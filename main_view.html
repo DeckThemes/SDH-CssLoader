@@ -92,8 +92,8 @@
 				
 				toggles.appendChild(clone)
 			}
-		
-            async function startup() {
+			
+			async function startup() {
 				console.log("hello!")
 				var result = await get_themes()
 				
@@ -101,11 +101,29 @@
 					await create_toggle(value)
 				} 
 			}
+			
+			async function reload(){
+				console.log("Reloading...")
+				var result = await get_themes()
+				for (const [key, value] of Object.entries(result)){
+					if (value.active){
+						await disable(value)
+					}
+				}
+
+				await call_plugin_method("reload", {}) 
+				
+				Array.from(document.getElementsByClassName("themeToggle")).forEach(x => {
+					x.remove()
+				})
+				
+				await startup()
+			}
 		</script>
     </head>
     <body onload="startup()">
 		<template id="toggleTemplate">
-		    <div class="quickaccesscontrols_PanelSectionRow_26R5w">
+		    <div class="quickaccesscontrols_PanelSectionRow_26R5w themeToggle">
                 <div class="quickaccesscontrols_PanelSectionRow_26R5w">
                     <div class="basicdialog_Field_ugL9c basicdialog_WithFirstRow_31BpU basicdialog_WithBottomSeparator_1e8sp basicdialog_ExtraPaddingOnChildrenBelow_2-owv basicdialog_StandardPadding_1HrfN basicdialog_HighlightOnFocus_1xh2W Panel Focusable" style="--indent-level:0;">
                         <div class="gamepaddialog_FieldLabelRow_2VcTl">
@@ -116,7 +134,7 @@
 								<div class="toggleText">__replace__</div>
 							</div>
 						<div class="gamepaddialog_FieldChildren_2rhav">
-							<div id="menuToggle" class="gamepaddialog_Toggle_9Ql-o" tabindex="0" onclick="handleThemeToggle()">
+							<div id="menuToggle" class="gamepaddialog_Toggle_9Ql-o" tabindex="0">
 								<div class="gamepaddialog_ToggleRail_2bl0i"></div>
 								<div class="gamepaddialog_ToggleSwitch_1PQpp"></div>
 							</div>
@@ -128,7 +146,7 @@
 		</template>
 	
         <div class="quickaccessmenu_TabGroupPanel_1QO7b Panel Focusable" id="toggles">
-		
+			<div class="quickaccesscontrols_PanelSectionRow_26R5w"><div class="gamepaddialog_Field_eKmEX gamepaddialog_WithChildrenBelow_37xzV gamepaddialog_InlineWrapShiftsChildrenBelow_3LCXh gamepaddialog_ExtraPaddingOnChildrenBelow_3nLNL gamepaddialog_StandardPadding_xIITX gamepaddialog_HighlightOnFocus_2HFrm Panel Focusable" style="--indent-level:0;"><div class="gamepaddialog_FieldChildren_2rhav"><button type="button" class="DialogButton _DialogLayout Secondary gamepaddialog_Button_cXzBZ Focusable" tabindex="0" onclick="reload()">Reload Themes</button></div></div></div>
         </div>
     </body>
 </html>

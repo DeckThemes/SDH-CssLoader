@@ -15,10 +15,13 @@ class Plugin:
             self.injects[name]["active"] = False
             self.injects[name]["ids"] = {}
 
+    async def reload(self):
+        await self._main(self) 
+
     async def _main(self):
         # TODO: load on boot
         self.injects = {} # TODO: clean up after hot reload
-        themedirspath = "/home/deck/homebrew/themes"
+        themedirspath = "/home/deck/homebrew/themes" 
 
         if (not path.exists(themedirspath)):
             return
