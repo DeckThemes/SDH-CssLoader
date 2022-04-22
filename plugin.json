@@ -1,7 +1,12 @@
 {
-    "name": "Plugin name",
-    "author": "Plugin author",
+    "name": "CSS Loader",
+    "author": "Such Meme, Many Skill#2921",
     "main_view_html": "main_view.html",
     "tile_view_html": "",
-    "flags": ["_hot_reload", "_root"]
+    "flags": ["_hot_reload"],
+	"publish": {
+        "discord_id": "249186838592487425",
+        "description": "Loads CSS dynamically into the steam deck game ui",
+        "tags": ["style"]
+    }
 }
