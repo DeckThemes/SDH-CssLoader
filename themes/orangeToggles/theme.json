@@ -3,7 +3,7 @@
     "version": "0.1",
     "inject": {
         "shared.css": [
-            "QuickAccess"
+            "QuickAccess", "SP"
         ] 
     }
 }
