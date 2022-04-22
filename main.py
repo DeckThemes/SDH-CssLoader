@@ -18,7 +18,7 @@ class Plugin:
     async def _main(self):
         # TODO: load on boot
         self.injects = {} # TODO: clean up after hot reload
-        themedirspath = "/home/deck/themes"
+        themedirspath = "/home/deck/homebrew/themes"
 
         if (not path.exists(themedirspath)):
             return
