@@ -5,7 +5,6 @@ from injector import inject_to_tab, get_tab, tab_has_element
 from logging import getLogger, basicConfig, INFO, DEBUG
 
 firstLoad = True
-#logger = getLogger("css-loader")
 
 class Plugin: 
     async def getThemes(self):
@@ -46,7 +45,6 @@ class Plugin:
             
     async def checkIfReady(self):
         finished_reinjection = False
-        #logger.info("Starting theme coroutine")
         while True:
             try:
                 await asyncio.sleep(1)
@@ -65,13 +63,11 @@ class Plugin:
                     
                 elif finished_reinjection:
                     finished_reinjection = False
-                    #logger.info("Re-Injected theme")
                     for x in self.injects:
                         if (self.injects[x]["active"]):
                             await self.inject(self, self.injects[x])
             except:
                 pass
-                #logger.info("Failed to inject test theme element")
  
     async def _main(self):
         global firstLoad
@@ -79,7 +75,6 @@ class Plugin:
             firstLoad = False
             asyncio.get_event_loop().create_task(self.checkIfReady(self))
         
-        # TODO: load on boot
         self.utils = Utilities(None)
         self.injects = {} # TODO: clean up after hot reload
         themedirspath = "/home/deck/homebrew/themes" 
