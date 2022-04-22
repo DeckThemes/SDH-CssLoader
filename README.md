@@ -1,14 +1,19 @@
-# Plugin-Template
+# SDH-CssLoader
+Dynamically loads css off the disk.
 
-This is the template plugin for developing plugins for the [SteamOS Plugin Loader](https://github.com/SteamDeckHomebrew/PluginLoader).
+## How it works
+The loader reads all folders in `/home/deck/homebrew/themes`. In every folder, it looks for a file called `theme.json`. This json file stores in which tab which css should be injected. An example theme can be found in the themes folder of this repository
 
-## Usage
+Structure of `theme.json`:
 
-1. Click on the green `Use this template` button to create a new repository for your plugin
-2. Rename the `plugin_template.py` file to something unique
-3. Add your code to the plugin's python and html files.
-4. To use it, simply `git clone` the repo into the `/home/deck/homebrew/plugins` folder on your Steam Deck
-
-## License
-
-This Template Project is under The Unlicense. You may license your own plugin under whatever license you prefer.
+```
+{
+    "name": "OrangeToggles",
+    "version": "0.1",
+    "inject": {
+        "shared.css": [
+            "QuickAccess"
+        ] 
+    }
+}
+```
