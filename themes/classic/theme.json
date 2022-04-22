@@ -1,0 +1,9 @@
+ {
+     "name": "SDH-ClassicTheme",
+     "version": "0.2",
+     "inject": {
+         "shared.css": [
+             "SP", "MainMenu", "QuickAccess"
+         ] 
+     }
+ }
