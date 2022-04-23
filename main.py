@@ -20,19 +20,27 @@ class Theme:
         self.name = json["name"]
         self.version = json["version"]
         self.tabs = {}
+        self.css = {}
+        self.patches = []
         self.ids = {}
         self.path = themePath
         self.active = path.exists(self.path + "/ENABLED")
         
         for y in json["inject"]:
-            with open(themePath + "/" + y, "r") as fp: 
-                css = fp.read()
+            if y not in self.css:
+                with open(themePath + "/" + y, "r") as fp: 
+                    css = fp.read()
+                    self.css[y] = css
                     
-                for z in json["inject"][y]:
-                    if (z not in self.tabs):
-                        self.tabs[z] = []
+            for z in json["inject"][y]:
+                if (z not in self.tabs):
+                    self.tabs[z] = []
 
-                    self.tabs[z].append(css)
+                self.tabs[z].append(y)
+        
+        if "patches" in json:
+            for x in json["patches"]:
+                self.patches.append(Patch(x, json["patches"][x], self))
 
     async def inject(self) -> Result:
         if self.active:
@@ -52,7 +60,7 @@ class Theme:
             ids = []
             for y in self.tabs[x]:
                 try:
-                    res = await pluginManagerUtils.inject_css_into_tab(x, y)
+                    res = await pluginManagerUtils.inject_css_into_tab(x, self.css[y])
                     if (res["success"]): 
                         ids.append(res["result"])
                     else:
@@ -60,7 +68,15 @@ class Theme:
                 except Exception as e:
                     return Result(False, str(e))
 
-            self.ids[x] = ids
+            if x not in self.ids:
+                self.ids[x] = ids
+            else:
+                self.ids[x].extend(ids)
+
+        for x in self.patches:
+            res = await x.inject_additional_css()
+            if not res.success:
+                return res
         
         return Result(True)
 
@@ -94,8 +110,67 @@ class Theme:
             "name": self.name,
             "version": self.version,
             "active": self.active,
+            "options": [x.toDict() for x in self.patches]
         }
 
+class Patch:
+    def __init__(self, name : str, json : dict, theme : Theme):
+        self.name = name
+        self.default = ""
+        self.selectedOption = ""
+        self.options = {}
+        self.theme = theme
+
+        for x in json: # Possible options
+            if x == "default":
+                self.default = json[x]
+            else:
+                if x not in self.options:
+                    self.options[x] = {}
+
+                for y in json[x]: # Css files
+                    if y not in self.theme.css:
+                        with open(self.theme.path + "/" + y, "r") as fp: 
+                            css = fp.read()
+                            self.theme.css[y] = css
+
+                    for z in json[x][y]: # Target tabs
+                        if z not in self.options[x]:
+                            self.options[x][z] = []
+                        
+                        self.options[x][z].append(y)
+        
+        if self.default == "":
+            raise Exception("Patch has no default")
+
+        self.selectedOption = self.default
+    
+    async def inject_additional_css(self) -> Result:
+        for x in self.options[self.selectedOption]:
+            ids = []
+            for y in self.options[self.selectedOption][x]:
+                try:
+                    res = await pluginManagerUtils.inject_css_into_tab(x, self.theme.css[y])
+                    if (res["success"]): 
+                        ids.append(res["result"])
+                    else:
+                        return Result(False, str(res["result"]))
+                except Exception as e:
+                    return Result(False, str(e))
+
+            if x not in self.theme.ids:
+                self.theme.ids[x] = ids
+            else:
+                self.theme.ids[x].extend(ids)
+
+        return Result(True)
+
+    def toDict(self) -> dict:
+        return {
+            "name": self.name,
+            "active": self.selectedOption,
+            "options": self.options.keys()
+        }
 
 class Plugin: 
     async def getThemes(self):

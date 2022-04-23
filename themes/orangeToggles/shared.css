@@ -1,20 +1,25 @@
+:root {
+	--main-color: orange;
+	--friends-text-color: black;
+}
+
 .gamepaddialog_ToggleRail_2bl0i::before {
-	background: orange !important;
+	background: var(--main-color) !important;
 }
 
 .gamepadslider_SliderTrack_2_vG6::before {
-    background: orange !important;
+    background: var(--main-color) !important;
 }
 
 .gamepadslider_TickActive_j418S {
-	background: orange !important;
+	background: var(--main-color) !important;
 } 
 
 .appdetailsfriendssection_FriendsPlayingNowBadge_38sNQ {
-	background: orange !important;
-	color: black !important;
+	background: var(--main-color) !important;
+	color: var(--friends-text-color) !important;
 }
 
 .mainmenu_ActiveDot_1uLVH {
-	background: orange !important;
+	background: var(--main-color) !important;
 }

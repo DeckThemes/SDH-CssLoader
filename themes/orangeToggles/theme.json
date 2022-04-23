@@ -5,5 +5,14 @@
         "shared.css": [
             "QuickAccess", "SP", "MainMenu"
         ] 
+    },
+    "patches": {
+        "Theme Color": {
+            "default": "orange",
+            "orange": {},
+            "lime": {
+                "colors/lime.css": ["QuickAccess", "SP", "MainMenu"]
+            }
+        }
     }
 }
