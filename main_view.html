@@ -34,13 +34,20 @@
 				var toggle = document.getElementById(toggleId)
 				var state = toggle.classList.contains("gamepaddialog_On_yLrDA")
 				
+				if (toggle.hasAttribute("disabled"))
+					return
+
 				if (state) {
-					toggle.classList.remove("gamepaddialog_On_yLrDA")
+					toggle.setAttribute("disabled", "")
 					await py_remove(name)
+					toggle.classList.remove("gamepaddialog_On_yLrDA")
+					toggle.removeAttribute("disabled")
 				}
 				else {
-					toggle.classList.add("gamepaddialog_On_yLrDA")
+					toggle.setAttribute("disabled", "")
 					await py_inject(name)
+					toggle.classList.add("gamepaddialog_On_yLrDA")
+					toggle.removeAttribute("disabled")
 				}
 			}
 			
