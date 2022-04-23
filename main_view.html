@@ -7,70 +7,47 @@
 		<link rel="stylesheet" href="/static/styles.css">
 		<script>
 			const delay = ms => new Promise(res => setTimeout(res, ms));
-			
-			async function set_theme_state(themeName, state){
-				await call_plugin_method("setThemeState", {"name": themeName, "state": state})
-			}
-			
-			async function set_applied_theme_ids(name, tab, ids){
-				await call_plugin_method("setAppliedThemeIds", {"name": name, "tab": tab, "ids": ids})
-			}
-			
-			async function get_themes() {
+
+			async function py_get_themes(){
 				let result = await call_plugin_method("getThemes", {});
 				console.log(result)
 				return result
 			}
-		
-			async function inject(tab, css) {
-				let result = await inject_css_into_tab(tab, css)
-				
-				console.log("Injected css into " + tab + " with ID " + result.result)
-				
-				return result.result
+
+			async function py_inject(themeName){
+				let result = await call_plugin_method("inject", {"themeName": themeName});
+				console.log(result)
+				return result
 			}
-			
-			async function reject(tab, id){
-				await remove_css_from_tab(tab, id)
+
+			async function py_remove(themeName){
+				let result = await call_plugin_method("remove", {"themeName": themeName});
+				console.log(result)
+				return result
 			}
-			
-			async function enable(theme) {
-				console.log("Enabling theme " + theme.name) 
-				await set_theme_state(theme.name, true) 
-				for (const [key, value] of Object.entries(theme.tabs)){
-					let ids = []
-					for (const x of value){
-						let res = await inject(key, x)
-						ids.push(res)
-					}
-					await set_applied_theme_ids(theme.name, key, ids)
-				}
-			}
-			
-			async function disable(theme) {
-				console.log("Disabling theme " + theme.name) 
-				for (const [key, value] of Object.entries(theme.ids)){
-					for (const x of value){
-						await reject(key, x)
-					} 
-				}
-				await set_theme_state(theme.name, false)
+
+			async function py_reload(){
+				await call_plugin_method("reload", {});
 			}
 			
 			async function handleToggle(toggleId, name){
 				var toggle = document.getElementById(toggleId)
 				var state = toggle.classList.contains("gamepaddialog_On_yLrDA")
 				
-				var themes = await get_themes()
-				var theme = themes[name]
-				
+				if (toggle.hasAttribute("disabled"))
+					return
+
 				if (state) {
+					toggle.setAttribute("disabled", "")
+					await py_remove(name)
 					toggle.classList.remove("gamepaddialog_On_yLrDA")
-					await disable(theme)
+					toggle.removeAttribute("disabled")
 				}
 				else {
+					toggle.setAttribute("disabled", "")
+					await py_inject(name)
 					toggle.classList.add("gamepaddialog_On_yLrDA")
-					await enable(theme)
+					toggle.removeAttribute("disabled")
 				}
 			}
 			
@@ -95,7 +72,7 @@
 			
 			async function startup() {
 				console.log("hello!")
-				var result = await get_themes()
+				var result = await py_get_themes()
 				
 				for (const [key, value] of Object.entries(result)){
 					await create_toggle(value)
@@ -104,14 +81,7 @@
 			
 			async function reload(){
 				console.log("Reloading...")
-				var result = await get_themes()
-				for (const [key, value] of Object.entries(result)){
-					if (value.active){
-						await disable(value)
-					}
-				}
-
-				await call_plugin_method("reload", {}) 
+				await py_reload() 
 				
 				Array.from(document.getElementsByClassName("themeToggle")).forEach(x => {
 					x.remove()
@@ -124,7 +94,7 @@
     <body onload="startup()">
 		<template id="toggleTemplate">
 		    <div class="quickaccesscontrols_PanelSectionRow_26R5w themeToggle">
-                <div class="quickaccesscontrols_PanelSectionRow_26R5w">
+                <div class="quickaccesscontrols_PanelSectionRow_26R5w" style="padding: 8px 8px;">
                     <div class="basicdialog_Field_ugL9c basicdialog_WithFirstRow_31BpU basicdialog_WithBottomSeparator_1e8sp basicdialog_ExtraPaddingOnChildrenBelow_2-owv basicdialog_StandardPadding_1HrfN basicdialog_HighlightOnFocus_1xh2W Panel Focusable" style="--indent-level:0;">
                         <div class="gamepaddialog_FieldLabelRow_2VcTl">
 							<div class="gamepaddialog_FieldLabel_3jMlJ">

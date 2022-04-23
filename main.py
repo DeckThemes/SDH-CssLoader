@@ -5,43 +5,118 @@ from injector import inject_to_tab, get_tab, tab_has_element
 from logging import getLogger, basicConfig, INFO, DEBUG
 
 firstLoad = True
+pluginManagerUtils = Utilities(None)
+
+class Result:
+    def __init__(self, success : bool, message : str = "Success"):
+        self.success = success
+        self.message = message
+    
+    def toDict(self):
+        return {"success": self.success, "message": self.message}
+
+class Theme:
+    def __init__(self, themePath : str, json : dict):
+        self.name = json["name"]
+        self.version = json["version"]
+        self.tabs = {}
+        self.ids = {}
+        self.path = themePath
+        self.active = path.exists(self.path + "/ENABLED")
+        
+        for y in json["inject"]:
+            with open(themePath + "/" + y, "r") as fp: 
+                css = fp.read()
+                    
+                for z in json["inject"][y]:
+                    if (z not in self.tabs):
+                        self.tabs[z] = []
+
+                    self.tabs[z].append(css)
+
+    async def inject(self) -> Result:
+        if self.active:
+            return Result(True)
+
+        self.active = True
+
+        try:
+            if not path.exists(self.path + "/ENABLED"):
+                open(self.path + "/ENABLED", "a").close()
+        except Exception as e:
+            return Result(False, str(e))
+
+        self.ids = {}
+
+        for x in self.tabs:
+            ids = []
+            for y in self.tabs[x]:
+                try:
+                    res = await pluginManagerUtils.inject_css_into_tab(x, y)
+                    if (res["success"]): 
+                        ids.append(res["result"])
+                    else:
+                        return Result(False, str(res["result"]))
+                except Exception as e:
+                    return Result(False, str(e))
+
+            self.ids[x] = ids
+        
+        return Result(True)
+
+    async def remove(self) -> Result:
+        if not self.active:
+            return Result(True)
+
+        self.active = False
+        
+        try:
+            if path.exists(self.path + "/ENABLED"):
+                os.remove(self.path + "/ENABLED")
+        except Exception as e:
+            return Result(False, str(e))
+
+        for x in self.ids:
+            for y in self.ids[x]:
+                try:
+                    res = await pluginManagerUtils.remove_css_from_tab(x, y)
+                    if not res["success"]:
+                        return Result(False, res["result"])
+                except Exception as e:
+                    return Result(False, str(e))
+        
+        self.ids = {}
+
+        return Result(True)
+    
+    def toDict(self) -> dict:
+        return {
+            "name": self.name,
+            "version": self.version,
+            "active": self.active,
+        }
+
 
 class Plugin: 
     async def getThemes(self):
-        return self.injects
-
-    async def setAppliedThemeIds(self, name : str, tab : str, ids : list):
-        self.injects[name]["ids"][tab] = ids
-
-    async def setThemeState(self, name : str, state : bool):
-        enabledPath = self.injects[name]["path"] + "/ENABLED"
+        return [x.toDict() for x in self.themes]
+    
+    async def inject(self, themeName : str) -> dict:
+        for x in self.themes:
+            if (x.name == themeName):
+                return (await x.inject()).toDict()
         
-        if (state):
-            self.injects[name]["active"] = True
+        return Result(False, "Theme with name not found").toDict()
+
+    async def remove(self, themeName : str) -> dict:
+        for x in self.themes:
+            if (x.name == themeName):
+                return (await x.remove()).toDict()
             
-            if not path.exists(enabledPath):
-                open(enabledPath, "a").close()
-                
-        else:
-            self.injects[name]["active"] = False
-            self.injects[name]["ids"] = {}
-            
-            if path.exists(enabledPath):
-                os.remove(enabledPath)
+        return Result(False, "Theme with name not found").toDict()
 
     async def reload(self):
         await self._main(self) 
-        
-    async def inject(self, theme):
-        theme["active"] = True
-        for x in theme["tabs"]:
-            ids = []
-            for y in theme["tabs"][x]:
-                res = await self.utils.inject_css_into_tab(x, y)
-                if (res["success"]): 
-                    ids.append(res["result"])
-
-            theme["ids"][x] = ids
             
     async def checkIfReady(self):
         finished_reinjection = False
@@ -63,9 +138,9 @@ class Plugin:
                     
                 elif finished_reinjection:
                     finished_reinjection = False
-                    for x in self.injects:
-                        if (self.injects[x]["active"]):
-                            await self.inject(self, self.injects[x])
+                    for x in [x for x in self.themes if x.active]:
+                        x.active = False
+                        await x.inject()
             except:
                 pass
  
@@ -74,13 +149,16 @@ class Plugin:
         if (firstLoad):
             firstLoad = False
             asyncio.get_event_loop().create_task(self.checkIfReady(self))
-        
-        self.utils = Utilities(None)
-        self.injects = {} # TODO: clean up after hot reload
+
+        if hasattr(self, "themes"):
+            for x in self.themes:
+                await x.remove()
+
+        self.themes = []
         themedirspath = "/home/deck/homebrew/themes" 
 
         if (not path.exists(themedirspath)):
-            return
+            return # TODO: maybe copy the default theme dir over?
 
         themedirs = [str(x) for x in os.listdir(themedirspath)]
 
@@ -89,36 +167,6 @@ class Plugin:
 
             with open(xPath + "/" + "theme.json", "r") as fp:
                 theme = json.load(fp)
-            
-            themedata = {}
-            themedata["name"] = theme["name"]
-            themedata["version"] = theme["version"]
-            themedata["tabs"] = {}
-            themedata["ids"] = {}
-            themedata["active"] = False
-            themedata["path"] = xPath
 
-            for y in theme["inject"]:
-                with open(xPath + "/" + y, "r") as fp: 
-                    css = fp.read()
-                    
-                    for z in theme["inject"][y]:
-                        if (z not in themedata["tabs"]):
-                            themedata["tabs"][z] = []
-
-                        themedata["tabs"][z].append(css)
- 
-            enabledPath = xPath + "/ENABLED"
-            if path.exists(enabledPath):
-                themedata["active"] = True
-                
-            self.injects[theme["name"]] = themedata
-            
-if __name__ == "__main__":
-    plugin = Plugin()
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(plugin._main())
-    
-    for x in plugin.injects:
-        themedata = plugin.injects[x]
-        print(f"Found theme {themedata['name']} ({themedata['version']}). Injects into {len(themedata['tabs'])} tabs")
+            themedata = Theme(xPath, theme)
+            self.themes.append(themedata)
