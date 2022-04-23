@@ -29,6 +29,12 @@
 			async function py_reload(){
 				await call_plugin_method("reload", {});
 			}
+
+			async function py_set_patch_option(themeName, patch, option){
+				let result = await call_plugin_method("set_patch_option", {"themeName": themeName, "patch": patch, "option": option});
+				console.log(result)
+				return result
+			}
 			
 			async function handleToggle(toggleId, name){
 				var toggle = document.getElementById(toggleId)
@@ -50,6 +56,13 @@
 					toggle.removeAttribute("disabled")
 				}
 			}
+
+			async function handleOption(selectId, name, patch){
+				var select = document.getElementById(selectId)
+				var value = select.value
+
+				await py_set_patch_option(name, patch, value)
+			}
 			
 			async function create_toggle(theme){
 				var toggles = document.querySelector("#toggles")
@@ -66,6 +79,34 @@
 						handleToggle(toggleId, name);
 					}
 				}(menuToggle.id, theme.name))
+
+				var optionTemplate = document.querySelector("#optionTemplate")
+				for (const patch of theme.patches){
+					var optionClone = optionTemplate.content.cloneNode(true)
+					var optionSelect = optionClone.querySelector(".optionSelect")
+					var optionText = optionClone.querySelector(".optionText")
+					optionText.textContent = patch.name
+					optionSelect.id = theme.name + "_" + patch.name + "_select"
+
+					optionSelect.onchange = (function (selectId, name, patch) {
+						return function() {
+							handleOption(selectId, name, patch);
+						}
+					}(optionSelect.id, theme.name, patch.name)) 
+
+					for (const injectOption of patch.options){
+						var element = document.createElement("option")
+						element.setAttribute("value", injectOption)
+						element.textContent = injectOption
+						if (injectOption == patch.active){
+							element.setAttribute("selected", "")
+						}
+						optionSelect.appendChild(element)
+					}
+
+					clone.querySelector(".themeToggle").appendChild(optionClone)
+				}
+				
 				
 				toggles.appendChild(clone)
 			}
@@ -90,6 +131,19 @@
 				await startup()
 			}
 		</script>
+		<style>
+			.optionSelect {
+				float: right;
+			}
+
+			.option {
+				padding: 0px 32px;
+			}
+
+			.inline {
+				display: inline;
+			}
+		</style>
     </head>
     <body onload="startup()">
 		<template id="toggleTemplate">
@@ -113,6 +167,13 @@
                     </div>
                 </div>
             </div>
+		</template>
+
+		<template id="optionTemplate">
+			<div class="option">
+				<div class="optionText inline">__replace__</div>
+				<select class="optionSelect"></select>
+			</div>
 		</template>
 	
         <div class="quickaccessmenu_TabGroupPanel_1QO7b Panel Focusable" id="toggles">

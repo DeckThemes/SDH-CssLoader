@@ -105,12 +105,18 @@ class Theme:
 
         return Result(True)
     
+    def setPatchOption(self, patch : str, option : str):
+        for x in self.patches:
+            if (x.name == patch):
+                x.selectedOption = option
+                return
+
     def toDict(self) -> dict:
         return {
             "name": self.name,
             "version": self.version,
             "active": self.active,
-            "options": [x.toDict() for x in self.patches]
+            "patches": [x.toDict() for x in self.patches]
         }
 
 class Patch:
@@ -169,7 +175,7 @@ class Patch:
         return {
             "name": self.name,
             "active": self.selectedOption,
-            "options": self.options.keys()
+            "options": [x for x in self.options]
         }
 
 class Plugin: 
@@ -182,6 +188,27 @@ class Plugin:
                 return (await x.inject()).toDict()
         
         return Result(False, "Theme with name not found").toDict()
+    
+    async def set_patch_option(self, themeName : str, patch : str, option : str) -> dict:
+        for x in self.themes:
+            if (x.name == themeName):
+                wasActive = x.active
+                if (wasActive):
+                    res = await x.remove()
+                    if not res.success:
+                        return res.toDict()
+                
+                x.setPatchOption(patch, option)
+
+                if (wasActive):
+                    res = await x.inject()
+                    if not res.success:
+                        return res.toDict()
+
+                return Result(True).toDict()
+        
+        return Result(False, "Theme with name not found").toDict()
+
 
     async def remove(self, themeName : str) -> dict:
         for x in self.themes:
