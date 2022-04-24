@@ -1,5 +1,5 @@
 {
-    "name": "OrangeToggles",
+    "name": "Colored Toggles",
     "version": "0.1",
     "inject": {
         "shared.css": [
@@ -12,6 +12,9 @@
             "orange": {},
             "lime": {
                 "colors/lime.css": ["QuickAccess", "SP", "MainMenu"]
+            },
+            "red": {
+                "colors/red.css": ["QuickAccess", "SP", "MainMenu"]
             }
         }
     }

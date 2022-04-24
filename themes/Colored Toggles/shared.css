@@ -23,3 +23,12 @@
 .mainmenu_ActiveDot_1uLVH {
 	background: var(--main-color) !important;
 }
+
+.appactionbutton_PlayButton_3ydig.gpfocus {
+	background: var(--main-color) !important;
+	color: var(--friends-text-color) !important;
+}
+
+.appactionbutton_PlayButton_3ydig.gpfocus > .appactionbutton_ButtonText_33cnX {
+	color: var(--friends-text-color) !important;
+}
