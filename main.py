@@ -1,5 +1,5 @@
 import os, json, asyncio
-from os import path
+from os import geteuid, path
 from utilities import Utilities
 from injector import inject_to_tab, get_tab, tab_has_element
 from logging import getLogger, basicConfig, INFO, DEBUG
@@ -24,7 +24,7 @@ class Theme:
         self.patches = []
         self.ids = {}
         self.path = themePath
-        self.active = path.exists(self.path + "/ENABLED")
+        self.active = False
         
         for y in json["inject"]:
             if y not in self.css:
@@ -42,18 +42,13 @@ class Theme:
             for x in json["patches"]:
                 self.patches.append(Patch(x, json["patches"][x], self))
 
+        self.loadState()
+
     async def inject(self) -> Result:
         if self.active:
             return Result(True)
 
         self.active = True
-
-        try:
-            if not path.exists(self.path + "/ENABLED"):
-                open(self.path + "/ENABLED", "a").close()
-        except Exception as e:
-            return Result(False, str(e))
-
         self.ids = {}
 
         for x in self.tabs:
@@ -78,6 +73,10 @@ class Theme:
             if not res.success:
                 return res
         
+        res = self.saveState()
+        if not res.success:
+            return res
+
         return Result(True)
 
     async def remove(self) -> Result:
@@ -85,12 +84,6 @@ class Theme:
             return Result(True)
 
         self.active = False
-        
-        try:
-            if path.exists(self.path + "/ENABLED"):
-                os.remove(self.path + "/ENABLED")
-        except Exception as e:
-            return Result(False, str(e))
 
         for x in self.ids:
             for y in self.ids[x]:
@@ -103,7 +96,49 @@ class Theme:
         
         self.ids = {}
 
+        res = self.saveState()
+        if not res.success:
+            return res
+
         return Result(True)
+    
+    def loadState(self) -> Result:
+        configPath = self.path + "/config" + ("_ROOT.json" if os.geteuid() == 0 else "_USER.json")
+
+        if not path.exists(configPath):
+            return Result(True)
+        
+        try:
+            with open(configPath, "r") as fp:
+                config = json.load(fp)
+        except Exception as e:
+            return Result(False, str(e))
+        
+        for x in config:
+            if x == "active":
+                self.active = config[x]
+            else:
+                for y in self.patches:
+                    if y.name == x:
+                        y.selectedOption = config[x]
+        
+        return Result(True)
+    
+    def saveState(self) -> Result:
+        configPath = self.path + "/config" + ("_ROOT.json" if os.geteuid() == 0 else "_USER.json")
+        
+        try:
+            config = {"active": self.active}
+            for x in self.patches:
+                config[x.name] = x.selectedOption
+
+            with open(configPath, "w") as fp:
+                json.dump(config, fp)
+        except Exception as e:
+            return Result(False, str(e))
+        
+        return Result(True)
+
     
     def setPatchOption(self, patch : str, option : str):
         for x in self.patches:
