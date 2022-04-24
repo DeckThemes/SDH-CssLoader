@@ -1,0 +1,34 @@
+:root {
+	--main-color: orange;
+	--friends-text-color: black;
+}
+
+.gamepaddialog_ToggleRail_2bl0i::before {
+	background: var(--main-color) !important;
+}
+
+.gamepadslider_SliderTrack_2_vG6::before {
+    background: var(--main-color) !important;
+}
+
+.gamepadslider_TickActive_j418S {
+	background: var(--main-color) !important;
+} 
+
+.appdetailsfriendssection_FriendsPlayingNowBadge_38sNQ {
+	background: var(--main-color) !important;
+	color: var(--friends-text-color) !important;
+}
+
+.mainmenu_ActiveDot_1uLVH {
+	background: var(--main-color) !important;
+}
+
+.appactionbutton_PlayButton_3ydig.gpfocus {
+	background: var(--main-color) !important;
+	color: var(--friends-text-color) !important;
+}
+
+.appactionbutton_PlayButton_3ydig.gpfocus > .appactionbutton_ButtonText_33cnX {
+	color: var(--friends-text-color) !important;
+}

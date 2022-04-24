@@ -1,9 +1,0 @@
-{
-    "name": "OrangeToggles",
-    "version": "0.1",
-    "inject": {
-        "shared.css": [
-            "QuickAccess", "SP", "MainMenu"
-        ] 
-    }
-}
