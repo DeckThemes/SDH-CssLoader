@@ -302,8 +302,16 @@ class Plugin:
         for x in themedirs:
             xPath = themedirspath + "/" + x
 
-            with open(xPath + "/" + "theme.json", "r") as fp:
-                theme = json.load(fp)
+            themeDataPath = xPath + "/theme.json"
 
-            themedata = Theme(xPath, theme)
-            self.themes.append(themedata)
+            if not path.exists(themeDataPath):
+                continue
+            
+            try:
+                with open(themeDataPath, "r") as fp:
+                    theme = json.load(fp)
+                    
+                themedata = Theme(xPath, theme)
+                self.themes.append(themedata)
+            except:
+                pass # Couldn't properly parse everything
