@@ -20,7 +20,7 @@ Structure of `theme.json`:
 
 ![example1](https://raw.githubusercontent.com/suchmememanyskill/SDH-CssLoader/main/images/example1.png)
 
-Additionally, you can add 'injects', which are extra options the user can choose from. You can activate it as follows:
+Additionally, you can add 'patches', which are extra options the user can choose from. You can activate it as follows:
 
 ```
 {
