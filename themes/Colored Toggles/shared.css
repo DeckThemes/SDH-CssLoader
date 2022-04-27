@@ -32,3 +32,8 @@
 .appactionbutton_PlayButton_3ydig.gpfocus > .appactionbutton_ButtonText_33cnX {
 	color: var(--friends-text-color) !important;
 }
+
+.appportrait_AppPortraitBanner_N8aJr {
+	background-color: var(--main-color) !important; 
+	color: var(--friends-text-color) !important;
+}
