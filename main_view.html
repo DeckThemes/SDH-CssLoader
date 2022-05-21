@@ -38,7 +38,7 @@
 			
 			async function handleToggle(toggleId, name){
 				var toggle = document.getElementById(toggleId)
-				var state = toggle.classList.contains("gamepaddialog_On_yLrDA")
+				var state = toggle.classList.contains("gamepaddialog_On_3ld7T")
 				
 				if (toggle.hasAttribute("disabled"))
 					return
@@ -46,13 +46,13 @@
 				if (state) {
 					toggle.setAttribute("disabled", "")
 					await py_remove(name)
-					toggle.classList.remove("gamepaddialog_On_yLrDA")
+					toggle.classList.remove("gamepaddialog_On_3ld7T")
 					toggle.removeAttribute("disabled")
 				}
 				else {
 					toggle.setAttribute("disabled", "")
 					await py_inject(name)
-					toggle.classList.add("gamepaddialog_On_yLrDA")
+					toggle.classList.add("gamepaddialog_On_3ld7T")
 					toggle.removeAttribute("disabled")
 				}
 			}
@@ -72,7 +72,7 @@
 				var menuToggle = clone.querySelector("#menuToggle")
 				menuToggle.id = theme.name + "_toggle"
 				if (theme.active) {
-					menuToggle.classList.add("gamepaddialog_On_yLrDA")
+					menuToggle.classList.add("gamepaddialog_On_3ld7T")
 				}
 				menuToggle.onclick = (function (toggleId, name) {
 					return function() {
@@ -152,30 +152,52 @@
 			.optionSelect option {
 				font-size: 15;
 			}
+
+			.gamepaddialog_FieldLeadIcon_OKYIj > svg {
+				display: inline-block;
+    			vertical-align: bottom;
+    			margin-right: 10px;
+    			margin-left: 10px;
+			}
+
+			.toggleText {
+				display: inline-block;
+			}
+
+			.gamepaddialog_FieldChildren_14_HB {
+				margin-left: auto;
+			}
+
+			.themeToggle {
+				padding-bottom: 8px;
+				padding-top: 8px;
+			}
 		</style>
     </head>
     <body onload="startup()">
 		<template id="toggleTemplate">
-		    <div class="quickaccesscontrols_PanelSectionRow_26R5w themeToggle">
-                <div class="quickaccesscontrols_PanelSectionRow_26R5w" style="padding: 8px 8px;">
-                    <div class="basicdialog_Field_ugL9c basicdialog_WithFirstRow_31BpU basicdialog_WithBottomSeparator_1e8sp basicdialog_ExtraPaddingOnChildrenBelow_2-owv basicdialog_StandardPadding_1HrfN basicdialog_HighlightOnFocus_1xh2W Panel Focusable" style="--indent-level:0;">
-                        <div class="gamepaddialog_FieldLabelRow_2VcTl">
-							<div class="gamepaddialog_FieldLabel_3jMlJ">
-								<div class="gamepaddialog_FieldLeadIcon_3CGpa">
-									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" fill="none"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M0 11C0 9.89543 0.895431 9 2 9H34C35.1046 9 36 9.89543 36 11V24C36 25.6569 34.6569 27 33 27H3C1.34315 27 0 25.6569 0 24V11ZM33 16C33 16.5523 32.5523 17 32 17C31.4477 17 31 16.5523 31 16C31 15.4477 31.4477 15 32 15C32.5523 15 33 15.4477 33 16ZM32 13C32.5523 13 33 12.5523 33 12C33 11.4477 32.5523 11 32 11C31.4477 11 31 11.4477 31 12C31 12.5523 31.4477 13 32 13ZM35 14C35 14.5523 34.5523 15 34 15C33.4477 15 33 14.5523 33 14C33 13.4477 33.4477 13 34 13C34.5523 13 35 13.4477 35 14ZM30 15C30.5523 15 31 14.5523 31 14C31 13.4477 30.5523 13 30 13C29.4477 13 29 13.4477 29 14C29 14.5523 29.4477 15 30 15ZM6 14C6 15.1046 5.10457 16 4 16C2.89543 16 2 15.1046 2 14C2 12.8954 2.89543 12 4 12C5.10457 12 6 12.8954 6 14ZM2.5 21C2.22386 21 2 21.2239 2 21.5V24.5C2 24.7761 2.22386 25 2.5 25H5.5C5.77614 25 6 24.7761 6 24.5V21.5C6 21.2239 5.77614 21 5.5 21H2.5ZM30 21.5C30 21.2239 30.2239 21 30.5 21H33.5C33.7761 21 34 21.2239 34 21.5V24.5C34 24.7761 33.7761 25 33.5 25H30.5C30.2239 25 30 24.7761 30 24.5V21.5ZM28 11H8V25H28V11Z"></path></svg>
-								</div>
+			<div class="themeToggle quickaccesscontrols_PanelSectionRow_2VQ88 gamepaddialog_Field_S-_La gamepaddialog_WithBottomSeparatorStandard_3s1Rk">
+				<div class="gamepaddialog_Field_S-_La gamepaddialog_WithFirstRow_qFXi6 gamepaddialog_VerticalAlignCenter_3XNvA gamepaddialog_ExtraPaddingOnChildrenBelow_5UO-_ gamepaddialog_StandardPadding_XRBFu gamepaddialog_HighlightOnFocus_wE4V6 Panel Focusable"
+					style="--indent-level:0;">
+					<div class="gamepaddialog_FieldLabelRow_H9WOq">
+						<div class="gamepaddialog_FieldLabel_3b0U-">
+							<div class="gamepaddialog_FieldLeadIcon_OKYIj">
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" fill="none">
+									<path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
+										d="M0 11C0 9.89543 0.895431 9 2 9H34C35.1046 9 36 9.89543 36 11V24C36 25.6569 34.6569 27 33 27H3C1.34315 27 0 25.6569 0 24V11ZM33 16C33 16.5523 32.5523 17 32 17C31.4477 17 31 16.5523 31 16C31 15.4477 31.4477 15 32 15C32.5523 15 33 15.4477 33 16ZM32 13C32.5523 13 33 12.5523 33 12C33 11.4477 32.5523 11 32 11C31.4477 11 31 11.4477 31 12C31 12.5523 31.4477 13 32 13ZM35 14C35 14.5523 34.5523 15 34 15C33.4477 15 33 14.5523 33 14C33 13.4477 33.4477 13 34 13C34.5523 13 35 13.4477 35 14ZM30 15C30.5523 15 31 14.5523 31 14C31 13.4477 30.5523 13 30 13C29.4477 13 29 13.4477 29 14C29 14.5523 29.4477 15 30 15ZM6 14C6 15.1046 5.10457 16 4 16C2.89543 16 2 15.1046 2 14C2 12.8954 2.89543 12 4 12C5.10457 12 6 12.8954 6 14ZM2.5 21C2.22386 21 2 21.2239 2 21.5V24.5C2 24.7761 2.22386 25 2.5 25H5.5C5.77614 25 6 24.7761 6 24.5V21.5C6 21.2239 5.77614 21 5.5 21H2.5ZM30 21.5C30 21.2239 30.2239 21 30.5 21H33.5C33.7761 21 34 21.2239 34 21.5V24.5C34 24.7761 33.7761 25 33.5 25H30.5C30.2239 25 30 24.7761 30 24.5V21.5ZM28 11H8V25H28V11Z">
+									</path>
+								</svg>
 								<div class="toggleText">__replace__</div>
 							</div>
-						<div class="gamepaddialog_FieldChildren_2rhav">
-							<div id="menuToggle" class="gamepaddialog_Toggle_9Ql-o" tabindex="0">
-								<div class="gamepaddialog_ToggleRail_2bl0i"></div>
-								<div class="gamepaddialog_ToggleSwitch_1PQpp"></div>
+						<div class="gamepaddialog_FieldChildren_14_HB">
+							<div id="menuToggle" class="gamepaddialog_Toggle_24G4g Focusable" tabindex="0">
+								<div class="gamepaddialog_ToggleRail_2JtC3"></div>
+								<div class="gamepaddialog_ToggleSwitch_3__OD"></div>
 							</div>
 						</div>
 					</div>
-                    </div>
-                </div>
-            </div>
+				</div>
+			</div>
 		</template>
 
 		<template id="optionTemplate">

@@ -261,7 +261,7 @@ class Plugin:
             try:
                 await asyncio.sleep(1)
                 if not await tab_has_element("SP", "test_css_loaded"):
-                
+                    await asyncio.sleep(3) # Make sure everything is loaded?
                     await inject_to_tab("SP", 
                     f"""
                     (function() {{
