@@ -36,4 +36,12 @@
 .appportrait_AppPortraitBanner_N8aJr {
 	background-color: var(--main-color) !important; 
 	color: var(--friends-text-color) !important;
+  }
+
+.appportrait_UninstalledBar_kX-tI .appportrait_UninstalledProgressBar_mA39H {
+	background-color: var(--main-color) !important;
+}
+
+.header_HeaderDownloadContainer_2ssr3 .header_HeaderAppPortraitContainer_1PbL3 .header_HeaderDownloadProgressBarBackground_vo3Tt .header_HeaderDownloadProgressBar_AK_Ax {
+	background-color: var(--main-color) !important;
 }
