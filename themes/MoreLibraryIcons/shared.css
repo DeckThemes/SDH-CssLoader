@@ -3,3 +3,7 @@
     grid-auto-rows: 177px !important;
     gap: 16px 16px !important;
 }
+
+.cssgrid_Container_DGRkX.Panel.Focusable {
+    height: fit-content !important;
+}

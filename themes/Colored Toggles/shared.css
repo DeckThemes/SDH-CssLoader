@@ -45,3 +45,19 @@
 .header_HeaderDownloadContainer_2ssr3 .header_HeaderAppPortraitContainer_1PbL3 .header_HeaderDownloadProgressBarBackground_vo3Tt .header_HeaderDownloadProgressBar_AK_Ax {
 	background-color: var(--main-color) !important;
 }
+
+.appdetailsplaysection_DetailsProgressBar_1FnTq {
+	background-color: var(--main-color) !important;
+}
+
+.downloads_State_2ns4w {
+	color: var(--main-color) !important;
+}
+
+.downloads_Button_3oavR {
+	background: var(--main-color) !important;
+}
+
+.downloads_Button_3oavR > svg {
+	color: var(--friends-text-color) !important;
+}
