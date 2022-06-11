@@ -1,11 +1,20 @@
 import os, json, asyncio
-from os import geteuid, path
+from os import geteuid, mkdir, path
 from utilities import Utilities
 from injector import inject_to_tab, get_tab, tab_has_element
 from logging import getLogger, basicConfig, INFO, DEBUG
 
 firstLoad = True
 pluginManagerUtils = Utilities(None)
+
+def createDir(dirPath : str):
+    if (path.exists(dirPath)):
+        return
+
+    os.mkdir(dirPath)
+
+    if (os.stat(dirPath).st_uid != 1000):
+        os.chown(dirPath, 1000, 1000) # Change to deck user
 
 class Result:
     def __init__(self, success : bool, message : str = "Success"):
@@ -16,7 +25,7 @@ class Result:
         return {"success": self.success, "message": self.message}
 
 class Theme:
-    def __init__(self, themePath : str, json : dict):
+    def __init__(self, themePath : str, json : dict, configPath : str = None):
         self.name = json["name"]
         self.version = json["version"]
         self.tabs = {}
@@ -25,6 +34,10 @@ class Theme:
         self.ids = {}
         self.path = themePath
         self.active = False
+        self.configPath = configPath
+
+        if (self.configPath is None):
+            self.configPath = self.path
         
         for y in json["inject"]:
             if y not in self.css:
@@ -103,7 +116,7 @@ class Theme:
         return Result(True)
     
     def loadState(self) -> Result:
-        configPath = self.path + "/config" + ("_ROOT.json" if os.geteuid() == 0 else "_USER.json")
+        configPath = self.configPath + "/config" + ("_ROOT.json" if os.geteuid() == 0 else "_USER.json")
 
         if not path.exists(configPath):
             return Result(True)
@@ -125,7 +138,7 @@ class Theme:
         return Result(True)
     
     def saveState(self) -> Result:
-        configPath = self.path + "/config" + ("_ROOT.json" if os.geteuid() == 0 else "_USER.json")
+        configPath = self.configPath + "/config" + ("_ROOT.json" if os.geteuid() == 0 else "_USER.json")
         
         try:
             config = {"active": self.active}
@@ -280,8 +293,40 @@ class Plugin:
                         await x.inject()
             except:
                 pass
+
+    async def parseThemes(self, themesDir : str, configDir : str = None):
+        if (configDir is None):
+            configDir = themesDir
+
+        possibleThemeDirs = [str(x) for x in os.listdir(themesDir)]
+
+        for x in possibleThemeDirs:
+            themePath = themesDir + "/" + x
+            configPath = configDir + "/" + x
+            themeDataPath = themePath + "/theme.json"
+
+            if not path.exists(themeDataPath):
+                continue
+
+            self.log.info(f"Analyzing theme {x}")
+            
+            try:
+                with open(themeDataPath, "r") as fp:
+                    theme = json.load(fp)
+                    
+                themeData = Theme(themePath, theme, configPath)
+
+                if (themeData.name not in [x.name for x in self.themes]):
+                    createDir(configPath)
+                    self.themes.append(themeData)
+                    self.log.info(f"Adding theme {themeData.name}")
+
+            except Exception as e:
+                self.log.warn(f"Exception while parsing a theme: {e}") # Couldn't properly parse everything
  
     async def _main(self):
+        self.log = getLogger("CSS_LOADER")
+
         global firstLoad
         if (firstLoad):
             firstLoad = False
@@ -292,26 +337,15 @@ class Plugin:
                 await x.remove()
 
         self.themes = []
-        themedirspath = "/home/deck/homebrew/themes" 
+        themesPath = "/home/deck/homebrew/themes"
+        defaultThemesPath = "/home/deck/homebrew/plugins/SDH-CssLoader/themes"
 
-        if (not path.exists(themedirspath)):
-            return # TODO: maybe copy the default theme dir over?
+        if (not path.exists(themesPath)):
+            createDir(themesPath)
 
-        themedirs = [str(x) for x in os.listdir(themedirspath)]
+        await self.parseThemes(self, themesPath)
 
-        for x in themedirs:
-            xPath = themedirspath + "/" + x
+        if (not path.exists(defaultThemesPath)):
+            return
 
-            themeDataPath = xPath + "/theme.json"
-
-            if not path.exists(themeDataPath):
-                continue
-            
-            try:
-                with open(themeDataPath, "r") as fp:
-                    theme = json.load(fp)
-                    
-                themedata = Theme(xPath, theme)
-                self.themes.append(themedata)
-            except:
-                pass # Couldn't properly parse everything
+        await self.parseThemes(self, defaultThemesPath, themesPath)
