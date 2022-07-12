@@ -1,22 +1,8 @@
 import {
-    ButtonItem,
-    definePlugin,
-    DialogButton,
     DropdownItem,
-    DropdownOption,
-    Menu,
-    MenuItem,
-    PanelSection,
     PanelSectionRow,
-    Router,
-    ServerAPI,
-    showContextMenu,
-    staticClasses,
     ToggleField,
   } from "decky-frontend-lib";
-import { useMemo, useState, VFC } from "react";
-import { FaShip } from "react-icons/fa";
-import { GoGear } from "react-icons/go"
 import * as python from "./python";
 
 export class Theme {

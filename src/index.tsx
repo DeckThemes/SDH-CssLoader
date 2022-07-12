@@ -1,25 +1,16 @@
 import {
   ButtonItem,
   definePlugin,
-  DialogButton,
-  Menu,
-  MenuItem,
   PanelSection,
   PanelSectionRow,
-  Router,
   ServerAPI,
-  showContextMenu,
   staticClasses,
-  ToggleField,
 } from "decky-frontend-lib";
 import { useState, VFC } from "react";
-import { FaShip } from "react-icons/fa";
-import { GoGear } from "react-icons/go"
 import * as python from "./python";
 import { Theme } from "./theme"
+import { RiPaintFill } from "react-icons/ri"
 var reload = function(){};
-
-import logo from "../assets/logo.png";
 
 // interface AddMethodArgs {
 //   left: number;
@@ -73,28 +64,10 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
   );
 };
 
-const DeckyPluginRouterTest: VFC = () => {
-  return (
-    <div style={{ marginTop: "50px", color: "white" }}>
-      Hello World!
-      <DialogButton onClick={() => Router.NavigateToStore()}>
-        Go to Store
-      </DialogButton>
-    </div>
-  );
-};
-
 export default definePlugin((serverApi: ServerAPI) => {
-  serverApi.routerHook.addRoute("/decky-plugin-test", DeckyPluginRouterTest, {
-    exact: true,
-  });
-
   return {
-    title: <div className={staticClasses.Title}>Example Plugin</div>,
+    title: <div className={staticClasses.Title}>Css Loader</div>,
     content: <Content serverAPI={serverApi} />,
-    icon: <FaShip />,
-    onDismount() {
-      serverApi.routerHook.removeRoute("/decky-plugin-test");
-    },
+    icon: <RiPaintFill />,
   };
 });
