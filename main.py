@@ -281,7 +281,7 @@ class ThemePatch:
     async def remove(self) -> Result:
         self.theme.log("ThemePatch.remove")
         for x in self.injects:
-            result = await x.remove
+            result = await x.remove()
             if not result.success:
                 return result
         
@@ -307,6 +307,35 @@ class Plugin:
                 return result.to_dict()
         
         return Result(False, f"Did not find theme {name}").to_dict()
+
+    async def set_patch_of_theme(self, themeName : str, patchName : str, value : str) -> dict:
+        theme = None
+        for x in self.themes:
+            if (x.name == themeName):
+                theme = x
+                break
+        
+        if theme is None:
+            return Result(False, f"Did not find theme '{themeName}'").to_dict()
+        
+        themePatch = None
+        for x in theme.patches:
+            if (x.name == patchName):
+                themePatch = x
+                break
+        
+        if themePatch is None:
+            return Result(False, f"Did not find patch '{patchName}' for theme '{themeName}'").to_dict()
+        
+        if (value in themePatch.options):
+            themePatch.value = value
+        
+        if (theme.enabled):
+            await themePatch.remove()
+            await themePatch.inject()
+        
+        await theme.save()
+        return Result(True).to_dict()
     
     async def reset(self) -> dict:
         for x in self.themes:
