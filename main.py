@@ -48,6 +48,7 @@ class Inject:
                 self.css = fp.read()
 
             self.theme.log(f"Loaded css at {self.cssPath}")
+            self.css = self.css.replace("\\", "\\\\").replace("`", "\\`")
 
             return Result(True)
         except Exception as e:
@@ -77,6 +78,7 @@ class Inject:
             if not res["success"]:
                 return Result(False, str(res["result"]))
             
+            self.theme.log(f"+{str(res['result'])} @ {tab}")
             self.uuids[tab].append(str(res["result"]))
         except Exception as e:
             return Result(False, str(e))
@@ -100,7 +102,7 @@ class Inject:
 
         try:
             for x in self.uuids[tab]:
-                self.theme.log(f"-{x} {tab}")
+                self.theme.log(f"-{x} @ {tab}")
                 res = await pluginManagerUtils.remove_css_from_tab(tab, x)
                 #if not res["success"]:
                 #    return Result(False, res["result"])
@@ -148,8 +150,6 @@ class Theme:
                     return result
 
                 self.patches.append(patch)
-
-        self.log(self.configJsonPath)
 
         if not path.exists(self.configJsonPath):
             return Result(True)
@@ -349,7 +349,7 @@ class Plugin:
                 return Result(True)
             else:
                 try:
-                    await inject_to_tab("SP", 
+                    await inject_to_tab(tab, 
                     f"""
                     (function() {{
                         const elem = document.createElement('div');
@@ -418,7 +418,6 @@ class Plugin:
             await asyncio.sleep(5)
             for x in self.tabs:
                 try:
-                    await asyncio.sleep(1)
                     self.log.info(f"Checking if tab {x} is still injected...")
                     if not await self._check_test_element(self, x):
                         self.log.info(f"Tab {x} is not injected, reloading...")
@@ -450,6 +449,8 @@ class Plugin:
             res = await x.load()
             if not res.success:
                 self.log(res.message)
+        
+        await self._cache_lists(self)
 
     async def _main(self):
         global Initialized
@@ -466,6 +467,4 @@ class Plugin:
         await self._inject_test_element(self, "SP")
         await self._load_stage_2(self)
 
-        await self._cache_lists(self)
-        
-        asyncio.get_event_loop().create_task(self._check_tabs(self))
+        await self._check_tabs(self)

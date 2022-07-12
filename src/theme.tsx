@@ -32,7 +32,7 @@ export class Theme {
       
       this.description = this.data.version
       if (this.data.author != ""){
-        this.description += "| " + this.data.author
+        this.description += " | " + this.data.author
       }
 
       this.patches = []
@@ -42,6 +42,7 @@ export class Theme {
         patch.init()
         this.patches.push(patch)
       })
+      console.log(`Init-ed theme ${this.name} with state ${this.checked}`)
     }
 
     setState(){

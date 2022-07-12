@@ -23,7 +23,6 @@ export function execute(promise: Promise<any>) {
         } else {
             console.warn("Execute failed:", data, "promise", promise);
         }
-
     })();
 }
 
