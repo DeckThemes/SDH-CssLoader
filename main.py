@@ -1,11 +1,13 @@
 import os, json, asyncio
+from time import sleep
 from os import geteuid, mkdir, path
+from typing import List
 from utilities import Utilities
 from injector import inject_to_tab, get_tab, tab_has_element
 from logging import getLogger, basicConfig, INFO, DEBUG
 
-firstLoad = True
 pluginManagerUtils = Utilities(None)
+Initialized = False 
 
 def createDir(dirPath : str):
     if (path.exists(dirPath)):
@@ -21,260 +23,305 @@ class Result:
         self.success = success
         self.message = message
     
-    def toDict(self):
+    def raise_on_failure(self):
+        if not self.success:
+            raise Exception(self.message)
+
+    def to_dict(self):
         return {"success": self.success, "message": self.message}
+
+class Inject:
+    def __init__(self, cssPath : str, tabs : List[str], theme):
+        self.css = None
+        self.cssPath = cssPath
+        self.tabs = tabs
+        self.uuids = {}
+        self.theme = theme
+        self.enabled = False
+        for x in self.tabs:
+            self.uuids[x] = []
+
+    async def load(self) -> Result:
+        self.theme.log("Inject.load")
+        try:
+            with open(self.cssPath, "r") as fp:
+                self.css = fp.read()
+
+            self.theme.log(f"Loaded css at {self.cssPath}")
+
+            return Result(True)
+        except Exception as e:
+            return Result(False, str(e))
+
+    async def inject(self, tab : str = None) -> Result:
+        self.theme.log("Inject.inject")
+        if (tab is None):
+            for x in self.tabs:
+                await self.inject(x)
+
+            return Result(True)
+        else:
+            if (tab not in self.tabs):
+                return Result(True) # this is kind of cheating but
+
+        if (len(self.uuids[tab]) > 0):
+            await self.remove(tab)
+
+        if (self.css is None):
+            result = await self.load()
+            if not result.success:
+                return result        
+
+        try:
+            res = await pluginManagerUtils.inject_css_into_tab(tab, self.css)
+            if not res["success"]:
+                return Result(False, str(res["result"]))
+            
+            self.uuids[tab].append(str(res["result"]))
+        except Exception as e:
+            return Result(False, str(e))
+
+        self.enabled = True
+        return Result(True)
+
+    async def remove(self, tab : str = None) -> Result:
+        self.theme.log("Inject.remove")
+        if (tab is None):
+            for x in self.tabs:
+                await self.remove(x)
+
+            return Result(True)
+        else:
+            if (tab not in self.tabs):
+                return Result(True) # this is kind of cheating but
+
+        if (len(self.uuids[tab]) <= 0):
+            return Result(True) # this is kind of cheating but
+
+        try:
+            for x in self.uuids[tab]:
+                self.theme.log(f"-{x} {tab}")
+                res = await pluginManagerUtils.remove_css_from_tab(tab, x)
+                #if not res["success"]:
+                #    return Result(False, res["result"])
+                # Silently ignore error. If any page gets reloaded, and there was css loaded. this will fail as it will fail to remove the css
+
+            self.uuids[tab] = []
+        except Exception as e:
+            return Result(False, str(e))
+
+        self.enabled = False
+        return Result(True)
 
 class Theme:
     def __init__(self, themePath : str, json : dict, configPath : str = None):
         self.name = json["name"]
-        self.version = json["version"]
-        self.tabs = {}
-        self.css = {}
+        self.version = json["version"] if ("version" in json) else "v1.0"
+        self.author = json["author"] if ("author" in json) else ""
+
         self.patches = []
-        self.ids = {}
-        self.path = themePath
-        self.active = False
-        self.configPath = configPath
+        self.injects = []
 
-        if (self.configPath is None):
-            self.configPath = self.path
-        
-        for y in json["inject"]:
-            if y not in self.css:
-                with open(themePath + "/" + y, "r") as fp: 
-                    css = fp.read()
-                    self.css[y] = css
-                    
-            for z in json["inject"][y]:
-                if (z not in self.tabs):
-                    self.tabs[z] = []
+        self.configPath = configPath if (configPath is not None) else themePath
+        self.themePath = themePath
 
-                self.tabs[z].append(y)
-        
-        if "patches" in json:
-            for x in json["patches"]:
-                self.patches.append(Patch(x, json["patches"][x], self))
+        self.enabled = False
+        self.json = json
+        self.logobj = None
 
-        self.loadState()
-
-    async def inject(self) -> Result:
-        if self.active:
-            return Result(True)
-
-        self.active = True
-        self.ids = {}
-
-        for x in self.tabs:
-            ids = []
-            for y in self.tabs[x]:
-                try:
-                    res = await pluginManagerUtils.inject_css_into_tab(x, self.css[y])
-                    if (res["success"]): 
-                        ids.append(res["result"])
-                    else:
-                        return Result(False, str(res["result"]))
-                except Exception as e:
-                    return Result(False, str(e))
-
-            if x not in self.ids:
-                self.ids[x] = ids
-            else:
-                self.ids[x].extend(ids)
-
-        for x in self.patches:
-            res = await x.inject_additional_css()
-            if not res.success:
-                return res
-        
-        res = self.saveState()
-        if not res.success:
-            return res
-
-        return Result(True)
-
-    async def remove(self) -> Result:
-        if not self.active:
-            return Result(True)
-
-        self.active = False
-
-        for x in self.ids:
-            for y in self.ids[x]:
-                try:
-                    res = await pluginManagerUtils.remove_css_from_tab(x, y)
-                    if not res["success"]:
-                        return Result(False, res["result"])
-                except Exception as e:
-                    return Result(False, str(e))
-        
-        self.ids = {}
-
-        res = self.saveState()
-        if not res.success:
-            return res
-
-        return Result(True)
+    def log(self, text : str):
+        if self.logobj is not None:
+            self.logobj.info(text)
     
-    def loadState(self) -> Result:
+    async def load(self) -> Result:
+        self.log("Theme.load")
+        if "inject" in self.json:
+            for x in self.json["inject"]:
+                self.injects.append(Inject(self.themePath + "/" + x, self.json["inject"][x], self))
+        
+        if "patches" in self.json:
+            for x in self.json["patches"]:
+                patch = ThemePatch(self, self.json["patches"][x], x)
+                result = await patch.load()
+                if not result.success:
+                    return result
+
+                self.patches.append(patch)
+
         configPath = self.configPath + "/config" + ("_ROOT.json" if os.geteuid() == 0 else "_USER.json")
+
+        self.log(configPath)
 
         if not path.exists(configPath):
             return Result(True)
-        
+
         try:
             with open(configPath, "r") as fp:
                 config = json.load(fp)
         except Exception as e:
             return Result(False, str(e))
         
+        activate = False
+
         for x in config:
             if x == "active":
-                self.active = config[x]
+                activate = True
             else:
                 for y in self.patches:
                     if y.name == x:
-                        y.selectedOption = config[x]
+                        y.value = config[x]
+        
+        if activate:
+            result = await self.inject()
+            if not result.success:
+                return result
         
         return Result(True)
-    
-    def saveState(self) -> Result:
-        configPath = self.configPath + "/config" + ("_ROOT.json" if os.geteuid() == 0 else "_USER.json")
-        
-        try:
-            config = {"active": self.active}
-            for x in self.patches:
-                config[x.name] = x.selectedOption
 
+    async def save(self) -> Result:
+        self.log("Theme.save")
+        createDir(self.configPath)
+        configPath = self.configPath + "/config" + ("_ROOT.json" if os.geteuid() == 0 else "_USER.json")
+
+        try:
+            config = {"active": self.enabled}
+            for x in self.patches:
+                config[x.name] = x.value
+            
             with open(configPath, "w") as fp:
                 json.dump(config, fp)
+        
         except Exception as e:
             return Result(False, str(e))
         
         return Result(True)
 
-    
-    def setPatchOption(self, patch : str, option : str):
-        for x in self.patches:
-            if (x.name == patch):
-                x.selectedOption = option
-                return
+    async def inject(self) -> Result:
+        self.log(f"Injecting theme '{self.name}'")
+        for x in self.injects:
+            result = await x.inject()
+            if not result.success:
+                return result
 
-    def toDict(self) -> dict:
+        for x in self.patches:
+            result = await x.inject()
+            if not result.success:
+                return result
+        
+        self.enabled = True
+        await self.save()
+        return Result(True)
+    
+    async def remove(self) -> Result:
+        self.log("Theme.remove")
+        for x in self.get_all_injects():
+            result = await x.remove()
+            if not result.success:
+                return result
+
+        self.enabled = False
+        await self.save()
+        return Result(True)
+
+    def get_all_injects(self) -> List[Inject]:
+        self.log("Theme.get_all_injects")
+        injects = []
+        injects.extend(self.injects)
+        for x in self.patches:
+            injects.extend(x.injects)
+        
+        return injects
+    
+    def to_dict(self) -> dict:
         return {
             "name": self.name,
             "version": self.version,
-            "active": self.active,
-            "patches": [x.toDict() for x in self.patches]
+            "author": self.author,
+            "enabled": self.enabled,
+            "patches": [x.to_dict() for x in self.patches]
         }
 
-class Patch:
-    def __init__(self, name : str, json : dict, theme : Theme):
-        self.name = name
-        self.default = ""
-        self.selectedOption = ""
-        self.options = {}
-        self.theme = theme
-
-        for x in json: # Possible options
-            if x == "default":
-                self.default = json[x]
-            else:
-                if x not in self.options:
-                    self.options[x] = {}
-
-                for y in json[x]: # Css files
-                    if y not in self.theme.css:
-                        with open(self.theme.path + "/" + y, "r") as fp: 
-                            css = fp.read()
-                            self.theme.css[y] = css
-
-                    for z in json[x][y]: # Target tabs
-                        if z not in self.options[x]:
-                            self.options[x][z] = []
-                        
-                        self.options[x][z].append(y)
-        
-        if self.default == "":
-            raise Exception("Patch has no default")
-
-        self.selectedOption = self.default
     
-    async def inject_additional_css(self) -> Result:
-        for x in self.options[self.selectedOption]:
-            ids = []
-            for y in self.options[self.selectedOption][x]:
-                try:
-                    res = await pluginManagerUtils.inject_css_into_tab(x, self.theme.css[y])
-                    if (res["success"]): 
-                        ids.append(res["result"])
-                    else:
-                        return Result(False, str(res["result"]))
-                except Exception as e:
-                    return Result(False, str(e))
+class ThemePatch:
+    def __init__(self, theme : Theme, json : dict, name : str):
+        self.json = json
+        self.name = name
+        self.default = json["default"]
+        self.theme = theme
+        self.value = self.default
+        self.injects = []
+        self.options = {}
+        for x in json:
+            if (x == "default"):
+                continue
 
-            if x not in self.theme.ids:
-                self.theme.ids[x] = ids
-            else:
-                self.theme.ids[x].extend(ids)
-
+            self.options[x] = []
+    
+    async def load(self) -> Result:
+        self.theme.log("ThemePatch.load")
+        for x in self.options:
+            for y in self.json[x]:
+                inject = Inject(self.theme.themePath + "/" + y, self.json[x][y], self.theme)
+                self.injects.append(inject)
+                self.options[x].append(inject)
+        
         return Result(True)
 
-    def toDict(self) -> dict:
+    async def inject(self) -> Result:
+        self.theme.log(f"Injecting patch '{self.name}' of theme '{self.theme.name}'")
+        for x in self.options[self.value]:
+            self.theme.log(x)
+            result = await x.inject()
+            self.theme.log(result.message)
+            if not result.success:
+                return result
+        
+        return Result(True)
+
+    async def remove(self) -> Result:
+        self.theme.log("ThemePatch.remove")
+        for x in self.injects:
+            result = await x.remove
+            if not result.success:
+                return result
+        
+        return Result(True)
+    
+    def to_dict(self) -> dict:
         return {
             "name": self.name,
-            "active": self.selectedOption,
+            "default": self.default,
+            "value": self.value,
             "options": [x for x in self.options]
         }
 
-class Plugin: 
-    async def getThemes(self):
-        return [x.toDict() for x in self.themes]
+class Plugin:
+    async def get_themes(self) -> list:
+        return [x.to_dict() for x in self.themes]
     
-    async def inject(self, themeName : str) -> dict:
+    async def set_theme_state(self, name : str, state : bool) -> dict:
+        self.log.info(f"Setting state for {name} to {state}")
         for x in self.themes:
-            if (x.name == themeName):
-                return (await x.inject()).toDict()
+            if (x.name == name):
+                result = await x.inject() if state else await x.remove()
+                return result.to_dict()
         
-        return Result(False, "Theme with name not found").toDict()
+        return Result(False, f"Did not find theme {name}").to_dict()
     
-    async def set_patch_option(self, themeName : str, patch : str, option : str) -> dict:
+    async def reset(self) -> dict:
         for x in self.themes:
-            if (x.name == themeName):
-                wasActive = x.active
-                if (wasActive):
-                    res = await x.remove()
-                    if not res.success:
-                        return res.toDict()
-                
-                x.setPatchOption(patch, option)
-
-                if (wasActive):
-                    res = await x.inject()
-                    if not res.success:
-                        return res.toDict()
-
-                return Result(True).toDict()
+            await x.remove()
         
-        return Result(False, "Theme with name not found").toDict()
+        await self._load(self)
+        await self._load_stage_2(self)
+        return Result(True).to_dict()
 
-
-    async def remove(self, themeName : str) -> dict:
-        for x in self.themes:
-            if (x.name == themeName):
-                return (await x.remove()).toDict()
-            
-        return Result(False, "Theme with name not found").toDict()
-
-    async def reload(self):
-        await self._main(self) 
-            
-    async def checkIfReady(self):
-        finished_reinjection = False
+    async def _inject_test_element(self, tab : str) -> Result:
         while True:
-            try:
-                await asyncio.sleep(1)
-                if not await tab_has_element("SP", "test_css_loaded"):
-                    await asyncio.sleep(3) # Make sure everything is loaded?
+            if await self._check_test_element(self, tab):
+                return Result(True)
+            else:
+                try:
                     await inject_to_tab("SP", 
                     f"""
                     (function() {{
@@ -283,18 +330,19 @@ class Plugin:
                         document.head.append(elem);
                     }})()
                     """, False)
-            
-                    finished_reinjection = True
-                    
-                elif finished_reinjection:
-                    finished_reinjection = False
-                    for x in [x for x in self.themes if x.active]:
-                        x.active = False
-                        await x.inject()
-            except:
-                pass
+                except:
+                    pass
 
-    async def parseThemes(self, themesDir : str, configDir : str = None):
+                await asyncio.sleep(1)
+            
+    
+    async def _check_test_element(self, tab : str) -> bool:
+        try:
+            return await tab_has_element(tab, "test_css_loaded")
+        except:
+            return False
+
+    async def _parse_themes(self, themesDir : str, configDir : str = None):
         if (configDir is None):
             configDir = themesDir
 
@@ -305,47 +353,92 @@ class Plugin:
             configPath = configDir + "/" + x
             themeDataPath = themePath + "/theme.json"
 
+
             if not path.exists(themeDataPath):
                 continue
-
+        
             self.log.info(f"Analyzing theme {x}")
             
             try:
                 with open(themeDataPath, "r") as fp:
                     theme = json.load(fp)
                     
+                self.log.info(theme)
                 themeData = Theme(themePath, theme, configPath)
 
                 if (themeData.name not in [x.name for x in self.themes]):
-                    createDir(configPath)
                     self.themes.append(themeData)
                     self.log.info(f"Adding theme {themeData.name}")
 
             except Exception as e:
                 self.log.warn(f"Exception while parsing a theme: {e}") # Couldn't properly parse everything
- 
-    async def _main(self):
-        self.log = getLogger("CSS_LOADER")
 
-        global firstLoad
-        if (firstLoad):
-            firstLoad = False
-            asyncio.get_event_loop().create_task(self.checkIfReady(self))
+    async def _cache_lists(self):
+        self.injects = []
+        self.tabs = []
 
-        if hasattr(self, "themes"):
-            for x in self.themes:
-                await x.remove()
+        for x in self.themes:
+            x.logobj = self.log
+            injects = x.get_all_injects()
+            self.injects.extend(injects)
+            for y in injects:
+                for z in y.tabs:
+                    if z not in self.tabs:
+                        self.tabs.append(z)
 
+    async def _check_tabs(self):
+        while True:
+            await asyncio.sleep(5)
+            for x in self.tabs:
+                try:
+                    await asyncio.sleep(1)
+                    self.log.info(f"Checking if tab {x} is still injected...")
+                    if not await self._check_test_element(self, x):
+                        self.log.info(f"Tab {x} is not injected, reloading...")
+                        await self._inject_test_element(self, x)
+                        for y in self.injects:
+                            if y.enabled:
+                                (await y.inject(x)).raise_on_failure()
+                except Exception as e:
+                    self.log.info(f":( {str(e)}")
+                    pass
+
+    async def _load(self):
+        self.log.info("Loading themes...")
         self.themes = []
+
         themesPath = "/home/deck/homebrew/themes"
         defaultThemesPath = "/home/deck/homebrew/plugins/SDH-CssLoader/themes"
 
         if (not path.exists(themesPath)):
             createDir(themesPath)
 
-        await self.parseThemes(self, themesPath)
+        await self._parse_themes(self, themesPath)
+        if (path.exists(defaultThemesPath)):
+            await self._parse_themes(self, defaultThemesPath, themesPath)
+    
+    async def _load_stage_2(self):
+        for x in self.themes:
+            self.log.info(f"Loading theme {x.name}")
+            res = await x.load()
+            if not res.success:
+                self.log(res.message)
 
-        if (not path.exists(defaultThemesPath)):
+    async def _main(self):
+        global Initialized
+        if Initialized:
             return
+        
+        Initialized = True
 
-        await self.parseThemes(self, defaultThemesPath, themesPath)
+        self.log = getLogger("CSS_LOADER")
+        self.themes = []
+        self.log.info("Hello world!")
+
+        await self._load(self)
+        await self._inject_test_element(self, "SP")
+        await self._load_stage_2(self)
+
+        await self._cache_lists(self)
+        
+        asyncio.get_event_loop().create_task(self._check_tabs(self))

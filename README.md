@@ -1,52 +1,37 @@
-# SDH-CssLoader
-Dynamically loads css off storage. Also reloads whenever the steam ui reloads
+# React-Frontend Plugin Template 
 
-## How it works
-The loader reads all folders in `/home/deck/homebrew/themes`. In every folder, it looks for a file called `theme.json`. This json file stores in which tab which css should be injected. An example theme can be found in the themes folder of this repository
+Reference example for using [decky-frontend-lib](https://github.com/SteamDeckHomebrew/decky-frontend-lib) in a [PluginLoader](https://github.com/SteamDeckHomebrew/PluginLoader) plugin.
 
-Structure of `theme.json`:
+## PluginLoader Discord [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://discord.gg/ZU74G2NJzk)
 
-```
-{
-    "name": "OrangeToggles",
-    "version": "0.1",
-    "inject": { # <-- Anything in here will be applied when you enable the theme
-        "shared.css": [ # <-- A css file that should be loaded 
-            "QuickAccess" # <-- Which tabs the css should be injected into
-        ] 
-    }
-}
-```
+## Developers
 
-![example1](https://raw.githubusercontent.com/suchmememanyskill/SDH-CssLoader/main/images/example1.png)
+### Dependencies
 
-Additionally, you can add 'patches', which are extra options the user can choose from. You can activate it as follows:
+This template relies on the user having `pnpm` installed on their system.  
+This can be downloaded from `npm` itself which is recommended. 
 
-```
-{
-    "name": "Colored Toggles",
-    "version": "0.1",
-    "inject": { # <-- Anything in here will be applied when you enable the theme
-        "shared.css": [ # <-- A css file that should be loaded 
-            "QuickAccess", "SP", "MainMenu" # <-- Which tabs the css should be injected into
-        ] 
-    },
-    "patches": {
-        "Theme Color": { # <-- The name of the setting
-            "default": "orange", # <-- The name of the default option. This is required
-            "orange": {}, # <-- An orange option, that applies no additional css
-            "lime": { # <-- A lime option, that applies 'colors/lime.css'. Anything in here works the same as the 'inject' section
-                "colors/lime.css": ["QuickAccess", "SP", "MainMenu"]
-            },
-            "red": {
-                "colors/red.css": ["QuickAccess", "SP", "MainMenu"]
-            }
-        }
-    }
-}
+#### Linux
+
+```bash
+sudo npm i -g pnpm
 ```
 
-![example2](https://raw.githubusercontent.com/suchmememanyskill/SDH-CssLoader/main/images/example2.png)
+### Getting Started
 
-## Credits
-- The classic theme in the themes folder is made by [NegativeI0N](https://github.com/NegativeI0N/SDH-ClassicTheme)
+1. Clone the repository to use as an example for making your plugin.
+2. In your clone of the repository run these commands:
+   1. ``pnpm i``
+   2. ``pnpm run build``
+3. You should do this every time you make changes to your plugin.
+
+Note: If you are recieveing build errors due to an out of date library, you should run this command inside of your repository:
+
+```bash
+pnpm update decky-frontend-lib --latest
+```
+
+### Distribution
+
+WIP. Check back in later.
+

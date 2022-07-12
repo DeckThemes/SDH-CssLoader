@@ -1,12 +1,10 @@
 {
-    "name": "CSS Loader",
-    "author": "Such Meme, Many Skill#2921",
-    "main_view_html": "main_view.html",
-    "tile_view_html": "",
-    "flags": ["_hot_reload", "root" ],
-	"publish": {
-        "discord_id": "249186838592487425",
-        "description": "Loads CSS (themes) dynamically into the steam deck game ui. Comes with some basic bundled themes",
-        "tags": ["style"]
-    }
+  "name": "Example Plugin",
+  "author": "John Doe",
+  "flags": ["debug", "_root"],
+  "publish": {
+    "tags": ["template", "root"],
+    "description": "Decky example plugin.",
+    "image": "https://opengraph.githubassets.com/1/SteamDeckHomebrew/PluginLoader"
+  }
 }
