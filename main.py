@@ -123,6 +123,7 @@ class Theme:
         self.injects = []
 
         self.configPath = configPath if (configPath is not None) else themePath
+        self.configJsonPath = self.configPath + "/config" + ("_ROOT.json" if os.geteuid() == 0 else "_USER.json")
         self.themePath = themePath
 
         self.enabled = False
@@ -148,15 +149,13 @@ class Theme:
 
                 self.patches.append(patch)
 
-        configPath = self.configPath + "/config" + ("_ROOT.json" if os.geteuid() == 0 else "_USER.json")
+        self.log(self.configJsonPath)
 
-        self.log(configPath)
-
-        if not path.exists(configPath):
+        if not path.exists(self.configJsonPath):
             return Result(True)
 
         try:
-            with open(configPath, "r") as fp:
+            with open(self.configJsonPath, "r") as fp:
                 config = json.load(fp)
         except Exception as e:
             return Result(False, str(e))
@@ -164,7 +163,7 @@ class Theme:
         activate = False
 
         for x in config:
-            if x == "active":
+            if x == "active" and config["active"]:
                 activate = True
             else:
                 for y in self.patches:
@@ -181,14 +180,13 @@ class Theme:
     async def save(self) -> Result:
         self.log("Theme.save")
         createDir(self.configPath)
-        configPath = self.configPath + "/config" + ("_ROOT.json" if os.geteuid() == 0 else "_USER.json")
 
         try:
             config = {"active": self.enabled}
             for x in self.patches:
                 config[x.name] = x.value
             
-            with open(configPath, "w") as fp:
+            with open(self.configJsonPath, "w") as fp:
                 json.dump(config, fp)
         
         except Exception as e:
@@ -340,7 +338,7 @@ class Plugin:
     async def reset(self) -> dict:
         for x in self.themes:
             await x.remove()
-        
+
         await self._load(self)
         await self._load_stage_2(self)
         return Result(True).to_dict()

@@ -60,7 +60,12 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
   let elements = themeList.map((x) => x.generate())
 
   return (
-    <PanelSection title="Panel Section">
+    <PanelSection title="Themes">
+      <PanelSectionRow>
+        <ButtonItem layout="below" onClick={x => {
+          python.resolve(python.reset(), (y : any) => reload())
+        }}>Reload themes</ButtonItem>
+      </PanelSectionRow>
       {
         elements
       }
