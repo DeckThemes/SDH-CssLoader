@@ -336,7 +336,7 @@ class Plugin:
         return Result(True).to_dict()
     
     async def reset(self) -> dict:
-        for x in self.themes:
+        for x in self.injects:
             await x.remove()
 
         await self._load(self)
