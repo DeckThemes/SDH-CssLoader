@@ -61,3 +61,7 @@
 .downloads_Button_3oavR > svg {
 	color: var(--friends-text-color) !important;
 }
+
+.progressbar_Percent_2_0Jo {
+	background: var(--main-color) !important;
+}
