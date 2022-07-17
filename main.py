@@ -254,6 +254,10 @@ class ThemePatch:
                 continue
 
             self.options[x] = []
+
+    def check_value(self):
+        if (self.value not in self.options):
+            self.value = self.default
     
     async def load(self) -> Result:
         self.theme.log("ThemePatch.load")
@@ -266,6 +270,7 @@ class ThemePatch:
         return Result(True)
 
     async def inject(self) -> Result:
+        self.check_value()
         self.theme.log(f"Injecting patch '{self.name}' of theme '{self.theme.name}'")
         for x in self.options[self.value]:
             self.theme.log(x)
@@ -277,6 +282,7 @@ class ThemePatch:
         return Result(True)
 
     async def remove(self) -> Result:
+        self.check_value()
         self.theme.log("ThemePatch.remove")
         for x in self.injects:
             result = await x.remove()
@@ -415,7 +421,7 @@ class Plugin:
 
     async def _check_tabs(self):
         while True:
-            await asyncio.sleep(5)
+            await asyncio.sleep(3)
             for x in self.tabs:
                 try:
                     self.log.info(f"Checking if tab {x} is still injected...")

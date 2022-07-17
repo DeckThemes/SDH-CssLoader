@@ -1,0 +1,21 @@
+:root {
+	--main-color: linear-gradient(138deg, #009fff, #ff1965, #b9b500);
+    --friends-text-color: white !important;
+    --static-color: #009fff !important;
+    --animation: gradient 20s ease infinite forwards !important;
+}
+
+@keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+      background-size: 300% 300%;
+    }
+    50% {
+      background-position: 100% 50%;
+      background-size: 300% 300%;
+    }
+    100% {
+      background-position: 0% 50%;
+      background-size: 300% 300%;
+    }
+  }

@@ -1,6 +1,7 @@
 {
     "name": "More Library Icons",
-    "version": "0.1",
+    "version": "v1.0",
+    "author": "SuchMeme",
     "inject": {
         "shared.css": [
             "SP"
