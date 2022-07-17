@@ -19,10 +19,7 @@ var reload = function(){};
 var firstTime : boolean = true;
 var themeList_backup : Theme[] = []
 
-const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
-  // const [result, setResult] = useState<number | undefined>();
-
-  python.setServer(serverAPI);
+const Content: VFC<{ serverAPI: ServerAPI }> = () => {
   const [themeList, themeListInternal] = useState<Theme[]>(themeList_backup);
 
   const setThemeList = (value : any) => {
@@ -65,6 +62,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
 };
 
 export default definePlugin((serverApi: ServerAPI) => {
+  python.setServer(serverApi);
   return {
     title: <div className={staticClasses.Title}>Css Loader</div>,
     content: <Content serverAPI={serverApi} />,
