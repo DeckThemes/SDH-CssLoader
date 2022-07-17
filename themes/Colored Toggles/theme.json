@@ -1,6 +1,7 @@
 {
     "name": "Colored Toggles",
-    "version": "0.1",
+    "version": "v1.1",
+    "author": "SuchMeme",
     "inject": {
         "shared.css": [
             "QuickAccess", "SP", "MainMenu"
@@ -8,13 +9,22 @@
     },
     "patches": {
         "Theme Color": {
-            "default": "orange",
-            "orange": {},
-            "lime": {
+            "default": "Orange",
+            "Orange": {},
+            "Lime": {
                 "colors/lime.css": ["QuickAccess", "SP", "MainMenu"]
             },
-            "red": {
+            "Red": {
                 "colors/red.css": ["QuickAccess", "SP", "MainMenu"]
+            },
+            "Magenta": {
+                "colors/magenta.css": ["QuickAccess", "SP", "MainMenu"]
+            },
+            "Gradient RGB": {
+                "colors/gradient_rgb.css": ["QuickAccess", "SP", "MainMenu"]
+            },
+            "Gradient Deck": {
+                "colors/gradient_deck.css": ["QuickAccess", "SP", "MainMenu"]
             }
         }
     }
