@@ -45,3 +45,7 @@ export function reset(): Promise<any> {
 export function setPatchOfTheme(themeName : string, patchName : string, value : string){
     return server!.callPluginMethod("set_patch_of_theme", {"themeName": themeName, "patchName": patchName, "value": value})
 }
+
+export function downloadTheme(uuid : string){
+    return server!.callPluginMethod("download_theme", {"uuid": uuid})
+}

@@ -371,6 +371,9 @@ class Plugin:
         
         return Result(False, f"Did not find theme {name}").to_dict()
 
+    async def download_theme(self, uuid : str) -> dict:
+        return (await self.remote.install(uuid)).to_dict()
+
     async def set_patch_of_theme(self, themeName : str, patchName : str, value : str) -> dict:
         theme = None
         for x in self.themes:
