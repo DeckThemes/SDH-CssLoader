@@ -316,7 +316,7 @@ class RemoteInstall:
 
         return stdout.decode()
 
-    async def load(self, force : bool) -> Result:
+    async def load(self, force : bool = False) -> Result:
         try:
             if force or (self.themes is None):
                 response = await self.run(f"curl {self.themeDb} -L")
