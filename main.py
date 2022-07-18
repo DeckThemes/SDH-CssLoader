@@ -1,4 +1,4 @@
-import os, json, asyncio
+import os, json, asyncio, tempfile, subprocess, shutil
 from time import sleep
 from os import geteuid, mkdir, path
 from typing import List
@@ -299,6 +299,65 @@ class ThemePatch:
             "options": [x for x in self.options]
         }
 
+class RemoteInstall:
+    def __init__(self, plugin):
+        self.themeDb = "https://github.com/suchmememanyskill/CssLoader-ThemeDb/releases/download/1.0.0/themes.json"
+        self.plugin = plugin
+        self.themes = None
+
+    async def run(self, command : str) -> str:
+        proc = await asyncio.create_subprocess_shell(command,        
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE)
+
+        stdout, stderr = await proc.communicate()
+        if (proc.returncode != 0):
+            raise Exception(f"Process exited with error code {proc.returncode}")
+
+        return stdout.decode()
+
+    async def load(self) -> Result:
+        try:
+            if self.themes is None:
+                response = await self.run(f"curl {self.themeDb} -L")
+                self.themes = json.loads(response)
+                self.plugin.log.info(self.themes)
+        except Exception as e:
+            return Result(False, str(e))
+        
+        return Result(True)
+
+    async def install(self, uuid : str) -> Result:
+        try:
+            result = await self.load()
+            if not result.success:
+                return result
+
+            theme = None
+
+            for x in self.themes:
+                if x["id"] == uuid:
+                    theme = x
+                    break
+            
+            if theme is None:
+                raise Exception(f"No theme with id {uuid} found")
+            
+            tempDir = tempfile.TemporaryDirectory()
+            print(f"Cloning {theme['repo_url']} into {tempDir.name}...")
+
+            await self.run(f"git clone \"{theme['repo_url']}\" \"{tempDir.name}\"")
+            await self.run(f"git -C \"{tempDir.name}\" reset --hard {theme['repo_commit']}")
+
+            themePath = os.path.join(tempDir.name, theme['repo_subpath'])
+            shutil.copytree(themePath, os.path.join("/home/deck/homebrew/themes", theme["name"]), dirs_exist_ok=True)
+
+            tempDir.cleanup()
+        except Exception as e:
+            return Result(False, str(e))
+
+        return Result(True)
+
 class Plugin:
     async def get_themes(self) -> list:
         return [x.to_dict() for x in self.themes]
@@ -468,6 +527,10 @@ class Plugin:
         self.log = getLogger("CSS_LOADER")
         self.themes = []
         self.log.info("Hello world!")
+        self.remote = RemoteInstall(self)
+        response = await self.remote.load()
+        if not response.success:
+            self.log.info(f":( {response.message}")
 
         await self._load(self)
         await self._inject_test_element(self, "SP")
