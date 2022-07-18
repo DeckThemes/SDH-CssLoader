@@ -316,9 +316,9 @@ class RemoteInstall:
 
         return stdout.decode()
 
-    async def load(self) -> Result:
+    async def load(self, force : bool) -> Result:
         try:
-            if self.themes is None:
+            if force or (self.themes is None):
                 response = await self.run(f"curl {self.themeDb} -L")
                 self.themes = json.loads(response)
                 self.plugin.log.info(self.themes)
@@ -373,6 +373,12 @@ class Plugin:
 
     async def download_theme(self, uuid : str) -> dict:
         return (await self.remote.install(uuid)).to_dict()
+    
+    async def get_theme_db_data(self) -> list:
+        return self.remote.themes
+    
+    async def reload_theme_db_data(self) -> dict:
+        return (await self.remote.load(True)).to_dict()
 
     async def set_patch_of_theme(self, themeName : str, patchName : str, value : str) -> dict:
         theme = None
