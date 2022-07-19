@@ -344,14 +344,14 @@ class RemoteInstall:
                 raise Exception(f"No theme with id {uuid} found")
             
             tempDir = tempfile.TemporaryDirectory()
-            print(f"Cloning {theme['repo_url']} into {tempDir.name}...")
 
-            await self.run(f"git clone \"{theme['repo_url']}\" \"{tempDir.name}\"")
-            await self.run(f"git -C \"{tempDir.name}\" reset --hard {theme['repo_commit']}")
+            print(f"Downloading {theme['download_url']} to {tempDir.name}...")
+            themeZipPath = os.path.join(tempDir.name, 'theme.zip')
+            await self.run(f"curl \"{theme['download_url']}\" -L -o \"{themeZipPath}\"")
 
-            themePath = os.path.join(tempDir.name, theme['repo_subpath'])
-            shutil.copytree(themePath, os.path.join("/home/deck/homebrew/themes", theme["name"]), dirs_exist_ok=True)
-
+            print(f"Unzipping {themeZipPath}")
+            await self.run(f"unzip -o \"{themeZipPath}\" -d /home/deck/homebrew/themes")
+            
             tempDir.cleanup()
         except Exception as e:
             return Result(False, str(e))
