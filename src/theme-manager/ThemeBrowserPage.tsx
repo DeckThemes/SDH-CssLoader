@@ -4,25 +4,17 @@ import { useEffect, useState, VFC } from "react";
 import * as python from "../python";
 
 // Interfaces for the JSON objects the lists work with
-interface browseThemeEntry {
-  author: string;
-  download_url: string;
-  id: string;
-  name: string;
-  preview_image: string;
-  version: string;
-}
-interface localThemeEntry {
-  author: string;
-  enabled: boolean;
-  name: string;
-  version?: string;
-  patches?: Array<object>;
-}
+import { browseThemeEntry } from "../customTypes";
+import { useCssLoaderState } from "../state/CssLoaderState";
+import { Theme } from "../theme";
 
 export const ThemeBrowserPage: VFC = () => {
-  const [themeArr, setThemeArr] = useState([]);
-  const [installedThemes, setInstalledThemes] = useState([]);
+  const {
+    browseThemeList: themeArr,
+    setBrowseThemeList: setThemeArr,
+    localThemeList: installedThemes,
+    setLocalThemeList: setInstalledThemes,
+  } = useCssLoaderState();
 
   // This is used to disable buttons during a theme install
   const [isInstalling, setInstalling] = useState(false);
@@ -55,14 +47,15 @@ export const ThemeBrowserPage: VFC = () => {
       setInstalling(false);
     });
   }
+  console.log(installedThemes);
 
   function checkIfThemeInstalled(themeObj: browseThemeEntry) {
-    const filteredArr: localThemeEntry[] = installedThemes.filter(
-      (e: localThemeEntry) =>
-        e.name === themeObj.name && e.author === themeObj.author
+    const filteredArr: Theme[] = installedThemes.filter(
+      (e: Theme) =>
+        e.data.name === themeObj.name && e.data.author === themeObj.author
     );
     if (filteredArr.length > 0) {
-      if (filteredArr[0].version === themeObj.version) {
+      if (filteredArr[0].data.version === themeObj.version) {
         return "installed";
       } else {
         return "outdated";

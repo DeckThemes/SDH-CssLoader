@@ -8,36 +8,27 @@ import {
   SidebarNavigation,
   Router,
 } from "decky-frontend-lib";
-import { useState, VFC } from "react";
+import { VFC } from "react";
 import * as python from "./python";
-import { Theme } from "./theme";
 import { RiPaintFill } from "react-icons/ri";
 
 import { ThemeBrowserPage } from "./theme-manager";
+import {
+  CssLoaderContextProvider,
+  CssLoaderState,
+  useCssLoaderState,
+} from "./state/CssLoaderState";
 
-// interface AddMethodArgs {
-//   left: number;
-//   right: number;
-// }
 var firstTime: boolean = true;
-var themeList_backup: Theme[] = [];
 
 const Content: VFC<{ serverAPI: ServerAPI }> = () => {
-  const [themeList, themeListInternal] = useState<Theme[]>(themeList_backup);
+  // Originally, when SuchMeme wrote this, the names themeList, themeListInternal, and setThemeList were used for the getter and setter functions
+  // These were renamed when state was moved to the context, but I simply re-defined them here as their original names so that none of the original code broke
+  const { localThemeList: themeList, setLocalThemeList: setThemeList } =
+    useCssLoaderState();
 
-  const setThemeList = (value: any) => {
-    let list: Theme[] = [];
-
-    value.forEach((x: any) => {
-      let theme = new Theme();
-      theme.data = x;
-      list.push(theme);
-    });
-    list.forEach((x) => x.init());
-
-    themeList_backup = list;
-    themeListInternal(list);
-  };
+  // setThemeList is a function that takes the raw data from the python function and then formats it with init and generate functions
+  // This still exists, it just has been moved into the CssLoaderState class' setter function, so it now happens automatically
 
   const reload = function () {
     python.resolve(python.getThemes(), setThemeList);
@@ -93,11 +84,21 @@ const ThemeManagerRouter: VFC = () => {
 export default definePlugin((serverApi: ServerAPI) => {
   python.setServer(serverApi);
 
-  serverApi.routerHook.addRoute("/theme-manager", () => <ThemeManagerRouter />);
+  const state: CssLoaderState = new CssLoaderState();
+
+  serverApi.routerHook.addRoute("/theme-manager", () => (
+    <CssLoaderContextProvider cssLoaderStateClass={state}>
+      <ThemeManagerRouter />
+    </CssLoaderContextProvider>
+  ));
 
   return {
     title: <div className={staticClasses.Title}>Css Loader</div>,
-    content: <Content serverAPI={serverApi} />,
+    content: (
+      <CssLoaderContextProvider cssLoaderStateClass={state}>
+        <Content serverAPI={serverApi} />
+      </CssLoaderContextProvider>
+    ),
     icon: <RiPaintFill />,
   };
 });
