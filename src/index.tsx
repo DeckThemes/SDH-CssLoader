@@ -15,8 +15,6 @@ import { RiPaintFill } from "react-icons/ri";
 
 import { ThemeBrowserPage } from "./theme-manager";
 
-var reload = function () {};
-
 // interface AddMethodArgs {
 //   left: number;
 //   right: number;
@@ -41,7 +39,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
     themeListInternal(list);
   };
 
-  reload = function () {
+  const reload = function () {
     python.resolve(python.getThemes(), setThemeList);
   };
 
@@ -57,7 +55,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
       <PanelSectionRow>
         <ButtonItem
           layout='below'
-          onClick={(x) => {
+          onClick={() => {
             Router.CloseSideMenus();
             Router.Navigate("/theme-manager");
           }}>
@@ -65,8 +63,8 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
         </ButtonItem>
         <ButtonItem
           layout='below'
-          onClick={(x) => {
-            python.resolve(python.reset(), (y: any) => reload());
+          onClick={() => {
+            python.resolve(python.reset(), () => reload());
           }}>
           Reload themes
         </ButtonItem>
@@ -95,7 +93,7 @@ const ThemeManagerRouter: VFC = () => {
 export default definePlugin((serverApi: ServerAPI) => {
   python.setServer(serverApi);
 
-  serverApi.routerHook.addRoute("/theme-manager", ThemeManagerRouter);
+  serverApi.routerHook.addRoute("/theme-manager", () => <ThemeManagerRouter />);
 
   return {
     title: <div className={staticClasses.Title}>Css Loader</div>,
