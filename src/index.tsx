@@ -18,6 +18,8 @@ import {
   CssLoaderState,
   useCssLoaderState,
 } from "./state/CssLoaderState";
+import { UninstallThemePage } from "./theme-manager/UninstallThemePage";
+import { ThemeToggle } from "./components/ThemeToggle";
 
 var firstTime: boolean = true;
 
@@ -39,8 +41,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
     reload();
   }
 
-  let elements = themeList.map((x) => x.generate());
-
   return (
     <PanelSection title='Themes'>
       <PanelSectionRow>
@@ -60,7 +60,9 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
           Reload themes
         </ButtonItem>
       </PanelSectionRow>
-      {elements}
+      {themeList.map((x) => (
+        <ThemeToggle data={x} setThemeList={setThemeList} />
+      ))}
     </PanelSection>
   );
 };
@@ -75,6 +77,11 @@ const ThemeManagerRouter: VFC = () => {
           title: "Browse Themes",
           content: <ThemeBrowserPage />,
           route: "/theme-manager/browser",
+        },
+        {
+          title: "Uninstall Themes",
+          content: <UninstallThemePage />,
+          route: "/theme-manager/uninstall",
         },
       ]}
     />

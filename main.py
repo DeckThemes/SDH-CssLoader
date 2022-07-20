@@ -127,6 +127,7 @@ class Theme:
         self.configPath = configPath if (configPath is not None) else themePath
         self.configJsonPath = self.configPath + "/config" + ("_ROOT.json" if os.geteuid() == 0 else "_USER.json")
         self.themePath = themePath
+        self.bundled = self.configPath != self.themePath
 
         self.enabled = False
         self.json = json
@@ -221,6 +222,23 @@ class Theme:
         await self.save()
         return Result(True)
 
+    async def delete(self) -> Result:
+        self.log("Theme.delete")
+
+        if (self.bundled):
+            return Result(False, "Can't delete a bundled theme")
+
+        result = await self.remove()
+        if not result.success:
+            return result
+        
+        try:
+            shutil.rmtree(self.themePath)
+        except Exception as e:
+            return Result(False, str(e))
+        
+        return Result(True)
+
     def get_all_injects(self) -> List[Inject]:
         self.log("Theme.get_all_injects")
         injects = []
@@ -236,7 +254,8 @@ class Theme:
             "version": self.version,
             "author": self.author,
             "enabled": self.enabled,
-            "patches": [x.to_dict() for x in self.patches]
+            "patches": [x.to_dict() for x in self.patches],
+            "bundled": self.bundled,
         }
 
     
@@ -415,6 +434,25 @@ class Plugin:
 
         await self._load(self)
         await self._load_stage_2(self)
+        return Result(True).to_dict()
+
+    async def delete_theme(self, themeName : str) -> dict:
+        theme = None
+
+        for x in self.themes:
+            if x.name == themeName:
+                theme = x
+                break
+                
+        if (theme == None):
+            return Result(False, f"Could not find theme {themeName}").to_dict()
+        
+        result = await theme.delete()
+        if not result.success:
+            return result.to_dict()
+        
+        self.themes.remove(theme)
+        await self._cache_lists(self)
         return Result(True).to_dict()
 
     async def _inject_test_element(self, tab : str) -> Result:

@@ -1,5 +1,12 @@
-import { ButtonItem, PanelSectionRow, Focusable } from "decky-frontend-lib";
-import { useEffect, useState, VFC } from "react";
+import {
+  ButtonItem,
+  PanelSectionRow,
+  Focusable,
+  TextField,
+  DropdownOption,
+  DropdownItem,
+} from "decky-frontend-lib";
+import { useEffect, useMemo, useState, VFC } from "react";
 
 import * as python from "../python";
 
@@ -15,9 +22,21 @@ export const ThemeBrowserPage: VFC = () => {
     localThemeList: installedThemes,
     setLocalThemeList: setInstalledThemes,
   } = useCssLoaderState();
+  const [searchFieldValue, setSearchValue] = useState<string>("");
 
   // This is used to disable buttons during a theme install
-  const [isInstalling, setInstalling] = useState(false);
+  const [isInstalling, setInstalling] = useState<boolean>(false);
+
+  const [selectedSort, setSort] = useState<number>(1);
+  const sortOptions = useMemo(
+    (): DropdownOption[] => [
+      { data: 1, label: "Name: A-Z" },
+      { data: 2, label: "Name: Z-A" },
+      { data: 3, label: "Date: Newest-Oldest" },
+      { data: 4, label: "Date: Oldest-Newest" },
+    ],
+    []
+  );
 
   function reloadThemes() {
     // Reloads the theme database
@@ -43,11 +62,10 @@ export const ThemeBrowserPage: VFC = () => {
     python.resolve(python.downloadTheme(id), () => {
       python.resolve(python.reset(), () => {
         python.resolve(python.getThemes(), setInstalledThemes);
+        setInstalling(false);
       });
-      setInstalling(false);
     });
   }
-  console.log(installedThemes);
 
   function checkIfThemeInstalled(themeObj: browseThemeEntry) {
     const filteredArr: Theme[] = installedThemes.filter(
@@ -104,6 +122,157 @@ export const ThemeBrowserPage: VFC = () => {
   return (
     <>
       <PanelSectionRow>
+        <DropdownItem
+          label='Sort Results By:'
+          rgOptions={sortOptions}
+          strDefaultLabel='Sort Results:'
+          selectedOption={selectedSort}
+          onChange={(e) => setSort(e.data)}
+        />
+      </PanelSectionRow>
+      <PanelSectionRow>
+        <TextField
+          label='Search'
+          value={searchFieldValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+        />
+      </PanelSectionRow>
+      {/* I wrap everything in a Focusable, because that ensures that the dpad/stick navigation works correctly */}
+      <Focusable style={{ display: "flex", flexWrap: "wrap" }}>
+        {themeArr
+          .filter((e) => {
+            // This filter just implements the search stuff
+            if (searchFieldValue.length > 0) {
+              if (
+                // Convert the theme name and search to lowercase so that it's not case-sensitive
+                !e.name.toLowerCase().includes(searchFieldValue.toLowerCase())
+              ) {
+                // return false just means it won't show in the list
+                return false;
+              }
+            }
+            return true;
+          })
+          .sort((a, b) => {
+            // This handles the sort option the user has chosen
+            // 1: A-Z, 2: Z-A, 3: New-Old, 4: Old-New
+            switch (selectedSort) {
+              case 2:
+                // localeCompare just sorts alphabetically
+                return b.name.localeCompare(a.name);
+              case 3:
+                return (
+                  new Date(b.lastChanged).valueOf() -
+                  new Date(a.lastChanged).valueOf()
+                );
+              case 4:
+                return (
+                  new Date(a.lastChanged).valueOf() -
+                  new Date(b.lastChanged).valueOf()
+                );
+              default:
+                // This is just A-Z
+                return a.name.localeCompare(b.name);
+            }
+          })
+          .map((e: browseThemeEntry) => {
+            const installStatus = checkIfThemeInstalled(e);
+            return (
+              // The outer 2 most divs are the background darkened/blurred image, and everything inside is the text/image/buttons
+              <div
+                style={{
+                  backgroundImage: 'url("' + e.preview_image + '")',
+                  backgroundSize: "cover",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
+                  width: "260px",
+                  marginLeft: "10px",
+                  marginRight: "10px",
+                  marginBottom: "20px",
+                  borderRadius: "5px",
+                }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    background: "RGBA(0,0,0,0.8)",
+                    backdropFilter: "blur(4px)",
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "5px",
+                  }}>
+                  <span
+                    style={{
+                      marginTop: "5px",
+                      fontSize: "1.5em",
+                      fontWeight: "bold",
+                    }}>
+                    {e.name}
+                  </span>
+                  <div
+                    style={{
+                      width: "240px",
+                      backgroundImage: 'url("' + e.preview_image + '")',
+                      backgroundSize: "cover",
+                      backgroundRepeat: "no-repeat",
+                      height: "150px",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}></div>
+                  <div
+                    style={{
+                      width: "240px",
+                      textAlign: "center",
+                      display: "flex",
+                    }}>
+                    <span
+                      style={{
+                        marginRight: "auto",
+                        fontSize: "1em",
+                        textShadow: "rgb(48, 48, 48) 0px 0 10px",
+                      }}>
+                      {e.author}
+                    </span>
+                    <span
+                      style={{
+                        marginLeft: "auto",
+                        fontSize: "1em",
+                        textShadow: "rgb(48, 48, 48) 0px 0 10px",
+                      }}>
+                      {e.version}
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      width: "245px",
+                    }}>
+                    <PanelSectionRow>
+                      <div
+                        style={{
+                          // Filter is used to color the button blue for update
+                          filter: calcButtonColor(installStatus),
+                        }}>
+                        <ButtonItem
+                          layout='below'
+                          disabled={
+                            installStatus === "installed" || isInstalling
+                          }
+                          onClick={() => {
+                            installTheme(e.id);
+                          }}>
+                          <span>{calcButtonText(installStatus)}</span>
+                        </ButtonItem>
+                      </div>
+                    </PanelSectionRow>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+      </Focusable>
+      <PanelSectionRow>
         <ButtonItem
           layout='below'
           onClick={() => {
@@ -112,101 +281,6 @@ export const ThemeBrowserPage: VFC = () => {
           Reload Themes
         </ButtonItem>
       </PanelSectionRow>
-      {/* I wrap everything in a Focusable, because that ensures that the dpad/stick navigation works correctly */}
-      <Focusable style={{ display: "flex", flexWrap: "wrap" }}>
-        {themeArr.map((e: browseThemeEntry) => {
-          const installStatus = checkIfThemeInstalled(e);
-          return (
-            // The outer 2 most divs are the background darkened/blurred image, and everything inside is the text/image/buttons
-            <div
-              style={{
-                backgroundImage: 'url("' + e.preview_image + '")',
-                backgroundSize: "cover",
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "center",
-                width: "260px",
-                margin: "10px",
-                borderRadius: "5px",
-              }}>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  background: "RGBA(0,0,0,0.8)",
-                  backdropFilter: "blur(4px)",
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: "5px",
-                }}>
-                <span
-                  style={{
-                    marginTop: "5px",
-                    fontSize: "1.5em",
-                    fontWeight: "bold",
-                  }}>
-                  {e.name}
-                </span>
-                <div
-                  style={{
-                    width: "240px",
-                    backgroundImage: 'url("' + e.preview_image + '")',
-                    backgroundSize: "cover",
-                    backgroundRepeat: "no-repeat",
-                    height: "150px",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                  }}></div>
-                <div
-                  style={{
-                    width: "240px",
-                    textAlign: "center",
-                    display: "flex",
-                  }}>
-                  <span
-                    style={{
-                      marginRight: "auto",
-                      fontSize: "1em",
-                      textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                    }}>
-                    {e.author}
-                  </span>
-                  <span
-                    style={{
-                      marginLeft: "auto",
-                      fontSize: "1em",
-                      textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                    }}>
-                    {e.version}
-                  </span>
-                </div>
-                <div
-                  style={{
-                    width: "245px",
-                  }}>
-                  <PanelSectionRow>
-                    <div
-                      style={{
-                        // Filter is used to color the button blue for update
-                        filter: calcButtonColor(installStatus),
-                      }}>
-                      <ButtonItem
-                        layout='below'
-                        disabled={installStatus === "installed" || isInstalling}
-                        onClick={() => {
-                          installTheme(e.id);
-                        }}>
-                        <span>{calcButtonText(installStatus)}</span>
-                      </ButtonItem>
-                    </div>
-                  </PanelSectionRow>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </Focusable>
     </>
   );
 };
