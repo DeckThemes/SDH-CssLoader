@@ -57,3 +57,7 @@ export function getThemeDbData() : Promise<any> {
 export function reloadThemeDbData() : Promise<any> {
     return server!.callPluginMethod("reload_theme_db_data", {})
 }
+
+export function deleteTheme(themeName : string) : Promise<any> {
+    return server!.callPluginMethod("delete_theme", {"themeName": themeName})
+}
