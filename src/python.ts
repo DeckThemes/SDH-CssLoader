@@ -42,6 +42,22 @@ export function reset(): Promise<any> {
     return server!.callPluginMethod("reset", {})
 }
 
-export function setPatchOfTheme(themeName : string, patchName : string, value : string){
+export function setPatchOfTheme(themeName : string, patchName : string, value : string) : Promise<any> {
     return server!.callPluginMethod("set_patch_of_theme", {"themeName": themeName, "patchName": patchName, "value": value})
+}
+
+export function downloadTheme(uuid : string) : Promise<any> {
+    return server!.callPluginMethod("download_theme", {"uuid": uuid})
+}
+
+export function getThemeDbData() : Promise<any> {
+    return server!.callPluginMethod("get_theme_db_data", {})
+}
+
+export function reloadThemeDbData() : Promise<any> {
+    return server!.callPluginMethod("reload_theme_db_data", {})
+}
+
+export function deleteTheme(themeName : string) : Promise<any> {
+    return server!.callPluginMethod("delete_theme", {"themeName": themeName})
 }

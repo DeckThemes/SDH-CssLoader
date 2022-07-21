@@ -1,4 +1,4 @@
-import os, json, asyncio
+import os, json, asyncio, tempfile, subprocess, shutil
 from time import sleep
 from os import geteuid, mkdir, path
 from typing import List
@@ -127,6 +127,7 @@ class Theme:
         self.configPath = configPath if (configPath is not None) else themePath
         self.configJsonPath = self.configPath + "/config" + ("_ROOT.json" if os.geteuid() == 0 else "_USER.json")
         self.themePath = themePath
+        self.bundled = self.configPath != self.themePath
 
         self.enabled = False
         self.json = json
@@ -221,6 +222,23 @@ class Theme:
         await self.save()
         return Result(True)
 
+    async def delete(self) -> Result:
+        self.log("Theme.delete")
+
+        if (self.bundled):
+            return Result(False, "Can't delete a bundled theme")
+
+        result = await self.remove()
+        if not result.success:
+            return result
+        
+        try:
+            shutil.rmtree(self.themePath)
+        except Exception as e:
+            return Result(False, str(e))
+        
+        return Result(True)
+
     def get_all_injects(self) -> List[Inject]:
         self.log("Theme.get_all_injects")
         injects = []
@@ -236,7 +254,8 @@ class Theme:
             "version": self.version,
             "author": self.author,
             "enabled": self.enabled,
-            "patches": [x.to_dict() for x in self.patches]
+            "patches": [x.to_dict() for x in self.patches],
+            "bundled": self.bundled,
         }
 
     
@@ -299,6 +318,65 @@ class ThemePatch:
             "options": [x for x in self.options]
         }
 
+class RemoteInstall:
+    def __init__(self, plugin):
+        self.themeDb = "https://github.com/suchmememanyskill/CssLoader-ThemeDb/releases/download/1.0.0/themes.json"
+        self.plugin = plugin
+        self.themes = None
+
+    async def run(self, command : str) -> str:
+        proc = await asyncio.create_subprocess_shell(command,        
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE)
+
+        stdout, stderr = await proc.communicate()
+        if (proc.returncode != 0):
+            raise Exception(f"Process exited with error code {proc.returncode}")
+
+        return stdout.decode()
+
+    async def load(self, force : bool = False) -> Result:
+        try:
+            if force or (self.themes is None):
+                response = await self.run(f"curl {self.themeDb} -L")
+                self.themes = json.loads(response)
+                self.plugin.log.info(self.themes)
+        except Exception as e:
+            return Result(False, str(e))
+        
+        return Result(True)
+
+    async def install(self, uuid : str) -> Result:
+        try:
+            result = await self.load()
+            if not result.success:
+                return result
+
+            theme = None
+
+            for x in self.themes:
+                if x["id"] == uuid:
+                    theme = x
+                    break
+            
+            if theme is None:
+                raise Exception(f"No theme with id {uuid} found")
+            
+            tempDir = tempfile.TemporaryDirectory()
+
+            print(f"Downloading {theme['download_url']} to {tempDir.name}...")
+            themeZipPath = os.path.join(tempDir.name, 'theme.zip')
+            await self.run(f"curl \"{theme['download_url']}\" -L -o \"{themeZipPath}\"")
+
+            print(f"Unzipping {themeZipPath}")
+            await self.run(f"unzip -o \"{themeZipPath}\" -d /home/deck/homebrew/themes")
+            
+            tempDir.cleanup()
+        except Exception as e:
+            return Result(False, str(e))
+
+        return Result(True)
+
 class Plugin:
     async def get_themes(self) -> list:
         return [x.to_dict() for x in self.themes]
@@ -311,6 +389,15 @@ class Plugin:
                 return result.to_dict()
         
         return Result(False, f"Did not find theme {name}").to_dict()
+
+    async def download_theme(self, uuid : str) -> dict:
+        return (await self.remote.install(uuid)).to_dict()
+    
+    async def get_theme_db_data(self) -> list:
+        return self.remote.themes
+    
+    async def reload_theme_db_data(self) -> dict:
+        return (await self.remote.load(True)).to_dict()
 
     async def set_patch_of_theme(self, themeName : str, patchName : str, value : str) -> dict:
         theme = None
@@ -347,6 +434,25 @@ class Plugin:
 
         await self._load(self)
         await self._load_stage_2(self)
+        return Result(True).to_dict()
+
+    async def delete_theme(self, themeName : str) -> dict:
+        theme = None
+
+        for x in self.themes:
+            if x.name == themeName:
+                theme = x
+                break
+                
+        if (theme == None):
+            return Result(False, f"Could not find theme {themeName}").to_dict()
+        
+        result = await theme.delete()
+        if not result.success:
+            return result.to_dict()
+        
+        self.themes.remove(theme)
+        await self._cache_lists(self)
         return Result(True).to_dict()
 
     async def _inject_test_element(self, tab : str) -> Result:
@@ -468,6 +574,10 @@ class Plugin:
         self.log = getLogger("CSS_LOADER")
         self.themes = []
         self.log.info("Hello world!")
+        self.remote = RemoteInstall(self)
+        response = await self.remote.load()
+        if not response.success:
+            self.log.info(f":( {response.message}")
 
         await self._load(self)
         await self._inject_test_element(self, "SP")
