@@ -247,6 +247,8 @@ export const ThemeBrowserPage: VFC = () => {
                   <div
                     style={{
                       width: "245px",
+                      marginTop: "-10px",
+                      marginBottom: "-7.5px",
                     }}>
                     <PanelSectionRow>
                       <div
