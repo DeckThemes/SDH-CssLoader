@@ -3,7 +3,7 @@ import { VFC } from "react";
 import { Theme } from "../theme";
 
 import * as python from "../python";
-import { ThemePatch } from "./index";
+import { ThemePatch } from "./ThemePatch";
 
 export const ThemeToggle: VFC<{ data: Theme; setThemeList: any }> = ({
   data,
