@@ -5,6 +5,7 @@ import {
   TextField,
   DropdownOption,
   DropdownItem,
+  SingleDropdownOption,
 } from "decky-frontend-lib";
 import { useEffect, useMemo, useState, VFC } from "react";
 
@@ -12,7 +13,7 @@ import * as python from "../python";
 
 // Interfaces for the JSON objects the lists work with
 import { browseThemeEntry } from "../customTypes";
-import { useCssLoaderState } from "../state/CssLoaderState";
+import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
 
 export const ThemeBrowserPage: VFC = () => {
@@ -27,6 +28,20 @@ export const ThemeBrowserPage: VFC = () => {
   // This is used to disable buttons during a theme install
   const [isInstalling, setInstalling] = useState<boolean>(false);
 
+  const searchFilter = (e: browseThemeEntry) => {
+    // This filter just implements the search stuff
+    if (searchFieldValue.length > 0) {
+      if (
+        // Convert the theme name and search to lowercase so that it's not case-sensitive
+        !e.name.toLowerCase().includes(searchFieldValue.toLowerCase())
+      ) {
+        // return false just means it won't show in the list
+        return false;
+      }
+    }
+    return true;
+  };
+
   const [selectedSort, setSort] = useState<number>(1);
   const sortOptions = useMemo(
     (): DropdownOption[] => [
@@ -37,6 +52,20 @@ export const ThemeBrowserPage: VFC = () => {
     ],
     []
   );
+
+  const [selectedTarget, setTarget] = useState<SingleDropdownOption>({
+    data: 1,
+    label: "Any",
+  });
+  const targetOptions = useMemo((): DropdownOption[] => {
+    const uniqueTargets = new Set(
+      themeArr.filter(searchFilter).map((e) => e.target)
+    );
+    return [
+      { data: 1, label: "Any" },
+      ...[...uniqueTargets].map((e, i) => ({ data: i + 2, label: e })),
+    ];
+  }, [themeArr, searchFilter]);
 
   function reloadThemes() {
     // Reloads the theme database
@@ -129,6 +158,13 @@ export const ThemeBrowserPage: VFC = () => {
           selectedOption={selectedSort}
           onChange={(e) => setSort(e.data)}
         />
+        <DropdownItem
+          label='Filter By Theme Target:'
+          rgOptions={targetOptions}
+          strDefaultLabel='Any'
+          selectedOption={selectedTarget.data}
+          onChange={(e) => setTarget(e)}
+        />
       </PanelSectionRow>
       <PanelSectionRow>
         <TextField
@@ -140,19 +176,12 @@ export const ThemeBrowserPage: VFC = () => {
       {/* I wrap everything in a Focusable, because that ensures that the dpad/stick navigation works correctly */}
       <Focusable style={{ display: "flex", flexWrap: "wrap" }}>
         {themeArr
-          .filter((e) => {
-            // This filter just implements the search stuff
-            if (searchFieldValue.length > 0) {
-              if (
-                // Convert the theme name and search to lowercase so that it's not case-sensitive
-                !e.name.toLowerCase().includes(searchFieldValue.toLowerCase())
-              ) {
-                // return false just means it won't show in the list
-                return false;
-              }
-            }
-            return true;
-          })
+          .filter(searchFilter)
+          .filter((e: browseThemeEntry) =>
+            selectedTarget.label === "Any"
+              ? true
+              : e.target === selectedTarget.label
+          )
           .sort((a, b) => {
             // This handles the sort option the user has chosen
             // 1: A-Z, 2: Z-A, 3: New-Old, 4: Old-New
@@ -180,6 +209,7 @@ export const ThemeBrowserPage: VFC = () => {
             return (
               // The outer 2 most divs are the background darkened/blurred image, and everything inside is the text/image/buttons
               <div
+                className='CssLoader_ThemeBrowser_SingleItem_BgImage'
                 style={{
                   backgroundImage: 'url("' + e.preview_image + '")',
                   backgroundSize: "cover",
@@ -192,6 +222,7 @@ export const ThemeBrowserPage: VFC = () => {
                   borderRadius: "5px",
                 }}>
                 <div
+                  className='CssLoader_ThemeBrowser_SingleItem_BgOverlay'
                   style={{
                     display: "flex",
                     flexDirection: "column",
@@ -203,6 +234,7 @@ export const ThemeBrowserPage: VFC = () => {
                     borderRadius: "5px",
                   }}>
                   <span
+                    className='CssLoader_ThemeBrowser_SingleItem_ThemeName'
                     style={{
                       marginTop: "5px",
                       fontSize: "1.5em",
@@ -210,7 +242,19 @@ export const ThemeBrowserPage: VFC = () => {
                     }}>
                     {e.name}
                   </span>
+                  {selectedTarget.label === "Any" && (
+                    <span
+                      className='CssLoader_ThemeBrowser_SingleItem_ThemeTarget'
+                      style={{
+                        marginTop: "-6px",
+                        fontSize: "1em",
+                        textShadow: "rgb(48, 48, 48) 0px 0 10px",
+                      }}>
+                      {e.target}
+                    </span>
+                  )}
                   <div
+                    className='CssLoader_ThemeBrowser_SingleItem_PreviewImage'
                     style={{
                       width: "240px",
                       backgroundImage: 'url("' + e.preview_image + '")',
@@ -220,14 +264,17 @@ export const ThemeBrowserPage: VFC = () => {
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
-                    }}></div>
+                    }}
+                  />
                   <div
+                    className='CssLoader_ThemeBrowser_SingleItem_AuthorVersionContainer'
                     style={{
                       width: "240px",
                       textAlign: "center",
                       display: "flex",
                     }}>
                     <span
+                      className='CssLoader_ThemeBrowser_SingleItem_AuthorText'
                       style={{
                         marginRight: "auto",
                         fontSize: "1em",
@@ -236,6 +283,7 @@ export const ThemeBrowserPage: VFC = () => {
                       {e.author}
                     </span>
                     <span
+                      className='CssLoader_ThemeBrowser_SingleItem_VersionText'
                       style={{
                         marginLeft: "auto",
                         fontSize: "1em",
@@ -245,6 +293,7 @@ export const ThemeBrowserPage: VFC = () => {
                     </span>
                   </div>
                   <div
+                    className='CssLoader_ThemeBrowser_SingleItem_InstallButtonContainer'
                     style={{
                       width: "245px",
                       marginTop: "-10px",
@@ -252,6 +301,7 @@ export const ThemeBrowserPage: VFC = () => {
                     }}>
                     <PanelSectionRow>
                       <div
+                        className='CssLoader_ThemeBrowser_SingleItem_InstallButtonColorFilter'
                         style={{
                           // Filter is used to color the button blue for update
                           filter: calcButtonColor(installStatus),
@@ -264,7 +314,9 @@ export const ThemeBrowserPage: VFC = () => {
                           onClick={() => {
                             installTheme(e.id);
                           }}>
-                          <span>{calcButtonText(installStatus)}</span>
+                          <span className='CssLoader_ThemeBrowser_SingleItem_InstallText'>
+                            {calcButtonText(installStatus)}
+                          </span>
                         </ButtonItem>
                       </div>
                     </PanelSectionRow>

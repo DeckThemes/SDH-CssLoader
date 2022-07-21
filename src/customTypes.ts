@@ -6,6 +6,7 @@ export interface browseThemeEntry {
   preview_image: string;
   version: string;
   last_changed: string;
+  target: string;
 }
 export interface localThemeEntry {
   author: string;

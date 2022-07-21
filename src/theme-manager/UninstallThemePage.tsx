@@ -3,7 +3,7 @@ import { useState, VFC } from "react";
 import { FaTrash } from "react-icons/fa";
 import * as python from "../python";
 
-import { useCssLoaderState } from "../state/CssLoaderState";
+import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
 
 export const UninstallThemePage: VFC = () => {

@@ -12,14 +12,13 @@ import { VFC } from "react";
 import * as python from "./python";
 import { RiPaintFill } from "react-icons/ri";
 
-import { ThemeBrowserPage } from "./theme-manager";
+import { ThemeBrowserPage, UninstallThemePage } from "./theme-manager";
 import {
   CssLoaderContextProvider,
   CssLoaderState,
   useCssLoaderState,
-} from "./state/CssLoaderState";
-import { UninstallThemePage } from "./theme-manager/UninstallThemePage";
-import { ThemeToggle } from "./components/ThemeToggle";
+} from "./state";
+import { ThemeToggle } from "./components";
 
 var firstTime: boolean = true;
 
