@@ -162,13 +162,13 @@ export const ThemeBrowserPage: VFC = () => {
                 return b.name.localeCompare(a.name);
               case 3:
                 return (
-                  new Date(b.lastChanged).valueOf() -
-                  new Date(a.lastChanged).valueOf()
+                  new Date(b.last_changed).valueOf() -
+                  new Date(a.last_changed).valueOf()
                 );
               case 4:
                 return (
-                  new Date(a.lastChanged).valueOf() -
-                  new Date(b.lastChanged).valueOf()
+                  new Date(a.last_changed).valueOf() -
+                  new Date(b.last_changed).valueOf()
                 );
               default:
                 // This is just A-Z
