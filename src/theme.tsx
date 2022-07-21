@@ -1,6 +1,3 @@
-import { DropdownItem, PanelSectionRow, ToggleField } from "decky-frontend-lib";
-import * as python from "./python";
-
 export class Theme {
   data: any;
   checked: boolean = false;

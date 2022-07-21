@@ -52,6 +52,11 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
           }}>
           Manage Themes
         </ButtonItem>
+      </PanelSectionRow>
+      {themeList.map((x) => (
+        <ThemeToggle data={x} setThemeList={setThemeList} />
+      ))}
+      <PanelSectionRow>
         <ButtonItem
           layout='below'
           onClick={() => {
@@ -60,9 +65,6 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
           Reload themes
         </ButtonItem>
       </PanelSectionRow>
-      {themeList.map((x) => (
-        <ThemeToggle data={x} setThemeList={setThemeList} />
-      ))}
     </PanelSection>
   );
 };
