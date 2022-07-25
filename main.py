@@ -322,7 +322,7 @@ class RemoteInstall:
     def __init__(self, plugin):
         self.themeDb = "https://github.com/suchmememanyskill/CssLoader-ThemeDb/releases/download/1.0.0/themes.json"
         self.plugin = plugin
-        self.themes = None
+        self.themes = []
 
     async def run(self, command : str) -> str:
         proc = await asyncio.create_subprocess_shell(command,        
@@ -337,7 +337,7 @@ class RemoteInstall:
 
     async def load(self, force : bool = False) -> Result:
         try:
-            if force or (self.themes is None):
+            if force or (self.themes == []):
                 response = await self.run(f"curl {self.themeDb} -L")
                 self.themes = json.loads(response)
                 self.plugin.log.info(self.themes)
