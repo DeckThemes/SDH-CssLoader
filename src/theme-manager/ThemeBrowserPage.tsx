@@ -216,10 +216,10 @@ export const ThemeBrowserPage: VFC = () => {
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "center",
                   width: "260px",
+                  borderRadius: "5px",
                   marginLeft: "10px",
                   marginRight: "10px",
                   marginBottom: "20px",
-                  borderRadius: "5px",
                 }}>
                 <div
                   className='CssLoader_ThemeBrowser_SingleItem_BgOverlay'
@@ -228,10 +228,10 @@ export const ThemeBrowserPage: VFC = () => {
                     flexDirection: "column",
                     alignItems: "center",
                     background: "RGBA(0,0,0,0.8)",
-                    backdropFilter: "blur(4px)",
+                    backdropFilter: "blur(5px)",
                     width: "100%",
                     height: "100%",
-                    borderRadius: "5px",
+                    borderRadius: "3px",
                   }}>
                   <span
                     className='CssLoader_ThemeBrowser_SingleItem_ThemeName'
@@ -296,17 +296,20 @@ export const ThemeBrowserPage: VFC = () => {
                     className='CssLoader_ThemeBrowser_SingleItem_InstallButtonContainer'
                     style={{
                       width: "245px",
-                      marginTop: "-10px",
-                      marginBottom: "-7.5px",
                     }}>
                     <PanelSectionRow>
                       <div
                         className='CssLoader_ThemeBrowser_SingleItem_InstallButtonColorFilter'
                         style={{
+                          // This padding here overrides the default padding put on PanelSectionRow's by Valve
+                          // Before this, I was using negative margin to "shrink" the element, but this is a much better solution
+                          paddingTop: "0px",
+                          paddingBottom: "0px",
                           // Filter is used to color the button blue for update
                           filter: calcButtonColor(installStatus),
                         }}>
                         <ButtonItem
+                          bottomSeparator={false}
                           layout='below'
                           disabled={
                             installStatus === "installed" || isInstalling

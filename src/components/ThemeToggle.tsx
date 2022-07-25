@@ -10,18 +10,22 @@ export const ThemeToggle: VFC<{ data: Theme; setThemeList: any }> = ({
   setThemeList,
 }) => {
   return (
-    <PanelSectionRow>
-      <ToggleField
-        checked={data.checked}
-        label={data.name}
-        description={data.description}
-        onChange={(switchValue: boolean) => {
-          python.resolve(python.setThemeState(data.name, switchValue), () => {
-            python.resolve(python.getThemes(), setThemeList);
-          });
-        }}
-      />
-      {data.checked && data.patches.map((x) => <ThemePatch data={x} />)}
-    </PanelSectionRow>
+    <>
+      <PanelSectionRow>
+        <ToggleField
+          checked={data.checked}
+          label={data.name}
+          description={data.description}
+          onChange={(switchValue: boolean) => {
+            python.resolve(python.setThemeState(data.name, switchValue), () => {
+              python.resolve(python.getThemes(), setThemeList);
+            });
+          }}
+        />
+      </PanelSectionRow>
+      <PanelSectionRow>
+        {data.checked && data.patches.map((x) => <ThemePatch data={x} />)}
+      </PanelSectionRow>
+    </>
   );
 };
