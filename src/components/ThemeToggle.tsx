@@ -23,9 +23,7 @@ export const ThemeToggle: VFC<{ data: Theme; setThemeList: any }> = ({
           }}
         />
       </PanelSectionRow>
-      <PanelSectionRow>
-        {data.checked && data.patches.map((x) => <ThemePatch data={x} />)}
-      </PanelSectionRow>
+      {data.checked && data.patches.map((x) => <ThemePatch data={x} />)}
     </>
   );
 };
