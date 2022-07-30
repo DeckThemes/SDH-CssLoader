@@ -264,25 +264,43 @@ class ThemePatch:
         self.json = json
         self.name = name
         self.default = json["default"]
+        self.type = json["type"] if type in json else "dropdown"
         self.theme = theme
         self.value = self.default
         self.injects = []
         self.options = {}
-        for x in json:
-            if (x == "default"):
-                continue
+        self.patchVersion = None
 
-            self.options[x] = []
+        if "values" in json: # Do we have a v2 or a v1 format?
+            self.patchVersion = 2
+            for x in json["values"]:
+                self.options[x] = []
+        else:
+            self.patchVersion = 1
+            for x in json:
+                if (x == "default"):
+                    continue
+
+                self.options[x] = []
 
     def check_value(self):
         if (self.value not in self.options):
             self.value = self.default
+
+        if (self.type not in ["dropdown", "checkbox", "slider"]):
+            self.type = "dropdown"
+        
+        if (self.type == "checkbox"):
+            if not ("No" in self.options and "Yes" in self.options):
+                self.type = "dropdown"
     
     async def load(self) -> Result:
         self.theme.log("ThemePatch.load")
         for x in self.options:
-            for y in self.json[x]:
-                inject = Inject(self.theme.themePath + "/" + y, self.json[x][y], self.theme)
+            data = self.json[x] if self.patchVersion == 1 else self.json["values"][x]
+
+            for y in data:
+                inject = Inject(self.theme.themePath + "/" + y, data[y], self.theme)
                 self.injects.append(inject)
                 self.options[x].append(inject)
         
@@ -315,7 +333,8 @@ class ThemePatch:
             "name": self.name,
             "default": self.default,
             "value": self.value,
-            "options": [x for x in self.options]
+            "options": [x for x in self.options],
+            "type": self.type,
         }
 
 class RemoteInstall:
