@@ -445,6 +445,9 @@ class Plugin:
         if themePatch is None:
             return Result(False, f"Did not find patch '{patchName}' for theme '{themeName}'").to_dict()
         
+        if (themePatch.value == value):
+            return Result(True, "Already injected").to_dict()
+
         if (value in themePatch.options):
             themePatch.value = value
         
