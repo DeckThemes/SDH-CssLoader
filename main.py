@@ -145,7 +145,11 @@ class Theme:
         
         if "patches" in self.json:
             for x in self.json["patches"]:
-                patch = ThemePatch(self, self.json["patches"][x], x)
+                try:
+                    patch = ThemePatch(self, self.json["patches"][x], x)
+                except Exception as e:
+                    continue # Just don't load the patch if it's invalid
+
                 result = await patch.load()
                 if not result.success:
                     return result
@@ -282,6 +286,9 @@ class ThemePatch:
                     continue
 
                 self.options[x] = []
+        
+        if self.default not in self.options:
+            raise Exception(f"In patch '{self.name}', '{self.default}' does not exist as a patch option")
 
     def check_value(self):
         if (self.value not in self.options):
@@ -304,6 +311,7 @@ class ThemePatch:
                 self.injects.append(inject)
                 self.options[x].append(inject)
         
+        self.check_value()
         return Result(True)
 
     async def inject(self) -> Result:
