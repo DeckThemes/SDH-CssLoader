@@ -264,7 +264,7 @@ class ThemePatch:
         self.json = json
         self.name = name
         self.default = json["default"]
-        self.type = json["type"] if type in json else "dropdown"
+        self.type = json["type"] if "type" in json else "dropdown"
         self.theme = theme
         self.value = self.default
         self.injects = []
