@@ -7,7 +7,8 @@ from injector import inject_to_tab, get_tab, tab_has_element
 from logging import getLogger, basicConfig, INFO, DEBUG
 
 pluginManagerUtils = Utilities(None)
-Initialized = False 
+Initialized = False
+CSS_LOADER_VER = 2
 
 def createDir(dirPath : str):
     if (path.exists(dirPath)):
@@ -120,6 +121,10 @@ class Theme:
         self.name = json["name"]
         self.version = json["version"] if ("version" in json) else "v1.0"
         self.author = json["author"] if ("author" in json) else ""
+        self.require = int(json["manifest_version"]) if ("manifest_version" in json) else 1
+
+        if (CSS_LOADER_VER < self.require):
+            raise Exception("A newer version of the CssLoader is required to load this theme")
 
         self.patches = []
         self.injects = []
@@ -133,29 +138,18 @@ class Theme:
         self.json = json
         self.logobj = None
 
+        if "inject" in self.json:
+            self.injects = [Inject(self.themePath + "/" + x, self.json["inject"][x], self) for x in self.json["inject"]]
+        
+        if "patches" in self.json:
+            self.patches = [ThemePatch(self, self.json["patches"][x], x) for x in self.json["patches"]]
+
     def log(self, text : str):
         if self.logobj is not None:
             self.logobj.info(text)
     
     async def load(self) -> Result:
         self.log("Theme.load")
-        if "inject" in self.json:
-            for x in self.json["inject"]:
-                self.injects.append(Inject(self.themePath + "/" + x, self.json["inject"][x], self))
-        
-        if "patches" in self.json:
-            for x in self.json["patches"]:
-                try:
-                    patch = ThemePatch(self, self.json["patches"][x], x)
-                except Exception as e:
-                    continue # Just don't load the patch if it's invalid
-
-                result = await patch.load()
-                if not result.success:
-                    return result
-
-                self.patches.append(patch)
-
         if not path.exists(self.configJsonPath):
             return Result(True)
 
@@ -260,6 +254,7 @@ class Theme:
             "enabled": self.enabled,
             "patches": [x.to_dict() for x in self.patches],
             "bundled": self.bundled,
+            "require": self.require,
         }
 
     
@@ -289,6 +284,8 @@ class ThemePatch:
         
         if self.default not in self.options:
             raise Exception(f"In patch '{self.name}', '{self.default}' does not exist as a patch option")
+        
+        self.load()
 
     def check_value(self):
         if (self.value not in self.options):
@@ -301,8 +298,7 @@ class ThemePatch:
             if not ("No" in self.options and "Yes" in self.options):
                 self.type = "dropdown"
     
-    async def load(self) -> Result:
-        self.theme.log("ThemePatch.load")
+    def load(self):
         for x in self.options:
             data = self.json[x] if self.patchVersion == 1 else self.json["values"][x]
 
@@ -312,7 +308,6 @@ class ThemePatch:
                 self.options[x].append(inject)
         
         self.check_value()
-        return Result(True)
 
     async def inject(self) -> Result:
         self.check_value()
@@ -425,6 +420,9 @@ class Plugin:
     
     async def reload_theme_db_data(self) -> dict:
         return (await self.remote.load(True)).to_dict()
+
+    async def get_backend_version(self) -> int:
+        return CSS_LOADER_VER
 
     async def set_patch_of_theme(self, themeName : str, patchName : str, value : str) -> dict:
         theme = None
