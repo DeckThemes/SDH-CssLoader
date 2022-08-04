@@ -396,7 +396,7 @@ class Plugin:
         return [x.to_dict() for x in self.themes]
     
     async def set_theme_state(self, name : str, state : bool) -> dict:
-        self.log.info(f"Setting state for {name} to {state}")
+        Log(f"Setting state for {name} to {state}")
         for x in self.themes:
             if (x.name == name):
                 result = await x.inject() if state else await x.remove()
