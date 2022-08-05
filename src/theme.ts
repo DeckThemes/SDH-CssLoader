@@ -33,6 +33,7 @@ export class Patch {
   value: string = "";
   options: string[] = [];
   index: number = 0;
+  type: string = "dropdown";
 
   constructor(theme: Theme) {
     this.theme = theme;
@@ -43,6 +44,7 @@ export class Patch {
     this.default = this.data.default;
     this.value = this.data.value;
     this.options = this.data.options;
+    this.type = this.data.type;
 
     this.index = this.options.indexOf(this.value);
   }
