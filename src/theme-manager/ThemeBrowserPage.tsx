@@ -28,7 +28,16 @@ export const ThemeBrowserPage: VFC = () => {
   // This is used to disable buttons during a theme install
   const [isInstalling, setInstalling] = useState<boolean>(false);
 
+  const [backendVersion, setBackendVer] = useState<number>(2);
+  function reloadBackendVer() {
+    python.resolve(python.getBackendVersion(), setBackendVer);
+  }
+
   const searchFilter = (e: browseThemeEntry) => {
+    // This means only compatible themes will show up, newer ones won't
+    if (e.manifest_version > backendVersion) {
+      return false;
+    }
     // This filter just implements the search stuff
     if (searchFieldValue.length > 0) {
       // Convert the theme and search to lowercase so that it's not case-sensitive
@@ -72,6 +81,7 @@ export const ThemeBrowserPage: VFC = () => {
   }, [themeArr, searchFilter]);
 
   function reloadThemes() {
+    reloadBackendVer();
     // Reloads the theme database
     python.resolve(python.reloadThemeDbData(), () => {
       python.resolve(python.getThemeDbData(), setThemeArr);
@@ -148,6 +158,7 @@ export const ThemeBrowserPage: VFC = () => {
 
   // Runs upon opening the page
   useEffect(() => {
+    reloadBackendVer();
     getThemeDb();
     getInstalledThemes();
   }, []);
@@ -158,14 +169,14 @@ export const ThemeBrowserPage: VFC = () => {
         <DropdownItem
           label='Sort:'
           rgOptions={sortOptions}
-          strDefaultLabel='Sort Results:'
+          strDefaultLabel='Sort:'
           selectedOption={selectedSort}
           onChange={(e) => setSort(e.data)}
         />
         <DropdownItem
           label='Filter:'
           rgOptions={targetOptions}
-          strDefaultLabel='Any'
+          strDefaultLabel='All'
           selectedOption={selectedTarget.data}
           onChange={(e) => setTarget(e)}
         />
@@ -180,6 +191,7 @@ export const ThemeBrowserPage: VFC = () => {
       {/* I wrap everything in a Focusable, because that ensures that the dpad/stick navigation works correctly */}
       <Focusable style={{ display: "flex", flexWrap: "wrap" }}>
         {themeArr
+          // searchFilter also includes backend version check
           .filter(searchFilter)
           .filter((e: browseThemeEntry) => {
             if (selectedTarget.label === "All") {
@@ -253,7 +265,7 @@ export const ThemeBrowserPage: VFC = () => {
                     }}>
                     {e.name}
                   </span>
-                  {selectedTarget.label === "Any" && (
+                  {selectedTarget.label === "All" && (
                     <span
                       className='CssLoader_ThemeBrowser_SingleItem_ThemeTarget'
                       style={{

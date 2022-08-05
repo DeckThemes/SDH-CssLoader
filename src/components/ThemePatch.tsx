@@ -74,6 +74,7 @@ export const ThemePatch: VFC<{
           <DropdownItem
             bottomSeparator={bottomSeparatorValue}
             label={` ↳ ${data.name}`}
+            menuLabel={`${data.name}`}
             rgOptions={data.options.map((x, i) => {
               return { data: i, label: x };
             })}
