@@ -17,7 +17,7 @@ export const ThemePatch: VFC<{ data: Patch }> = ({ data }) => {
       return (
         <PanelSectionRow>
           <SliderField
-            label={`${data.name} of ${data.theme.name}`}
+            label={`${data.name}`}
             min={0}
             max={data.options.length - 1}
             value={sliderValue}
@@ -47,8 +47,8 @@ export const ThemePatch: VFC<{ data: Patch }> = ({ data }) => {
       return (
         <PanelSectionRow>
           <ToggleField
-            indentLevel={10}
-            label={`${data.name} of ${data.theme.name}`}
+            indentLevel={2}
+            label={`${data.name}`}
             checked={data.value === "Yes"}
             onChange={(bool) => {
               const newValue = bool ? "Yes" : "No";
@@ -68,7 +68,7 @@ export const ThemePatch: VFC<{ data: Patch }> = ({ data }) => {
             rgOptions={data.options.map((x, i) => {
               return { data: i, label: x };
             })}
-            label={`${data.name} of ${data.theme.name}`}
+            label={`${data.name}`}
             selectedOption={data.index}
             onChange={(index) => {
               data.index = index.data;
