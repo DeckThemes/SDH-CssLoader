@@ -31,9 +31,12 @@ export const ThemeBrowserPage: VFC = () => {
   const searchFilter = (e: browseThemeEntry) => {
     // This filter just implements the search stuff
     if (searchFieldValue.length > 0) {
+      // Convert the theme and search to lowercase so that it's not case-sensitive
       if (
-        // Convert the theme name and search to lowercase so that it's not case-sensitive
-        !e.name.toLowerCase().includes(searchFieldValue.toLowerCase())
+        // This checks for the theme name
+        !e.name.toLowerCase().includes(searchFieldValue.toLowerCase()) &&
+        // This checks for the author name
+        !e.author.toLowerCase().includes(searchFieldValue.toLowerCase())
       ) {
         // return false just means it won't show in the list
         return false;
@@ -55,15 +58,16 @@ export const ThemeBrowserPage: VFC = () => {
 
   const [selectedTarget, setTarget] = useState<SingleDropdownOption>({
     data: 1,
-    label: "Any",
+    label: "All",
   });
   const targetOptions = useMemo((): DropdownOption[] => {
     const uniqueTargets = new Set(
       themeArr.filter(searchFilter).map((e) => e.target)
     );
     return [
-      { data: 1, label: "Any" },
-      ...[...uniqueTargets].map((e, i) => ({ data: i + 2, label: e })),
+      { data: 1, label: "All" },
+      { data: 2, label: "Installed Only" },
+      ...[...uniqueTargets].map((e, i) => ({ data: i + 3, label: e })),
     ];
   }, [themeArr, searchFilter]);
 
@@ -152,14 +156,14 @@ export const ThemeBrowserPage: VFC = () => {
     <>
       <PanelSectionRow>
         <DropdownItem
-          label='Sort Results By:'
+          label='Sort:'
           rgOptions={sortOptions}
           strDefaultLabel='Sort Results:'
           selectedOption={selectedSort}
           onChange={(e) => setSort(e.data)}
         />
         <DropdownItem
-          label='Filter By Theme Target:'
+          label='Filter:'
           rgOptions={targetOptions}
           strDefaultLabel='Any'
           selectedOption={selectedTarget.data}
@@ -177,24 +181,31 @@ export const ThemeBrowserPage: VFC = () => {
       <Focusable style={{ display: "flex", flexWrap: "wrap" }}>
         {themeArr
           .filter(searchFilter)
-          .filter((e: browseThemeEntry) =>
-            selectedTarget.label === "Any"
-              ? true
-              : e.target === selectedTarget.label
-          )
+          .filter((e: browseThemeEntry) => {
+            if (selectedTarget.label === "All") {
+              return true;
+            } else if (selectedTarget.label === "Installed Only") {
+              const strValue = checkIfThemeInstalled(e);
+              return strValue === "installed" || strValue === "outdated";
+            } else {
+              return e.target === selectedTarget.label;
+            }
+          })
           .sort((a, b) => {
             // This handles the sort option the user has chosen
-            // 1: A-Z, 2: Z-A, 3: New-Old, 4: Old-New
             switch (selectedSort) {
               case 2:
+                // Z-A
                 // localeCompare just sorts alphabetically
                 return b.name.localeCompare(a.name);
               case 3:
+                // New-Old
                 return (
                   new Date(b.last_changed).valueOf() -
                   new Date(a.last_changed).valueOf()
                 );
               case 4:
+                // Old-New
                 return (
                   new Date(a.last_changed).valueOf() -
                   new Date(b.last_changed).valueOf()

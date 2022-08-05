@@ -8,16 +8,23 @@ import * as python from "../python";
 import { useState, VFC } from "react";
 import { Patch } from "../theme";
 
-export const ThemePatch: VFC<{ data: Patch }> = ({ data }) => {
+export const ThemePatch: VFC<{
+  data: Patch;
+  index: number;
+  fullArr: Patch[];
+}> = ({ data, index, fullArr }) => {
   // For some reason, the other 2 don't require useStates, the slider does though.
   const [sliderValue, setSlider] = useState(data.index);
+
+  const bottomSeparatorValue = fullArr.length - 1 === index ? undefined : false;
 
   switch (data.type) {
     case "slider":
       return (
         <PanelSectionRow>
           <SliderField
-            label={`${data.name}`}
+            bottomSeparator={bottomSeparatorValue}
+            label={` ↳ ${data.name}`}
             min={0}
             max={data.options.length - 1}
             value={sliderValue}
@@ -47,8 +54,8 @@ export const ThemePatch: VFC<{ data: Patch }> = ({ data }) => {
       return (
         <PanelSectionRow>
           <ToggleField
-            indentLevel={2}
-            label={`${data.name}`}
+            bottomSeparator={bottomSeparatorValue}
+            label={` ↳ ${data.name}`}
             checked={data.value === "Yes"}
             onChange={(bool) => {
               const newValue = bool ? "Yes" : "No";
@@ -65,10 +72,11 @@ export const ThemePatch: VFC<{ data: Patch }> = ({ data }) => {
       return (
         <PanelSectionRow>
           <DropdownItem
+            bottomSeparator={bottomSeparatorValue}
+            label={` ↳ ${data.name}`}
             rgOptions={data.options.map((x, i) => {
               return { data: i, label: x };
             })}
-            label={`${data.name}`}
             selectedOption={data.index}
             onChange={(index) => {
               data.index = index.data;
