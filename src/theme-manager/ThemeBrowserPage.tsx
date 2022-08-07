@@ -259,9 +259,15 @@ export const ThemeBrowserPage: VFC = () => {
                   <span
                     className='CssLoader_ThemeBrowser_SingleItem_ThemeName'
                     style={{
+                      textAlign: "center",
                       marginTop: "5px",
-                      fontSize: "1.5em",
+                      fontSize: "1.25em",
                       fontWeight: "bold",
+                      // This stuff here truncates it if it's too long
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      width: "90%",
                     }}>
                     {e.name}
                   </span>
@@ -318,6 +324,7 @@ export const ThemeBrowserPage: VFC = () => {
                   <div
                     className='CssLoader_ThemeBrowser_SingleItem_InstallButtonContainer'
                     style={{
+                      marginTop: "auto",
                       width: "245px",
                     }}>
                     <PanelSectionRow>
