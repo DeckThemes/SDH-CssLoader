@@ -76,3 +76,7 @@ export function deleteTheme(themeName: string): Promise<any> {
 export function getBackendVersion(): Promise<any> {
   return server!.callPluginMethod("get_backend_version", {});
 }
+
+export function dummyFunction(): Promise<any> {
+  return server!.callPluginMethod("dummy_function", {});
+}

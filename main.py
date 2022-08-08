@@ -339,6 +339,9 @@ class RemoteInstall:
         self.plugin = plugin
         self.themes = []
 
+    async def dummy_function(self) -> bool:
+        return True
+
     async def run(self, command : str) -> str:
         proc = await asyncio.create_subprocess_shell(command,        
             stdout=asyncio.subprocess.PIPE,
