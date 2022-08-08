@@ -73,6 +73,7 @@ class Inject:
 
         if (len(self.uuids[tab]) > 0):
             await self.remove(tab)
+            self.enabled = True # In case the below code fails, it will never be re-injected unless it's still enabled
 
         if (self.css is None):
             result = await self.load()
@@ -495,8 +496,8 @@ class Plugin:
 
                 attempt += 1
 
-                if (attempt >= 6):
-                    return Result(False, f"Inject into tab '{tab}' was attempted 6 times, stopping")
+                if (attempt >= 3):
+                    return Result(False, f"Inject into tab '{tab}' was attempted 3 times, stopping")
 
                 await asyncio.sleep(1)
             
@@ -602,5 +603,5 @@ class Plugin:
         await self._inject_test_element(self, "SP")
         await self._load_stage_2(self)
 
-        Log(f"Initialised css loader. Found {len(self.themes)} themes, which inject into {len(self.tabs)} tabs ({self.tabs}). Total {len(self.injects)} injects")
+        Log(f"Initialized css loader. Found {len(self.themes)} themes, which inject into {len(self.tabs)} tabs ({self.tabs}). Total {len(self.injects)} injects, {len([x for x in self.injects if x.enabled])} injected")
         await self._check_tabs(self)
