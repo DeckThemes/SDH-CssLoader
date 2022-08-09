@@ -339,9 +339,6 @@ class RemoteInstall:
         self.plugin = plugin
         self.themes = []
 
-    async def dummy_function(self) -> bool:
-        return True
-
     async def run(self, command : str) -> str:
         proc = await asyncio.create_subprocess_shell(command,        
             stdout=asyncio.subprocess.PIPE,
@@ -396,6 +393,10 @@ class RemoteInstall:
         return Result(True)
 
 class Plugin:
+
+    async def dummy_function(self) -> bool:
+        return True
+
     async def get_themes(self) -> list:
         return [x.to_dict() for x in self.themes]
     

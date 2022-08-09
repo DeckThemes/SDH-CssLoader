@@ -8,7 +8,7 @@ import {
   SidebarNavigation,
   Router,
 } from "decky-frontend-lib";
-import { VFC } from "react";
+import { useEffect, useState, VFC } from "react";
 import * as python from "./python";
 import { RiPaintFill } from "react-icons/ri";
 
@@ -31,6 +31,8 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
   // setThemeList is a function that takes the raw data from the python function and then formats it with init and generate functions
   // This still exists, it just has been moved into the CssLoaderState class' setter function, so it now happens automatically
 
+  const [dummyFuncResult, setDummyResult] = useState<boolean>(false);
+
   const reload = function () {
     python.resolve(python.getThemes(), setThemeList);
   };
@@ -39,6 +41,18 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
     firstTime = false;
     reload();
   }
+
+  function dummyFuncTest() {
+    python.resolve(python.dummyFunction(), setDummyResult);
+  }
+
+  useEffect(() => {
+    dummyFuncTest();
+  }, []);
+
+  useEffect(() => {
+    console.log(dummyFuncResult);
+  });
 
   return (
     <PanelSection title='Themes'>
