@@ -126,7 +126,7 @@ export default definePlugin((serverApi: ServerAPI) => {
     </CssLoaderContextProvider>
   ));
 
-  serverApi.routerHook.addRoute("theme-manager-expanded-view", () => (
+  serverApi.routerHook.addRoute("/theme-manager-expanded-view", () => (
     <CssLoaderContextProvider cssLoaderStateClass={state}>
       <ExpandedViewPage />
     </CssLoaderContextProvider>

@@ -3,7 +3,7 @@ import {
   PanelSectionRow,
   Router,
 } from "decky-frontend-lib";
-import { useState, VFC } from "react";
+import { VFC } from "react";
 
 import * as python from "../python";
 
@@ -14,8 +14,6 @@ import { Theme } from "../theme";
 
 export const ExpandedViewPage: VFC = () => {
   const {
-    browseThemeList: themeArr,
-    setBrowseThemeList: setThemeArr,
     localThemeList: installedThemes,
     setLocalThemeList: setInstalledThemes,
     currentExpandedTheme,
@@ -23,23 +21,6 @@ export const ExpandedViewPage: VFC = () => {
     isInstalling,
     setInstalling,
   } = useCssLoaderState();
-
-  // function reloadThemes() {
-  //   // Reloads the theme database
-  //   python.resolve(python.reloadThemeDbData(), () => {
-  //     python.resolve(python.getThemeDbData(), setThemeArr);
-  //   });
-  //   // Reloads the local themes
-  //   python.resolve(python.reset(), () => {
-  //     python.resolve(python.getThemes(), setInstalledThemes);
-  //   });
-  // }
-  //   function getThemeDb() {
-  //     python.resolve(python.getThemeDbData(), setThemeArr);
-  //   }
-  //   function getInstalledThemes() {
-  //     python.resolve(python.getThemes(), setInstalledThemes);
-  //   }
 
     function installTheme(id: string) {
       // TODO: most of this is repeating code in other functions, I can probably refactor it to shorten it
@@ -103,7 +84,8 @@ export const ExpandedViewPage: VFC = () => {
     // This returns 'installed', 'outdated', or 'uninstalled'
     const installStatus = checkIfThemeInstalled(currentExpandedTheme);
     return (
-      <>
+      // The outermost div is to push the content down into the visible area
+      <div style={{marginTop: '40px'}}>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex" }}>
             <div
@@ -173,7 +155,7 @@ export const ExpandedViewPage: VFC = () => {
                       layout="below"
                       onClick={() => {
                         setCurExpandedTheme(undefined);
-                        Router.Navigate("/theme-manager");
+                        Router.NavigateBackOrOpenMenu();
                       }}
                     >
                       <span className="CssLoader_ThemeBrowser_ExpandedView_BackText">
@@ -193,7 +175,7 @@ export const ExpandedViewPage: VFC = () => {
             </span>
           </div>
         </div>
-      </>
+      </div>
     );
   }
   return (

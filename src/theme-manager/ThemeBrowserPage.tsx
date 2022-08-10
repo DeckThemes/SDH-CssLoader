@@ -24,14 +24,10 @@ export const ThemeBrowserPage: VFC = () => {
     localThemeList: installedThemes,
     setLocalThemeList: setInstalledThemes,
     isInstalling,
-    setInstalling,
-    currentExpandedTheme,
+    // setInstalling,
+    // currentExpandedTheme,
     setCurExpandedTheme
   } = useCssLoaderState();
-
-  // const [currentExpandedTheme, setCurExpandedTheme] = useState<
-  //   browseThemeEntry | undefined
-  // >(undefined);
 
   const [searchFieldValue, setSearchValue] = useState<string>("");
 
@@ -109,16 +105,18 @@ export const ThemeBrowserPage: VFC = () => {
     python.resolve(python.getThemes(), setInstalledThemes);
   }
 
-  function installTheme(id: string) {
-    // TODO: most of this is repeating code in other functions, I can probably refactor it to shorten it
-    setInstalling(true);
-    python.resolve(python.downloadTheme(id), () => {
-      python.resolve(python.reset(), () => {
-        python.resolve(python.getThemes(), setInstalledThemes);
-        setInstalling(false);
-      });
-    });
-  }
+  // Installing is now handled on the ExpandedView 
+
+  // function installTheme(id: string) {
+  //   // TODO: most of this is repeating code in other functions, I can probably refactor it to shorten it
+  //   setInstalling(true);
+  //   python.resolve(python.downloadTheme(id), () => {
+  //     python.resolve(python.reset(), () => {
+  //       python.resolve(python.getThemes(), setInstalledThemes);
+  //       setInstalling(false);
+  //     });
+  //   });
+  // }
 
   function checkIfThemeInstalled(themeObj: browseThemeEntry) {
     const filteredArr: Theme[] = installedThemes.filter(
@@ -173,98 +171,6 @@ export const ThemeBrowserPage: VFC = () => {
     getInstalledThemes();
   }, []);
 
-  // if theres no theme in the detailed view
-  if (currentExpandedTheme) {
-    // This returns 'installed', 'outdated', or 'uninstalled'
-    const installStatus = checkIfThemeInstalled(currentExpandedTheme);
-    return (
-      <>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex" }}>
-            <div
-              className='CssLoader_ThemeBrowser_ExpandedView_PreviewImage'
-              style={{
-                width: "350px",
-                backgroundImage:
-                  'url("' + currentExpandedTheme.preview_image + '")',
-                backgroundSize: "cover",
-                backgroundRepeat: "no-repeat",
-                height: "219px",
-                margin: "10px",
-              }}
-            />
-            <div style={{ width: "192px" }}>
-              <div
-                style={{
-                  padding: "0px 8px 0px 8px",
-                  display: "flex",
-                  flexDirection: "column",
-                }}>
-                <span style={{ fontWeight: "bold", fontSize: "1.25em" }}>
-                  {currentExpandedTheme.name}
-                </span>
-                <span>{currentExpandedTheme.author}</span>
-                <span>{currentExpandedTheme.target}</span>
-                <span>{currentExpandedTheme.version}</span>
-              </div>
-              <div>
-                <PanelSectionRow>
-                  <div
-                    className='CssLoader_ThemeBrowser_ExpandedView_InstallButtonColorFilter'
-                    style={{
-                      // This padding here overrides the default padding put on PanelSectionRow's by Valve
-                      // Before this, I was using negative margin to "shrink" the element, but this is a much better solution
-                      paddingTop: "0px",
-                      paddingBottom: "0px",
-                      // Filter is used to color the button blue for update
-                      filter: calcButtonColor(installStatus),
-                    }}>
-                    <ButtonItem
-                      layout='below'
-                      disabled={installStatus === "installed" || isInstalling}
-                      onClick={() => {
-                        installTheme(currentExpandedTheme.id);
-                      }}>
-                      <span className='CssLoader_ThemeBrowser_ExpandedView_InstallText'>
-                        {calcButtonText(installStatus)}
-                      </span>
-                    </ButtonItem>
-                  </div>
-                </PanelSectionRow>
-                <PanelSectionRow>
-                  <div
-                    className='CssLoader_ThemeBrowser_ExpandedView_BackButtonContainer'
-                    style={{
-                      // This padding here overrides the default padding put on PanelSectionRow's by Valve
-                      paddingTop: "0px",
-                      paddingBottom: "0px",
-                    }}>
-                    <ButtonItem
-                      bottomSeparator={false}
-                      layout='below'
-                      onClick={() => {
-                        setCurExpandedTheme(undefined);
-                      }}>
-                      <span className='CssLoader_ThemeBrowser_ExpandedView_BackText'>
-                        Back
-                      </span>
-                    </ButtonItem>
-                  </div>
-                </PanelSectionRow>
-              </div>
-            </div>
-          </div>
-          <div style={{ flex: "1 1 0%", flexGrow: "1" }}>
-            <span>
-              {currentExpandedTheme?.description || (
-                <i style={{ color: "#666" }}>No description provided.</i>
-              )}
-            </span>
-          </div>
-        </div>
-      </>
-    );
-  }
   return (
     <>
       <PanelSectionRow>
@@ -438,6 +344,8 @@ export const ThemeBrowserPage: VFC = () => {
                             // Before this, I was using negative margin to "shrink" the element, but this is a much better solution
                             paddingTop: "0px",
                             paddingBottom: "0px",
+
+                            filter: calcButtonColor(installStatus)
                           }}>
                           <ButtonItem
                             bottomSeparator={false}
@@ -445,7 +353,7 @@ export const ThemeBrowserPage: VFC = () => {
                             disabled={isInstalling}
                             onClick={() => {
                               setCurExpandedTheme(e);
-                              // Router.Navigate("/theme-manager-expanded-view");
+                              Router.Navigate("/theme-manager-expanded-view");
                             }}>
                             <span className='CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewText'>
                               {installStatus === "outdated"
