@@ -35,6 +35,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
 
   const reload = function () {
     python.resolve(python.getThemes(), setThemeList);
+    dummyFuncTest();
   };
 
   if (firstTime) {
@@ -50,25 +51,33 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
     dummyFuncTest();
   }, []);
 
-  useEffect(() => {
-    console.log(dummyFuncResult);
-  });
-
   return (
     <PanelSection title='Themes'>
-      <PanelSectionRow>
-        <ButtonItem
-          layout='below'
-          onClick={() => {
-            Router.CloseSideMenus();
-            Router.Navigate("/theme-manager");
-          }}>
-          Manage Themes
-        </ButtonItem>
-      </PanelSectionRow>
-      {themeList.map((x) => (
-        <ThemeToggle data={x} setThemeList={setThemeList} />
-      ))}
+      {dummyFuncResult ? (
+        <>
+          <PanelSectionRow>
+            <ButtonItem
+              layout='below'
+              onClick={() => {
+                Router.CloseSideMenus();
+                Router.Navigate("/theme-manager");
+              }}>
+              Manage Themes
+            </ButtonItem>
+          </PanelSectionRow>
+          {themeList.map((x) => (
+            <ThemeToggle data={x} setThemeList={setThemeList} />
+          ))}
+        </>
+      ) : (
+        <PanelSectionRow>
+          <span>
+            CssLoader failed to initialize, try reloading, and if that doesn't
+            work, try restarting your deck.
+          </span>
+        </PanelSectionRow>
+      )}
+
       <PanelSectionRow>
         <ButtonItem
           layout='below'

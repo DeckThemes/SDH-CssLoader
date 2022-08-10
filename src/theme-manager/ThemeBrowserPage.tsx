@@ -23,6 +23,11 @@ export const ThemeBrowserPage: VFC = () => {
     localThemeList: installedThemes,
     setLocalThemeList: setInstalledThemes,
   } = useCssLoaderState();
+
+  const [currentExpandedTheme, setCurExpandedTheme] = useState<
+    browseThemeEntry | undefined
+  >(undefined);
+
   const [searchFieldValue, setSearchValue] = useState<string>("");
 
   // This is used to disable buttons during a theme install
@@ -163,6 +168,92 @@ export const ThemeBrowserPage: VFC = () => {
     getInstalledThemes();
   }, []);
 
+  // if theres no theme in the detailed view
+  if (currentExpandedTheme) {
+    // This returns 'installed', 'outdated', or 'uninstalled'
+    const installStatus = checkIfThemeInstalled(currentExpandedTheme);
+    return (
+      <>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", height: "300px" }}>
+            <div
+              className='CssLoader_ThemeBrowser_ExpandedView_PreviewImage'
+              style={{
+                width: "384px",
+                backgroundImage:
+                  'url("' + currentExpandedTheme.preview_image + '")',
+                backgroundSize: "cover",
+                backgroundRepeat: "no-repeat",
+                height: "240px",
+                margin: "10px",
+              }}
+            />
+            <div style={{ background: "#020405", height: "200px" }}>
+              <span style={{ fontWeight: "bold", fontSize: "1.5em" }}>
+                {currentExpandedTheme.name}
+              </span>
+              <br />
+              <span>{currentExpandedTheme.author}</span>
+              <br />
+              <span>{currentExpandedTheme.target}</span>
+              <br />
+              <span>{currentExpandedTheme.version}</span>
+              <div>
+                <PanelSectionRow>
+                  <div
+                    className='CssLoader_ThemeBrowser_ExpandedView_InstallButtonColorFilter'
+                    style={{
+                      // This padding here overrides the default padding put on PanelSectionRow's by Valve
+                      // Before this, I was using negative margin to "shrink" the element, but this is a much better solution
+                      paddingTop: "0px",
+                      paddingBottom: "0px",
+                      // Filter is used to color the button blue for update
+                      filter: calcButtonColor(installStatus),
+                    }}>
+                    <ButtonItem
+                      layout='below'
+                      disabled={installStatus === "installed" || isInstalling}
+                      onClick={() => {
+                        installTheme(currentExpandedTheme.id);
+                      }}>
+                      <span className='CssLoader_ThemeBrowser_ExpandedView_InstallText'>
+                        {calcButtonText(installStatus)}
+                      </span>
+                    </ButtonItem>
+                  </div>
+                </PanelSectionRow>
+                <PanelSectionRow>
+                  <div
+                    className='CssLoader_ThemeBrowser_ExpandedView_BackButtonContainer'
+                    style={{
+                      // This padding here overrides the default padding put on PanelSectionRow's by Valve
+                      paddingTop: "0px",
+                      paddingBottom: "0px",
+                    }}>
+                    <ButtonItem
+                      bottomSeparator={false}
+                      layout='below'
+                      onClick={() => {
+                        setCurExpandedTheme(undefined);
+                      }}>
+                      <span className='CssLoader_ThemeBrowser_ExpandedView_BackText'>
+                        Back
+                      </span>
+                    </ButtonItem>
+                  </div>
+                </PanelSectionRow>
+              </div>
+            </div>
+          </div>
+          <div style={{ background: "#020405", flex: "1 1 0%", flexGrow: "1" }}>
+            <span>
+              {currentExpandedTheme?.description || "No Description Provided"}
+            </span>
+          </div>
+        </div>
+      </>
+    );
+  }
   return (
     <>
       <PanelSectionRow>
@@ -228,134 +319,129 @@ export const ThemeBrowserPage: VFC = () => {
             }
           })
           .map((e: browseThemeEntry) => {
-            const installStatus = checkIfThemeInstalled(e);
             return (
               // The outer 2 most divs are the background darkened/blurred image, and everything inside is the text/image/buttons
-              <div
-                className='CssLoader_ThemeBrowser_SingleItem_BgImage'
-                style={{
-                  backgroundImage: 'url("' + e.preview_image + '")',
-                  backgroundSize: "cover",
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "center",
-                  width: "260px",
-                  borderRadius: "5px",
-                  marginLeft: "10px",
-                  marginRight: "10px",
-                  marginBottom: "20px",
-                }}>
+              <>
                 <div
-                  className='CssLoader_ThemeBrowser_SingleItem_BgOverlay'
+                  className='CssLoader_ThemeBrowser_SingleItem_BgImage'
                   style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    background: "RGBA(0,0,0,0.8)",
-                    backdropFilter: "blur(5px)",
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: "3px",
+                    backgroundImage: 'url("' + e.preview_image + '")',
+                    backgroundSize: "cover",
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "center",
+                    width: "260px",
+                    borderRadius: "5px",
+                    marginLeft: "10px",
+                    marginRight: "10px",
+                    marginBottom: "20px",
                   }}>
-                  <span
-                    className='CssLoader_ThemeBrowser_SingleItem_ThemeName'
-                    style={{
-                      textAlign: "center",
-                      marginTop: "5px",
-                      fontSize: "1.25em",
-                      fontWeight: "bold",
-                      // This stuff here truncates it if it's too long
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      width: "90%",
-                    }}>
-                    {e.name}
-                  </span>
-                  {selectedTarget.label === "All" && (
-                    <span
-                      className='CssLoader_ThemeBrowser_SingleItem_ThemeTarget'
-                      style={{
-                        marginTop: "-6px",
-                        fontSize: "1em",
-                        textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                      }}>
-                      {e.target}
-                    </span>
-                  )}
                   <div
-                    className='CssLoader_ThemeBrowser_SingleItem_PreviewImage'
+                    className='CssLoader_ThemeBrowser_SingleItem_BgOverlay'
                     style={{
-                      width: "240px",
-                      backgroundImage: 'url("' + e.preview_image + '")',
-                      backgroundSize: "cover",
-                      backgroundRepeat: "no-repeat",
-                      height: "150px",
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
-                    }}
-                  />
-                  <div
-                    className='CssLoader_ThemeBrowser_SingleItem_AuthorVersionContainer'
-                    style={{
-                      width: "240px",
-                      textAlign: "center",
-                      display: "flex",
+                      background: "RGBA(0,0,0,0.8)",
+                      backdropFilter: "blur(5px)",
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "3px",
                     }}>
                     <span
-                      className='CssLoader_ThemeBrowser_SingleItem_AuthorText'
+                      className='CssLoader_ThemeBrowser_SingleItem_ThemeName'
                       style={{
-                        marginRight: "auto",
-                        fontSize: "1em",
-                        textShadow: "rgb(48, 48, 48) 0px 0 10px",
+                        textAlign: "center",
+                        marginTop: "5px",
+                        fontSize: "1.25em",
+                        fontWeight: "bold",
+                        // This stuff here truncates it if it's too long
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        width: "90%",
                       }}>
-                      {e.author}
+                      {e.name}
                     </span>
-                    <span
-                      className='CssLoader_ThemeBrowser_SingleItem_VersionText'
-                      style={{
-                        marginLeft: "auto",
-                        fontSize: "1em",
-                        textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                      }}>
-                      {e.version}
-                    </span>
-                  </div>
-                  <div
-                    className='CssLoader_ThemeBrowser_SingleItem_InstallButtonContainer'
-                    style={{
-                      marginTop: "auto",
-                      width: "245px",
-                    }}>
-                    <PanelSectionRow>
-                      <div
-                        className='CssLoader_ThemeBrowser_SingleItem_InstallButtonColorFilter'
+                    {selectedTarget.label === "All" && (
+                      <span
+                        className='CssLoader_ThemeBrowser_SingleItem_ThemeTarget'
                         style={{
-                          // This padding here overrides the default padding put on PanelSectionRow's by Valve
-                          // Before this, I was using negative margin to "shrink" the element, but this is a much better solution
-                          paddingTop: "0px",
-                          paddingBottom: "0px",
-                          // Filter is used to color the button blue for update
-                          filter: calcButtonColor(installStatus),
+                          marginTop: "-6px",
+                          fontSize: "1em",
+                          textShadow: "rgb(48, 48, 48) 0px 0 10px",
                         }}>
-                        <ButtonItem
-                          bottomSeparator={false}
-                          layout='below'
-                          disabled={
-                            installStatus === "installed" || isInstalling
-                          }
-                          onClick={() => {
-                            installTheme(e.id);
+                        {e.target}
+                      </span>
+                    )}
+                    <div
+                      className='CssLoader_ThemeBrowser_SingleItem_PreviewImage'
+                      style={{
+                        width: "240px",
+                        backgroundImage: 'url("' + e.preview_image + '")',
+                        backgroundSize: "cover",
+                        backgroundRepeat: "no-repeat",
+                        height: "150px",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                      }}
+                    />
+                    <div
+                      className='CssLoader_ThemeBrowser_SingleItem_AuthorVersionContainer'
+                      style={{
+                        width: "240px",
+                        textAlign: "center",
+                        display: "flex",
+                      }}>
+                      <span
+                        className='CssLoader_ThemeBrowser_SingleItem_AuthorText'
+                        style={{
+                          marginRight: "auto",
+                          fontSize: "1em",
+                          textShadow: "rgb(48, 48, 48) 0px 0 10px",
+                        }}>
+                        {e.author}
+                      </span>
+                      <span
+                        className='CssLoader_ThemeBrowser_SingleItem_VersionText'
+                        style={{
+                          marginLeft: "auto",
+                          fontSize: "1em",
+                          textShadow: "rgb(48, 48, 48) 0px 0 10px",
+                        }}>
+                        {e.version}
+                      </span>
+                    </div>
+                    <div
+                      className='CssLoader_ThemeBrowser_SingleItem_InstallButtonContainer'
+                      style={{
+                        marginTop: "auto",
+                        width: "245px",
+                      }}>
+                      <PanelSectionRow>
+                        <div
+                          className='CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewContainer'
+                          style={{
+                            // This padding here overrides the default padding put on PanelSectionRow's by Valve
+                            // Before this, I was using negative margin to "shrink" the element, but this is a much better solution
+                            paddingTop: "0px",
+                            paddingBottom: "0px",
                           }}>
-                          <span className='CssLoader_ThemeBrowser_SingleItem_InstallText'>
-                            {calcButtonText(installStatus)}
-                          </span>
-                        </ButtonItem>
-                      </div>
-                    </PanelSectionRow>
+                          <ButtonItem
+                            bottomSeparator={false}
+                            layout='below'
+                            disabled={isInstalling}
+                            onClick={() => setCurExpandedTheme(e)}>
+                            <span className='CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewText'>
+                              See More
+                            </span>
+                          </ButtonItem>
+                        </div>
+                      </PanelSectionRow>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </>
             );
           })}
       </Focusable>
