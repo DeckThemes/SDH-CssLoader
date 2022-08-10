@@ -22,6 +22,8 @@ export const ThemeBrowserPage: VFC = () => {
     setBrowseThemeList: setThemeArr,
     localThemeList: installedThemes,
     setLocalThemeList: setInstalledThemes,
+    isInstalling,
+    setInstalling,
   } = useCssLoaderState();
 
   const [currentExpandedTheme, setCurExpandedTheme] = useState<
@@ -31,7 +33,7 @@ export const ThemeBrowserPage: VFC = () => {
   const [searchFieldValue, setSearchValue] = useState<string>("");
 
   // This is used to disable buttons during a theme install
-  const [isInstalling, setInstalling] = useState<boolean>(false);
+  // const [isInstalling, setInstalling] = useState<boolean>(false);
 
   const [backendVersion, setBackendVer] = useState<number>(2);
   function reloadBackendVer() {
@@ -177,7 +179,7 @@ export const ThemeBrowserPage: VFC = () => {
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex" }}>
             <div
-              className="CssLoader_ThemeBrowser_ExpandedView_PreviewImage"
+              className='CssLoader_ThemeBrowser_ExpandedView_PreviewImage'
               style={{
                 width: "350px",
                 backgroundImage:
@@ -194,8 +196,7 @@ export const ThemeBrowserPage: VFC = () => {
                   padding: "0px 8px 0px 8px",
                   display: "flex",
                   flexDirection: "column",
-                }}
-              >
+                }}>
                 <span style={{ fontWeight: "bold", fontSize: "1.25em" }}>
                   {currentExpandedTheme.name}
                 </span>
@@ -206,7 +207,7 @@ export const ThemeBrowserPage: VFC = () => {
               <div>
                 <PanelSectionRow>
                   <div
-                    className="CssLoader_ThemeBrowser_ExpandedView_InstallButtonColorFilter"
+                    className='CssLoader_ThemeBrowser_ExpandedView_InstallButtonColorFilter'
                     style={{
                       // This padding here overrides the default padding put on PanelSectionRow's by Valve
                       // Before this, I was using negative margin to "shrink" the element, but this is a much better solution
@@ -214,16 +215,14 @@ export const ThemeBrowserPage: VFC = () => {
                       paddingBottom: "0px",
                       // Filter is used to color the button blue for update
                       filter: calcButtonColor(installStatus),
-                    }}
-                  >
+                    }}>
                     <ButtonItem
-                      layout="below"
+                      layout='below'
                       disabled={installStatus === "installed" || isInstalling}
                       onClick={() => {
                         installTheme(currentExpandedTheme.id);
-                      }}
-                    >
-                      <span className="CssLoader_ThemeBrowser_ExpandedView_InstallText">
+                      }}>
+                      <span className='CssLoader_ThemeBrowser_ExpandedView_InstallText'>
                         {calcButtonText(installStatus)}
                       </span>
                     </ButtonItem>
@@ -231,21 +230,19 @@ export const ThemeBrowserPage: VFC = () => {
                 </PanelSectionRow>
                 <PanelSectionRow>
                   <div
-                    className="CssLoader_ThemeBrowser_ExpandedView_BackButtonContainer"
+                    className='CssLoader_ThemeBrowser_ExpandedView_BackButtonContainer'
                     style={{
                       // This padding here overrides the default padding put on PanelSectionRow's by Valve
                       paddingTop: "0px",
                       paddingBottom: "0px",
-                    }}
-                  >
+                    }}>
                     <ButtonItem
                       bottomSeparator={false}
-                      layout="below"
+                      layout='below'
                       onClick={() => {
                         setCurExpandedTheme(undefined);
-                      }}
-                    >
-                      <span className="CssLoader_ThemeBrowser_ExpandedView_BackText">
+                      }}>
+                      <span className='CssLoader_ThemeBrowser_ExpandedView_BackText'>
                         Back
                       </span>
                     </ButtonItem>
@@ -269,23 +266,23 @@ export const ThemeBrowserPage: VFC = () => {
     <>
       <PanelSectionRow>
         <DropdownItem
-          label="Sort:"
+          label='Sort:'
           rgOptions={sortOptions}
-          strDefaultLabel="Sort:"
+          strDefaultLabel='Sort:'
           selectedOption={selectedSort}
           onChange={(e) => setSort(e.data)}
         />
         <DropdownItem
-          label="Filter:"
+          label='Filter:'
           rgOptions={targetOptions}
-          strDefaultLabel="All"
+          strDefaultLabel='All'
           selectedOption={selectedTarget.data}
           onChange={(e) => setTarget(e)}
         />
       </PanelSectionRow>
       <PanelSectionRow>
         <TextField
-          label="Search"
+          label='Search'
           value={searchFieldValue}
           onChange={(e) => setSearchValue(e.target.value)}
         />
@@ -330,11 +327,12 @@ export const ThemeBrowserPage: VFC = () => {
             }
           })
           .map((e: browseThemeEntry) => {
+            const installStatus = checkIfThemeInstalled(currentExpandedTheme);
             return (
               // The outer 2 most divs are the background darkened/blurred image, and everything inside is the text/image/buttons
               <>
                 <div
-                  className="CssLoader_ThemeBrowser_SingleItem_BgImage"
+                  className='CssLoader_ThemeBrowser_SingleItem_BgImage'
                   style={{
                     backgroundImage: 'url("' + e.preview_image + '")',
                     backgroundSize: "cover",
@@ -345,10 +343,9 @@ export const ThemeBrowserPage: VFC = () => {
                     marginLeft: "10px",
                     marginRight: "10px",
                     marginBottom: "20px",
-                  }}
-                >
+                  }}>
                   <div
-                    className="CssLoader_ThemeBrowser_SingleItem_BgOverlay"
+                    className='CssLoader_ThemeBrowser_SingleItem_BgOverlay'
                     style={{
                       display: "flex",
                       flexDirection: "column",
@@ -358,10 +355,9 @@ export const ThemeBrowserPage: VFC = () => {
                       width: "100%",
                       height: "100%",
                       borderRadius: "3px",
-                    }}
-                  >
+                    }}>
                     <span
-                      className="CssLoader_ThemeBrowser_SingleItem_ThemeName"
+                      className='CssLoader_ThemeBrowser_SingleItem_ThemeName'
                       style={{
                         textAlign: "center",
                         marginTop: "5px",
@@ -372,24 +368,22 @@ export const ThemeBrowserPage: VFC = () => {
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         width: "90%",
-                      }}
-                    >
+                      }}>
                       {e.name}
                     </span>
                     {selectedTarget.label === "All" && (
                       <span
-                        className="CssLoader_ThemeBrowser_SingleItem_ThemeTarget"
+                        className='CssLoader_ThemeBrowser_SingleItem_ThemeTarget'
                         style={{
                           marginTop: "-6px",
                           fontSize: "1em",
                           textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                        }}
-                      >
+                        }}>
                         {e.target}
                       </span>
                     )}
                     <div
-                      className="CssLoader_ThemeBrowser_SingleItem_PreviewImage"
+                      className='CssLoader_ThemeBrowser_SingleItem_PreviewImage'
                       style={{
                         width: "240px",
                         backgroundImage: 'url("' + e.preview_image + '")',
@@ -402,59 +396,55 @@ export const ThemeBrowserPage: VFC = () => {
                       }}
                     />
                     <div
-                      className="CssLoader_ThemeBrowser_SingleItem_AuthorVersionContainer"
+                      className='CssLoader_ThemeBrowser_SingleItem_AuthorVersionContainer'
                       style={{
                         width: "240px",
                         textAlign: "center",
                         display: "flex",
-                      }}
-                    >
+                      }}>
                       <span
-                        className="CssLoader_ThemeBrowser_SingleItem_AuthorText"
+                        className='CssLoader_ThemeBrowser_SingleItem_AuthorText'
                         style={{
                           marginRight: "auto",
                           fontSize: "1em",
                           textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                        }}
-                      >
+                        }}>
                         {e.author}
                       </span>
                       <span
-                        className="CssLoader_ThemeBrowser_SingleItem_VersionText"
+                        className='CssLoader_ThemeBrowser_SingleItem_VersionText'
                         style={{
                           marginLeft: "auto",
                           fontSize: "1em",
                           textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                        }}
-                      >
+                        }}>
                         {e.version}
                       </span>
                     </div>
                     <div
-                      className="CssLoader_ThemeBrowser_SingleItem_InstallButtonContainer"
+                      className='CssLoader_ThemeBrowser_SingleItem_InstallButtonContainer'
                       style={{
                         marginTop: "auto",
                         width: "245px",
-                      }}
-                    >
+                      }}>
                       <PanelSectionRow>
                         <div
-                          className="CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewContainer"
+                          className='CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewContainer'
                           style={{
                             // This padding here overrides the default padding put on PanelSectionRow's by Valve
                             // Before this, I was using negative margin to "shrink" the element, but this is a much better solution
                             paddingTop: "0px",
                             paddingBottom: "0px",
-                          }}
-                        >
+                          }}>
                           <ButtonItem
                             bottomSeparator={false}
-                            layout="below"
+                            layout='below'
                             disabled={isInstalling}
-                            onClick={() => setCurExpandedTheme(e)}
-                          >
-                            <span className="CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewText">
-                              See More
+                            onClick={() => setCurExpandedTheme(e)}>
+                            <span className='CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewText'>
+                              {installStatus === "outdated"
+                                ? "Update Available"
+                                : "See More"}
                             </span>
                           </ButtonItem>
                         </div>
@@ -468,11 +458,10 @@ export const ThemeBrowserPage: VFC = () => {
       </Focusable>
       <PanelSectionRow>
         <ButtonItem
-          layout="below"
+          layout='below'
           onClick={() => {
             reloadThemes();
-          }}
-        >
+          }}>
           Reload Themes
         </ButtonItem>
       </PanelSectionRow>

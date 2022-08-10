@@ -5,6 +5,8 @@ import { Theme } from "../theme";
 interface PublicCssLoaderState {
   localThemeList: Theme[];
   browseThemeList: browseThemeEntry[];
+  isInstalling: boolean;
+  currentExpandedTheme: browseThemeEntry | undefined;
 }
 
 // The localThemeEntry interface refers to the theme data as given by the python function, the Theme class refers to a theme after it has been formatted and the generate function has been added
@@ -12,12 +14,16 @@ interface PublicCssLoaderState {
 interface PublicCssLoaderContext extends PublicCssLoaderState {
   setLocalThemeList(listArr: localThemeEntry[]): void;
   setBrowseThemeList(listArr: browseThemeEntry[]): void;
+  setInstalling(bool: boolean): void;
+  setCurExpandedTheme(theme: browseThemeEntry | undefined): void;
 }
 
 // This class creates the getter and setter functions for all of the global state data.
 export class CssLoaderState {
   private localThemeList: Theme[] = [];
   private browseThemeList: browseThemeEntry[] = [];
+  private isInstalling: boolean = false;
+  private currentExpandedTheme: browseThemeEntry | undefined = undefined;
 
   // You can listen to this eventBus' 'stateUpdate' event and use that to trigger a useState or other function that causes a re-render
   public eventBus = new EventTarget();
@@ -26,6 +32,8 @@ export class CssLoaderState {
     return {
       localThemeList: this.localThemeList,
       browseThemeList: this.browseThemeList,
+      isInstalling: this.isInstalling,
+      currentExpandedTheme: this.currentExpandedTheme,
     };
   }
 
@@ -46,6 +54,16 @@ export class CssLoaderState {
 
   setBrowseThemeList(listArr: browseThemeEntry[]) {
     this.browseThemeList = listArr;
+    this.forceUpdate();
+  }
+
+  setInstalling(bool: boolean) {
+    this.isInstalling = bool;
+    this.forceUpdate();
+  }
+
+  setCurExpandedTheme(theme: browseThemeEntry | undefined) {
+    this.currentExpandedTheme = theme;
     this.forceUpdate();
   }
 
@@ -85,10 +103,21 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({
     cssLoaderStateClass.setLocalThemeList(listArr);
   const setBrowseThemeList = (listArr: browseThemeEntry[]) =>
     cssLoaderStateClass.setBrowseThemeList(listArr);
+  const setInstalling = (bool: boolean) =>
+    cssLoaderStateClass.setInstalling(bool);
+  const setCurExpandedTheme = (theme: browseThemeEntry | undefined) =>
+    cssLoaderStateClass.setCurExpandedTheme(theme);
 
   return (
     <CssLoaderContext.Provider
-      value={{ ...publicState, setLocalThemeList, setBrowseThemeList }}>
+      value={{
+        ...publicState,
+        setLocalThemeList,
+        setBrowseThemeList,
+        setInstalling,
+        setCurExpandedTheme,
+      }}
+    >
       {children}
     </CssLoaderContext.Provider>
   );

@@ -52,16 +52,17 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
   }, []);
 
   return (
-    <PanelSection title='Themes'>
+    <PanelSection title="Themes">
       {dummyFuncResult ? (
         <>
           <PanelSectionRow>
             <ButtonItem
-              layout='below'
+              layout="below"
               onClick={() => {
                 Router.CloseSideMenus();
                 Router.Navigate("/theme-manager");
-              }}>
+              }}
+            >
               Manage Themes
             </ButtonItem>
           </PanelSectionRow>
@@ -80,10 +81,11 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
 
       <PanelSectionRow>
         <ButtonItem
-          layout='below'
+          layout="below"
           onClick={() => {
             python.resolve(python.reset(), () => reload());
-          }}>
+          }}
+        >
           Reload themes
         </ButtonItem>
       </PanelSectionRow>
@@ -94,7 +96,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
 const ThemeManagerRouter: VFC = () => {
   return (
     <SidebarNavigation
-      title='Theme Manager'
+      title="Theme Manager"
       showTitle
       pages={[
         {
@@ -122,6 +124,12 @@ export default definePlugin((serverApi: ServerAPI) => {
       <ThemeManagerRouter />
     </CssLoaderContextProvider>
   ));
+
+  // serverApi.routerHook.addRoute("theme-manager-expanded-view", () => (
+  //   <CssLoaderContextProvider cssLoaderStateClass={state}>
+
+  //   </CssLoaderContextProvider>
+  // ))
 
   return {
     title: <div className={staticClasses.Title}>Css Loader</div>,
