@@ -6,6 +6,7 @@ import {
   DropdownOption,
   DropdownItem,
   SingleDropdownOption,
+  Router,
 } from "decky-frontend-lib";
 import { useEffect, useMemo, useState, VFC } from "react";
 
@@ -24,11 +25,13 @@ export const ThemeBrowserPage: VFC = () => {
     setLocalThemeList: setInstalledThemes,
     isInstalling,
     setInstalling,
+    currentExpandedTheme,
+    setCurExpandedTheme
   } = useCssLoaderState();
 
-  const [currentExpandedTheme, setCurExpandedTheme] = useState<
-    browseThemeEntry | undefined
-  >(undefined);
+  // const [currentExpandedTheme, setCurExpandedTheme] = useState<
+  //   browseThemeEntry | undefined
+  // >(undefined);
 
   const [searchFieldValue, setSearchValue] = useState<string>("");
 
@@ -327,7 +330,7 @@ export const ThemeBrowserPage: VFC = () => {
             }
           })
           .map((e: browseThemeEntry) => {
-            const installStatus = checkIfThemeInstalled(currentExpandedTheme);
+            const installStatus = checkIfThemeInstalled(e);
             return (
               // The outer 2 most divs are the background darkened/blurred image, and everything inside is the text/image/buttons
               <>
@@ -440,7 +443,10 @@ export const ThemeBrowserPage: VFC = () => {
                             bottomSeparator={false}
                             layout='below'
                             disabled={isInstalling}
-                            onClick={() => setCurExpandedTheme(e)}>
+                            onClick={() => {
+                              setCurExpandedTheme(e);
+                              // Router.Navigate("/theme-manager-expanded-view");
+                            }}>
                             <span className='CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewText'>
                               {installStatus === "outdated"
                                 ? "Update Available"

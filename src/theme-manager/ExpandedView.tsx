@@ -1,13 +1,9 @@
 import {
   ButtonItem,
   PanelSectionRow,
-  Focusable,
-  TextField,
-  DropdownOption,
-  DropdownItem,
-  SingleDropdownOption,
+  Router,
 } from "decky-frontend-lib";
-import { useEffect, useMemo, useState, VFC } from "react";
+import { useState, VFC } from "react";
 
 import * as python from "../python";
 
@@ -16,7 +12,7 @@ import { browseThemeEntry } from "../customTypes";
 import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
 
-export const ThemeBrowserPage: VFC = () => {
+export const ExpandedViewPage: VFC = () => {
   const {
     browseThemeList: themeArr,
     setBrowseThemeList: setThemeArr,
@@ -28,23 +24,16 @@ export const ThemeBrowserPage: VFC = () => {
     setInstalling,
   } = useCssLoaderState();
 
-  const [backendVersion, setBackendVer] = useState<number>(2);
-  function reloadBackendVer() {
-    python.resolve(python.getBackendVersion(), setBackendVer);
-  }
-
-  function reloadThemes() {
-    reloadBackendVer();
-    // Reloads the theme database
-    python.resolve(python.reloadThemeDbData(), () => {
-      python.resolve(python.getThemeDbData(), setThemeArr);
-    });
-    // Reloads the local themes
-    python.resolve(python.reset(), () => {
-      python.resolve(python.getThemes(), setInstalledThemes);
-    });
-  }
-
+  // function reloadThemes() {
+  //   // Reloads the theme database
+  //   python.resolve(python.reloadThemeDbData(), () => {
+  //     python.resolve(python.getThemeDbData(), setThemeArr);
+  //   });
+  //   // Reloads the local themes
+  //   python.resolve(python.reset(), () => {
+  //     python.resolve(python.getThemes(), setInstalledThemes);
+  //   });
+  // }
   //   function getThemeDb() {
   //     python.resolve(python.getThemeDbData(), setThemeArr);
   //   }
@@ -52,16 +41,16 @@ export const ThemeBrowserPage: VFC = () => {
   //     python.resolve(python.getThemes(), setInstalledThemes);
   //   }
 
-  //   function installTheme(id: string) {
-  //     // TODO: most of this is repeating code in other functions, I can probably refactor it to shorten it
-  //     setInstalling(true);
-  //     python.resolve(python.downloadTheme(id), () => {
-  //       python.resolve(python.reset(), () => {
-  //         python.resolve(python.getThemes(), setInstalledThemes);
-  //         setInstalling(false);
-  //       });
-  //     });
-  //   }
+    function installTheme(id: string) {
+      // TODO: most of this is repeating code in other functions, I can probably refactor it to shorten it
+      setInstalling(true);
+      python.resolve(python.downloadTheme(id), () => {
+        python.resolve(python.reset(), () => {
+          python.resolve(python.getThemes(), setInstalledThemes);
+          setInstalling(false);
+        });
+      });
+    }
 
   function checkIfThemeInstalled(themeObj: browseThemeEntry) {
     const filteredArr: Theme[] = installedThemes.filter(
@@ -184,6 +173,7 @@ export const ThemeBrowserPage: VFC = () => {
                       layout="below"
                       onClick={() => {
                         setCurExpandedTheme(undefined);
+                        Router.Navigate("/theme-manager");
                       }}
                     >
                       <span className="CssLoader_ThemeBrowser_ExpandedView_BackText">

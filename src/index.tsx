@@ -19,6 +19,7 @@ import {
   useCssLoaderState,
 } from "./state";
 import { ThemeToggle } from "./components";
+import { ExpandedViewPage } from "./theme-manager/ExpandedView";
 
 var firstTime: boolean = true;
 
@@ -125,11 +126,11 @@ export default definePlugin((serverApi: ServerAPI) => {
     </CssLoaderContextProvider>
   ));
 
-  // serverApi.routerHook.addRoute("theme-manager-expanded-view", () => (
-  //   <CssLoaderContextProvider cssLoaderStateClass={state}>
-
-  //   </CssLoaderContextProvider>
-  // ))
+  serverApi.routerHook.addRoute("theme-manager-expanded-view", () => (
+    <CssLoaderContextProvider cssLoaderStateClass={state}>
+      <ExpandedViewPage />
+    </CssLoaderContextProvider>
+  ))
 
   return {
     title: <div className={staticClasses.Title}>Css Loader</div>,
