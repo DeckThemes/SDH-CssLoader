@@ -60,13 +60,13 @@ export const ThemeBrowserPage: VFC = () => {
     return true;
   };
 
-  const [selectedSort, setSort] = useState<number>(1);
+  const [selectedSort, setSort] = useState<number>(3);
   const sortOptions = useMemo(
     (): DropdownOption[] => [
-      { data: 1, label: "Name: A-Z" },
-      { data: 2, label: "Name: Z-A" },
-      { data: 3, label: "Date: Newest-Oldest" },
-      { data: 4, label: "Date: Oldest-Newest" },
+      { data: 1, label: "Alphabetical (A to Z)" },
+      { data: 2, label: "Alphabetical (Z to A)" },
+      { data: 3, label: "Last Updated (Newest)" },
+      { data: 4, label: "Last Updated (Oldest)" },
     ],
     []
   );
@@ -81,7 +81,7 @@ export const ThemeBrowserPage: VFC = () => {
     );
     return [
       { data: 1, label: "All" },
-      { data: 2, label: "Installed Only" },
+      { data: 2, label: "Installed" },
       ...[...uniqueTargets].map((e, i) => ({ data: i + 3, label: e })),
     ];
   }, [themeArr, searchFilter]);
@@ -175,14 +175,14 @@ export const ThemeBrowserPage: VFC = () => {
     <>
       <PanelSectionRow>
         <DropdownItem
-          label='Sort:'
+          label='Sort'
           rgOptions={sortOptions}
-          strDefaultLabel='Sort:'
+          strDefaultLabel='Last Updated (Newest)'
           selectedOption={selectedSort}
           onChange={(e) => setSort(e.data)}
         />
         <DropdownItem
-          label='Filter:'
+          label='Filter'
           rgOptions={targetOptions}
           strDefaultLabel='All'
           selectedOption={selectedTarget.data}
@@ -204,7 +204,7 @@ export const ThemeBrowserPage: VFC = () => {
           .filter((e: browseThemeEntry) => {
             if (selectedTarget.label === "All") {
               return true;
-            } else if (selectedTarget.label === "Installed Only") {
+            } else if (selectedTarget.label === "Installed") {
               const strValue = checkIfThemeInstalled(e);
               return strValue === "installed" || strValue === "outdated";
             } else {
