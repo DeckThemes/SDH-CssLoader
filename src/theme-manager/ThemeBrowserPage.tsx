@@ -148,21 +148,21 @@ export const ThemeBrowserPage: VFC = () => {
     }
     return filterCSS;
   }
-  function calcButtonText(installStatus: string) {
-    let buttonText = "";
-    switch (installStatus) {
-      case "installed":
-        buttonText = "Installed";
-        break;
-      case "outdated":
-        buttonText = "Update";
-        break;
-      default:
-        buttonText = "Install";
-        break;
-    }
-    return buttonText;
-  }
+  // function calcButtonText(installStatus: string) {
+  //   let buttonText = "";
+  //   switch (installStatus) {
+  //     case "installed":
+  //       buttonText = "Installed";
+  //       break;
+  //     case "outdated":
+  //       buttonText = "Update";
+  //       break;
+  //     default:
+  //       buttonText = "Install";
+  //       break;
+  //   }
+  //   return buttonText;
+  // }
 
   // Runs upon opening the page
   useEffect(() => {

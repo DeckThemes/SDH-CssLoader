@@ -86,24 +86,19 @@ export const ExpandedViewPage: VFC = () => {
     return (
       // The outermost div is to push the content down into the visible area
       <div style={{marginTop: '40px'}}>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex" }}>
-            <div
+        <div style={{ display: "flex", flexDirection: "column", margin: "20px" }}>
+          <div style={{ display: "flex", marginBottom: "8px" }}>
+            <img
               className="CssLoader_ThemeBrowser_ExpandedView_PreviewImage"
+              src={currentExpandedTheme.preview_image}
               style={{
-                width: "350px",
-                backgroundImage:
-                  'url("' + currentExpandedTheme.preview_image + '")',
-                backgroundSize: "cover",
-                backgroundRepeat: "no-repeat",
-                height: "219px",
-                margin: "10px",
+                width: "60%",
               }}
             />
-            <div style={{ width: "192px" }}>
+            <div style={{ width: "100%", marginLeft: "16px" }}>
               <div
                 style={{
-                  padding: "0px 8px 0px 8px",
+                  marginBottom: "8px",
                   display: "flex",
                   flexDirection: "column",
                 }}
