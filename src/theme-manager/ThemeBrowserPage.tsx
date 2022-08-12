@@ -10,8 +10,6 @@ import {
 } from "decky-frontend-lib";
 import { useEffect, useMemo, useState, VFC } from "react";
 
-import { BiDownload } from "react-icons/bi";
-
 import * as python from "../python";
 
 // Interfaces for the JSON objects the lists work with
@@ -299,18 +297,7 @@ export const ThemeBrowserPage: VFC = () => {
                         flexDirection: "column",
                         alignItems: "center",
                       }}
-                    >
-                      <BiDownload
-                        size="2em"
-                        style={{
-                          fontSize: "1em",
-                          position: "absolute",
-                          top: "2px",
-                          left: "4px",
-                          textShadow: "rgb(48, 48, 48) 0px 0 20px",
-                        }}
-                      />
-                    </div>
+                    ></div>
                     <div
                       className="CssLoader_ThemeBrowser_SingleItem_AuthorVersionContainer"
                       style={{
