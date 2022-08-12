@@ -3,7 +3,7 @@ import {
   PanelSectionRow,
   Router,
 } from "decky-frontend-lib";
-import { VFC } from "react";
+import { useEffect, useRef, VFC } from "react";
 
 import * as python from "../python";
 
@@ -79,6 +79,12 @@ export const ExpandedViewPage: VFC = () => {
     return buttonText;
   }
 
+  const backButtonRef = useRef(null);
+  useEffect(() => {
+    // @ts-ignore
+    backButtonRef?.current.focus();
+  }, [])
+
   // if theres no theme in the detailed view
   if (currentExpandedTheme) {
     // This returns 'installed', 'outdated', or 'uninstalled'
@@ -146,6 +152,9 @@ export const ExpandedViewPage: VFC = () => {
                     }}
                   >
                     <ButtonItem
+                      // They forgot to add the ref property to the buttons interface, so I'm just tsignoring the warning 
+                      // @ts-ignore
+                      ref={backButtonRef}
                       bottomSeparator={false}
                       layout="below"
                       onClick={() => {

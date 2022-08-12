@@ -148,21 +148,6 @@ export const ThemeBrowserPage: VFC = () => {
     }
     return filterCSS;
   }
-  // function calcButtonText(installStatus: string) {
-  //   let buttonText = "";
-  //   switch (installStatus) {
-  //     case "installed":
-  //       buttonText = "Installed";
-  //       break;
-  //     case "outdated":
-  //       buttonText = "Update";
-  //       break;
-  //     default:
-  //       buttonText = "Install";
-  //       break;
-  //   }
-  //   return buttonText;
-  // }
 
   // Runs upon opening the page
   useEffect(() => {
@@ -358,7 +343,7 @@ export const ThemeBrowserPage: VFC = () => {
                             <span className='CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewText'>
                               {installStatus === "outdated"
                                 ? "Update Available"
-                                : "See More"}
+                                : "View Details"}
                             </span>
                           </ButtonItem>
                         </div>
