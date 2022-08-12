@@ -133,7 +133,7 @@ export default definePlugin((serverApi: ServerAPI) => {
   ));
 
   return {
-    title: <div className={staticClasses.Title}>Css Loader</div>,
+    title: <div className={staticClasses.Title}>CSS Loader</div>,
     content: (
       <CssLoaderContextProvider cssLoaderStateClass={state}>
         <Content serverAPI={serverApi} />

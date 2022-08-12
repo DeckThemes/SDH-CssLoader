@@ -335,7 +335,7 @@ class ThemePatch:
 
 class RemoteInstall:
     def __init__(self, plugin):
-        self.themeDb = "https://github.com/suchmememanyskill/CssLoader-ThemeDb/releases/download/1.0.0/themes.json"
+        self.themeDb = "https://github.com/suchmememanyskill/CssLoader-ThemeDb/releases/download/1.1.0/themes.json"
         self.plugin = plugin
         self.themes = []
 
