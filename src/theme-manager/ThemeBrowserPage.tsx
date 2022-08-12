@@ -5,7 +5,6 @@ import {
   TextField,
   DropdownOption,
   DropdownItem,
-  SingleDropdownOption,
   Router,
 } from "decky-frontend-lib";
 import { useEffect, useMemo, useState, VFC } from "react";
@@ -23,16 +22,22 @@ export const ThemeBrowserPage: VFC = () => {
     setBrowseThemeList: setThemeArr,
     localThemeList: installedThemes,
     setLocalThemeList: setInstalledThemes,
+    searchFieldValue,
+    setSearchValue,
+    selectedSort,
+    setSort,
+    selectedTarget,
+    setTarget,
     isInstalling,
-    // setInstalling,
-    // currentExpandedTheme,
     setCurExpandedTheme,
   } = useCssLoaderState();
 
-  const [searchFieldValue, setSearchValue] = useState<string>("");
-
-  // This is used to disable buttons during a theme install
+  // THESE HAVE BEEN MOVED TO GLOBAL STATE
+  // These are the legacy "local state" versions of them, only uncomment if global state is broken and not working
+  // const [searchFieldValue, setSearchValue] = useState<string>("");
   // const [isInstalling, setInstalling] = useState<boolean>(false);
+  // const [selectedTarget, setTarget] = useState<SingleDropdownOption>({ data: 1, label: "All", });
+  // const [selectedSort, setSort] = useState<number>(3);
 
   const [backendVersion, setBackendVer] = useState<number>(2);
   function reloadBackendVer() {
@@ -60,7 +65,6 @@ export const ThemeBrowserPage: VFC = () => {
     return true;
   };
 
-  const [selectedSort, setSort] = useState<number>(3);
   const sortOptions = useMemo(
     (): DropdownOption[] => [
       { data: 1, label: "Alphabetical (A to Z)" },
@@ -71,10 +75,6 @@ export const ThemeBrowserPage: VFC = () => {
     []
   );
 
-  const [selectedTarget, setTarget] = useState<SingleDropdownOption>({
-    data: 1,
-    label: "All",
-  });
   const targetOptions = useMemo((): DropdownOption[] => {
     const uniqueTargets = new Set(
       themeArr.filter(searchFilter).map((e) => e.target)

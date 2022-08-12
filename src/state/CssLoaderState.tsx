@@ -1,3 +1,4 @@
+import { SingleDropdownOption } from "decky-frontend-lib";
 import { createContext, FC, useContext, useEffect, useState } from "react";
 import { localThemeEntry, browseThemeEntry } from "../customTypes";
 import { Theme } from "../theme";
@@ -5,6 +6,9 @@ import { Theme } from "../theme";
 interface PublicCssLoaderState {
   localThemeList: Theme[];
   browseThemeList: browseThemeEntry[];
+  searchFieldValue: string;
+  selectedSort: number;
+  selectedTarget: SingleDropdownOption;
   isInstalling: boolean;
   currentExpandedTheme: browseThemeEntry | undefined;
 }
@@ -14,6 +18,9 @@ interface PublicCssLoaderState {
 interface PublicCssLoaderContext extends PublicCssLoaderState {
   setLocalThemeList(listArr: localThemeEntry[]): void;
   setBrowseThemeList(listArr: browseThemeEntry[]): void;
+  setSearchValue(value: string): void;
+  setSort(value: number): void;
+  setTarget(value: SingleDropdownOption): void;
   setInstalling(bool: boolean): void;
   setCurExpandedTheme(theme: browseThemeEntry | undefined): void;
 }
@@ -22,6 +29,12 @@ interface PublicCssLoaderContext extends PublicCssLoaderState {
 export class CssLoaderState {
   private localThemeList: Theme[] = [];
   private browseThemeList: browseThemeEntry[] = [];
+  private searchFieldValue: string = "";
+  private selectedSort: number = 3;
+  private selectedTarget: SingleDropdownOption = {
+    data: 1,
+    label: "All",
+  };
   private isInstalling: boolean = false;
   private currentExpandedTheme: browseThemeEntry | undefined = undefined;
 
@@ -32,6 +45,9 @@ export class CssLoaderState {
     return {
       localThemeList: this.localThemeList,
       browseThemeList: this.browseThemeList,
+      searchFieldValue: this.searchFieldValue,
+      selectedSort: this.selectedSort,
+      selectedTarget: this.selectedTarget,
       isInstalling: this.isInstalling,
       currentExpandedTheme: this.currentExpandedTheme,
     };
@@ -54,6 +70,21 @@ export class CssLoaderState {
 
   setBrowseThemeList(listArr: browseThemeEntry[]) {
     this.browseThemeList = listArr;
+    this.forceUpdate();
+  }
+
+  setSearchValue(value: string) {
+    this.searchFieldValue = value;
+    this.forceUpdate();
+  }
+
+  setSort(value: number) {
+    this.selectedSort = value;
+    this.forceUpdate();
+  }
+
+  setTarget(value: SingleDropdownOption) {
+    this.selectedTarget = value;
     this.forceUpdate();
   }
 
@@ -103,6 +134,11 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({
     cssLoaderStateClass.setLocalThemeList(listArr);
   const setBrowseThemeList = (listArr: browseThemeEntry[]) =>
     cssLoaderStateClass.setBrowseThemeList(listArr);
+  const setSearchValue = (value: string) =>
+    cssLoaderStateClass.setSearchValue(value);
+  const setSort = (value: number) => cssLoaderStateClass.setSort(value);
+  const setTarget = (value: SingleDropdownOption) =>
+    cssLoaderStateClass.setTarget(value);
   const setInstalling = (bool: boolean) =>
     cssLoaderStateClass.setInstalling(bool);
   const setCurExpandedTheme = (theme: browseThemeEntry | undefined) =>
@@ -114,6 +150,9 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({
         ...publicState,
         setLocalThemeList,
         setBrowseThemeList,
+        setSearchValue,
+        setSort,
+        setTarget,
         setInstalling,
         setCurExpandedTheme,
       }}
