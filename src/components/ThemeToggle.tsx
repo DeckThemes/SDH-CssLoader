@@ -13,6 +13,9 @@ export const ThemeToggle: VFC<{ data: Theme; setThemeList: any }> = ({
     <>
       <PanelSectionRow>
         <ToggleField
+          bottomSeparator={
+            data.checked && data?.patches?.length > 0 ? false : undefined
+          }
           checked={data.checked}
           label={data.name}
           description={data.description}
@@ -23,7 +26,10 @@ export const ThemeToggle: VFC<{ data: Theme; setThemeList: any }> = ({
           }}
         />
       </PanelSectionRow>
-      {data.checked && data.patches.map((x) => <ThemePatch data={x} />)}
+      {data.checked &&
+        data.patches.map((x, i, arr) => (
+          <ThemePatch data={x} index={i} fullArr={arr} />
+        ))}
     </>
   );
 };

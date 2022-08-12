@@ -7,7 +7,12 @@ from injector import inject_to_tab, get_tab, tab_has_element
 from logging import getLogger, basicConfig, INFO, DEBUG
 
 pluginManagerUtils = Utilities(None)
-Initialized = False 
+Initialized = False
+CSS_LOADER_VER = 2
+Logger = getLogger("CSS_LOADER")
+
+def Log(text : str):
+    Logger.info(text)
 
 def createDir(dirPath : str):
     if (path.exists(dirPath)):
@@ -22,6 +27,9 @@ class Result:
     def __init__(self, success : bool, message : str = "Success"):
         self.success = success
         self.message = message
+
+        if not self.success:
+            Log(f"Result failed! {message}")
     
     def raise_on_failure(self):
         if not self.success:
@@ -42,12 +50,11 @@ class Inject:
             self.uuids[x] = []
 
     async def load(self) -> Result:
-        self.theme.log("Inject.load")
         try:
             with open(self.cssPath, "r") as fp:
                 self.css = fp.read()
 
-            self.theme.log(f"Loaded css at {self.cssPath}")
+            Log(f"Loaded css at {self.cssPath}")
             self.css = self.css.replace("\\", "\\\\").replace("`", "\\`")
 
             return Result(True)
@@ -55,7 +62,6 @@ class Inject:
             return Result(False, str(e))
 
     async def inject(self, tab : str = None) -> Result:
-        self.theme.log("Inject.inject")
         if (tab is None):
             for x in self.tabs:
                 await self.inject(x)
@@ -67,6 +73,7 @@ class Inject:
 
         if (len(self.uuids[tab]) > 0):
             await self.remove(tab)
+            self.enabled = True # In case the below code fails, it will never be re-injected unless it's still enabled
 
         if (self.css is None):
             result = await self.load()
@@ -78,7 +85,7 @@ class Inject:
             if not res["success"]:
                 return Result(False, str(res["result"]))
             
-            self.theme.log(f"+{str(res['result'])} @ {tab}")
+            Log(f"+{str(res['result'])} @ {tab}")
             self.uuids[tab].append(str(res["result"]))
         except Exception as e:
             return Result(False, str(e))
@@ -87,7 +94,6 @@ class Inject:
         return Result(True)
 
     async def remove(self, tab : str = None) -> Result:
-        self.theme.log("Inject.remove")
         if (tab is None):
             for x in self.tabs:
                 await self.remove(x)
@@ -102,7 +108,7 @@ class Inject:
 
         try:
             for x in self.uuids[tab]:
-                self.theme.log(f"-{x} @ {tab}")
+                Log(f"-{x} @ {tab}")
                 res = await pluginManagerUtils.remove_css_from_tab(tab, x)
                 #if not res["success"]:
                 #    return Result(False, res["result"])
@@ -120,6 +126,10 @@ class Theme:
         self.name = json["name"]
         self.version = json["version"] if ("version" in json) else "v1.0"
         self.author = json["author"] if ("author" in json) else ""
+        self.require = int(json["manifest_version"]) if ("manifest_version" in json) else 1
+
+        if (CSS_LOADER_VER < self.require):
+            raise Exception("A newer version of the CssLoader is required to load this theme")
 
         self.patches = []
         self.injects = []
@@ -131,27 +141,14 @@ class Theme:
 
         self.enabled = False
         self.json = json
-        self.logobj = None
 
-    def log(self, text : str):
-        if self.logobj is not None:
-            self.logobj.info(text)
-    
-    async def load(self) -> Result:
-        self.log("Theme.load")
         if "inject" in self.json:
-            for x in self.json["inject"]:
-                self.injects.append(Inject(self.themePath + "/" + x, self.json["inject"][x], self))
+            self.injects = [Inject(self.themePath + "/" + x, self.json["inject"][x], self) for x in self.json["inject"]]
         
         if "patches" in self.json:
-            for x in self.json["patches"]:
-                patch = ThemePatch(self, self.json["patches"][x], x)
-                result = await patch.load()
-                if not result.success:
-                    return result
-
-                self.patches.append(patch)
-
+            self.patches = [ThemePatch(self, self.json["patches"][x], x) for x in self.json["patches"]]
+    
+    async def load(self) -> Result:
         if not path.exists(self.configJsonPath):
             return Result(True)
 
@@ -179,7 +176,6 @@ class Theme:
         return Result(True)
 
     async def save(self) -> Result:
-        self.log("Theme.save")
         createDir(self.configPath)
 
         try:
@@ -196,7 +192,7 @@ class Theme:
         return Result(True)
 
     async def inject(self) -> Result:
-        self.log(f"Injecting theme '{self.name}'")
+        Log(f"Injecting theme '{self.name}'")
         for x in self.injects:
             result = await x.inject()
             if not result.success:
@@ -212,7 +208,7 @@ class Theme:
         return Result(True)
     
     async def remove(self) -> Result:
-        self.log("Theme.remove")
+        Log(f"Removing theme '{self.name}'")
         for x in self.get_all_injects():
             result = await x.remove()
             if not result.success:
@@ -223,8 +219,6 @@ class Theme:
         return Result(True)
 
     async def delete(self) -> Result:
-        self.log("Theme.delete")
-
         if (self.bundled):
             return Result(False, "Can't delete a bundled theme")
 
@@ -240,7 +234,6 @@ class Theme:
         return Result(True)
 
     def get_all_injects(self) -> List[Inject]:
-        self.log("Theme.get_all_injects")
         injects = []
         injects.extend(self.injects)
         for x in self.patches:
@@ -256,6 +249,7 @@ class Theme:
             "enabled": self.enabled,
             "patches": [x.to_dict() for x in self.patches],
             "bundled": self.bundled,
+            "require": self.require,
         }
 
     
@@ -264,37 +258,57 @@ class ThemePatch:
         self.json = json
         self.name = name
         self.default = json["default"]
+        self.type = json["type"] if "type" in json else "dropdown"
         self.theme = theme
         self.value = self.default
         self.injects = []
         self.options = {}
-        for x in json:
-            if (x == "default"):
-                continue
+        self.patchVersion = None
 
-            self.options[x] = []
+        if "values" in json: # Do we have a v2 or a v1 format?
+            self.patchVersion = 2
+            for x in json["values"]:
+                self.options[x] = []
+        else:
+            self.patchVersion = 1
+            for x in json:
+                if (x == "default"):
+                    continue
+
+                self.options[x] = []
+        
+        if self.default not in self.options:
+            raise Exception(f"In patch '{self.name}', '{self.default}' does not exist as a patch option")
+        
+        self.load()
 
     def check_value(self):
         if (self.value not in self.options):
             self.value = self.default
+
+        if (self.type not in ["dropdown", "checkbox", "slider"]):
+            self.type = "dropdown"
+        
+        if (self.type == "checkbox"):
+            if not ("No" in self.options and "Yes" in self.options):
+                self.type = "dropdown"
     
-    async def load(self) -> Result:
-        self.theme.log("ThemePatch.load")
+    def load(self):
         for x in self.options:
-            for y in self.json[x]:
-                inject = Inject(self.theme.themePath + "/" + y, self.json[x][y], self.theme)
+            data = self.json[x] if self.patchVersion == 1 else self.json["values"][x]
+
+            for y in data:
+                inject = Inject(self.theme.themePath + "/" + y, data[y], self.theme)
                 self.injects.append(inject)
                 self.options[x].append(inject)
         
-        return Result(True)
+        self.check_value()
 
     async def inject(self) -> Result:
         self.check_value()
-        self.theme.log(f"Injecting patch '{self.name}' of theme '{self.theme.name}'")
+        Log(f"Injecting patch '{self.name}' of theme '{self.theme.name}'")
         for x in self.options[self.value]:
-            self.theme.log(x)
             result = await x.inject()
-            self.theme.log(result.message)
             if not result.success:
                 return result
         
@@ -302,7 +316,7 @@ class ThemePatch:
 
     async def remove(self) -> Result:
         self.check_value()
-        self.theme.log("ThemePatch.remove")
+        Log(f"Removing patch '{self.name}' of theme '{self.theme.name}'")
         for x in self.injects:
             result = await x.remove()
             if not result.success:
@@ -315,12 +329,13 @@ class ThemePatch:
             "name": self.name,
             "default": self.default,
             "value": self.value,
-            "options": [x for x in self.options]
+            "options": [x for x in self.options],
+            "type": self.type,
         }
 
 class RemoteInstall:
     def __init__(self, plugin):
-        self.themeDb = "https://github.com/suchmememanyskill/CssLoader-ThemeDb/releases/download/1.0.0/themes.json"
+        self.themeDb = "https://github.com/suchmememanyskill/CssLoader-ThemeDb/releases/download/1.1.0/themes.json"
         self.plugin = plugin
         self.themes = []
 
@@ -340,7 +355,7 @@ class RemoteInstall:
             if force or (self.themes == []):
                 response = await self.run(f"curl {self.themeDb} -L")
                 self.themes = json.loads(response)
-                self.plugin.log.info(self.themes)
+                Log(f"Got {len(self.themes)} from the themedb")
         except Exception as e:
             return Result(False, str(e))
         
@@ -364,11 +379,11 @@ class RemoteInstall:
             
             tempDir = tempfile.TemporaryDirectory()
 
-            print(f"Downloading {theme['download_url']} to {tempDir.name}...")
+            Log(f"Downloading {theme['download_url']} to {tempDir.name}...")
             themeZipPath = os.path.join(tempDir.name, 'theme.zip')
             await self.run(f"curl \"{theme['download_url']}\" -L -o \"{themeZipPath}\"")
 
-            print(f"Unzipping {themeZipPath}")
+            Log(f"Unzipping {themeZipPath}")
             await self.run(f"unzip -o \"{themeZipPath}\" -d /home/deck/homebrew/themes")
             
             tempDir.cleanup()
@@ -378,11 +393,15 @@ class RemoteInstall:
         return Result(True)
 
 class Plugin:
+
+    async def dummy_function(self) -> bool:
+        return True
+
     async def get_themes(self) -> list:
         return [x.to_dict() for x in self.themes]
     
     async def set_theme_state(self, name : str, state : bool) -> dict:
-        self.log.info(f"Setting state for {name} to {state}")
+        Log(f"Setting state for {name} to {state}")
         for x in self.themes:
             if (x.name == name):
                 result = await x.inject() if state else await x.remove()
@@ -398,6 +417,9 @@ class Plugin:
     
     async def reload_theme_db_data(self) -> dict:
         return (await self.remote.load(True)).to_dict()
+
+    async def get_backend_version(self) -> int:
+        return CSS_LOADER_VER
 
     async def set_patch_of_theme(self, themeName : str, patchName : str, value : str) -> dict:
         theme = None
@@ -418,6 +440,9 @@ class Plugin:
         if themePatch is None:
             return Result(False, f"Did not find patch '{patchName}' for theme '{themeName}'").to_dict()
         
+        if (themePatch.value == value):
+            return Result(True, "Already injected").to_dict()
+
         if (value in themePatch.options):
             themePatch.value = value
         
@@ -456,6 +481,7 @@ class Plugin:
         return Result(True).to_dict()
 
     async def _inject_test_element(self, tab : str) -> Result:
+        attempt = 0
         while True:
             if await self._check_test_element(self, tab):
                 return Result(True)
@@ -471,6 +497,11 @@ class Plugin:
                     """, False)
                 except:
                     pass
+
+                attempt += 1
+
+                if (attempt >= 3):
+                    return Result(False, f"Inject into tab '{tab}' was attempted 3 times, stopping")
 
                 await asyncio.sleep(1)
             
@@ -496,28 +527,26 @@ class Plugin:
             if not path.exists(themeDataPath):
                 continue
         
-            self.log.info(f"Analyzing theme {x}")
+            Log(f"Analyzing theme {x}")
             
             try:
                 with open(themeDataPath, "r") as fp:
                     theme = json.load(fp)
                     
-                self.log.info(theme)
                 themeData = Theme(themePath, theme, configPath)
 
                 if (themeData.name not in [x.name for x in self.themes]):
                     self.themes.append(themeData)
-                    self.log.info(f"Adding theme {themeData.name}")
+                    Log(f"Adding theme {themeData.name}")
 
             except Exception as e:
-                self.log.warn(f"Exception while parsing a theme: {e}") # Couldn't properly parse everything
+                Log(f"Exception while parsing a theme: {e}") # Couldn't properly parse everything
 
     async def _cache_lists(self):
         self.injects = []
         self.tabs = []
 
         for x in self.themes:
-            x.logobj = self.log
             injects = x.get_all_injects()
             self.injects.extend(injects)
             for y in injects:
@@ -530,19 +559,19 @@ class Plugin:
             await asyncio.sleep(3)
             for x in self.tabs:
                 try:
-                    self.log.info(f"Checking if tab {x} is still injected...")
+                    # Log(f"Checking if tab {x} is still injected...")
                     if not await self._check_test_element(self, x):
-                        self.log.info(f"Tab {x} is not injected, reloading...")
+                        Log(f"Tab {x} is not injected, reloading...")
                         await self._inject_test_element(self, x)
                         for y in self.injects:
                             if y.enabled:
                                 (await y.inject(x)).raise_on_failure()
                 except Exception as e:
-                    self.log.info(f":( {str(e)}")
+                    Log(f":( {str(e)}")
                     pass
 
     async def _load(self):
-        self.log.info("Loading themes...")
+        Log("Loading themes...")
         self.themes = []
 
         themesPath = "/home/deck/homebrew/themes"
@@ -557,10 +586,8 @@ class Plugin:
     
     async def _load_stage_2(self):
         for x in self.themes:
-            self.log.info(f"Loading theme {x.name}")
-            res = await x.load()
-            if not res.success:
-                self.log(res.message)
+            Log(f"Loading theme {x.name}")
+            await x.load()
         
         await self._cache_lists(self)
 
@@ -571,16 +598,14 @@ class Plugin:
         
         Initialized = True
 
-        self.log = getLogger("CSS_LOADER")
         self.themes = []
-        self.log.info("Hello world!")
+        Log("Initializing css loader...")
         self.remote = RemoteInstall(self)
-        response = await self.remote.load()
-        if not response.success:
-            self.log.info(f":( {response.message}")
+        await self.remote.load()
 
         await self._load(self)
         await self._inject_test_element(self, "SP")
         await self._load_stage_2(self)
 
+        Log(f"Initialized css loader. Found {len(self.themes)} themes, which inject into {len(self.tabs)} tabs ({self.tabs}). Total {len(self.injects)} injects, {len([x for x in self.injects if x.enabled])} injected")
         await self._check_tabs(self)

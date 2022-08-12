@@ -5,7 +5,7 @@ import {
   TextField,
   DropdownOption,
   DropdownItem,
-  SingleDropdownOption,
+  Router,
 } from "decky-frontend-lib";
 import { useEffect, useMemo, useState, VFC } from "react";
 
@@ -22,18 +22,41 @@ export const ThemeBrowserPage: VFC = () => {
     setBrowseThemeList: setThemeArr,
     localThemeList: installedThemes,
     setLocalThemeList: setInstalledThemes,
+    searchFieldValue,
+    setSearchValue,
+    selectedSort,
+    setSort,
+    selectedTarget,
+    setTarget,
+    isInstalling,
+    setCurExpandedTheme,
   } = useCssLoaderState();
-  const [searchFieldValue, setSearchValue] = useState<string>("");
 
-  // This is used to disable buttons during a theme install
-  const [isInstalling, setInstalling] = useState<boolean>(false);
+  // THESE HAVE BEEN MOVED TO GLOBAL STATE
+  // These are the legacy "local state" versions of them, only uncomment if global state is broken and not working
+  // const [searchFieldValue, setSearchValue] = useState<string>("");
+  // const [isInstalling, setInstalling] = useState<boolean>(false);
+  // const [selectedTarget, setTarget] = useState<SingleDropdownOption>({ data: 1, label: "All", });
+  // const [selectedSort, setSort] = useState<number>(3);
+
+  const [backendVersion, setBackendVer] = useState<number>(2);
+  function reloadBackendVer() {
+    python.resolve(python.getBackendVersion(), setBackendVer);
+  }
 
   const searchFilter = (e: browseThemeEntry) => {
+    // This means only compatible themes will show up, newer ones won't
+    if (e.manifest_version > backendVersion) {
+      return false;
+    }
     // This filter just implements the search stuff
     if (searchFieldValue.length > 0) {
+      // Convert the theme and search to lowercase so that it's not case-sensitive
       if (
-        // Convert the theme name and search to lowercase so that it's not case-sensitive
-        !e.name.toLowerCase().includes(searchFieldValue.toLowerCase())
+        // This checks for the theme name
+        !e.name.toLowerCase().includes(searchFieldValue.toLowerCase()) &&
+        // This checks for the author name
+        !e.author.toLowerCase().includes(searchFieldValue.toLowerCase())
       ) {
         // return false just means it won't show in the list
         return false;
@@ -42,32 +65,29 @@ export const ThemeBrowserPage: VFC = () => {
     return true;
   };
 
-  const [selectedSort, setSort] = useState<number>(1);
   const sortOptions = useMemo(
     (): DropdownOption[] => [
-      { data: 1, label: "Name: A-Z" },
-      { data: 2, label: "Name: Z-A" },
-      { data: 3, label: "Date: Newest-Oldest" },
-      { data: 4, label: "Date: Oldest-Newest" },
+      { data: 1, label: "Alphabetical (A to Z)" },
+      { data: 2, label: "Alphabetical (Z to A)" },
+      { data: 3, label: "Last Updated (Newest)" },
+      { data: 4, label: "Last Updated (Oldest)" },
     ],
     []
   );
 
-  const [selectedTarget, setTarget] = useState<SingleDropdownOption>({
-    data: 1,
-    label: "Any",
-  });
   const targetOptions = useMemo((): DropdownOption[] => {
     const uniqueTargets = new Set(
       themeArr.filter(searchFilter).map((e) => e.target)
     );
     return [
-      { data: 1, label: "Any" },
-      ...[...uniqueTargets].map((e, i) => ({ data: i + 2, label: e })),
+      { data: 1, label: "All" },
+      { data: 2, label: "Installed" },
+      ...[...uniqueTargets].map((e, i) => ({ data: i + 3, label: e })),
     ];
   }, [themeArr, searchFilter]);
 
   function reloadThemes() {
+    reloadBackendVer();
     // Reloads the theme database
     python.resolve(python.reloadThemeDbData(), () => {
       python.resolve(python.getThemeDbData(), setThemeArr);
@@ -85,16 +105,18 @@ export const ThemeBrowserPage: VFC = () => {
     python.resolve(python.getThemes(), setInstalledThemes);
   }
 
-  function installTheme(id: string) {
-    // TODO: most of this is repeating code in other functions, I can probably refactor it to shorten it
-    setInstalling(true);
-    python.resolve(python.downloadTheme(id), () => {
-      python.resolve(python.reset(), () => {
-        python.resolve(python.getThemes(), setInstalledThemes);
-        setInstalling(false);
-      });
-    });
-  }
+  // Installing is now handled on the ExpandedView
+
+  // function installTheme(id: string) {
+  //   // TODO: most of this is repeating code in other functions, I can probably refactor it to shorten it
+  //   setInstalling(true);
+  //   python.resolve(python.downloadTheme(id), () => {
+  //     python.resolve(python.reset(), () => {
+  //       python.resolve(python.getThemes(), setInstalledThemes);
+  //       setInstalling(false);
+  //     });
+  //   });
+  // }
 
   function checkIfThemeInstalled(themeObj: browseThemeEntry) {
     const filteredArr: Theme[] = installedThemes.filter(
@@ -126,24 +148,10 @@ export const ThemeBrowserPage: VFC = () => {
     }
     return filterCSS;
   }
-  function calcButtonText(installStatus: string) {
-    let buttonText = "";
-    switch (installStatus) {
-      case "installed":
-        buttonText = "Installed";
-        break;
-      case "outdated":
-        buttonText = "Update";
-        break;
-      default:
-        buttonText = "Install";
-        break;
-    }
-    return buttonText;
-  }
 
   // Runs upon opening the page
   useEffect(() => {
+    reloadBackendVer();
     getThemeDb();
     getInstalledThemes();
   }, []);
@@ -152,23 +160,23 @@ export const ThemeBrowserPage: VFC = () => {
     <>
       <PanelSectionRow>
         <DropdownItem
-          label='Sort Results By:'
+          label="Sort"
           rgOptions={sortOptions}
-          strDefaultLabel='Sort Results:'
+          strDefaultLabel="Last Updated (Newest)"
           selectedOption={selectedSort}
           onChange={(e) => setSort(e.data)}
         />
         <DropdownItem
-          label='Filter By Theme Target:'
+          label="Filter"
           rgOptions={targetOptions}
-          strDefaultLabel='Any'
+          strDefaultLabel="All"
           selectedOption={selectedTarget.data}
           onChange={(e) => setTarget(e)}
         />
       </PanelSectionRow>
       <PanelSectionRow>
         <TextField
-          label='Search'
+          label="Search"
           value={searchFieldValue}
           onChange={(e) => setSearchValue(e.target.value)}
         />
@@ -176,25 +184,33 @@ export const ThemeBrowserPage: VFC = () => {
       {/* I wrap everything in a Focusable, because that ensures that the dpad/stick navigation works correctly */}
       <Focusable style={{ display: "flex", flexWrap: "wrap" }}>
         {themeArr
+          // searchFilter also includes backend version check
           .filter(searchFilter)
-          .filter((e: browseThemeEntry) =>
-            selectedTarget.label === "Any"
-              ? true
-              : e.target === selectedTarget.label
-          )
+          .filter((e: browseThemeEntry) => {
+            if (selectedTarget.label === "All") {
+              return true;
+            } else if (selectedTarget.label === "Installed") {
+              const strValue = checkIfThemeInstalled(e);
+              return strValue === "installed" || strValue === "outdated";
+            } else {
+              return e.target === selectedTarget.label;
+            }
+          })
           .sort((a, b) => {
             // This handles the sort option the user has chosen
-            // 1: A-Z, 2: Z-A, 3: New-Old, 4: Old-New
             switch (selectedSort) {
               case 2:
+                // Z-A
                 // localeCompare just sorts alphabetically
                 return b.name.localeCompare(a.name);
               case 3:
+                // New-Old
                 return (
                   new Date(b.last_changed).valueOf() -
                   new Date(a.last_changed).valueOf()
                 );
               case 4:
+                // Old-New
                 return (
                   new Date(a.last_changed).valueOf() -
                   new Date(b.last_changed).valueOf()
@@ -208,133 +224,159 @@ export const ThemeBrowserPage: VFC = () => {
             const installStatus = checkIfThemeInstalled(e);
             return (
               // The outer 2 most divs are the background darkened/blurred image, and everything inside is the text/image/buttons
-              <div
-                className='CssLoader_ThemeBrowser_SingleItem_BgImage'
-                style={{
-                  backgroundImage: 'url("' + e.preview_image + '")',
-                  backgroundSize: "cover",
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "center",
-                  width: "260px",
-                  borderRadius: "5px",
-                  marginLeft: "10px",
-                  marginRight: "10px",
-                  marginBottom: "20px",
-                }}>
+              <>
                 <div
-                  className='CssLoader_ThemeBrowser_SingleItem_BgOverlay'
+                  className="CssLoader_ThemeBrowser_SingleItem_BgImage"
                   style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    background: "RGBA(0,0,0,0.8)",
-                    backdropFilter: "blur(5px)",
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: "3px",
-                  }}>
-                  <span
-                    className='CssLoader_ThemeBrowser_SingleItem_ThemeName'
-                    style={{
-                      marginTop: "5px",
-                      fontSize: "1.5em",
-                      fontWeight: "bold",
-                    }}>
-                    {e.name}
-                  </span>
-                  {selectedTarget.label === "Any" && (
-                    <span
-                      className='CssLoader_ThemeBrowser_SingleItem_ThemeTarget'
-                      style={{
-                        marginTop: "-6px",
-                        fontSize: "1em",
-                        textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                      }}>
-                      {e.target}
-                    </span>
-                  )}
+                    // Uncomment the next line and comment out the backgroundImage line if you want to try the new "greyed out bg" style
+                    // background: "#0000",
+                    backgroundImage: 'url("' + e.preview_image + '")',
+                    backgroundSize: "cover",
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "center",
+                    width: "260px",
+                    borderRadius: "5px",
+                    marginLeft: "10px",
+                    marginRight: "10px",
+                    marginBottom: "20px",
+                  }}
+                >
                   <div
-                    className='CssLoader_ThemeBrowser_SingleItem_PreviewImage'
+                    className="CssLoader_ThemeBrowser_SingleItem_BgOverlay"
                     style={{
-                      width: "240px",
-                      backgroundImage: 'url("' + e.preview_image + '")',
-                      backgroundSize: "cover",
-                      backgroundRepeat: "no-repeat",
-                      height: "150px",
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
+                      // Uncomment the next line and comment out the next next line if you want to try the new "greyed out bg" style
+                      // background: "#ACB2C911",
+                      background: "RGBA(0,0,0,0.8)",
+                      backdropFilter: "blur(5px)",
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "3px",
                     }}
-                  />
-                  <div
-                    className='CssLoader_ThemeBrowser_SingleItem_AuthorVersionContainer'
-                    style={{
-                      width: "240px",
-                      textAlign: "center",
-                      display: "flex",
-                    }}>
+                  >
                     <span
-                      className='CssLoader_ThemeBrowser_SingleItem_AuthorText'
+                      className="CssLoader_ThemeBrowser_SingleItem_ThemeName"
                       style={{
-                        marginRight: "auto",
-                        fontSize: "1em",
-                        textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                      }}>
-                      {e.author}
+                        textAlign: "center",
+                        marginTop: "5px",
+                        fontSize: "1.25em",
+                        fontWeight: "bold",
+                        // This stuff here truncates it if it's too long
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        width: "90%",
+                      }}
+                    >
+                      {e.name}
                     </span>
-                    <span
-                      className='CssLoader_ThemeBrowser_SingleItem_VersionText'
-                      style={{
-                        marginLeft: "auto",
-                        fontSize: "1em",
-                        textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                      }}>
-                      {e.version}
-                    </span>
-                  </div>
-                  <div
-                    className='CssLoader_ThemeBrowser_SingleItem_InstallButtonContainer'
-                    style={{
-                      width: "245px",
-                    }}>
-                    <PanelSectionRow>
-                      <div
-                        className='CssLoader_ThemeBrowser_SingleItem_InstallButtonColorFilter'
+                    {selectedTarget.label === "All" && (
+                      <span
+                        className="CssLoader_ThemeBrowser_SingleItem_ThemeTarget"
                         style={{
-                          // This padding here overrides the default padding put on PanelSectionRow's by Valve
-                          // Before this, I was using negative margin to "shrink" the element, but this is a much better solution
-                          paddingTop: "0px",
-                          paddingBottom: "0px",
-                          // Filter is used to color the button blue for update
-                          filter: calcButtonColor(installStatus),
-                        }}>
-                        <ButtonItem
-                          bottomSeparator={false}
-                          layout='below'
-                          disabled={
-                            installStatus === "installed" || isInstalling
-                          }
-                          onClick={() => {
-                            installTheme(e.id);
-                          }}>
-                          <span className='CssLoader_ThemeBrowser_SingleItem_InstallText'>
-                            {calcButtonText(installStatus)}
-                          </span>
-                        </ButtonItem>
-                      </div>
-                    </PanelSectionRow>
+                          marginTop: "-6px",
+                          fontSize: "1em",
+                          textShadow: "rgb(48, 48, 48) 0px 0 10px",
+                        }}
+                      >
+                        {e.target}
+                      </span>
+                    )}
+                    <div
+                      className="CssLoader_ThemeBrowser_SingleItem_PreviewImage"
+                      style={{
+                        width: "240px",
+                        backgroundImage: 'url("' + e.preview_image + '")',
+                        backgroundSize: "cover",
+                        backgroundRepeat: "no-repeat",
+                        height: "150px",
+                        display: "flex",
+                        position: "relative",
+                        flexDirection: "column",
+                        alignItems: "center",
+                      }}
+                    ></div>
+                    <div
+                      className="CssLoader_ThemeBrowser_SingleItem_AuthorVersionContainer"
+                      style={{
+                        width: "240px",
+                        textAlign: "center",
+                        display: "flex",
+                      }}
+                    >
+                      <span
+                        className="CssLoader_ThemeBrowser_SingleItem_AuthorText"
+                        style={{
+                          marginRight: "auto",
+                          fontSize: "1em",
+                          textShadow: "rgb(48, 48, 48) 0px 0 10px",
+                        }}
+                      >
+                        {e.author}
+                      </span>
+                      <span
+                        className="CssLoader_ThemeBrowser_SingleItem_VersionText"
+                        style={{
+                          marginLeft: "auto",
+                          fontSize: "1em",
+                          textShadow: "rgb(48, 48, 48) 0px 0 10px",
+                        }}
+                      >
+                        {e.version}
+                      </span>
+                    </div>
+                    <div
+                      className="CssLoader_ThemeBrowser_SingleItem_InstallButtonContainer"
+                      style={{
+                        marginTop: "auto",
+                        width: "245px",
+                      }}
+                    >
+                      <PanelSectionRow>
+                        <div
+                          className="CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewContainer"
+                          style={{
+                            // This padding here overrides the default padding put on PanelSectionRow's by Valve
+                            // Before this, I was using negative margin to "shrink" the element, but this is a much better solution
+                            paddingTop: "0px",
+                            paddingBottom: "0px",
+
+                            filter: calcButtonColor(installStatus),
+                          }}
+                        >
+                          <ButtonItem
+                            bottomSeparator={false}
+                            layout="below"
+                            disabled={isInstalling}
+                            onClick={() => {
+                              setCurExpandedTheme(e);
+                              Router.Navigate("/theme-manager-expanded-view");
+                            }}
+                          >
+                            <span className="CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewText">
+                              {installStatus === "outdated"
+                                ? "Update Available"
+                                : "View Details"}
+                            </span>
+                          </ButtonItem>
+                        </div>
+                      </PanelSectionRow>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </>
             );
           })}
       </Focusable>
       <PanelSectionRow>
         <ButtonItem
-          layout='below'
+          layout="below"
           onClick={() => {
             reloadThemes();
-          }}>
+          }}
+        >
           Reload Themes
         </ButtonItem>
       </PanelSectionRow>

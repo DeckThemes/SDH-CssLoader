@@ -3,10 +3,12 @@ export interface browseThemeEntry {
   download_url: string;
   id: string;
   name: string;
+  description: string;
   preview_image: string;
   version: string;
   last_changed: string;
   target: string;
+  manifest_version: number;
 }
 export interface localThemeEntry {
   author: string;

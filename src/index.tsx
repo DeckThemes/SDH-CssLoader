@@ -8,7 +8,7 @@ import {
   SidebarNavigation,
   Router,
 } from "decky-frontend-lib";
-import { VFC } from "react";
+import { useEffect, useState, VFC } from "react";
 import * as python from "./python";
 import { RiPaintFill } from "react-icons/ri";
 
@@ -19,6 +19,7 @@ import {
   useCssLoaderState,
 } from "./state";
 import { ThemeToggle } from "./components";
+import { ExpandedViewPage } from "./theme-manager/ExpandedView";
 
 var firstTime: boolean = true;
 
@@ -31,8 +32,11 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
   // setThemeList is a function that takes the raw data from the python function and then formats it with init and generate functions
   // This still exists, it just has been moved into the CssLoaderState class' setter function, so it now happens automatically
 
+  const [dummyFuncResult, setDummyResult] = useState<boolean>(false);
+
   const reload = function () {
     python.resolve(python.getThemes(), setThemeList);
+    dummyFuncTest();
   };
 
   if (firstTime) {
@@ -40,27 +44,49 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
     reload();
   }
 
+  function dummyFuncTest() {
+    python.resolve(python.dummyFunction(), setDummyResult);
+  }
+
+  useEffect(() => {
+    dummyFuncTest();
+  }, []);
+
   return (
-    <PanelSection title='Themes'>
+    <PanelSection title="Themes">
+      {dummyFuncResult ? (
+        <>
+          <PanelSectionRow>
+            <ButtonItem
+              layout="below"
+              onClick={() => {
+                Router.CloseSideMenus();
+                Router.Navigate("/theme-manager");
+              }}
+            >
+              Manage Themes
+            </ButtonItem>
+          </PanelSectionRow>
+          {themeList.map((x) => (
+            <ThemeToggle data={x} setThemeList={setThemeList} />
+          ))}
+        </>
+      ) : (
+        <PanelSectionRow>
+          <span>
+            CssLoader failed to initialize, try reloading, and if that doesn't
+            work, try restarting your deck.
+          </span>
+        </PanelSectionRow>
+      )}
+
       <PanelSectionRow>
         <ButtonItem
-          layout='below'
-          onClick={() => {
-            Router.CloseSideMenus();
-            Router.Navigate("/theme-manager");
-          }}>
-          Manage Themes
-        </ButtonItem>
-      </PanelSectionRow>
-      {themeList.map((x) => (
-        <ThemeToggle data={x} setThemeList={setThemeList} />
-      ))}
-      <PanelSectionRow>
-        <ButtonItem
-          layout='below'
+          layout="below"
           onClick={() => {
             python.resolve(python.reset(), () => reload());
-          }}>
+          }}
+        >
           Reload themes
         </ButtonItem>
       </PanelSectionRow>
@@ -71,7 +97,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
 const ThemeManagerRouter: VFC = () => {
   return (
     <SidebarNavigation
-      title='Theme Manager'
+      title="Theme Manager"
       showTitle
       pages={[
         {
@@ -100,8 +126,14 @@ export default definePlugin((serverApi: ServerAPI) => {
     </CssLoaderContextProvider>
   ));
 
+  serverApi.routerHook.addRoute("/theme-manager-expanded-view", () => (
+    <CssLoaderContextProvider cssLoaderStateClass={state}>
+      <ExpandedViewPage />
+    </CssLoaderContextProvider>
+  ));
+
   return {
-    title: <div className={staticClasses.Title}>Css Loader</div>,
+    title: <div className={staticClasses.Title}>CSS Loader</div>,
     content: (
       <CssLoaderContextProvider cssLoaderStateClass={state}>
         <Content serverAPI={serverApi} />
