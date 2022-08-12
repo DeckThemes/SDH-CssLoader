@@ -130,7 +130,7 @@ export default definePlugin((serverApi: ServerAPI) => {
     <CssLoaderContextProvider cssLoaderStateClass={state}>
       <ExpandedViewPage />
     </CssLoaderContextProvider>
-  ))
+  ));
 
   return {
     title: <div className={staticClasses.Title}>Css Loader</div>,

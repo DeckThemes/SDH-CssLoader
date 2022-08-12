@@ -1,8 +1,4 @@
-import {
-  ButtonItem,
-  PanelSectionRow,
-  Router,
-} from "decky-frontend-lib";
+import { ButtonItem, PanelSectionRow, Router } from "decky-frontend-lib";
 import { useEffect, useRef, VFC } from "react";
 
 import * as python from "../python";
@@ -22,16 +18,16 @@ export const ExpandedViewPage: VFC = () => {
     setInstalling,
   } = useCssLoaderState();
 
-    function installTheme(id: string) {
-      // TODO: most of this is repeating code in other functions, I can probably refactor it to shorten it
-      setInstalling(true);
-      python.resolve(python.downloadTheme(id), () => {
-        python.resolve(python.reset(), () => {
-          python.resolve(python.getThemes(), setInstalledThemes);
-          setInstalling(false);
-        });
+  function installTheme(id: string) {
+    // TODO: most of this is repeating code in other functions, I can probably refactor it to shorten it
+    setInstalling(true);
+    python.resolve(python.downloadTheme(id), () => {
+      python.resolve(python.reset(), () => {
+        python.resolve(python.getThemes(), setInstalledThemes);
+        setInstalling(false);
       });
-    }
+    });
+  }
 
   function checkIfThemeInstalled(themeObj: browseThemeEntry) {
     const filteredArr: Theme[] = installedThemes.filter(
@@ -83,7 +79,7 @@ export const ExpandedViewPage: VFC = () => {
   useEffect(() => {
     // @ts-ignore
     backButtonRef?.current.focus();
-  }, [])
+  }, []);
 
   // if theres no theme in the detailed view
   if (currentExpandedTheme) {
@@ -91,8 +87,10 @@ export const ExpandedViewPage: VFC = () => {
     const installStatus = checkIfThemeInstalled(currentExpandedTheme);
     return (
       // The outermost div is to push the content down into the visible area
-      <div style={{marginTop: '40px'}}>
-        <div style={{ display: "flex", flexDirection: "column", margin: "20px" }}>
+      <div style={{ marginTop: "40px" }}>
+        <div
+          style={{ display: "flex", flexDirection: "column", margin: "20px" }}
+        >
           <div style={{ display: "flex", marginBottom: "8px" }}>
             <img
               className="CssLoader_ThemeBrowser_ExpandedView_PreviewImage"
@@ -152,7 +150,7 @@ export const ExpandedViewPage: VFC = () => {
                     }}
                   >
                     <ButtonItem
-                      // They forgot to add the ref property to the buttons interface, so I'm just tsignoring the warning 
+                      // They forgot to add the ref property to the buttons interface, so I'm just tsignoring the warning
                       // @ts-ignore
                       ref={backButtonRef}
                       bottomSeparator={false}

@@ -40,7 +40,8 @@ export const UninstallThemePage: VFC = () => {
             <ButtonItem
               label={e.data.name}
               onClick={() => handleUninstall(e)}
-              disabled={isUninstalling}>
+              disabled={isUninstalling}
+            >
               <FaTrash />
             </ButtonItem>
           </PanelSectionRow>
