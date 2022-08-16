@@ -293,6 +293,7 @@ class ThemePatchComponent:
             "name": self.name,
             "type": self.type,
             "on": self.on,
+            "value": self.value,
         }
 
 class ThemePatch:

@@ -25,6 +25,13 @@ export class Theme {
   }
 }
 
+export interface themePatchComponent {
+  name: string;
+  on: string;
+  type: string;
+  value: string;
+}
+
 export class Patch {
   data: any;
   theme: Theme;
@@ -34,6 +41,7 @@ export class Patch {
   options: string[] = [];
   index: number = 0;
   type: string = "dropdown";
+  components: themePatchComponent[] = [];
 
   constructor(theme: Theme) {
     this.theme = theme;
@@ -45,6 +53,7 @@ export class Patch {
     this.value = this.data.value;
     this.options = this.data.options;
     this.type = this.data.type;
+    this.components = this.data.components;
 
     this.index = this.options.indexOf(this.value);
   }

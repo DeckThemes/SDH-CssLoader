@@ -15,6 +15,7 @@ import * as python from "../python";
 import { browseThemeEntry } from "../customTypes";
 import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
+import { calcButtonColor } from "../logic";
 
 export const ThemeBrowserPage: VFC = () => {
   const {
@@ -105,19 +106,6 @@ export const ThemeBrowserPage: VFC = () => {
     python.resolve(python.getThemes(), setInstalledThemes);
   }
 
-  // Installing is now handled on the ExpandedView
-
-  // function installTheme(id: string) {
-  //   // TODO: most of this is repeating code in other functions, I can probably refactor it to shorten it
-  //   setInstalling(true);
-  //   python.resolve(python.downloadTheme(id), () => {
-  //     python.resolve(python.reset(), () => {
-  //       python.resolve(python.getThemes(), setInstalledThemes);
-  //       setInstalling(false);
-  //     });
-  //   });
-  // }
-
   function checkIfThemeInstalled(themeObj: browseThemeEntry) {
     const filteredArr: Theme[] = installedThemes.filter(
       (e: Theme) =>
@@ -132,21 +120,6 @@ export const ThemeBrowserPage: VFC = () => {
     } else {
       return "uninstalled";
     }
-  }
-  // These are just switch statements I use to determine text/css for the buttons
-  // I put them up here just because I find it clearer to read when they aren't inline
-  function calcButtonColor(installStatus: string) {
-    let filterCSS = "";
-    switch (installStatus) {
-      case "outdated":
-        filterCSS =
-          "invert(6%) sepia(90%) saturate(200%) hue-rotate(160deg) contrast(122%)";
-        break;
-      default:
-        filterCSS = "";
-        break;
-    }
-    return filterCSS;
   }
 
   // Runs upon opening the page

@@ -21,6 +21,8 @@ import {
 import { ThemeToggle } from "./components";
 import { ExpandedViewPage } from "./theme-manager/ExpandedView";
 
+import "./styles/colorpicker.css";
+
 var firstTime: boolean = true;
 
 const Content: VFC<{ serverAPI: ServerAPI }> = () => {

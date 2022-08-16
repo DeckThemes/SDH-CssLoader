@@ -1,0 +1,34 @@
+/* This removes the cyan track color that is behind the slider head */
+.CSSLoader_ColorPicker_Container .gamepadslider_SliderTrack_Mq25N {
+  --left-track-color: #0000;
+  --colored-toggles-main-color: #0000;
+}
+
+/* The hvalue, svalue, and lvalue variables are supplied by react, and these just adjust the gradients to match */
+.CSSLoader_ColorPicker_HSlider .gamepadslider_SliderTrack_Mq25N {
+  background: linear-gradient(
+    270deg,
+    hsl(360, var(--cssloader-svalue), var(--cssloader-lvalue)),
+    hsl(270, var(--cssloader-svalue), var(--cssloader-lvalue)),
+    hsl(180, var(--cssloader-svalue), var(--cssloader-lvalue)),
+    hsl(90, var(--cssloader-svalue), var(--cssloader-lvalue)),
+    hsl(0, var(--cssloader-svalue), var(--cssloader-lvalue))
+  );
+}
+
+.CSSLoader_ColorPicker_SSlider .gamepadslider_SliderTrack_Mq25N {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--cssloader-hvalue), 0%, var(--cssloader-lvalue)),
+    hsl(var(--cssloader-hvalue), 100%, var(--cssloader-lvalue))
+  );
+}
+
+.CSSLoader_ColorPicker_LSlider .gamepadslider_SliderTrack_Mq25N {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--cssloader-hvalue), var(--cssloader-svalue), 0%),
+    hsl(var(--cssloader-hvalue), var(--cssloader-svalue), 50%),
+    hsl(var(--cssloader-hvalue), var(--cssloader-svalue), 100%)
+  );
+}
