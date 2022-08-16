@@ -166,7 +166,7 @@ class Theme:
             else:
                 for y in self.patches:
                     if y.name == x:
-                        y.value = config[x]
+                        y.set_value(config[x])
         
         if activate:
             result = await self.inject()
@@ -181,7 +181,7 @@ class Theme:
         try:
             config = {"active": self.enabled}
             for x in self.patches:
-                config[x.name] = x.value
+                config[x.name] = x.get_value()
             
             with open(self.configJsonPath, "w") as fp:
                 json.dump(config, fp)
@@ -252,7 +252,49 @@ class Theme:
             "require": self.require,
         }
 
+class ThemePatchComponent:
+    def __init__(self, themePatch, component : dict):
+        self.themePatch = themePatch
+
+        # Intentionally not doing error checking here. This should error when loaded incorrectly
+        self.name = component["name"]
+        self.type = component["type"]
+
+        if self.type not in ["color-picker"]:
+            raise Exception(f"Unknown component type '{self.type}'")
+
+        self.default = component["default"]
+        self.value = self.default
+        self.on = component["on"]
+        self.css_variable = component["css_variable"]
+
+        self.tabs = component["tabs"]
+        self.inject = Inject("", self.tabs, self.themePatch.theme)
+        self.generate()
+
+    def generate(self) -> Result:
+        if (";" in self.css_variable or ";" in self.value):
+            raise Exception("???")
+
+        self.inject.css = f":root {{ --{self.css_variable}: {self.value}; }}"
+        return Result(True)
+
+    async def generate_and_reinject(self) -> Result:
+        self.generate()
+        if (self.inject.enabled):
+            result = await self.inject.inject()
+            if not result.success:
+                return result
+        
+        return Result(True)
     
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "type": self.type,
+            "on": self.on,
+        }
+
 class ThemePatch:
     def __init__(self, theme : Theme, json : dict, name : str):
         self.json = json
@@ -264,6 +306,7 @@ class ThemePatch:
         self.injects = []
         self.options = {}
         self.patchVersion = None
+        self.components = []
 
         if "values" in json: # Do we have a v2 or a v1 format?
             self.patchVersion = 2
@@ -281,6 +324,37 @@ class ThemePatch:
             raise Exception(f"In patch '{self.name}', '{self.default}' does not exist as a patch option")
         
         self.load()
+
+    def set_value(self, value):
+        if isinstance(value, str):
+            self.value = value
+        elif isinstance(value, dict):
+            if "value" in value:
+                self.value = value["value"]
+            
+            if "components" in value:
+                components = value["components"]
+
+                if not isinstance(components, dict):
+                    raise Exception("???")
+                
+                for x in self.components:
+                    if x.name in components:
+                        x.value = components[x.name]
+                        x.generate()
+    
+    def get_value(self) -> str | dict:
+        if len(self.components) <= 0:
+            return self.value
+        else:
+            components = {}
+            for x in self.components:
+                components[x.name] = x.value
+            
+            return {
+                "value": self.value,
+                "components": components,
+            }
 
     def check_value(self):
         if (self.value not in self.options):
@@ -302,6 +376,16 @@ class ThemePatch:
                 self.injects.append(inject)
                 self.options[x].append(inject)
         
+        if "components" in self.json:
+            for x in self.json["components"]:
+                component = ThemePatchComponent(self, x)
+                if component.on not in self.options:
+                    raise Exception("Component references non-existent value")
+                
+                self.components.append(component)
+                self.injects.append(component.inject)
+                self.options[component.on].append(component.inject)
+
         self.check_value()
 
     async def inject(self) -> Result:
@@ -331,6 +415,7 @@ class ThemePatch:
             "value": self.value,
             "options": [x for x in self.options],
             "type": self.type,
+            "components": [x.to_dict() for x in self.components]
         }
 
 class RemoteInstall:
@@ -421,7 +506,7 @@ class Plugin:
     async def get_backend_version(self) -> int:
         return CSS_LOADER_VER
 
-    async def set_patch_of_theme(self, themeName : str, patchName : str, value : str) -> dict:
+    async def _get_patch_of_theme(self, themeName : str, patchName : str) -> ThemePatch:
         theme = None
         for x in self.themes:
             if (x.name == themeName):
@@ -429,7 +514,7 @@ class Plugin:
                 break
         
         if theme is None:
-            return Result(False, f"Did not find theme '{themeName}'").to_dict()
+            raise Exception(f"Did not find theme '{themeName}'")
         
         themePatch = None
         for x in theme.patches:
@@ -438,7 +523,15 @@ class Plugin:
                 break
         
         if themePatch is None:
-            return Result(False, f"Did not find patch '{patchName}' for theme '{themeName}'").to_dict()
+            raise Exception(f"Did not find patch '{patchName}' for theme '{themeName}'")
+        
+        return themePatch
+
+    async def set_patch_of_theme(self, themeName : str, patchName : str, value : str) -> dict:
+        try:
+            themePatch = await self._get_patch_of_theme(self, themeName, patchName)
+        except Exception as e:
+            return Result(False, str(e))
         
         if (themePatch.value == value):
             return Result(True, "Already injected").to_dict()
@@ -446,11 +539,32 @@ class Plugin:
         if (value in themePatch.options):
             themePatch.value = value
         
-        if (theme.enabled):
+        if (themePatch.theme.enabled):
             await themePatch.remove()
             await themePatch.inject()
         
-        await theme.save()
+        await themePatch.theme.save()
+        return Result(True).to_dict()
+    
+    async def set_component_of_theme_patch(self, themeName : str, patchName : str, componentName : str, value : str) -> dict:
+        try:
+            themePatch = await self._get_patch_of_theme(self, themeName, patchName)
+        except Exception as e:
+            return Result(False, str(e))
+
+        component = None
+        for x in themePatch.components:
+            if x.name == componentName:
+                component = x
+                break
+        
+        if component == None:
+            return Result(False, f"Failed to find component '{componentName}'")
+        
+        component.value = value
+        await component.generate_and_reinject()
+
+        await themePatch.theme.save()
         return Result(True).to_dict()
     
     async def reset(self) -> dict:
