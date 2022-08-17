@@ -8,6 +8,7 @@ interface ColorPickerModalProps {
   defaultH?: number;
   defaultS?: number;
   defaultL?: number;
+  // defaultA?: number;
 }
 
 export const ColorPickerModal: VFC<ColorPickerModalProps> = ({
@@ -17,10 +18,12 @@ export const ColorPickerModal: VFC<ColorPickerModalProps> = ({
   defaultH = 0,
   defaultS = 100,
   defaultL = 50,
+  // defaultA = 1,
 }) => {
   const [H, setH] = useState<number>(defaultH);
   const [S, setS] = useState<number>(defaultS);
   const [L, setL] = useState<number>(defaultL);
+  // const [A, setA] = useState<number>(defaultA);
 
   return (
     <>

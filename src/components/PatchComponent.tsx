@@ -53,7 +53,7 @@ export const PatchComponent: VFC<{
                       defaultH={curColorHSLArray[0]}
                       defaultS={curColorHSLArray[1]}
                       defaultL={curColorHSLArray[2]}
-                      title={data.name + "cock"}
+                      title={data.name}
                     />
                   )
                 }
