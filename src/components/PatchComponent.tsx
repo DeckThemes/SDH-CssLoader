@@ -1,5 +1,7 @@
 import { VFC } from "react";
 
+import * as python from "../python";
+
 import { showModal, ButtonItem, PanelSectionRow } from "decky-frontend-lib";
 
 import { ColorPickerModal } from "./ColorPickerModal";
@@ -16,7 +18,7 @@ export const PatchComponent: VFC<{
   if (selectedLabel === data.on) {
     // This is used by the ColorPickerModal, but im getting errors when I attempt to call it from that
     // I think it's because QAM and SP are different tabs
-    const { setLocalThemeList } = useCssLoaderState();
+    const { setLocalThemeList: setThemeList } = useCssLoaderState();
 
     switch (data.type) {
       default:
@@ -34,11 +36,24 @@ export const PatchComponent: VFC<{
                   showModal(
                     // @ts-ignore -- showModal passes the closeModal function to this, but for some reason it's giving me a typescript error because I didn't explicitly pass it myself
                     <ColorPickerModal
-                      setThemeList={setLocalThemeList}
-                      curColorArr={curColorHSLArray}
-                      themeName={themeName}
-                      patchName={patchName}
-                      componentName={data.name}
+                      onConfirm={(HSLString, closeModal) => {
+                        python.resolve(
+                          python.setComponentOfThemePatch(
+                            themeName,
+                            patchName,
+                            data.name, // componentName
+                            HSLString
+                          ),
+                          () => {
+                            closeModal();
+                            python.resolve(python.getThemes(), setThemeList);
+                          }
+                        );
+                      }}
+                      defaultH={curColorHSLArray[0]}
+                      defaultS={curColorHSLArray[1]}
+                      defaultL={curColorHSLArray[2]}
+                      title={data.name + "cock"}
                     />
                   )
                 }

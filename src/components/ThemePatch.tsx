@@ -21,7 +21,6 @@ export const ThemePatch: VFC<{
 
   const bottomSeparatorValue = fullArr.length - 1 === index ? undefined : false;
 
-  console.log(data);
   switch (data.type) {
     case "slider":
       return (

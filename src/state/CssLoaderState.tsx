@@ -54,6 +54,7 @@ export class CssLoaderState {
   }
 
   setLocalThemeList(listArr: localThemeEntry[]) {
+    // This formats the raw data grabbed by the python into the standardized Theme class
     let list: Theme[] = [];
 
     listArr.forEach((x: any) => {
@@ -63,7 +64,6 @@ export class CssLoaderState {
     });
     list.forEach((x) => x.init());
 
-    // themeList_backup = list;
     this.localThemeList = list;
     this.forceUpdate();
   }
