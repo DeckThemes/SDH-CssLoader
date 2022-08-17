@@ -484,7 +484,7 @@ class Plugin:
         return True
 
     async def get_themes(self) -> list:
-        return sorted([x.to_dict() for x in self.themes], key=lambda d: d['name'])
+        return [x.to_dict() for x in self.themes]
     
     async def set_theme_state(self, name : str, state : bool) -> dict:
         Log(f"Setting state for {name} to {state}")
@@ -705,6 +705,7 @@ class Plugin:
             await x.load()
         
         await self._cache_lists(self)
+        self.themes.sort(key=lambda d: d.name)
 
     async def _main(self):
         global Initialized
