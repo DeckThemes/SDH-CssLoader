@@ -1,36 +1,70 @@
 import { ModalRoot, SliderField } from "decky-frontend-lib";
 import { useState, VFC } from "react";
 
-import * as python from "../python";
+interface ColorPickerModalProps {
+  closeModal: () => void;
+  onConfirm?(HSLString: string, closeModal: () => void): any;
+  title?: string;
+  defaultH?: number;
+  defaultS?: number;
+  defaultL?: number;
+}
 
-export const ColorPickerModal: VFC<{
-  setThemeList: any;
-  closeModal: any;
-  curColorArr: number[];
-  themeName: string;
-  patchName: string;
-  componentName: string;
-}> = ({
+export const ColorPickerModal: VFC<ColorPickerModalProps> = ({
   closeModal,
-  setThemeList,
-  curColorArr,
-  themeName,
-  patchName,
-  componentName,
+  onConfirm = () => {},
+  title = "Color Picker",
+  defaultH = 0,
+  defaultS = 100,
+  defaultL = 50,
 }) => {
-  const [H, setH] = useState<number>(curColorArr[0] || 0);
-  const [S, setS] = useState<number>(curColorArr[1] || 100);
-  const [L, setL] = useState<number>(curColorArr[2] || 50);
+  const [H, setH] = useState<number>(defaultH);
+  const [S, setS] = useState<number>(defaultS);
+  const [L, setL] = useState<number>(defaultL);
 
   return (
     <>
       <style>
-        {/* refer to "colorpicker.css" to see how these variables are used, they're for dynamically changing the slider bgs */}
         {`
         :root {
-          --cssloader-hvalue: ${H};
-          --cssloader-svalue: ${S}%;
-          --cssloader-lvalue: ${L}%;
+          --decky-color-picker-hvalue: ${H};
+          --decky-color-picker-svalue: ${S}%;
+          --decky-color-picker-lvalue: ${L}%;
+        }
+
+        /* This removes the cyan track color that is behind the slider head */
+        .ColorPicker_Container .gamepadslider_SliderTrack_Mq25N {
+          --left-track-color: #0000;
+          /* This is for compatibility with the "Colored Toggles" CSSLoader Theme*/
+          --colored-toggles-main-color: #0000;
+        }
+
+        .ColorPicker_HSlider .gamepadslider_SliderTrack_Mq25N {
+          background: linear-gradient(
+            270deg,
+            hsl(360, var(--decky-color-picker-svalue), var(--decky-color-picker-lvalue)),
+            hsl(270, var(--decky-color-picker-svalue), var(--decky-color-picker-lvalue)),
+            hsl(180, var(--decky-color-picker-svalue), var(--decky-color-picker-lvalue)),
+            hsl(90, var(--decky-color-picker-svalue), var(--decky-color-picker-lvalue)),
+            hsl(0, var(--decky-color-picker-svalue), var(--decky-color-picker-lvalue))
+          );
+        }
+
+        .ColorPicker_SSlider .gamepadslider_SliderTrack_Mq25N {
+          background: linear-gradient(
+            90deg,
+            hsl(var(--decky-color-picker-hvalue), 0%, var(--decky-color-picker-lvalue)),
+            hsl(var(--decky-color-picker-hvalue), 100%, var(--decky-color-picker-lvalue))
+          );
+        }
+
+        .ColorPicker_LSlider .gamepadslider_SliderTrack_Mq25N {
+          background: linear-gradient(
+            90deg,
+            hsl(var(--decky-color-picker-hvalue), var(--decky-color-picker-svalue), 0%),
+            hsl(var(--decky-color-picker-hvalue), var(--decky-color-picker-svalue), 50%),
+            hsl(var(--decky-color-picker-hvalue), var(--decky-color-picker-svalue), 100%)
+          );
         }
         `}
       </style>
@@ -38,23 +72,11 @@ export const ColorPickerModal: VFC<{
         bAllowFullSize
         onCancel={closeModal}
         onOK={() => {
-          const HSLString = `hsl(${H}, ${S}%, ${L}%)`;
-          python.resolve(
-            python.setComponentOfThemePatch(
-              themeName,
-              patchName,
-              componentName,
-              HSLString
-            ),
-            () => {
-              closeModal();
-              python.resolve(python.getThemes(), setThemeList);
-            }
-          );
+          onConfirm(`hsl(${H}, ${S}%, ${L}%)`, closeModal);
         }}
       >
         <div
-          className="CSSLoader_ColorPicker_ColorDisplayContainer"
+          className="ColorPicker_ColorDisplayContainer"
           style={{
             display: "flex",
             justifyContent: "space-between",
@@ -66,7 +88,7 @@ export const ColorPickerModal: VFC<{
         >
           <div>
             <span style={{ fontSize: "1.5em" }}>
-              <b>Color Picker </b>
+              <b>{title}</b>
             </span>
           </div>
           <div
@@ -77,8 +99,8 @@ export const ColorPickerModal: VFC<{
             }}
           ></div>
         </div>
-        <div className="CSSLoader_ColorPicker_Container">
-          <div className="CSSLoader_ColorPicker_HSlider">
+        <div className="ColorPicker_Container">
+          <div className="ColorPicker_HSlider">
             <SliderField
               showValue
               editableValue
@@ -89,7 +111,7 @@ export const ColorPickerModal: VFC<{
               onChange={setH}
             />
           </div>
-          <div className="CSSLoader_ColorPicker_SSlider">
+          <div className="ColorPicker_SSlider">
             <SliderField
               showValue
               editableValue
@@ -100,7 +122,7 @@ export const ColorPickerModal: VFC<{
               onChange={setS}
             />
           </div>
-          <div className="CSSLoader_ColorPicker_LSlider">
+          <div className="ColorPicker_LSlider">
             <SliderField
               showValue
               editableValue

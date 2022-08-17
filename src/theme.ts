@@ -5,6 +5,7 @@ export class Theme {
   description: string = "";
   patches: Patch[] = [];
 
+  // This init function is called by the setter function in GlobalState
   init() {
     this.name = this.data.name;
     this.checked = this.data.enabled;
