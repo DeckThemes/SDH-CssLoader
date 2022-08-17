@@ -484,7 +484,7 @@ class Plugin:
         return True
 
     async def get_themes(self) -> list:
-        return [x.to_dict() for x in self.themes]
+        return sorted([x.to_dict() for x in self.themes], key=lambda d: d['name'])
     
     async def set_theme_state(self, name : str, state : bool) -> dict:
         Log(f"Setting state for {name} to {state}")
