@@ -746,8 +746,8 @@ class Plugin:
             Log(f"Loading theme {x.name}")
             await x.load()
         
-        self.themes.sort(key=lambda d: d.name)
         await self._cache_lists(self)
+        self.themes.sort(key=lambda d: d.name)
 
     async def _main(self):
         global Initialized
