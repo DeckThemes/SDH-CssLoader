@@ -705,6 +705,7 @@ class Plugin:
             await x.load()
         
         await self._cache_lists(self)
+        self.themes.sort(key=lambda d: d.name)
 
     async def _main(self):
         global Initialized
