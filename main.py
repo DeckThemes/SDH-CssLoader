@@ -138,6 +138,7 @@ class Theme:
         self.configJsonPath = self.configPath + "/config" + ("_ROOT.json" if os.geteuid() == 0 else "_USER.json")
         self.themePath = themePath
         self.bundled = self.configPath != self.themePath
+        self.dependencies = json["dependencies"] if "dependencies" in json else {}
 
         self.enabled = False
         self.json = json
@@ -250,6 +251,7 @@ class Theme:
             "patches": [x.to_dict() for x in self.patches],
             "bundled": self.bundled,
             "require": self.require,
+            "dependencies": [x for x in self.dependencies]
         }
 
 class ThemePatchComponent:
@@ -490,6 +492,22 @@ class Plugin:
         Log(f"Setting state for {name} to {state}")
         for x in self.themes:
             if (x.name == name):
+
+                if state:
+                    for y in x.dependencies:
+                        dep_theme = await self._get_theme(self, y)
+                        if dep_theme is not None:
+                            if dep_theme.enabled:
+                                await dep_theme.remove()
+                            
+                            for z in x.dependencies[y]:
+                                value = x.dependencies[y][z]
+                                for patch in dep_theme.patches:
+                                    if patch.name == z:
+                                        patch.set_value(value)
+                            
+                            await dep_theme.inject()
+
                 result = await x.inject() if state else await x.remove()
                 return result.to_dict()
         
@@ -506,6 +524,13 @@ class Plugin:
 
     async def get_backend_version(self) -> int:
         return CSS_LOADER_VER
+    
+    async def _get_theme(self, themeName : str) -> Theme | None:
+        for x in self.themes:
+            if x.name == themeName:
+                return x
+        
+        return None
 
     async def _get_patch_of_theme(self, themeName : str, patchName : str) -> ThemePatch:
         theme = None
@@ -699,13 +724,30 @@ class Plugin:
         if (path.exists(defaultThemesPath)):
             await self._parse_themes(self, defaultThemesPath, themesPath)
     
+    async def _set_theme_score(self, theme : Theme):
+        if theme.name not in self.scores:
+            self.scores[theme.name] = 0
+        
+        for x in theme.dependencies:
+            dependency = await self._get_theme(self, x)
+            if dependency is not None:
+                await self._set_theme_score(self, dependency)
+                self.scores[dependency.name] -= 1
+
     async def _load_stage_2(self):
+        self.scores = {}
+        for x in self.themes:
+            await self._set_theme_score(self, x)
+        
+        Log(self.scores)
+        self.themes.sort(key=lambda d: self.scores[d.name])
+
         for x in self.themes:
             Log(f"Loading theme {x.name}")
             await x.load()
         
-        await self._cache_lists(self)
         self.themes.sort(key=lambda d: d.name)
+        await self._cache_lists(self)
 
     async def _main(self):
         global Initialized
