@@ -449,22 +449,31 @@ class RemoteInstall:
         
         return Result(True)
 
+    async def get_theme_db_entry_by_uuid(self, uuid : str) -> dict:
+        result = await self.load()
+        if not result.success:
+            raise Exception(result.message)
+
+        for x in self.themes:
+            if x["id"] == uuid:
+                return x
+            
+        raise Exception(f"No theme with id {uuid} found")
+
+    async def get_theme_db_entry_by_name(self, name : str) -> dict:
+        result = await self.load()
+        if not result.success:
+            raise Exception(result.message)
+
+        for x in self.themes:
+            if x["name"] == name:
+                return x
+            
+        raise Exception(f"No theme with name {name} found")
+
     async def install(self, uuid : str) -> Result:
         try:
-            result = await self.load()
-            if not result.success:
-                return result
-
-            theme = None
-
-            for x in self.themes:
-                if x["id"] == uuid:
-                    theme = x
-                    break
-            
-            if theme is None:
-                raise Exception(f"No theme with id {uuid} found")
-            
+            theme = await self.get_theme_db_entry_by_uuid(uuid)
             tempDir = tempfile.TemporaryDirectory()
 
             Log(f"Downloading {theme['download_url']} to {tempDir.name}...")
@@ -473,7 +482,7 @@ class RemoteInstall:
 
             Log(f"Unzipping {themeZipPath}")
             await self.run(f"unzip -o \"{themeZipPath}\" -d /home/deck/homebrew/themes")
-            
+
             tempDir.cleanup()
         except Exception as e:
             return Result(False, str(e))
@@ -481,7 +490,6 @@ class RemoteInstall:
         return Result(True)
 
 class Plugin:
-
     async def dummy_function(self) -> bool:
         return True
 
@@ -492,21 +500,20 @@ class Plugin:
         Log(f"Setting state for {name} to {state}")
         for x in self.themes:
             if (x.name == name):
-
                 if state:
                     for y in x.dependencies:
-                        dep_theme = await self._get_theme(self, y)
-                        if dep_theme is not None:
-                            if dep_theme.enabled:
-                                await dep_theme.remove()
+                        dependency = await self._get_theme(self, y)
+                        if dependency is not None:
+                            if dependency.enabled:
+                                await dependency.remove()
                             
                             for z in x.dependencies[y]:
                                 value = x.dependencies[y][z]
-                                for patch in dep_theme.patches:
+                                for patch in dependency.patches:
                                     if patch.name == z:
                                         patch.set_value(value)
                             
-                            await dep_theme.inject()
+                            await self.set_theme_state(self, dependency.name, True)
 
                 result = await x.inject() if state else await x.remove()
                 return result.to_dict()
@@ -514,7 +521,38 @@ class Plugin:
         return Result(False, f"Did not find theme {name}").to_dict()
 
     async def download_theme(self, uuid : str) -> dict:
-        return (await self.remote.install(uuid)).to_dict()
+        try:
+            theme_db_entry = await self.remote.get_theme_db_entry_by_uuid(uuid)
+        except Exception as e:
+            return Result(False, str(e)).to_dict()
+
+        result = await self.remote.install(uuid)
+        if not result.success:
+            return result.to_dict()
+
+        possibleThemeJsonPath = os.path.join("/home/deck/homebrew/themes", theme_db_entry["name"], "theme.json")
+        if (os.path.exists(possibleThemeJsonPath)):
+            with open(possibleThemeJsonPath, "r") as fp:
+                theme = json.load(fp)
+            
+            parsedTheme = Theme(possibleThemeJsonPath, theme)
+            for x in parsedTheme.dependencies:
+                found = False
+                for y in self.themes:
+                    if y.name == x:
+                        found = True
+                        break
+                
+                if not found:
+                    try:
+                        theme_db_dependency = await self.remote.get_theme_db_entry_by_name(x)
+                        result = await self.download_theme(self, theme_db_dependency["id"])
+                        if not result["success"]:
+                            raise Exception(result["message"])
+                    except Exception as e:
+                        return Result(False, str(e)).to_dict()
+
+        return Result(True).to_dict()
     
     async def get_theme_db_data(self) -> list:
         return self.remote.themes
@@ -620,7 +658,7 @@ class Plugin:
         await self._cache_lists(self)
         return Result(True).to_dict()
 
-    async def _inject_test_element(self, tab : str) -> Result:
+    async def _inject_test_element(self, tab : str, timeout : int = 3) -> Result:
         attempt = 0
         while True:
             if await self._check_test_element(self, tab):
@@ -640,8 +678,8 @@ class Plugin:
 
                 attempt += 1
 
-                if (attempt >= 3):
-                    return Result(False, f"Inject into tab '{tab}' was attempted 3 times, stopping")
+                if (attempt >= timeout):
+                    return Result(False, f"Inject into tab '{tab}' was attempted {timeout} times, stopping")
 
                 await asyncio.sleep(1)
             
@@ -762,7 +800,7 @@ class Plugin:
         await self.remote.load()
 
         await self._load(self)
-        await self._inject_test_element(self, "SP")
+        await self._inject_test_element(self, "SP", 9999)
         await self._load_stage_2(self)
 
         Log(f"Initialized css loader. Found {len(self.themes)} themes, which inject into {len(self.tabs)} tabs ({self.tabs}). Total {len(self.injects)} injects, {len([x for x in self.injects if x.enabled])} injected")
