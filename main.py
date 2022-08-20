@@ -14,6 +14,10 @@ Logger = getLogger("CSS_LOADER")
 def Log(text : str):
     Logger.info(text)
 
+async def create_symlink(src : str, dst : str):
+    if not os.path.exists(dst):
+        os.symlink(src, dst, True)
+
 def createDir(dirPath : str):
     if (path.exists(dirPath)):
         return
@@ -754,6 +758,10 @@ class Plugin:
 
         themesPath = "/home/deck/homebrew/themes"
         defaultThemesPath = "/home/deck/homebrew/plugins/SDH-CssLoader/themes"
+        symlinkPath = "/home/deck/.local/share/Steam/steamui/themes_custom"
+
+        if (not os.path.exists(symlinkPath)):
+            await create_symlink(themesPath, symlinkPath)
 
         if (not path.exists(themesPath)):
             createDir(themesPath)
