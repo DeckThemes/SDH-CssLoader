@@ -38,6 +38,16 @@ class Result:
     def to_dict(self):
         return {"success": self.success, "message": self.message}
 
+async def create_symlink(src : str, dst : str) -> Result:
+   
+    try:
+        if not os.path.exists(dst):
+            os.symlink(src, dst, True)
+    except Exception as e:
+        return Result(False, str(e))
+
+    return Result(True)
+
 class Inject:
     def __init__(self, cssPath : str, tabs : List[str], theme):
         self.css = None
@@ -796,6 +806,7 @@ class Plugin:
 
         self.themes = []
         Log("Initializing css loader...")
+        await create_symlink("/home/deck/homebrew/themes", "/home/deck/.local/share/Steam/steamui/themes_custom")
         self.remote = RemoteInstall(self)
         await self.remote.load()
 
