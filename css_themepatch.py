@@ -6,7 +6,7 @@ class ThemePatch:
     def __init__(self, theme, json : dict, name : str):
         self.json = json
         self.name = name
-        self.default = json["default"]
+        self.default = json["default"] if "default" in json else None
         self.type = json["type"] if "type" in json else "dropdown"
         self.theme = theme
         self.value = self.default
@@ -26,6 +26,12 @@ class ThemePatch:
                     continue
 
                 self.options[x] = []
+        
+        if len(self.options) <= 0:
+            raise Exception(f"In patch '{name}' there is less than 1 value present")
+
+        if self.default is None:
+            self.default = list(self.options.keys())[0]
         
         if self.default not in self.options:
             raise Exception(f"In patch '{self.name}', '{self.default}' does not exist as a patch option")
@@ -67,7 +73,7 @@ class ThemePatch:
         if (self.value not in self.options):
             self.value = self.default
 
-        if (self.type not in ["dropdown", "checkbox", "slider"]):
+        if (self.type not in ["dropdown", "checkbox", "slider", "none"]):
             self.type = "dropdown"
         
         if (self.type == "checkbox"):
