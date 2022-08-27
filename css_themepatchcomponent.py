@@ -13,6 +13,18 @@ class ThemePatchComponent:
             raise Exception(f"Unknown component type '{self.type}'")
 
         self.default = component["default"]
+
+        if self.type == "color-picker":
+            if self.default[0] != "#":
+                raise Exception("Color picker default is not a valid hex value")
+            
+            if len(self.default) not in [4,5,7,9]:
+                raise Exception("Color picker default is not a valid hex value")
+
+            for x in self.default[1:]:
+                if x not in "1234567890ABCDEF":
+                    raise Exception("Color picker default is not a valid hex value")
+
         self.value = self.default
         self.on = component["on"]
         self.css_variable = component["css_variable"]
