@@ -22,7 +22,7 @@ class ThemePatchComponent:
                 raise Exception("Color picker default is not a valid hex value")
 
             for x in self.default[1:]:
-                if x not in "1234567890ABCDEF":
+                if x not in "1234567890ABCDEFabcdef":
                     raise Exception("Color picker default is not a valid hex value")
 
         self.value = self.default
