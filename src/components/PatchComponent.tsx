@@ -7,7 +7,7 @@ import { showModal, ButtonItem, PanelSectionRow } from "decky-frontend-lib";
 import { ColorPickerModal } from "./ColorPickerModal";
 import { themePatchComponent } from "../theme";
 import { useCssLoaderState } from "../state";
-import { anythingToHSL } from "../logic";
+import { anythingToHSLA } from "../logic";
 
 export const PatchComponent: VFC<{
   data: themePatchComponent;
@@ -22,11 +22,8 @@ export const PatchComponent: VFC<{
 
     switch (data.type) {
       default:
-        const curColorHSLArray = anythingToHSL(data.value);
-        const hslString = `hsl(${curColorHSLArray[0]}, ${curColorHSLArray
-          .slice(1)
-          .map((e) => `${e}%`)
-          .join(", ")})`;
+        const curColorHSLArray = anythingToHSLA(data.value);
+        const hslString = `hsla(${curColorHSLArray[0]}, ${curColorHSLArray[1]}%, ${curColorHSLArray[2]}%, ${curColorHSLArray[3]})`;
 
         return (
           <>
@@ -36,7 +33,7 @@ export const PatchComponent: VFC<{
                   showModal(
                     // @ts-ignore -- showModal passes the closeModal function to this, but for some reason it's giving me a typescript error because I didn't explicitly pass it myself
                     <ColorPickerModal
-                      onConfirm={(HSLString, closeModal) => {
+                      onConfirm={(HSLString) => {
                         python.resolve(
                           python.setComponentOfThemePatch(
                             themeName,
@@ -45,7 +42,6 @@ export const PatchComponent: VFC<{
                             HSLString
                           ),
                           () => {
-                            closeModal();
                             python.resolve(python.getThemes(), setThemeList);
                           }
                         );
@@ -53,6 +49,7 @@ export const PatchComponent: VFC<{
                       defaultH={curColorHSLArray[0]}
                       defaultS={curColorHSLArray[1]}
                       defaultL={curColorHSLArray[2]}
+                      defaultA={curColorHSLArray[3]}
                       title={data.name}
                     />
                   )

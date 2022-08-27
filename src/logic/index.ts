@@ -1,2 +1,2 @@
-export * from "./anythingToHSL";
+export * from "./anythingToHSLA";
 export * from "./calcButtonColor";

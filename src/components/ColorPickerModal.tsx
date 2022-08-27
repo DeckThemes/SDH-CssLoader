@@ -1,14 +1,14 @@
 import { ModalRoot, SliderField } from "decky-frontend-lib";
-import { useState, VFC } from "react";
+import { CSSProperties, useState, VFC } from "react";
 
 interface ColorPickerModalProps {
   closeModal: () => void;
-  onConfirm?(HSLString: string, closeModal: () => void): any;
+  onConfirm?(HSLString: string): any;
   title?: string;
   defaultH?: number;
   defaultS?: number;
   defaultL?: number;
-  // defaultA?: number;
+  defaultA?: number;
 }
 
 export const ColorPickerModal: VFC<ColorPickerModalProps> = ({
@@ -18,23 +18,23 @@ export const ColorPickerModal: VFC<ColorPickerModalProps> = ({
   defaultH = 0,
   defaultS = 100,
   defaultL = 50,
-  // defaultA = 1,
+  defaultA = 1,
 }) => {
   const [H, setH] = useState<number>(defaultH);
   const [S, setS] = useState<number>(defaultS);
   const [L, setL] = useState<number>(defaultL);
-  // const [A, setA] = useState<number>(defaultA);
+  const [A, setA] = useState<number>(defaultA);
 
+  const colorPickerCSSVars = {
+    "--decky-color-picker-hvalue": `${H}`,
+    "--decky-color-picker-svalue": `${S}%`,
+    "--decky-color-picker-lvalue": `${L}%`,
+    "--decky-color-picker-avalue": `${A}`,
+  } as CSSProperties;
   return (
     <>
       <style>
         {`
-        :root {
-          --decky-color-picker-hvalue: ${H};
-          --decky-color-picker-svalue: ${S}%;
-          --decky-color-picker-lvalue: ${L}%;
-        }
-
         /* This removes the cyan track color that is behind the slider head */
         .ColorPicker_Container .gamepadslider_SliderTrack_Mq25N {
           --left-track-color: #0000;
@@ -45,28 +45,36 @@ export const ColorPickerModal: VFC<ColorPickerModalProps> = ({
         .ColorPicker_HSlider .gamepadslider_SliderTrack_Mq25N {
           background: linear-gradient(
             270deg,
-            hsl(360, var(--decky-color-picker-svalue), var(--decky-color-picker-lvalue)),
-            hsl(270, var(--decky-color-picker-svalue), var(--decky-color-picker-lvalue)),
-            hsl(180, var(--decky-color-picker-svalue), var(--decky-color-picker-lvalue)),
-            hsl(90, var(--decky-color-picker-svalue), var(--decky-color-picker-lvalue)),
-            hsl(0, var(--decky-color-picker-svalue), var(--decky-color-picker-lvalue))
+            hsla(360, var(--decky-color-picker-svalue), var(--decky-color-picker-lvalue), var(--decky-color-picker-avalue)),
+            hsla(270, var(--decky-color-picker-svalue), var(--decky-color-picker-lvalue), var(--decky-color-picker-avalue)),
+            hsla(180, var(--decky-color-picker-svalue), var(--decky-color-picker-lvalue), var(--decky-color-picker-avalue)),
+            hsla(90, var(--decky-color-picker-svalue), var(--decky-color-picker-lvalue), var(--decky-color-picker-avalue)),
+            hsla(0, var(--decky-color-picker-svalue), var(--decky-color-picker-lvalue), var(--decky-color-picker-avalue))
           );
         }
 
         .ColorPicker_SSlider .gamepadslider_SliderTrack_Mq25N {
           background: linear-gradient(
             90deg,
-            hsl(var(--decky-color-picker-hvalue), 0%, var(--decky-color-picker-lvalue)),
-            hsl(var(--decky-color-picker-hvalue), 100%, var(--decky-color-picker-lvalue))
+            hsla(var(--decky-color-picker-hvalue), 0%, var(--decky-color-picker-lvalue), var(--decky-color-picker-avalue)),
+            hsla(var(--decky-color-picker-hvalue), 100%, var(--decky-color-picker-lvalue), var(--decky-color-picker-avalue))
           );
         }
 
         .ColorPicker_LSlider .gamepadslider_SliderTrack_Mq25N {
           background: linear-gradient(
             90deg,
-            hsl(var(--decky-color-picker-hvalue), var(--decky-color-picker-svalue), 0%),
-            hsl(var(--decky-color-picker-hvalue), var(--decky-color-picker-svalue), 50%),
-            hsl(var(--decky-color-picker-hvalue), var(--decky-color-picker-svalue), 100%)
+            hsla(var(--decky-color-picker-hvalue), var(--decky-color-picker-svalue), 0%, var(--decky-color-picker-avalue)),
+            hsla(var(--decky-color-picker-hvalue), var(--decky-color-picker-svalue), 50%, var(--decky-color-picker-avalue)),
+            hsla(var(--decky-color-picker-hvalue), var(--decky-color-picker-svalue), 100%, var(--decky-color-picker-avalue))
+          );
+        }
+
+        .ColorPicker_ASlider .gamepadslider_SliderTrack_Mq25N {
+          background: linear-gradient(
+            90deg,
+            hsla(var(--decky-color-picker-hvalue), var(--decky-color-picker-svalue), var(--decky-color-picker-lvalue), 0),
+            hsla(var(--decky-color-picker-hvalue), var(--decky-color-picker-svalue), var(--decky-color-picker-lvalue), 1)
           );
         }
         `}
@@ -75,7 +83,8 @@ export const ColorPickerModal: VFC<ColorPickerModalProps> = ({
         bAllowFullSize
         onCancel={closeModal}
         onOK={() => {
-          onConfirm(`hsl(${H}, ${S}%, ${L}%)`, closeModal);
+          onConfirm(`hsla(${H}, ${S}%, ${L}%, ${A})`);
+          closeModal();
         }}
       >
         <div
@@ -96,13 +105,13 @@ export const ColorPickerModal: VFC<ColorPickerModalProps> = ({
           </div>
           <div
             style={{
-              backgroundColor: `hsl(${H}, ${S}%, ${L}%)`,
+              backgroundColor: `hsla(${H}, ${S}%, ${L}%, ${A})`,
               width: "40px",
               height: "40px",
             }}
           ></div>
         </div>
-        <div className="ColorPicker_Container">
+        <div className="ColorPicker_Container" style={colorPickerCSSVars}>
           <div className="ColorPicker_HSlider">
             <SliderField
               showValue
@@ -134,6 +143,18 @@ export const ColorPickerModal: VFC<ColorPickerModalProps> = ({
               min={0}
               max={100}
               onChange={setL}
+            />
+          </div>
+          <div className="ColorPicker_ASlider">
+            <SliderField
+              showValue
+              editableValue
+              label="Alpha"
+              value={A}
+              step={0.1}
+              min={0}
+              max={1}
+              onChange={setA}
             />
           </div>
         </div>
