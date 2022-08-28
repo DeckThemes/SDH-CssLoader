@@ -12,7 +12,11 @@ import { useEffect, useState, VFC } from "react";
 import * as python from "./python";
 import { RiPaintFill } from "react-icons/ri";
 
-import { ThemeBrowserPage, UninstallThemePage } from "./theme-manager";
+import {
+  AboutPage,
+  ThemeBrowserPage,
+  UninstallThemePage,
+} from "./theme-manager";
 import {
   CssLoaderContextProvider,
   CssLoaderState,
@@ -109,6 +113,11 @@ const ThemeManagerRouter: VFC = () => {
           title: "Uninstall Themes",
           content: <UninstallThemePage />,
           route: "/theme-manager/uninstall",
+        },
+        {
+          title: "About CSS Loader",
+          content: <AboutPage />,
+          route: "/theme-manager/about",
         },
       ]}
     />
