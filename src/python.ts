@@ -75,7 +75,7 @@ export function toast(title: string, message: string) {
   return server?.toaster.toast({
     title: title,
     body: message,
-    duration: 3000,
+    duration: 8000,
   });
 }
 
