@@ -9,6 +9,7 @@ export const ThemeToggle: VFC<{ data: Theme; setThemeList: any }> = ({
   data,
   setThemeList,
 }) => {
+  console.log(data);
   return (
     <>
       <PanelSectionRow>
@@ -20,6 +21,18 @@ export const ThemeToggle: VFC<{ data: Theme; setThemeList: any }> = ({
           label={data.name}
           description={data.description}
           onChange={(switchValue: boolean) => {
+            // Dependency Toast
+            if (switchValue === true && data.dependencies.length > 0) {
+              python.toast(
+                `${data.name} enabled other themes`,
+                // @ts-ignore
+                `${new Intl.ListFormat().format(data.dependencies)} ${
+                  data.dependencies.length > 1 ? "are" : "is"
+                } required for this theme`
+              );
+            }
+
+            // Actually enabling the theme
             python.resolve(python.setThemeState(data.name, switchValue), () => {
               python.resolve(python.getThemes(), setThemeList);
             });

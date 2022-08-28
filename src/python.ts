@@ -66,8 +66,16 @@ export function setComponentOfThemePatch(
   return server!.callPluginMethod("set_component_of_theme_patch", {
     themeName: themeName,
     patchName: patchName,
-	  componentName: componentName,
+    componentName: componentName,
     value: value,
+  });
+}
+
+export function toast(title: string, message: string) {
+  return server?.toaster.toast({
+    title: title,
+    body: message,
+    duration: 3000,
   });
 }
 
