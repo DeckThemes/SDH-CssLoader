@@ -9,7 +9,6 @@ export const ThemeToggle: VFC<{ data: Theme; setThemeList: any }> = ({
   data,
   setThemeList,
 }) => {
-  console.log(data);
   return (
     <>
       <PanelSectionRow>

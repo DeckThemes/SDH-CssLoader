@@ -54,6 +54,19 @@ export const ThemePatch: VFC<{
               }))}
             />
           </PanelSectionRow>
+          {data.components.length > 0 ? (
+            <>
+              {data.components.map((e) => (
+                <PatchComponent
+                  data={e}
+                  selectedLabel={selectedLabel}
+                  themeName={data.theme.name}
+                  patchName={data.name}
+                  bottomSeparatorValue={bottomSeparatorValue}
+                />
+              ))}
+            </>
+          ) : null}
         </>
       );
     case "checkbox":
@@ -75,9 +88,22 @@ export const ThemePatch: VFC<{
               }}
             />
           </PanelSectionRow>
+          {data.components.length > 0 ? (
+            <>
+              {data.components.map((e) => (
+                <PatchComponent
+                  data={e}
+                  selectedLabel={selectedLabel}
+                  themeName={data.theme.name}
+                  patchName={data.name}
+                  bottomSeparatorValue={bottomSeparatorValue}
+                />
+              ))}
+            </>
+          ) : null}
         </>
       );
-    default:
+    case "dropdown":
       return (
         <>
           <PanelSectionRow>
@@ -107,11 +133,36 @@ export const ThemePatch: VFC<{
                   selectedLabel={selectedLabel}
                   themeName={data.theme.name}
                   patchName={data.name}
+                  bottomSeparatorValue={bottomSeparatorValue}
                 />
               ))}
             </>
           ) : null}
         </>
       );
+    case "none":
+      return (
+        <>
+          <PanelSectionRow>
+            {/* For some reason spans by default have a gray color, so I manually set it to the same white as the other titles */}
+            <span style={{ color: "#dcdedf" }}>↳ {data.name}</span>
+          </PanelSectionRow>
+          {data.components.length > 0 ? (
+            <>
+              {data.components.map((e) => (
+                <PatchComponent
+                  data={e}
+                  selectedLabel={selectedLabel}
+                  themeName={data.theme.name}
+                  patchName={data.name}
+                  bottomSeparatorValue={bottomSeparatorValue}
+                />
+              ))}
+            </>
+          ) : null}
+        </>
+      );
+    default:
+      return null;
   }
 };
