@@ -14,7 +14,8 @@ export const PatchComponent: VFC<{
   selectedLabel: string;
   themeName: string;
   patchName: string;
-}> = ({ data, selectedLabel, themeName, patchName }) => {
+  bottomSeparatorValue: boolean | undefined;
+}> = ({ data, selectedLabel, themeName, patchName, bottomSeparatorValue }) => {
   if (selectedLabel === data.on) {
     // This is used by the ColorPickerModal, but im getting errors when I attempt to call it from that
     // I think it's because QAM and SP are different tabs
@@ -29,6 +30,7 @@ export const PatchComponent: VFC<{
           <>
             <PanelSectionRow>
               <ButtonItem
+                bottomSeparator={bottomSeparatorValue}
                 onClick={() =>
                   showModal(
                     // @ts-ignore -- showModal passes the closeModal function to this, but for some reason it's giving me a typescript error because I didn't explicitly pass it myself
@@ -57,7 +59,7 @@ export const PatchComponent: VFC<{
                 layout={"below"}
               >
                 <div style={{ display: "flex", alignItems: "center" }}>
-                  <span>Open Color Picker</span>
+                  <span>Open {data.name}</span>
                   <div
                     style={{
                       marginLeft: "auto",

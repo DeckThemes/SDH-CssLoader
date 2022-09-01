@@ -4,11 +4,13 @@ export class Theme {
   name: string = "";
   description: string = "";
   patches: Patch[] = [];
+  dependencies: string[] = [];
 
   // This init function is called by the setter function in GlobalState
   init() {
     this.name = this.data.name;
     this.checked = this.data.enabled;
+    this.dependencies = this.data.dependencies;
 
     this.description = this.data.version;
     if (this.data.author != "") {
