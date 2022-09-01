@@ -91,7 +91,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
             python.resolve(python.reset(), () => reload());
           }}
         >
-          Reload themes
+          Reload Themes
         </ButtonItem>
       </PanelSectionRow>
     </PanelSection>
