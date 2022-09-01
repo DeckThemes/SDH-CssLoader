@@ -62,7 +62,7 @@ export const PatchComponent: VFC<{
                 layout={"below"}
               >
                 <div style={{ display: "flex", alignItems: "center" }}>
-                  <span>Open Color Picker</span>
+                  <span>Open {data.name}</span>
                   <div
                     style={{
                       marginLeft: "auto",
