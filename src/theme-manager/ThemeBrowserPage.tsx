@@ -161,7 +161,7 @@ export const ThemeBrowserPage: VFC = () => {
           .filter(searchFilter)
           .filter((e: browseThemeEntry) => {
             if (selectedTarget.label === "All") {
-              return true;
+              return e.target !== "Background"
             } else if (selectedTarget.label === "Installed") {
               const strValue = checkIfThemeInstalled(e);
               return strValue === "installed" || strValue === "outdated";
