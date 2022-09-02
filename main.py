@@ -319,6 +319,7 @@ class Plugin:
 
         self.themes = []
         Log("Initializing css loader...")
+        Log(f"Max supported manifest version: {CSS_LOADER_VER}")
         await create_symlink("/home/deck/homebrew/themes", "/home/deck/.local/share/Steam/steamui/themes_custom")
         self.remote = RemoteInstall(self)
         await self.remote.load()

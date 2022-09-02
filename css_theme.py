@@ -5,7 +5,7 @@ from css_inject import Inject
 from css_utils import Result, Log, create_dir
 from css_themepatch import ThemePatch
 
-CSS_LOADER_VER = 2
+CSS_LOADER_VER = 3
 
 class Theme:
     def __init__(self, themePath : str, json : dict, configPath : str = None):
