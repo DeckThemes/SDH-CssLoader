@@ -1,6 +1,6 @@
 {
   "name": "SDH-CssLoader",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A css loader",
   "scripts": {
     "build": "shx rm -rf dist && rollup -c",
