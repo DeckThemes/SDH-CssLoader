@@ -7,6 +7,7 @@ import * as python from "../python";
 import { browseThemeEntry } from "../customTypes";
 import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
+import { calcButtonColor } from "../logic";
 
 export const ExpandedViewPage: VFC = () => {
   const {
@@ -46,19 +47,6 @@ export const ExpandedViewPage: VFC = () => {
   }
   // These are just switch statements I use to determine text/css for the buttons
   // I put them up here just because I find it clearer to read when they aren't inline
-  function calcButtonColor(installStatus: string) {
-    let filterCSS = "";
-    switch (installStatus) {
-      case "outdated":
-        filterCSS =
-          "invert(6%) sepia(90%) saturate(200%) hue-rotate(160deg) contrast(122%)";
-        break;
-      default:
-        filterCSS = "";
-        break;
-    }
-    return filterCSS;
-  }
   function calcButtonText(installStatus: string) {
     let buttonText = "";
     switch (installStatus) {

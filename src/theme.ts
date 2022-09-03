@@ -4,10 +4,13 @@ export class Theme {
   name: string = "";
   description: string = "";
   patches: Patch[] = [];
+  dependencies: string[] = [];
 
+  // This init function is called by the setter function in GlobalState
   init() {
     this.name = this.data.name;
     this.checked = this.data.enabled;
+    this.dependencies = this.data.dependencies;
 
     this.description = this.data.version;
     if (this.data.author != "") {
@@ -25,6 +28,13 @@ export class Theme {
   }
 }
 
+export interface themePatchComponent {
+  name: string;
+  on: string;
+  type: string;
+  value: string;
+}
+
 export class Patch {
   data: any;
   theme: Theme;
@@ -34,6 +44,7 @@ export class Patch {
   options: string[] = [];
   index: number = 0;
   type: string = "dropdown";
+  components: themePatchComponent[] = [];
 
   constructor(theme: Theme) {
     this.theme = theme;
@@ -45,6 +56,7 @@ export class Patch {
     this.value = this.data.value;
     this.options = this.data.options;
     this.type = this.data.type;
+    this.components = this.data.components;
 
     this.index = this.options.indexOf(this.value);
   }
