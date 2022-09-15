@@ -40,7 +40,7 @@ export const ThemeBrowserPage: VFC = () => {
   // const [selectedTarget, setTarget] = useState<SingleDropdownOption>({ data: 1, label: "All", });
   // const [selectedSort, setSort] = useState<number>(3);
 
-  const [backendVersion, setBackendVer] = useState<number>(2);
+  const [backendVersion, setBackendVer] = useState<number>(3);
   function reloadBackendVer() {
     python.resolve(python.getBackendVersion(), setBackendVer);
   }
@@ -161,7 +161,7 @@ export const ThemeBrowserPage: VFC = () => {
           .filter(searchFilter)
           .filter((e: browseThemeEntry) => {
             if (selectedTarget.label === "All") {
-              return e.target !== "Background"
+              return e.target !== "Background";
             } else if (selectedTarget.label === "Installed") {
               const strValue = checkIfThemeInstalled(e);
               return strValue === "installed" || strValue === "outdated";

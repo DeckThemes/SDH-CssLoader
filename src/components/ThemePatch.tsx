@@ -117,8 +117,8 @@ export const ThemePatch: VFC<{
               selectedOption={data.index}
               onChange={(index) => {
                 data.index = index.data;
-                data.value = index.label;
-                setLabel(index.label);
+                data.value = index.label as string;
+                setLabel(data.value);
                 python.execute(
                   python.setPatchOfTheme(data.theme.name, data.name, data.value)
                 );
