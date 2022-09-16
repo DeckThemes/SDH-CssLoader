@@ -8,7 +8,7 @@ specifiers:
   '@rollup/plugin-typescript': ^8.3.2
   '@types/react': 16.14.0
   '@types/webpack': ^5.28.0
-  decky-frontend-lib: ^1.7.5
+  decky-frontend-lib: 3.0.0
   react-icons: ^4.3.1
   rollup: ^2.70.2
   rollup-plugin-import-assets: ^1.1.1
@@ -18,7 +18,7 @@ specifiers:
   typescript: ^4.6.4
 
 dependencies:
-  decky-frontend-lib: 1.7.5
+  decky-frontend-lib: 3.0.0
   react-icons: 4.4.0
 
 devDependencies:
@@ -632,8 +632,8 @@ packages:
     resolution: {integrity: sha512-uX1KG+x9h5hIJsaKR9xHUeUraxf8IODOwq9JLNPq6BwB04a/xgpq3rcx47l5BZu5zBPlgD342tdke3Hom/nJRA==}
     dev: true
 
-  /decky-frontend-lib/1.7.5:
-    resolution: {integrity: sha512-1OX/Ix9W76gF0NJjfm0k/01LYPmC2k/k+k/qqH8JJPlPHh5+W5P8ZG2T8m5wKsqoP7jx2W3k7RNZBh9vAqFoFw==}
+  /decky-frontend-lib/3.0.0:
+    resolution: {integrity: sha512-ZqJ9ii7QoYWHFfkU8hV82IHi3+McZDmE4wS22duXpgRI8r5BBMiZItw6tYkc24ZtsJIVso83FFt7adcEBqBwJA==}
     dependencies:
       minimist: 1.2.6
     dev: false
@@ -976,7 +976,7 @@ packages:
 
   /minimist/1.2.6:
     resolution: {integrity: sha512-Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q==}
-    
+
   /nanoid/3.3.4:
     resolution: {integrity: sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}

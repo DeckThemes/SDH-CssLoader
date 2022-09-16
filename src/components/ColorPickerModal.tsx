@@ -1,4 +1,4 @@
-import { ModalRoot, SliderField } from "decky-frontend-lib";
+import { ConfirmModal, SliderField } from "decky-frontend-lib";
 import { CSSProperties, useState, VFC } from "react";
 
 interface ColorPickerModalProps {
@@ -79,7 +79,7 @@ export const ColorPickerModal: VFC<ColorPickerModalProps> = ({
         }
         `}
       </style>
-      <ModalRoot
+      <ConfirmModal
         bAllowFullSize
         onCancel={closeModal}
         onOK={() => {
@@ -158,7 +158,7 @@ export const ColorPickerModal: VFC<ColorPickerModalProps> = ({
             />
           </div>
         </div>
-      </ModalRoot>
+      </ConfirmModal>
     </>
   );
 };

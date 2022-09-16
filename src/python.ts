@@ -72,11 +72,18 @@ export function setComponentOfThemePatch(
 }
 
 export function toast(title: string, message: string) {
-  return server?.toaster.toast({
-    title: title,
-    body: message,
-    duration: 8000,
-  });
+  // This is a weirdo self-invoking function, but it works.
+  return (() => {
+    try {
+      return server?.toaster.toast({
+        title: title,
+        body: message,
+        duration: 8000,
+      });
+    } catch (e) {
+      console.log("CSSLoader Toaster Error", e);
+    }
+  })();
 }
 
 export function downloadTheme(uuid: string): Promise<any> {

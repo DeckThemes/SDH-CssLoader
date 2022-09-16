@@ -20,6 +20,10 @@ export const ThemeToggle: VFC<{ data: Theme; setThemeList: any }> = ({
           label={data.name}
           description={data.description}
           onChange={(switchValue: boolean) => {
+            // Actually enabling the theme
+            python.resolve(python.setThemeState(data.name, switchValue), () => {
+              python.resolve(python.getThemes(), setThemeList);
+            });
             // Dependency Toast
             if (switchValue === true && data.dependencies.length > 0) {
               python.toast(
@@ -30,11 +34,6 @@ export const ThemeToggle: VFC<{ data: Theme; setThemeList: any }> = ({
                 } required for this theme`
               );
             }
-
-            // Actually enabling the theme
-            python.resolve(python.setThemeState(data.name, switchValue), () => {
-              python.resolve(python.getThemes(), setThemeList);
-            });
           }}
         />
       </PanelSectionRow>
