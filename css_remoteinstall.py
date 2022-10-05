@@ -1,5 +1,5 @@
 import asyncio, json, tempfile, os
-from css_utils import Result, Log
+from css_utils import Result, Log, get_user_home
 
 class RemoteInstall:
     def __init__(self, plugin):
@@ -61,7 +61,7 @@ class RemoteInstall:
             await self.run(f"curl \"{theme['download_url']}\" -L -o \"{themeZipPath}\"")
 
             Log(f"Unzipping {themeZipPath}")
-            await self.run(f"unzip -o \"{themeZipPath}\" -d /home/deck/homebrew/themes")
+            await self.run(f"unzip -o \"{themeZipPath}\" -d \"{get_user_home()}/homebrew/themes\"")
 
             tempDir.cleanup()
         except Exception as e:

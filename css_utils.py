@@ -1,6 +1,8 @@
 from logging import getLogger
 import os
 from os import path
+from helpers import get_user
+import pwd
 
 Logger = getLogger("CSS_LOADER")
 
@@ -28,8 +30,15 @@ def create_dir(dirPath : str):
 
     os.mkdir(dirPath)
 
-    if (os.stat(dirPath).st_uid != 1000):
-        os.chown(dirPath, 1000, 1000) # Change to deck user
+    a = pwd.getpwnam(get_user())
+    uid = a.pw_uid
+    gid = a.pw_gid
+
+    if (os.stat(dirPath).st_uid != uid):
+        os.chown(dirPath, uid, gid) # Change to deck user
+
+def get_user_home() -> str:
+    return f"/home/{get_user()}" 
 
 async def create_symlink(src : str, dst : str) -> Result:
     try:
