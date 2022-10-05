@@ -4,7 +4,7 @@ from injector import inject_to_tab, tab_has_element
 
 sys.path.append(os.path.dirname(__file__))
 
-from css_utils import Log, create_dir, create_symlink, Result
+from css_utils import Log, create_dir, create_symlink, Result, get_user_home
 from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
@@ -53,7 +53,7 @@ class Plugin:
         if not result.success:
             return result.to_dict()
 
-        possibleThemeJsonPath = os.path.join("/home/deck/homebrew/themes", theme_db_entry["name"], "theme.json")
+        possibleThemeJsonPath = os.path.join(get_user_home(), "homebrew/themes", theme_db_entry["name"], "theme.json")
         if (os.path.exists(possibleThemeJsonPath)):
             with open(possibleThemeJsonPath, "r") as fp:
                 theme = json.load(fp)
@@ -275,8 +275,8 @@ class Plugin:
         Log("Loading themes...")
         self.themes = []
 
-        themesPath = "/home/deck/homebrew/themes"
-        defaultThemesPath = "/home/deck/homebrew/plugins/SDH-CssLoader/themes"
+        themesPath = f"{get_user_home()}/homebrew/themes"
+        defaultThemesPath = f"{get_user_home()}/homebrew/plugins/SDH-CssLoader/themes"
 
         if (not path.exists(themesPath)):
             create_dir(themesPath)
@@ -320,7 +320,7 @@ class Plugin:
         self.themes = []
         Log("Initializing css loader...")
         Log(f"Max supported manifest version: {CSS_LOADER_VER}")
-        await create_symlink("/home/deck/homebrew/themes", "/home/deck/.local/share/Steam/steamui/themes_custom")
+        await create_symlink(f"{get_user_home()}/homebrew/themes", f"{get_user_home()}/.local/share/Steam/steamui/themes_custom")
         self.remote = RemoteInstall(self)
         await self.remote.load()
 
