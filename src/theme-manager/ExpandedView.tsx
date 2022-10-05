@@ -141,7 +141,7 @@ export const ExpandedViewPage: VFC = () => {
                       // They forgot to add the ref property to the buttons interface, so I'm just tsignoring the warning
                       // @ts-ignore
                       ref={backButtonRef}
-                      bottomSeparator={false}
+                      bottomSeparator="none"
                       layout="below"
                       onClick={() => {
                         setCurExpandedTheme(undefined);

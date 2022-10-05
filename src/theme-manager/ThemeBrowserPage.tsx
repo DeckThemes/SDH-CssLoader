@@ -320,7 +320,7 @@ export const ThemeBrowserPage: VFC = () => {
                           }}
                         >
                           <ButtonItem
-                            bottomSeparator={false}
+                            bottomSeparator="none"
                             layout="below"
                             disabled={isInstalling}
                             onClick={() => {
