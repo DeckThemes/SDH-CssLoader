@@ -7,7 +7,7 @@ import {
   DropdownItem,
   Router,
 } from "decky-frontend-lib";
-import { useEffect, useMemo, useState, VFC } from "react";
+import { useLayoutEffect, useMemo, useState, VFC } from "react";
 
 import * as python from "../python";
 
@@ -123,7 +123,7 @@ export const ThemeBrowserPage: VFC = () => {
   }
 
   // Runs upon opening the page
-  useEffect(() => {
+  useLayoutEffect(() => {
     reloadBackendVer();
     getThemeDb();
     getInstalledThemes();
@@ -315,7 +315,6 @@ export const ThemeBrowserPage: VFC = () => {
                             // Before this, I was using negative margin to "shrink" the element, but this is a much better solution
                             paddingTop: "0px",
                             paddingBottom: "0px",
-
                             filter: calcButtonColor(installStatus),
                           }}
                         >
