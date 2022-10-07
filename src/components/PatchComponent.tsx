@@ -4,7 +4,7 @@ import * as python from "../python";
 
 import { showModal, ButtonItem, PanelSectionRow } from "decky-frontend-lib";
 
-import { ColorPickerModal } from "./ColorPickerModal";
+import { ColorPickerModal } from "decky-frontend-lib";
 import { themePatchComponent } from "../theme";
 import { useCssLoaderState } from "../state";
 import { anythingToHSLA } from "../logic";
@@ -14,7 +14,7 @@ export const PatchComponent: VFC<{
   selectedLabel: string;
   themeName: string;
   patchName: string;
-  bottomSeparatorValue: boolean | undefined;
+  bottomSeparatorValue: "standard" | "none";
 }> = ({ data, selectedLabel, themeName, patchName, bottomSeparatorValue }) => {
   if (selectedLabel === data.on) {
     // This is used by the ColorPickerModal, but im getting errors when I attempt to call it from that

@@ -19,7 +19,8 @@ export const ThemePatch: VFC<{
 
   const [selectedLabel, setLabel] = useState(data.value);
 
-  const bottomSeparatorValue = fullArr.length - 1 === index ? undefined : false;
+  const bottomSeparatorValue =
+    fullArr.length - 1 === index ? "standard" : "none";
 
   switch (data.type) {
     case "slider":
