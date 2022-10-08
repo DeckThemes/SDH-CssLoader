@@ -6,7 +6,7 @@ import {
   DropdownOption,
   DropdownItem,
   Router,
-  DialogButton,
+  // DialogButton,
 } from "decky-frontend-lib";
 import { useLayoutEffect, useMemo, useState, VFC } from "react";
 
@@ -133,6 +133,8 @@ export const ThemeBrowserPage: VFC = () => {
           selectedOption={selectedSort}
           onChange={(e) => setSort(e.data)}
         />
+      </PanelSectionRow>
+      <PanelSectionRow>
         <DropdownItem
           label="Filter"
           rgOptions={targetOptions}
@@ -149,7 +151,10 @@ export const ThemeBrowserPage: VFC = () => {
         />
       </PanelSectionRow>
       {/* I wrap everything in a Focusable, because that ensures that the dpad/stick navigation works correctly */}
-      <Focusable style={{ display: "flex", flexWrap: "wrap" }}>
+      {/* The 10px margin here is there because the card items themselves dont have margin left */}
+      <Focusable
+        style={{ display: "flex", flexWrap: "wrap", marginLeft: "10px" }}
+      >
         {themeArr
           // searchFilter also includes backend version check
           .filter(searchFilter)
@@ -192,7 +197,7 @@ export const ThemeBrowserPage: VFC = () => {
             return (
               // The outer 2 most divs are the background darkened/blurred image, and everything inside is the text/image/buttons
               <>
-                <DialogButton
+                <div
                   className="CssLoader_ThemeBrowser_SingleItem_BgImage"
                   style={{
                     backgroundImage: 'url("' + e.preview_image + '")',
@@ -204,7 +209,6 @@ export const ThemeBrowserPage: VFC = () => {
                     marginLeft: "0px",
                     marginRight: "5px",
                     marginBottom: "20px",
-                    padding: "0px",
                   }}
                 >
                   <div
@@ -305,6 +309,8 @@ export const ThemeBrowserPage: VFC = () => {
                             // This padding here overrides the default padding put on PanelSectionRow's by Valve
                             // Before this, I was using negative margin to "shrink" the element, but this is a much better solution
                             paddingTop: "0px",
+                            marginLeft: "-7.5px",
+                            marginRight: "-7.5px",
                             paddingBottom: "0px",
                             filter: calcButtonColor(installStatus),
                           }}
@@ -328,7 +334,7 @@ export const ThemeBrowserPage: VFC = () => {
                       </PanelSectionRow>
                     </div>
                   </div>
-                </DialogButton>
+                </div>
               </>
             );
           })}
