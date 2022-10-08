@@ -314,12 +314,16 @@ class Plugin:
         global Initialized
         if Initialized:
             return
+
+        Log("Waiting 1s...")
+        await asyncio.sleep(1)
         
         Initialized = True
 
         self.themes = []
         Log("Initializing css loader...")
         Log(f"Max supported manifest version: {CSS_LOADER_VER}")
+        
         await create_symlink(f"{get_user_home()}/homebrew/themes", f"{get_user_home()}/.local/share/Steam/steamui/themes_custom")
         self.remote = RemoteInstall(self)
         await self.remote.load()
