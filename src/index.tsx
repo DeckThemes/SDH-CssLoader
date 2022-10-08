@@ -5,10 +5,10 @@ import {
   PanelSectionRow,
   ServerAPI,
   staticClasses,
-  SidebarNavigation,
+  Tabs,
   Router,
 } from "decky-frontend-lib";
-import { useEffect, useState, VFC } from "react";
+import { useEffect, useState, FC } from "react";
 import * as python from "./python";
 import { RiPaintFill } from "react-icons/ri";
 
@@ -27,7 +27,7 @@ import { ExpandedViewPage } from "./theme-manager/ExpandedView";
 
 var firstTime: boolean = true;
 
-const Content: VFC<{ serverAPI: ServerAPI }> = () => {
+const Content: FC<{ serverAPI: ServerAPI }> = () => {
   // Originally, when SuchMeme wrote this, the names themeList, themeListInternal, and setThemeList were used for the getter and setter functions
   // These were renamed when state was moved to the context, but I simply re-defined them here as their original names so that none of the original code broke
   const { localThemeList: themeList, setLocalThemeList: setThemeList } =
@@ -98,29 +98,38 @@ const Content: VFC<{ serverAPI: ServerAPI }> = () => {
   );
 };
 
-const ThemeManagerRouter: VFC = () => {
+const ThemeManagerRouter: FC = () => {
+  const [currentTabRoute, setCurrentTabRoute] =
+    useState<string>("ThemeBrowser");
+
   return (
-    <SidebarNavigation
-      title="Theme Manager"
-      showTitle
-      pages={[
-        {
-          title: "Browse Themes",
-          content: <ThemeBrowserPage />,
-          route: "/theme-manager/browser",
-        },
-        {
-          title: "Uninstall Themes",
-          content: <UninstallThemePage />,
-          route: "/theme-manager/uninstall",
-        },
-        {
-          title: "About CSS Loader",
-          content: <AboutPage />,
-          route: "/theme-manager/about",
-        },
-      ]}
-    />
+    <div style={{ marginTop: "40px", height: "calc(100% - 40px)" }}>
+      <Tabs
+        title="Theme Manager"
+        activeTab={currentTabRoute}
+        // @ts-ignore
+        onShowTab={(tabID: string) => {
+          setCurrentTabRoute(tabID);
+        }}
+        tabs={[
+          {
+            title: "Browse Themes",
+            content: <ThemeBrowserPage />,
+            id: "ThemeBrowser",
+          },
+          {
+            title: "Uninstall Themes",
+            content: <UninstallThemePage />,
+            id: "UninstallThemes",
+          },
+          {
+            title: "About CSS Loader",
+            content: <AboutPage />,
+            id: "AboutCSSLoader",
+          },
+        ]}
+      />
+    </div>
   );
 };
 

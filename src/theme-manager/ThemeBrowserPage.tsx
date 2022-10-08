@@ -6,6 +6,7 @@ import {
   DropdownOption,
   DropdownItem,
   Router,
+  DialogButton,
 } from "decky-frontend-lib";
 import { useLayoutEffect, useMemo, useState, VFC } from "react";
 
@@ -32,13 +33,6 @@ export const ThemeBrowserPage: VFC = () => {
     isInstalling,
     setCurExpandedTheme,
   } = useCssLoaderState();
-
-  // THESE HAVE BEEN MOVED TO GLOBAL STATE
-  // These are the legacy "local state" versions of them, only uncomment if global state is broken and not working
-  // const [searchFieldValue, setSearchValue] = useState<string>("");
-  // const [isInstalling, setInstalling] = useState<boolean>(false);
-  // const [selectedTarget, setTarget] = useState<SingleDropdownOption>({ data: 1, label: "All", });
-  // const [selectedSort, setSort] = useState<number>(3);
 
   const [backendVersion, setBackendVer] = useState<number>(3);
   function reloadBackendVer() {
@@ -198,20 +192,19 @@ export const ThemeBrowserPage: VFC = () => {
             return (
               // The outer 2 most divs are the background darkened/blurred image, and everything inside is the text/image/buttons
               <>
-                <div
+                <DialogButton
                   className="CssLoader_ThemeBrowser_SingleItem_BgImage"
                   style={{
-                    // Uncomment the next line and comment out the backgroundImage line if you want to try the new "greyed out bg" style
-                    // background: "#0000",
                     backgroundImage: 'url("' + e.preview_image + '")',
                     backgroundSize: "cover",
                     backgroundRepeat: "no-repeat",
                     backgroundPosition: "center",
                     width: "260px",
                     borderRadius: "5px",
-                    marginLeft: "10px",
-                    marginRight: "10px",
+                    marginLeft: "0px",
+                    marginRight: "5px",
                     marginBottom: "20px",
+                    padding: "0px",
                   }}
                 >
                   <div
@@ -220,8 +213,6 @@ export const ThemeBrowserPage: VFC = () => {
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
-                      // Uncomment the next line and comment out the next next line if you want to try the new "greyed out bg" style
-                      // background: "#ACB2C911",
                       background: "RGBA(0,0,0,0.8)",
                       backdropFilter: "blur(5px)",
                       width: "100%",
@@ -337,7 +328,7 @@ export const ThemeBrowserPage: VFC = () => {
                       </PanelSectionRow>
                     </div>
                   </div>
-                </div>
+                </DialogButton>
               </>
             );
           })}
