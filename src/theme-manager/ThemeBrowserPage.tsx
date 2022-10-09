@@ -86,19 +86,19 @@ export const ThemeBrowserPage: VFC = () => {
 
   function reloadThemes() {
     reloadBackendVer();
-    // Reloads the theme database
-    python.resolve(python.reloadThemeDbData(), () => {
-      python.resolve(python.getThemeDbData(), setThemeArr);
-    });
+    reloadThemeDb();
     // Reloads the local themes
     python.resolve(python.reset(), () => {
       python.resolve(python.getThemes(), setInstalledThemes);
     });
   }
 
-  function getThemeDb() {
-    python.resolve(python.getThemeDbData(), setThemeArr);
+  function reloadThemeDb() {
+    python.resolve(python.reloadThemeDbData(), () => {
+      python.resolve(python.getThemeDbData(), setThemeArr);
+    });
   }
+
   function getInstalledThemes() {
     python.resolve(python.getThemes(), setInstalledThemes);
   }
@@ -122,7 +122,7 @@ export const ThemeBrowserPage: VFC = () => {
   // Runs upon opening the page every time
   useLayoutEffect(() => {
     reloadBackendVer();
-    getThemeDb();
+    reloadThemeDb();
     getInstalledThemes();
   }, []);
 
@@ -250,7 +250,7 @@ export const ThemeBrowserPage: VFC = () => {
                     borderRadius: "5px",
                     marginLeft: "0px",
                     marginRight: "5px",
-                    marginBottom: "20px",
+                    marginBottom: "5px",
                   }}
                 >
                   <div
