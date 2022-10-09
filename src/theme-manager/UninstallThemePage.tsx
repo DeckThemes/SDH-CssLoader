@@ -96,8 +96,8 @@ export const UninstallThemePage: VFC = () => {
                       style={{
                         display: "flex",
                         marginLeft: "auto",
-                        minWidth: "30%",
-                        maxWidth: "30%",
+                        minWidth: "60%",
+                        maxWidth: "60%",
                       }}
                     >
                       {/* Update Button */}
@@ -106,7 +106,8 @@ export const UninstallThemePage: VFC = () => {
                           <DialogButton
                             style={{
                               marginRight: "8px",
-                              minWidth: "calc(50% - 4px)",
+                              minWidth: "calc(50% - 8px)",
+                              maxWidth: "calc(50% - 8px)",
                               filter:
                                 "invert(6%) sepia(90%) saturate(200%) hue-rotate(160deg) contrast(122%)",
                             }}
@@ -118,7 +119,11 @@ export const UninstallThemePage: VFC = () => {
                         </>
                       )}
                       <DialogButton
-                        style={{ minWidth: "calc(50% - 4px)" }}
+                        style={{
+                          minWidth: "calc(50% - 8px)",
+                          maxWidth: "calc(50% - 8px)",
+                          marginLeft: "auto",
+                        }}
                         onClick={() => handleUninstall(e)}
                         disabled={isUninstalling}
                       >

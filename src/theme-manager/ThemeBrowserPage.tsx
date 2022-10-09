@@ -119,9 +119,8 @@ export const ThemeBrowserPage: VFC = () => {
     }
   }
 
-  // Runs upon opening the page everytime, but for some reason not on the initial version
+  // Runs upon opening the page every time
   useLayoutEffect(() => {
-    console.log("Test");
     reloadBackendVer();
     getThemeDb();
     getInstalledThemes();
