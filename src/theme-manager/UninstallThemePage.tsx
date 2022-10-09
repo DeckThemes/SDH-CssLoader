@@ -1,13 +1,16 @@
-import { PanelSectionRow, ButtonItem } from "decky-frontend-lib";
+import { PanelSectionRow, Focusable, DialogButton } from "decky-frontend-lib";
 import { useState, VFC } from "react";
 import { FaTrash } from "react-icons/fa";
+import { AiOutlineDownload } from "react-icons/ai";
 import * as python from "../python";
 
 import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
+import { browseThemeEntry } from "../customTypes";
 
 export const UninstallThemePage: VFC = () => {
-  const { localThemeList, setLocalThemeList } = useCssLoaderState();
+  const { localThemeList, setLocalThemeList, browseThemeList } =
+    useCssLoaderState();
 
   const [isUninstalling, setUninstalling] = useState(false);
 
@@ -19,6 +22,38 @@ export const UninstallThemePage: VFC = () => {
         setUninstalling(false);
       });
     });
+  }
+
+  function updateTheme(remoteEntry: browseThemeEntry) {
+    // This check is just because the value might be false because of typescript woes
+    if (remoteEntry.id) {
+      const id = remoteEntry.id;
+      setUninstalling(true);
+      python.resolve(python.downloadTheme(id), () => {
+        python.resolve(python.reset(), () => {
+          python.resolve(python.getThemes(), setLocalThemeList);
+          setUninstalling(false);
+        });
+      });
+    }
+  }
+
+  // This is a modified version of the checkIfThemeInstalled in the browser page, however it compares local themes to the remote ones instead of remote to local
+  // It also returns the remote entry, so that it's id can be referenced for downloads
+  function checkForUpdate(themeObj: Theme): [string, any] {
+    const filteredArr: browseThemeEntry[] = browseThemeList.filter(
+      (e: browseThemeEntry) =>
+        e.name === themeObj.data.name && e.author === themeObj.data.author
+    );
+    if (filteredArr.length > 0) {
+      if (filteredArr[0].version === themeObj.data.version) {
+        return ["installed", filteredArr[0]];
+      } else {
+        return ["outdated", filteredArr[0]];
+      }
+    } else {
+      return ["uninstalled", false];
+    }
   }
 
   if (localThemeList.filter((e) => !e.data.bundled).length === 0) {
@@ -33,19 +68,69 @@ export const UninstallThemePage: VFC = () => {
 
   return (
     <>
-      {localThemeList
-        .filter((e) => !e.data.bundled)
-        .map((e: Theme) => (
-          <PanelSectionRow>
-            <ButtonItem
-              label={e.data.name}
-              onClick={() => handleUninstall(e)}
-              disabled={isUninstalling}
-            >
-              <FaTrash />
-            </ButtonItem>
-          </PanelSectionRow>
-        ))}
+      <div>
+        <div>
+          {localThemeList
+            .filter((e) => !e.data.bundled)
+            .map((e: Theme) => {
+              const [updateStatus, remoteEntry] = checkForUpdate(e);
+              return (
+                <PanelSectionRow>
+                  <div
+                    style={{
+                      display: "flex",
+                      // TODO: I think that this 96% can be deleted, have to check
+                      width: "96%",
+                    }}
+                  >
+                    <span>{e.data.name}</span>
+                    <span
+                      style={{
+                        color: "#dcdedf55",
+                        marginLeft: "8px",
+                      }}
+                    >
+                      {e.data.version}
+                    </span>
+                    <Focusable
+                      style={{
+                        display: "flex",
+                        marginLeft: "auto",
+                        minWidth: "30%",
+                        maxWidth: "30%",
+                      }}
+                    >
+                      {/* Update Button */}
+                      {updateStatus === "outdated" && (
+                        <>
+                          <DialogButton
+                            style={{
+                              marginRight: "8px",
+                              minWidth: "calc(50% - 4px)",
+                              filter:
+                                "invert(6%) sepia(90%) saturate(200%) hue-rotate(160deg) contrast(122%)",
+                            }}
+                            onClick={() => updateTheme(remoteEntry)}
+                            disabled={isUninstalling}
+                          >
+                            <AiOutlineDownload />
+                          </DialogButton>{" "}
+                        </>
+                      )}
+                      <DialogButton
+                        style={{ minWidth: "calc(50% - 4px)" }}
+                        onClick={() => handleUninstall(e)}
+                        disabled={isUninstalling}
+                      >
+                        <FaTrash />
+                      </DialogButton>
+                    </Focusable>
+                  </div>
+                </PanelSectionRow>
+              );
+            })}
+        </div>
+      </div>
     </>
   );
 };

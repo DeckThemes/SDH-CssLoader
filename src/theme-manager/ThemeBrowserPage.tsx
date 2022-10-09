@@ -79,7 +79,7 @@ export const ThemeBrowserPage: VFC = () => {
     return [
       { data: 1, label: "All" },
       { data: 2, label: "Installed" },
-      { data: 3, label: "Update Needed" },
+      { data: 3, label: "Outdated" },
       ...[...uniqueTargets].map((e, i) => ({ data: i + 3, label: e })),
     ];
   }, [themeArr, searchFilter]);
@@ -204,7 +204,7 @@ export const ThemeBrowserPage: VFC = () => {
             } else if (selectedTarget.label === "Installed") {
               const strValue = checkIfThemeInstalled(e);
               return strValue === "installed" || strValue === "outdated";
-            } else if (selectedTarget.label === "Update Needed") {
+            } else if (selectedTarget.label === "Outdated") {
               const strValue = checkIfThemeInstalled(e);
               return strValue === "outdated";
             } else {

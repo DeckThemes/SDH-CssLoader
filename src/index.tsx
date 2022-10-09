@@ -124,9 +124,9 @@ const ThemeManagerRouter: FC = () => {
             id: "ThemeBrowser",
           },
           {
-            title: "Uninstall Themes",
+            title: "Installed Themes",
             content: <UninstallThemePage />,
-            id: "UninstallThemes",
+            id: "InstalledThemes",
           },
           {
             title: "About CSS Loader",
