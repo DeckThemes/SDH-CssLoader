@@ -103,7 +103,13 @@ const ThemeManagerRouter: FC = () => {
     useState<string>("ThemeBrowser");
 
   return (
-    <div style={{ marginTop: "40px", height: "calc(100% - 40px)" }}>
+    <div
+      style={{
+        marginTop: "40px",
+        height: "calc(100% - 40px)",
+        background: "#0005",
+      }}
+    >
       <Tabs
         title="Theme Manager"
         activeTab={currentTabRoute}

@@ -4,11 +4,13 @@ import {
   Focusable,
   TextField,
   DropdownOption,
-  DropdownItem,
   Router,
-  // DialogButton,
+  Dropdown,
+  DialogButton,
 } from "decky-frontend-lib";
 import { useLayoutEffect, useMemo, useState, VFC } from "react";
+
+import { TiRefreshOutline } from "react-icons/ti";
 
 import * as python from "../python";
 
@@ -77,6 +79,7 @@ export const ThemeBrowserPage: VFC = () => {
     return [
       { data: 1, label: "All" },
       { data: 2, label: "Installed" },
+      { data: 3, label: "Update Needed" },
       ...[...uniqueTargets].map((e, i) => ({ data: i + 3, label: e })),
     ];
   }, [themeArr, searchFilter]);
@@ -116,8 +119,9 @@ export const ThemeBrowserPage: VFC = () => {
     }
   }
 
-  // Runs upon opening the page
+  // Runs upon opening the page everytime, but for some reason not on the initial version
   useLayoutEffect(() => {
+    console.log("Test");
     reloadBackendVer();
     getThemeDb();
     getInstalledThemes();
@@ -126,34 +130,70 @@ export const ThemeBrowserPage: VFC = () => {
   return (
     <>
       <PanelSectionRow>
-        <DropdownItem
-          label="Sort"
-          rgOptions={sortOptions}
-          strDefaultLabel="Last Updated (Newest)"
-          selectedOption={selectedSort}
-          onChange={(e) => setSort(e.data)}
-        />
+        <Focusable style={{ display: "flex", maxWidth: "100%" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              maxWidth: "40%",
+              minWidth: "40%",
+            }}
+          >
+            <span>Sort</span>
+            <Dropdown
+              menuLabel="Sort"
+              rgOptions={sortOptions}
+              strDefaultLabel="Last Updated (Newest)"
+              selectedOption={selectedSort}
+              onChange={(e) => setSort(e.data)}
+            />
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              maxWidth: "40%",
+              minWidth: "40%",
+              marginLeft: "auto",
+            }}
+          >
+            <span>Filter</span>
+            <Dropdown
+              menuLabel="Filter"
+              rgOptions={targetOptions}
+              strDefaultLabel="All"
+              selectedOption={selectedTarget.data}
+              onChange={(e) => setTarget(e)}
+            />
+          </div>
+        </Focusable>
       </PanelSectionRow>
-      <PanelSectionRow>
-        <DropdownItem
-          label="Filter"
-          rgOptions={targetOptions}
-          strDefaultLabel="All"
-          selectedOption={selectedTarget.data}
-          onChange={(e) => setTarget(e)}
-        />
-      </PanelSectionRow>
-      <PanelSectionRow>
-        <TextField
-          label="Search"
-          value={searchFieldValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-        />
-      </PanelSectionRow>
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <Focusable
+          style={{ display: "flex", alignItems: "center", width: "96%" }}
+        >
+          <div style={{ minWidth: "75%" }}>
+            <TextField
+              label="Search"
+              value={searchFieldValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+          </div>
+          <DialogButton
+            onClick={() => {
+              reloadThemes();
+            }}
+            style={{ maxWidth: "20%", marginLeft: "auto", height: "50%" }}
+          >
+            <TiRefreshOutline style={{ transform: "translate(0, 2px)" }} />
+            <span>Refresh</span>
+          </DialogButton>
+        </Focusable>
+      </div>
       {/* I wrap everything in a Focusable, because that ensures that the dpad/stick navigation works correctly */}
-      {/* The 10px margin here is there because the card items themselves dont have margin left */}
+      {/* The margin here is there because the card items themselves dont have margin left */}
       <Focusable
-        style={{ display: "flex", flexWrap: "wrap", marginLeft: "10px" }}
+        style={{ display: "flex", flexWrap: "wrap", marginLeft: "7.5px" }}
       >
         {themeArr
           // searchFilter also includes backend version check
@@ -164,6 +204,9 @@ export const ThemeBrowserPage: VFC = () => {
             } else if (selectedTarget.label === "Installed") {
               const strValue = checkIfThemeInstalled(e);
               return strValue === "installed" || strValue === "outdated";
+            } else if (selectedTarget.label === "Update Needed") {
+              const strValue = checkIfThemeInstalled(e);
+              return strValue === "outdated";
             } else {
               return e.target === selectedTarget.label;
             }
@@ -339,16 +382,6 @@ export const ThemeBrowserPage: VFC = () => {
             );
           })}
       </Focusable>
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={() => {
-            reloadThemes();
-          }}
-        >
-          Reload Themes
-        </ButtonItem>
-      </PanelSectionRow>
     </>
   );
 };
