@@ -9,6 +9,7 @@ export interface browseThemeEntry {
   last_changed: string;
   target: string;
   manifest_version: number;
+  repo: string;
 }
 export interface localThemeEntry {
   author: string;

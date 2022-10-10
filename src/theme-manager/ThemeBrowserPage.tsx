@@ -33,6 +33,8 @@ export const ThemeBrowserPage: VFC = () => {
     setSort,
     selectedTarget,
     setTarget,
+    selectedRepo,
+    setRepo,
     isInstalling,
     setCurExpandedTheme,
   } = useCssLoaderState();
@@ -85,6 +87,21 @@ export const ThemeBrowserPage: VFC = () => {
     ];
   }, [themeArr, searchFilter]);
 
+  const repoOptions = useMemo((): DropdownOption[] => {
+    const uniqueRepos = new Set(themeArr.map((e) => e.repo));
+    // Spread operator is to turn set into array
+    if ([...uniqueRepos].length <= 1) {
+      // This says All but really is just official
+      return [{ data: 1, label: "All" }];
+    } else {
+      return [
+        { data: 1, label: "All" },
+        { data: 2, label: "Official" },
+        { data: 3, label: "3rd Party" },
+      ];
+    }
+  }, [themeArr]);
+
   function reloadThemes() {
     reloadBackendVer();
     reloadThemeDb();
@@ -131,7 +148,7 @@ export const ThemeBrowserPage: VFC = () => {
     <>
       <style>
         {`
-        .gamepaddialog_Field_S-_La {
+        .CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewContainer .gamepaddialog_Field_S-_La {
           position: absolute;
           height: 212.5px;
           top: 0;
@@ -159,8 +176,8 @@ export const ThemeBrowserPage: VFC = () => {
             style={{
               display: "flex",
               flexDirection: "column",
-              maxWidth: "40%",
-              minWidth: "40%",
+              maxWidth: repoOptions.length <= 1 ? "40%" : "33%",
+              minWidth: repoOptions.length <= 1 ? "40%" : "33%",
             }}
           >
             <span>Sort</span>
@@ -176,8 +193,8 @@ export const ThemeBrowserPage: VFC = () => {
             style={{
               display: "flex",
               flexDirection: "column",
-              maxWidth: "40%",
-              minWidth: "40%",
+              maxWidth: repoOptions.length <= 1 ? "40%" : "33%",
+              minWidth: repoOptions.length <= 1 ? "40%" : "33%",
               marginLeft: "auto",
             }}
           >
@@ -190,6 +207,26 @@ export const ThemeBrowserPage: VFC = () => {
               onChange={(e) => setTarget(e)}
             />
           </div>
+          {repoOptions.length > 1 && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                maxWidth: "30%",
+                minWidth: "30%",
+                marginLeft: "auto",
+              }}
+            >
+              <span>Repo</span>
+              <Dropdown
+                menuLabel="Filter"
+                rgOptions={repoOptions}
+                strDefaultLabel="Official"
+                selectedOption={selectedRepo.data}
+                onChange={(e) => setRepo(e)}
+              />
+            </div>
+          )}
         </Focusable>
       </PanelSectionRow>
       <div style={{ display: "flex", justifyContent: "center" }}>
@@ -233,6 +270,15 @@ export const ThemeBrowserPage: VFC = () => {
               return strValue === "outdated";
             } else {
               return e.target === selectedTarget.label;
+            }
+          })
+          .filter((e: browseThemeEntry) => {
+            if (selectedRepo.label === "All") {
+              return true;
+            } else if (selectedRepo.label === "Official") {
+              return e.repo === "Official";
+            } else {
+              return e.repo !== "Official";
             }
           })
           .sort((a, b) => {
