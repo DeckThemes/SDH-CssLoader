@@ -9,6 +9,7 @@ interface PublicCssLoaderState {
   searchFieldValue: string;
   selectedSort: number;
   selectedTarget: SingleDropdownOption;
+  selectedRepo: SingleDropdownOption;
   isInstalling: boolean;
   currentExpandedTheme: browseThemeEntry | undefined;
 }
@@ -21,6 +22,7 @@ interface PublicCssLoaderContext extends PublicCssLoaderState {
   setSearchValue(value: string): void;
   setSort(value: number): void;
   setTarget(value: SingleDropdownOption): void;
+  setRepo(value: SingleDropdownOption): void;
   setInstalling(bool: boolean): void;
   setCurExpandedTheme(theme: browseThemeEntry | undefined): void;
 }
@@ -32,6 +34,10 @@ export class CssLoaderState {
   private searchFieldValue: string = "";
   private selectedSort: number = 3;
   private selectedTarget: SingleDropdownOption = {
+    data: 1,
+    label: "All",
+  };
+  private selectedRepo: SingleDropdownOption = {
     data: 1,
     label: "All",
   };
@@ -48,6 +54,7 @@ export class CssLoaderState {
       searchFieldValue: this.searchFieldValue,
       selectedSort: this.selectedSort,
       selectedTarget: this.selectedTarget,
+      selectedRepo: this.selectedRepo,
       isInstalling: this.isInstalling,
       currentExpandedTheme: this.currentExpandedTheme,
     };
@@ -85,6 +92,11 @@ export class CssLoaderState {
 
   setTarget(value: SingleDropdownOption) {
     this.selectedTarget = value;
+    this.forceUpdate();
+  }
+
+  setRepo(value: SingleDropdownOption) {
+    this.selectedRepo = value;
     this.forceUpdate();
   }
 
@@ -139,6 +151,8 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({
   const setSort = (value: number) => cssLoaderStateClass.setSort(value);
   const setTarget = (value: SingleDropdownOption) =>
     cssLoaderStateClass.setTarget(value);
+  const setRepo = (value: SingleDropdownOption) =>
+    cssLoaderStateClass.setRepo(value);
   const setInstalling = (bool: boolean) =>
     cssLoaderStateClass.setInstalling(bool);
   const setCurExpandedTheme = (theme: browseThemeEntry | undefined) =>
@@ -153,6 +167,7 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({
         setSearchValue,
         setSort,
         setTarget,
+        setRepo,
         setInstalling,
         setCurExpandedTheme,
       }}

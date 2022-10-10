@@ -8,6 +8,7 @@ import { ColorPickerModal } from "decky-frontend-lib";
 import { themePatchComponent } from "../theme";
 import { useCssLoaderState } from "../state";
 import { anythingToHSLA } from "../logic";
+import { FaFolder } from "react-icons/fa";
 
 export const PatchComponent: VFC<{
   data: themePatchComponent;
@@ -61,7 +62,21 @@ export const PatchComponent: VFC<{
               onClick={() => getRootPath()}
               layout="below"
             >
-              <span>Open {data.name}</span>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <span>Open {data.name}</span>
+                <div
+                  style={{
+                    marginLeft: "auto",
+                    width: "24px",
+                    height: "24px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <FaFolder />
+                </div>
+              </div>
             </ButtonItem>
           </PanelSectionRow>
         );
