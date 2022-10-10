@@ -3,6 +3,14 @@ import { ServerAPI } from "decky-frontend-lib";
 
 var server: ServerAPI | undefined = undefined;
 
+export async function openFilePicker(path: string) {
+  return await server!.openFilePicker(path, true);
+}
+
+export function fetchThemePath() {
+  return server!.callPluginMethod("fetch_theme_path", {});
+}
+
 export function resolve(promise: Promise<any>, setter: any) {
   (async function () {
     let data = await promise;

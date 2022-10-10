@@ -4,7 +4,7 @@ from injector import inject_to_tab, tab_has_element
 
 sys.path.append(os.path.dirname(__file__))
 
-from css_utils import Log, create_dir, create_symlink, Result, get_user_home
+from css_utils import Log, create_dir, create_symlink, Result, get_user_home, get_theme_path
 from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
@@ -15,6 +15,9 @@ Initialized = False
 class Plugin:
     async def dummy_function(self) -> bool:
         return True
+
+    async def fetch_theme_path(self) -> str:
+        return get_theme_path()
 
     async def get_themes(self) -> list:
         return [x.to_dict() for x in self.themes]
