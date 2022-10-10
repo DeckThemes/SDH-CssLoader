@@ -5,7 +5,6 @@ import replace from "@rollup/plugin-replace";
 import typescript from "@rollup/plugin-typescript";
 import { defineConfig } from "rollup";
 import importAssets from "rollup-plugin-import-assets";
-
 import styles from "rollup-plugin-styles";
 
 import { name } from "./plugin.json";
@@ -29,7 +28,6 @@ export default defineConfig({
   context: "window",
   external: ["react", "react-dom"],
   output: {
-    assetFileNames: "[name]-[hash][extname]",
     file: "dist/index.js",
     globals: {
       react: "SP_REACT",
@@ -37,5 +35,6 @@ export default defineConfig({
     },
     format: "iife",
     exports: "default",
+    assetFileNames: "[name]-[hash][extname]",
   },
 });

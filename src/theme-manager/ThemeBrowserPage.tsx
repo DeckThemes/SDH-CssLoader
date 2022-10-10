@@ -12,13 +12,14 @@ import { useLayoutEffect, useMemo, useState, VFC } from "react";
 
 import { TiRefreshOutline } from "react-icons/ti";
 
+// import "../styles/fullheightcard.css";
 import * as python from "../python";
 
 // Interfaces for the JSON objects the lists work with
 import { browseThemeEntry } from "../customTypes";
 import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
-import { calcButtonColor } from "../logic";
+import { AiOutlineDownload } from "react-icons/ai";
 
 export const ThemeBrowserPage: VFC = () => {
   const {
@@ -128,6 +129,30 @@ export const ThemeBrowserPage: VFC = () => {
 
   return (
     <>
+      <style>
+        {`
+        .gamepaddialog_Field_S-_La {
+          position: absolute;
+          height: 212.5px;
+          top: 0;
+          width: 228px;
+        }
+        
+        .gamepaddialog_Field_S-_La.gamepaddialog_HighlightOnFocus_wE4V6.gpfocus,
+        .gamepaddialog_Field_S-_La.gamepaddialog_HighlightOnFocus_wE4V6.gpfocuswithin {
+          background: #ffffff66 !important;
+        }
+        
+        .CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewContainer .DialogButton {
+          margin-top: 40px !important;
+          background: transparent !important;
+          height: 150px;
+          width: 240px !important;
+          transform: translate(-6px, 0);
+          box-shadow: none !important;
+        }
+        `}
+      </style>
       <PanelSectionRow>
         <Focusable style={{ display: "flex", maxWidth: "100%" }}>
           <div
@@ -264,8 +289,28 @@ export const ThemeBrowserPage: VFC = () => {
                       width: "100%",
                       height: "100%",
                       borderRadius: "3px",
+                      position: "relative",
                     }}
                   >
+                    {installStatus === "outdated" && (
+                      <div
+                        className="CssLoader_ThemeBrowser_SingleItem_NotifBubble"
+                        style={{
+                          position: "absolute",
+                          top: "-10px",
+                          left: "-10px",
+                          padding: "5px 8px 2.5px 8px",
+                          background:
+                            "linear-gradient(135deg, #3a9bed, #235ecf)",
+                          borderRadius: "50%",
+                          zIndex: "99",
+                          boxShadow:
+                            "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+                        }}
+                      >
+                        <AiOutlineDownload />
+                      </div>
+                    )}
                     <span
                       className="CssLoader_ThemeBrowser_SingleItem_ThemeName"
                       style={{
@@ -282,23 +327,22 @@ export const ThemeBrowserPage: VFC = () => {
                     >
                       {e.name}
                     </span>
-                    {selectedTarget.label === "All" && (
-                      <span
-                        className="CssLoader_ThemeBrowser_SingleItem_ThemeTarget"
-                        style={{
-                          marginTop: "-6px",
-                          fontSize: "1em",
-                          textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                        }}
-                      >
-                        {e.target}
-                      </span>
-                    )}
+                    <span
+                      className="CssLoader_ThemeBrowser_SingleItem_ThemeTarget"
+                      style={{
+                        marginTop: "-6px",
+                        fontSize: "1em",
+                        textShadow: "rgb(48, 48, 48) 0px 0 10px",
+                      }}
+                    >
+                      {e.target}
+                    </span>
                     <div
                       className="CssLoader_ThemeBrowser_SingleItem_PreviewImage"
                       style={{
                         width: "240px",
-                        backgroundImage: 'url("' + e.preview_image + '")',
+                        // backgroundImage: 'url("' + e.preview_image + '")',
+                        background: "rgba(0,0,0,0)",
                         backgroundSize: "cover",
                         backgroundRepeat: "no-repeat",
                         height: "150px",
@@ -307,19 +351,21 @@ export const ThemeBrowserPage: VFC = () => {
                         flexDirection: "column",
                         alignItems: "center",
                       }}
-                    ></div>
+                    />
                     <div
                       className="CssLoader_ThemeBrowser_SingleItem_AuthorVersionContainer"
                       style={{
                         width: "240px",
                         textAlign: "center",
                         display: "flex",
+                        paddingBottom: "8px",
                       }}
                     >
                       <span
                         className="CssLoader_ThemeBrowser_SingleItem_AuthorText"
                         style={{
                           marginRight: "auto",
+                          marginLeft: "2px",
                           fontSize: "1em",
                           textShadow: "rgb(48, 48, 48) 0px 0 10px",
                         }}
@@ -330,6 +376,7 @@ export const ThemeBrowserPage: VFC = () => {
                         className="CssLoader_ThemeBrowser_SingleItem_VersionText"
                         style={{
                           marginLeft: "auto",
+                          marginRight: "2px",
                           fontSize: "1em",
                           textShadow: "rgb(48, 48, 48) 0px 0 10px",
                         }}
@@ -354,7 +401,7 @@ export const ThemeBrowserPage: VFC = () => {
                             marginLeft: "-7.5px",
                             marginRight: "-7.5px",
                             paddingBottom: "0px",
-                            filter: calcButtonColor(installStatus),
+                            // filter: calcButtonColor(installStatus),
                           }}
                         >
                           <ButtonItem
@@ -366,11 +413,27 @@ export const ThemeBrowserPage: VFC = () => {
                               Router.Navigate("/theme-manager-expanded-view");
                             }}
                           >
-                            <span className="CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewText">
+                            <div
+                              className="CssLoader_ThemeBrowser_SingleItem_PreviewImage"
+                              style={{
+                                width: "240px",
+                                transform: "translate(-24px, -10px)",
+                                backgroundImage:
+                                  'url("' + e.preview_image + '")',
+                                backgroundSize: "cover",
+                                backgroundRepeat: "no-repeat",
+                                height: "150px",
+                                display: "flex",
+                                position: "relative",
+                                flexDirection: "column",
+                                alignItems: "center",
+                              }}
+                            ></div>
+                            {/* <span className="CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewText">
                               {installStatus === "outdated"
                                 ? "Update Available"
                                 : "View Details"}
-                            </span>
+                            </span> */}
                           </ButtonItem>
                         </div>
                       </PanelSectionRow>
