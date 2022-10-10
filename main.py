@@ -52,16 +52,20 @@ class Plugin:
         except Exception as e:
             return Result(False, str(e)).to_dict()
 
-        result = await self.remote.install(uuid)
+        result = await theme_db_entry.install()
         if not result.success:
             return result.to_dict()
 
-        possibleThemeJsonPath = os.path.join(get_user_home(), "homebrew/themes", theme_db_entry["name"], "theme.json")
+        possibleThemeJsonPath = os.path.join(get_theme_path(), theme_db_entry.name, "theme.json")
         if (os.path.exists(possibleThemeJsonPath)):
             with open(possibleThemeJsonPath, "r") as fp:
                 theme = json.load(fp)
             
-            parsedTheme = Theme(possibleThemeJsonPath, theme)
+            try:
+                parsedTheme = Theme(possibleThemeJsonPath, theme)
+            except Exception as e:
+                return Result(False, str(e)).to_dict()
+
             for x in parsedTheme.dependencies:
                 found = False
                 for y in self.themes:
@@ -72,7 +76,7 @@ class Plugin:
                 if not found:
                     try:
                         theme_db_dependency = await self.remote.get_theme_db_entry_by_name(x)
-                        result = await self.download_theme(self, theme_db_dependency["id"])
+                        result = await self.download_theme(self, theme_db_dependency.id)
                         if not result["success"]:
                             raise Exception(result["message"])
                     except Exception as e:
@@ -81,7 +85,7 @@ class Plugin:
         return Result(True).to_dict()
     
     async def get_theme_db_data(self) -> list:
-        return self.remote.themes
+        return [x.to_dict() for x in self.remote.themes]
     
     async def reload_theme_db_data(self) -> dict:
         return (await self.remote.load(True)).to_dict()
@@ -330,7 +334,7 @@ class Plugin:
         Log(f"Max supported manifest version: {CSS_LOADER_VER}")
         
         await create_symlink(f"{get_user_home()}/homebrew/themes", f"{get_user_home()}/.local/share/Steam/steamui/themes_custom")
-        self.remote = RemoteInstall(self)
+        self.remote = RemoteInstall()
         await self.remote.load()
 
         await self._load(self)
