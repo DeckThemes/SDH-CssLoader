@@ -38,7 +38,10 @@ def create_dir(dirPath : str):
         os.chown(dirPath, uid, gid) # Change to deck user
 
 def get_user_home() -> str:
-    return f"/home/{get_user()}" 
+    return f"/home/{get_user()}"
+
+def get_theme_path() -> str:
+    return f"{get_user_home()}/homebrew/themes"
 
 async def create_symlink(src : str, dst : str) -> Result:
     try:

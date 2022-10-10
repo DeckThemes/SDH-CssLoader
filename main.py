@@ -149,7 +149,9 @@ class Plugin:
             return Result(False, f"Failed to find component '{componentName}'")
         
         component.value = value
-        await component.generate_and_reinject()
+        result = await component.generate_and_reinject()
+        if not result.success:
+            return result
 
         await themePatch.theme.save()
         return Result(True).to_dict()
