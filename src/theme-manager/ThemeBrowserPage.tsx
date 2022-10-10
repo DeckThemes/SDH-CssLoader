@@ -131,7 +131,7 @@ export const ThemeBrowserPage: VFC = () => {
     <>
       <style>
         {`
-        .gamepaddialog_Field_S-_La {
+        .CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewContainer .gamepaddialog_Field_S-_La {
           position: absolute;
           height: 212.5px;
           top: 0;
