@@ -83,7 +83,7 @@ export const ThemeBrowserPage: VFC = () => {
       { data: 1, label: "All" },
       { data: 2, label: "Installed" },
       { data: 3, label: "Outdated" },
-      ...[...uniqueTargets].map((e, i) => ({ data: i + 3, label: e })),
+      ...[...uniqueTargets].map((e, i) => ({ data: i + 4, label: e })),
     ];
   }, [themeArr, searchFilter]);
 
