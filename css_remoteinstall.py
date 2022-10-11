@@ -1,70 +1,142 @@
 import asyncio, json, tempfile, os
-from css_utils import Result, Log
+from css_utils import Result, Log, get_user_home, get_theme_path
+from css_theme import CSS_LOADER_VER
 
-class RemoteInstall:
-    def __init__(self, plugin):
-        self.themeDb = "https://github.com/suchmememanyskill/CssLoader-ThemeDb/releases/download/1.1.0/themes.json"
-        self.plugin = plugin
-        self.themes = []
+async def run(command : str) -> str:
+    proc = await asyncio.create_subprocess_shell(command,        
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE)
+    stdout, stderr = await proc.communicate()
 
-    async def run(self, command : str) -> str:
-        proc = await asyncio.create_subprocess_shell(command,        
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE)
+    if (proc.returncode != 0):
+        raise Exception(f"Process exited with error code {proc.returncode}")
 
-        stdout, stderr = await proc.communicate()
-        if (proc.returncode != 0):
-            raise Exception(f"Process exited with error code {proc.returncode}")
+    return stdout.decode()
 
-        return stdout.decode()
+class RemoteInstallItem:
+    def __init__(self, content : dict, repo_url : str):
+        self.raw = content
+        self.id = content["id"]
+        self.download_url = content["download_url"]
+        self.preview_image = content["preview_image"]
+        self.name = content["name"]
+        self.version = content["version"] if "version" in content else "v1.0"
+        self.author = content["author"]
+        self.last_changed = content["last_changed"]
+        self.target = content["target"] if "target" in content else "Other"
+        self.source = content["source"] if "source" in content else ""
+        self.manifest_version = int(content["manifest_version"]) if "manifest_version" in content else 1
+        self.description = content["description"] if "description" in content else ""
+        self.repo_url = repo_url
 
-    async def load(self, force : bool = False) -> Result:
+        if (self.manifest_version > CSS_LOADER_VER):
+            raise Exception("Manifest version of themedb entry is unsupported by this version of CSS_Loader")
+
+    async def install(self) -> Result:
         try:
-            if force or (self.themes == []):
-                response = await self.run(f"curl {self.themeDb} -L")
-                self.themes = json.loads(response)
-                Log(f"Got {len(self.themes)} from the themedb")
-        except Exception as e:
-            return Result(False, str(e))
-        
-        return Result(True)
-
-    async def get_theme_db_entry_by_uuid(self, uuid : str) -> dict:
-        result = await self.load()
-        if not result.success:
-            raise Exception(result.message)
-
-        for x in self.themes:
-            if x["id"] == uuid:
-                return x
-            
-        raise Exception(f"No theme with id {uuid} found")
-
-    async def get_theme_db_entry_by_name(self, name : str) -> dict:
-        result = await self.load()
-        if not result.success:
-            raise Exception(result.message)
-
-        for x in self.themes:
-            if x["name"] == name:
-                return x
-            
-        raise Exception(f"No theme with name {name} found")
-
-    async def install(self, uuid : str) -> Result:
-        try:
-            theme = await self.get_theme_db_entry_by_uuid(uuid)
             tempDir = tempfile.TemporaryDirectory()
 
-            Log(f"Downloading {theme['download_url']} to {tempDir.name}...")
+            Log(f"Downloading {self.download_url} to {tempDir.name}...")
             themeZipPath = os.path.join(tempDir.name, 'theme.zip')
-            await self.run(f"curl \"{theme['download_url']}\" -L -o \"{themeZipPath}\"")
+            await run(f"curl \"{self.download_url}\" -L -o \"{themeZipPath}\"")
 
             Log(f"Unzipping {themeZipPath}")
-            await self.run(f"unzip -o \"{themeZipPath}\" -d /home/deck/homebrew/themes")
+            await run(f"unzip -o \"{themeZipPath}\" -d \"{get_user_home()}/homebrew/themes\"")
 
             tempDir.cleanup()
         except Exception as e:
             return Result(False, str(e))
 
         return Result(True)
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "download_url": self.download_url,
+            "preview_image": self.preview_image,
+            "name": self.name,
+            "version": self.version,
+            "author": self.author,
+            "last_changed": self.last_changed,
+            "target": self.target,
+            "source": self.source,
+            "manifest_version": self.manifest_version,
+            "description": self.description,
+            "repo": self.repo_url,
+        }
+
+class RemoteInstall:
+    def __init__(self):
+        self.baseThemeDb = "https://github.com/suchmememanyskill/CssLoader-ThemeDb/releases/download/1.1.0/themes.json"
+        self.themes = []
+        self.init = False
+
+    async def load(self, force : bool = False) -> Result:
+        if (self.init and not force):
+            return Result(True)
+
+        try:
+            repos_txt_path = os.path.join(get_theme_path(), "repos.txt")
+            repos = [self.baseThemeDb]
+
+            if (os.path.exists(repos_txt_path)):
+                with open(repos_txt_path, "r") as fp:
+                    repos.extend([x.strip() for x in fp.readlines() if not (x.startswith("#") or x.startswith("//") or x.strip() == "")])
+            
+            self.themes = []
+            for x in repos:
+                Log(f"Loading themedb {x}")
+                await self.add_repo(x)
+
+            self.init = True
+        except Exception as e:
+            return Result(False, str(e))
+        
+        return Result(True)
+    
+    async def add_repo(self, url : str) -> Result:
+        try:
+            theme_names = [x.name for x in self.themes]
+            response = await run(f"curl \"{url}\" -L")
+            themes = json.loads(response)
+            count = 0
+            
+            for x in themes:
+                try:
+                    theme = RemoteInstallItem(x, "Official" if url == self.baseThemeDb else url)
+                    
+                    if theme.name in theme_names:
+                        raise Exception("Theme already registered in remote theme pool")
+
+                    self.themes.append(theme)
+                    count += 1
+                except Exception as e:
+                    Result(False, str(e))
+
+            Log(f"Got {count} themes from themedb '{url}'")
+        except Exception as e:
+            return Result(False, str(e))
+        
+        return Result(True)
+
+    async def get_theme_db_entry_by_uuid(self, uuid : str) -> RemoteInstallItem:
+        result = await self.load()
+        if not result.success:
+            raise Exception(result.message)
+
+        for x in self.themes:
+            if x.id == uuid:
+                return x
+            
+        raise Exception(f"No theme with id {uuid} found")
+
+    async def get_theme_db_entry_by_name(self, name : str) -> RemoteInstallItem:
+        result = await self.load()
+        if not result.success:
+            raise Exception(result.message)
+
+        for x in self.themes:
+            if x.name == name:
+                return x
+            
+        raise Exception(f"No theme with name {name} found")

@@ -4,25 +4,83 @@ import * as python from "../python";
 
 import { showModal, ButtonItem, PanelSectionRow } from "decky-frontend-lib";
 
-import { ColorPickerModal } from "./ColorPickerModal";
+import { ColorPickerModal } from "decky-frontend-lib";
 import { themePatchComponent } from "../theme";
 import { useCssLoaderState } from "../state";
 import { anythingToHSLA } from "../logic";
+import { FaFolder } from "react-icons/fa";
 
 export const PatchComponent: VFC<{
   data: themePatchComponent;
   selectedLabel: string;
   themeName: string;
   patchName: string;
-  bottomSeparatorValue: boolean | undefined;
+  bottomSeparatorValue: "standard" | "none";
 }> = ({ data, selectedLabel, themeName, patchName, bottomSeparatorValue }) => {
   if (selectedLabel === data.on) {
-    // This is used by the ColorPickerModal, but im getting errors when I attempt to call it from that
-    // I think it's because QAM and SP are different tabs
     const { setLocalThemeList: setThemeList } = useCssLoaderState();
-
+    // The only value that changes from component to component is the value, so this can just be re-used
+    function setComponentAndReload(value: string) {
+      python.resolve(
+        python.setComponentOfThemePatch(
+          themeName,
+          patchName,
+          data.name, // componentName
+          value
+        ),
+        () => {
+          python.resolve(python.getThemes(), setThemeList);
+        }
+      );
+    }
     switch (data.type) {
-      default:
+      case "image-picker":
+        // This makes things compatible with people using HoloISO or who don't have the user /deck/
+        function getRootPath() {
+          python.resolve(python.fetchThemePath(), (path: string) =>
+            pickImage(path)
+          );
+        }
+        // These have to
+        async function pickImage(rootPath: string) {
+          const res = await python.openFilePicker(rootPath);
+          if (!res.path.includes(rootPath)) {
+            python.toast("Invalid File", "Images must be within themes folder");
+            return;
+          }
+          if (!/\.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(res.path)) {
+            python.toast("Invalid File", "Must be an image file");
+            return;
+          }
+          const relativePath = res.path.split(`${rootPath}/`)[1];
+          setComponentAndReload(relativePath);
+        }
+        return (
+          <PanelSectionRow>
+            <ButtonItem
+              bottomSeparator={bottomSeparatorValue}
+              onClick={() => getRootPath()}
+              layout="below"
+            >
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <span>Open {data.name}</span>
+                <div
+                  style={{
+                    marginLeft: "auto",
+                    width: "24px",
+                    height: "24px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <FaFolder />
+                </div>
+              </div>
+            </ButtonItem>
+          </PanelSectionRow>
+        );
+      case "color-picker":
         const curColorHSLArray = anythingToHSLA(data.value);
         const hslString = `hsla(${curColorHSLArray[0]}, ${curColorHSLArray[1]}%, ${curColorHSLArray[2]}%, ${curColorHSLArray[3]})`;
 
@@ -36,17 +94,7 @@ export const PatchComponent: VFC<{
                     // @ts-ignore -- showModal passes the closeModal function to this, but for some reason it's giving me a typescript error because I didn't explicitly pass it myself
                     <ColorPickerModal
                       onConfirm={(HSLString) => {
-                        python.resolve(
-                          python.setComponentOfThemePatch(
-                            themeName,
-                            patchName,
-                            data.name, // componentName
-                            HSLString
-                          ),
-                          () => {
-                            python.resolve(python.getThemes(), setThemeList);
-                          }
-                        );
+                        setComponentAndReload(HSLString);
                       }}
                       defaultH={curColorHSLArray[0]}
                       defaultS={curColorHSLArray[1]}

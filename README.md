@@ -9,3 +9,6 @@ The loader reads all folders in `/home/deck/homebrew/themes`. In every folder, i
 # Installation
 1. [Install the Decky plugin loader](https://github.com/SteamDeckHomebrew/decky-loader#installation)
 2. Use the built in plugin store to download the CSS Loader
+
+# Custom Theme Repositories
+Custom repositories can be added by adding a valid url to `~/homebrew/themes/repos.txt`. One url per line. Comments ('#', '//') are supported. Empty lines are ignored. Url needs to return the same information as the [CssLoader ThemeDb Release Json](https://github.com/suchmememanyskill/CssLoader-ThemeDb/releases)

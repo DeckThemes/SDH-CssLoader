@@ -14,7 +14,7 @@ export const ThemeToggle: VFC<{ data: Theme; setThemeList: any }> = ({
       <PanelSectionRow>
         <ToggleField
           bottomSeparator={
-            data.checked && data?.patches?.length > 0 ? false : undefined
+            data.checked && data?.patches?.length > 0 ? "none" : "standard"
           }
           checked={data.checked}
           label={data.name}

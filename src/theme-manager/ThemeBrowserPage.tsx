@@ -4,18 +4,22 @@ import {
   Focusable,
   TextField,
   DropdownOption,
-  DropdownItem,
   Router,
+  Dropdown,
+  DialogButton,
 } from "decky-frontend-lib";
-import { useEffect, useMemo, useState, VFC } from "react";
+import { useLayoutEffect, useMemo, useState, VFC } from "react";
 
+import { TiRefreshOutline } from "react-icons/ti";
+
+// import "../styles/fullheightcard.css";
 import * as python from "../python";
 
 // Interfaces for the JSON objects the lists work with
 import { browseThemeEntry } from "../customTypes";
 import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
-import { calcButtonColor } from "../logic";
+import { AiOutlineDownload } from "react-icons/ai";
 
 export const ThemeBrowserPage: VFC = () => {
   const {
@@ -29,16 +33,11 @@ export const ThemeBrowserPage: VFC = () => {
     setSort,
     selectedTarget,
     setTarget,
+    selectedRepo,
+    setRepo,
     isInstalling,
     setCurExpandedTheme,
   } = useCssLoaderState();
-
-  // THESE HAVE BEEN MOVED TO GLOBAL STATE
-  // These are the legacy "local state" versions of them, only uncomment if global state is broken and not working
-  // const [searchFieldValue, setSearchValue] = useState<string>("");
-  // const [isInstalling, setInstalling] = useState<boolean>(false);
-  // const [selectedTarget, setTarget] = useState<SingleDropdownOption>({ data: 1, label: "All", });
-  // const [selectedSort, setSort] = useState<number>(3);
 
   const [backendVersion, setBackendVer] = useState<number>(3);
   function reloadBackendVer() {
@@ -83,25 +82,41 @@ export const ThemeBrowserPage: VFC = () => {
     return [
       { data: 1, label: "All" },
       { data: 2, label: "Installed" },
+      { data: 3, label: "Outdated" },
       ...[...uniqueTargets].map((e, i) => ({ data: i + 3, label: e })),
     ];
   }, [themeArr, searchFilter]);
 
+  const repoOptions = useMemo((): DropdownOption[] => {
+    const uniqueRepos = new Set(themeArr.map((e) => e.repo));
+    // Spread operator is to turn set into array
+    if ([...uniqueRepos].length <= 1) {
+      // This says All but really is just official
+      return [{ data: 1, label: "All" }];
+    } else {
+      return [
+        { data: 1, label: "All" },
+        { data: 2, label: "Official" },
+        { data: 3, label: "3rd Party" },
+      ];
+    }
+  }, [themeArr]);
+
   function reloadThemes() {
     reloadBackendVer();
-    // Reloads the theme database
-    python.resolve(python.reloadThemeDbData(), () => {
-      python.resolve(python.getThemeDbData(), setThemeArr);
-    });
+    reloadThemeDb();
     // Reloads the local themes
     python.resolve(python.reset(), () => {
       python.resolve(python.getThemes(), setInstalledThemes);
     });
   }
 
-  function getThemeDb() {
-    python.resolve(python.getThemeDbData(), setThemeArr);
+  function reloadThemeDb() {
+    python.resolve(python.reloadThemeDbData(), () => {
+      python.resolve(python.getThemeDbData(), setThemeArr);
+    });
   }
+
   function getInstalledThemes() {
     python.resolve(python.getThemes(), setInstalledThemes);
   }
@@ -122,40 +137,125 @@ export const ThemeBrowserPage: VFC = () => {
     }
   }
 
-  // Runs upon opening the page
-  useEffect(() => {
+  // Runs upon opening the page every time
+  useLayoutEffect(() => {
     reloadBackendVer();
-    getThemeDb();
+    reloadThemeDb();
     getInstalledThemes();
   }, []);
 
   return (
     <>
+      <style>
+        {`
+        .CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewContainer .gamepaddialog_Field_S-_La {
+          position: absolute;
+          height: 212.5px;
+          top: 0;
+          width: 228px;
+        }
+        
+        .gamepaddialog_Field_S-_La.gamepaddialog_HighlightOnFocus_wE4V6.gpfocus,
+        .gamepaddialog_Field_S-_La.gamepaddialog_HighlightOnFocus_wE4V6.gpfocuswithin {
+          background: #ffffff66 !important;
+        }
+        
+        .CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewContainer .DialogButton {
+          margin-top: 40px !important;
+          background: transparent !important;
+          height: 150px;
+          width: 240px !important;
+          transform: translate(-6px, 0);
+          box-shadow: none !important;
+        }
+        `}
+      </style>
       <PanelSectionRow>
-        <DropdownItem
-          label="Sort"
-          rgOptions={sortOptions}
-          strDefaultLabel="Last Updated (Newest)"
-          selectedOption={selectedSort}
-          onChange={(e) => setSort(e.data)}
-        />
-        <DropdownItem
-          label="Filter"
-          rgOptions={targetOptions}
-          strDefaultLabel="All"
-          selectedOption={selectedTarget.data}
-          onChange={(e) => setTarget(e)}
-        />
+        <Focusable style={{ display: "flex", maxWidth: "100%" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              maxWidth: repoOptions.length <= 1 ? "40%" : "33%",
+              minWidth: repoOptions.length <= 1 ? "40%" : "33%",
+            }}
+          >
+            <span>Sort</span>
+            <Dropdown
+              menuLabel="Sort"
+              rgOptions={sortOptions}
+              strDefaultLabel="Last Updated (Newest)"
+              selectedOption={selectedSort}
+              onChange={(e) => setSort(e.data)}
+            />
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              maxWidth: repoOptions.length <= 1 ? "40%" : "33%",
+              minWidth: repoOptions.length <= 1 ? "40%" : "33%",
+              marginLeft: "auto",
+            }}
+          >
+            <span>Filter</span>
+            <Dropdown
+              menuLabel="Filter"
+              rgOptions={targetOptions}
+              strDefaultLabel="All"
+              selectedOption={selectedTarget.data}
+              onChange={(e) => setTarget(e)}
+            />
+          </div>
+          {repoOptions.length > 1 && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                maxWidth: "30%",
+                minWidth: "30%",
+                marginLeft: "auto",
+              }}
+            >
+              <span>Repo</span>
+              <Dropdown
+                menuLabel="Filter"
+                rgOptions={repoOptions}
+                strDefaultLabel="Official"
+                selectedOption={selectedRepo.data}
+                onChange={(e) => setRepo(e)}
+              />
+            </div>
+          )}
+        </Focusable>
       </PanelSectionRow>
-      <PanelSectionRow>
-        <TextField
-          label="Search"
-          value={searchFieldValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-        />
-      </PanelSectionRow>
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <Focusable
+          style={{ display: "flex", alignItems: "center", width: "96%" }}
+        >
+          <div style={{ minWidth: "75%" }}>
+            <TextField
+              label="Search"
+              value={searchFieldValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+          </div>
+          <DialogButton
+            onClick={() => {
+              reloadThemes();
+            }}
+            style={{ maxWidth: "20%", marginLeft: "auto", height: "50%" }}
+          >
+            <TiRefreshOutline style={{ transform: "translate(0, 2px)" }} />
+            <span>Refresh</span>
+          </DialogButton>
+        </Focusable>
+      </div>
       {/* I wrap everything in a Focusable, because that ensures that the dpad/stick navigation works correctly */}
-      <Focusable style={{ display: "flex", flexWrap: "wrap" }}>
+      {/* The margin here is there because the card items themselves dont have margin left */}
+      <Focusable
+        style={{ display: "flex", flexWrap: "wrap", marginLeft: "7.5px" }}
+      >
         {themeArr
           // searchFilter also includes backend version check
           .filter(searchFilter)
@@ -165,8 +265,20 @@ export const ThemeBrowserPage: VFC = () => {
             } else if (selectedTarget.label === "Installed") {
               const strValue = checkIfThemeInstalled(e);
               return strValue === "installed" || strValue === "outdated";
+            } else if (selectedTarget.label === "Outdated") {
+              const strValue = checkIfThemeInstalled(e);
+              return strValue === "outdated";
             } else {
               return e.target === selectedTarget.label;
+            }
+          })
+          .filter((e: browseThemeEntry) => {
+            if (selectedRepo.label === "All") {
+              return true;
+            } else if (selectedRepo.label === "Official") {
+              return e.repo === "Official";
+            } else {
+              return e.repo !== "Official";
             }
           })
           .sort((a, b) => {
@@ -201,17 +313,15 @@ export const ThemeBrowserPage: VFC = () => {
                 <div
                   className="CssLoader_ThemeBrowser_SingleItem_BgImage"
                   style={{
-                    // Uncomment the next line and comment out the backgroundImage line if you want to try the new "greyed out bg" style
-                    // background: "#0000",
                     backgroundImage: 'url("' + e.preview_image + '")',
                     backgroundSize: "cover",
                     backgroundRepeat: "no-repeat",
                     backgroundPosition: "center",
                     width: "260px",
                     borderRadius: "5px",
-                    marginLeft: "10px",
-                    marginRight: "10px",
-                    marginBottom: "20px",
+                    marginLeft: "0px",
+                    marginRight: "5px",
+                    marginBottom: "5px",
                   }}
                 >
                   <div
@@ -220,15 +330,33 @@ export const ThemeBrowserPage: VFC = () => {
                       display: "flex",
                       flexDirection: "column",
                       alignItems: "center",
-                      // Uncomment the next line and comment out the next next line if you want to try the new "greyed out bg" style
-                      // background: "#ACB2C911",
                       background: "RGBA(0,0,0,0.8)",
                       backdropFilter: "blur(5px)",
                       width: "100%",
                       height: "100%",
                       borderRadius: "3px",
+                      position: "relative",
                     }}
                   >
+                    {installStatus === "outdated" && (
+                      <div
+                        className="CssLoader_ThemeBrowser_SingleItem_NotifBubble"
+                        style={{
+                          position: "absolute",
+                          top: "-10px",
+                          left: "-10px",
+                          padding: "5px 8px 2.5px 8px",
+                          background:
+                            "linear-gradient(135deg, #3a9bed, #235ecf)",
+                          borderRadius: "50%",
+                          zIndex: "99",
+                          boxShadow:
+                            "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+                        }}
+                      >
+                        <AiOutlineDownload />
+                      </div>
+                    )}
                     <span
                       className="CssLoader_ThemeBrowser_SingleItem_ThemeName"
                       style={{
@@ -245,23 +373,22 @@ export const ThemeBrowserPage: VFC = () => {
                     >
                       {e.name}
                     </span>
-                    {selectedTarget.label === "All" && (
-                      <span
-                        className="CssLoader_ThemeBrowser_SingleItem_ThemeTarget"
-                        style={{
-                          marginTop: "-6px",
-                          fontSize: "1em",
-                          textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                        }}
-                      >
-                        {e.target}
-                      </span>
-                    )}
+                    <span
+                      className="CssLoader_ThemeBrowser_SingleItem_ThemeTarget"
+                      style={{
+                        marginTop: "-6px",
+                        fontSize: "1em",
+                        textShadow: "rgb(48, 48, 48) 0px 0 10px",
+                      }}
+                    >
+                      {e.target}
+                    </span>
                     <div
                       className="CssLoader_ThemeBrowser_SingleItem_PreviewImage"
                       style={{
                         width: "240px",
-                        backgroundImage: 'url("' + e.preview_image + '")',
+                        // backgroundImage: 'url("' + e.preview_image + '")',
+                        background: "rgba(0,0,0,0)",
                         backgroundSize: "cover",
                         backgroundRepeat: "no-repeat",
                         height: "150px",
@@ -270,19 +397,21 @@ export const ThemeBrowserPage: VFC = () => {
                         flexDirection: "column",
                         alignItems: "center",
                       }}
-                    ></div>
+                    />
                     <div
                       className="CssLoader_ThemeBrowser_SingleItem_AuthorVersionContainer"
                       style={{
                         width: "240px",
                         textAlign: "center",
                         display: "flex",
+                        paddingBottom: "8px",
                       }}
                     >
                       <span
                         className="CssLoader_ThemeBrowser_SingleItem_AuthorText"
                         style={{
                           marginRight: "auto",
+                          marginLeft: "2px",
                           fontSize: "1em",
                           textShadow: "rgb(48, 48, 48) 0px 0 10px",
                         }}
@@ -293,6 +422,7 @@ export const ThemeBrowserPage: VFC = () => {
                         className="CssLoader_ThemeBrowser_SingleItem_VersionText"
                         style={{
                           marginLeft: "auto",
+                          marginRight: "2px",
                           fontSize: "1em",
                           textShadow: "rgb(48, 48, 48) 0px 0 10px",
                         }}
@@ -314,13 +444,14 @@ export const ThemeBrowserPage: VFC = () => {
                             // This padding here overrides the default padding put on PanelSectionRow's by Valve
                             // Before this, I was using negative margin to "shrink" the element, but this is a much better solution
                             paddingTop: "0px",
+                            marginLeft: "-7.5px",
+                            marginRight: "-7.5px",
                             paddingBottom: "0px",
-
-                            filter: calcButtonColor(installStatus),
+                            // filter: calcButtonColor(installStatus),
                           }}
                         >
                           <ButtonItem
-                            bottomSeparator={false}
+                            bottomSeparator="none"
                             layout="below"
                             disabled={isInstalling}
                             onClick={() => {
@@ -328,11 +459,27 @@ export const ThemeBrowserPage: VFC = () => {
                               Router.Navigate("/theme-manager-expanded-view");
                             }}
                           >
-                            <span className="CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewText">
+                            <div
+                              className="CssLoader_ThemeBrowser_SingleItem_PreviewImage"
+                              style={{
+                                width: "240px",
+                                transform: "translate(-24px, -10px)",
+                                backgroundImage:
+                                  'url("' + e.preview_image + '")',
+                                backgroundSize: "cover",
+                                backgroundRepeat: "no-repeat",
+                                height: "150px",
+                                display: "flex",
+                                position: "relative",
+                                flexDirection: "column",
+                                alignItems: "center",
+                              }}
+                            ></div>
+                            {/* <span className="CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewText">
                               {installStatus === "outdated"
                                 ? "Update Available"
                                 : "View Details"}
-                            </span>
+                            </span> */}
                           </ButtonItem>
                         </div>
                       </PanelSectionRow>
@@ -343,16 +490,6 @@ export const ThemeBrowserPage: VFC = () => {
             );
           })}
       </Focusable>
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={() => {
-            reloadThemes();
-          }}
-        >
-          Reload Themes
-        </ButtonItem>
-      </PanelSectionRow>
     </>
   );
 };
