@@ -146,30 +146,6 @@ export const ThemeBrowserPage: VFC = () => {
 
   return (
     <>
-      <style>
-        {`
-        .CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewContainer .gamepaddialog_Field_S-_La {
-          position: absolute;
-          height: 212.5px;
-          top: 0;
-          width: 228px;
-        }
-        
-        .gamepaddialog_Field_S-_La.gamepaddialog_HighlightOnFocus_wE4V6.gpfocus,
-        .gamepaddialog_Field_S-_La.gamepaddialog_HighlightOnFocus_wE4V6.gpfocuswithin {
-          background: #ffffff66 !important;
-        }
-        
-        .CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewContainer .DialogButton {
-          margin-top: 40px !important;
-          background: transparent !important;
-          height: 150px;
-          width: 240px !important;
-          transform: translate(-6px, 0);
-          box-shadow: none !important;
-        }
-        `}
-      </style>
       <PanelSectionRow>
         <Focusable style={{ display: "flex", maxWidth: "100%" }}>
           <div
@@ -310,181 +286,132 @@ export const ThemeBrowserPage: VFC = () => {
             return (
               // The outer 2 most divs are the background darkened/blurred image, and everything inside is the text/image/buttons
               <>
-                <div
-                  className="CssLoader_ThemeBrowser_SingleItem_BgImage"
-                  style={{
-                    backgroundImage: 'url("' + e.preview_image + '")',
-                    backgroundSize: "cover",
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "center",
-                    width: "260px",
-                    borderRadius: "5px",
-                    marginLeft: "0px",
-                    marginRight: "5px",
-                    marginBottom: "5px",
-                  }}
-                >
-                  <div
-                    className="CssLoader_ThemeBrowser_SingleItem_BgOverlay"
+                <div style={{ position: "relative" }}>
+                  {installStatus === "outdated" && (
+                    <div
+                      className="CssLoader_ThemeBrowser_SingleItem_NotifBubble"
+                      style={{
+                        position: "absolute",
+                        top: "-10px",
+                        left: "-10px",
+                        padding: "5px 8px 2.5px 8px",
+                        background: "linear-gradient(135deg, #3a9bed, #235ecf)",
+                        borderRadius: "50%",
+                        // The focusRing has a z index of 10000, so this is just to be cheeky
+                        zIndex: "10001",
+                        boxShadow:
+                          "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+                      }}
+                    >
+                      <AiOutlineDownload />
+                    </div>
+                  )}
+                  <Focusable
+                    focusWithinClassName="gpfocuswithin"
+                    onActivate={() => {
+                      setCurExpandedTheme(e);
+                      Router.Navigate("/theme-manager-expanded-view");
+                    }}
+                    className="CssLoader_ThemeBrowser_SingleItem_BgImage"
                     style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      background: "RGBA(0,0,0,0.8)",
-                      backdropFilter: "blur(5px)",
-                      width: "100%",
-                      height: "100%",
-                      borderRadius: "3px",
-                      position: "relative",
+                      backgroundImage: 'url("' + e.preview_image + '")',
+                      backgroundSize: "cover",
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "center",
+                      width: "260px",
+                      borderRadius: "5px",
+                      marginLeft: "0px",
+                      marginRight: "5px",
+                      marginBottom: "5px",
                     }}
                   >
-                    {installStatus === "outdated" && (
-                      <div
-                        className="CssLoader_ThemeBrowser_SingleItem_NotifBubble"
-                        style={{
-                          position: "absolute",
-                          top: "-10px",
-                          left: "-10px",
-                          padding: "5px 8px 2.5px 8px",
-                          background:
-                            "linear-gradient(135deg, #3a9bed, #235ecf)",
-                          borderRadius: "50%",
-                          zIndex: "99",
-                          boxShadow:
-                            "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
-                        }}
-                      >
-                        <AiOutlineDownload />
-                      </div>
-                    )}
-                    <span
-                      className="CssLoader_ThemeBrowser_SingleItem_ThemeName"
-                      style={{
-                        textAlign: "center",
-                        marginTop: "5px",
-                        fontSize: "1.25em",
-                        fontWeight: "bold",
-                        // This stuff here truncates it if it's too long
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        width: "90%",
-                      }}
-                    >
-                      {e.name}
-                    </span>
-                    <span
-                      className="CssLoader_ThemeBrowser_SingleItem_ThemeTarget"
-                      style={{
-                        marginTop: "-6px",
-                        fontSize: "1em",
-                        textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                      }}
-                    >
-                      {e.target}
-                    </span>
                     <div
-                      className="CssLoader_ThemeBrowser_SingleItem_PreviewImage"
+                      className="CssLoader_ThemeBrowser_SingleItem_BgOverlay"
                       style={{
-                        width: "240px",
-                        // backgroundImage: 'url("' + e.preview_image + '")',
-                        background: "rgba(0,0,0,0)",
-                        backgroundSize: "cover",
-                        backgroundRepeat: "no-repeat",
-                        height: "150px",
                         display: "flex",
-                        position: "relative",
                         flexDirection: "column",
                         alignItems: "center",
-                      }}
-                    />
-                    <div
-                      className="CssLoader_ThemeBrowser_SingleItem_AuthorVersionContainer"
-                      style={{
-                        width: "240px",
-                        textAlign: "center",
-                        display: "flex",
-                        paddingBottom: "8px",
+                        background: "RGBA(0,0,0,0.8)",
+                        backdropFilter: "blur(5px)",
+                        width: "100%",
+                        height: "100%",
+                        borderRadius: "3px",
                       }}
                     >
                       <span
-                        className="CssLoader_ThemeBrowser_SingleItem_AuthorText"
+                        className="CssLoader_ThemeBrowser_SingleItem_ThemeName"
                         style={{
-                          marginRight: "auto",
-                          marginLeft: "2px",
+                          textAlign: "center",
+                          marginTop: "5px",
+                          fontSize: "1.25em",
+                          fontWeight: "bold",
+                          // This stuff here truncates it if it's too long
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          width: "90%",
+                        }}
+                      >
+                        {e.name}
+                      </span>
+                      <span
+                        className="CssLoader_ThemeBrowser_SingleItem_ThemeTarget"
+                        style={{
+                          marginTop: "-6px",
                           fontSize: "1em",
                           textShadow: "rgb(48, 48, 48) 0px 0 10px",
                         }}
                       >
-                        {e.author}
+                        {e.target}
                       </span>
-                      <span
-                        className="CssLoader_ThemeBrowser_SingleItem_VersionText"
+                      <div
+                        className="CssLoader_ThemeBrowser_SingleItem_PreviewImage"
                         style={{
-                          marginLeft: "auto",
-                          marginRight: "2px",
-                          fontSize: "1em",
-                          textShadow: "rgb(48, 48, 48) 0px 0 10px",
+                          width: "240px",
+                          backgroundImage: 'url("' + e.preview_image + '")',
+                          backgroundSize: "cover",
+                          backgroundRepeat: "no-repeat",
+                          height: "150px",
+                          display: "flex",
+                          position: "relative",
+                          flexDirection: "column",
+                          alignItems: "center",
+                        }}
+                      />
+                      <div
+                        className="CssLoader_ThemeBrowser_SingleItem_AuthorVersionContainer"
+                        style={{
+                          width: "240px",
+                          textAlign: "center",
+                          display: "flex",
+                          paddingBottom: "8px",
                         }}
                       >
-                        {e.version}
-                      </span>
-                    </div>
-                    <div
-                      className="CssLoader_ThemeBrowser_SingleItem_InstallButtonContainer"
-                      style={{
-                        marginTop: "auto",
-                        width: "245px",
-                      }}
-                    >
-                      <PanelSectionRow>
-                        <div
-                          className="CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewContainer"
+                        <span
+                          className="CssLoader_ThemeBrowser_SingleItem_AuthorText"
                           style={{
-                            // This padding here overrides the default padding put on PanelSectionRow's by Valve
-                            // Before this, I was using negative margin to "shrink" the element, but this is a much better solution
-                            paddingTop: "0px",
-                            marginLeft: "-7.5px",
-                            marginRight: "-7.5px",
-                            paddingBottom: "0px",
-                            // filter: calcButtonColor(installStatus),
+                            marginRight: "auto",
+                            marginLeft: "2px",
+                            fontSize: "1em",
+                            textShadow: "rgb(48, 48, 48) 0px 0 10px",
                           }}
                         >
-                          <ButtonItem
-                            bottomSeparator="none"
-                            layout="below"
-                            disabled={isInstalling}
-                            onClick={() => {
-                              setCurExpandedTheme(e);
-                              Router.Navigate("/theme-manager-expanded-view");
-                            }}
-                          >
-                            <div
-                              className="CssLoader_ThemeBrowser_SingleItem_PreviewImage"
-                              style={{
-                                width: "240px",
-                                transform: "translate(-24px, -10px)",
-                                backgroundImage:
-                                  'url("' + e.preview_image + '")',
-                                backgroundSize: "cover",
-                                backgroundRepeat: "no-repeat",
-                                height: "150px",
-                                display: "flex",
-                                position: "relative",
-                                flexDirection: "column",
-                                alignItems: "center",
-                              }}
-                            ></div>
-                            {/* <span className="CssLoader_ThemeBrowser_SingleItem_OpenExpandedViewText">
-                              {installStatus === "outdated"
-                                ? "Update Available"
-                                : "View Details"}
-                            </span> */}
-                          </ButtonItem>
-                        </div>
-                      </PanelSectionRow>
+                          {e.author}
+                        </span>
+                        <span
+                          className="CssLoader_ThemeBrowser_SingleItem_VersionText"
+                          style={{
+                            marginLeft: "auto",
+                            marginRight: "2px",
+                            fontSize: "1em",
+                            textShadow: "rgb(48, 48, 48) 0px 0 10px",
+                          }}
+                        >
+                          {e.version}
+                        </span>
+                      </div>
                     </div>
-                  </div>
+                  </Focusable>
                 </div>
               </>
             );
