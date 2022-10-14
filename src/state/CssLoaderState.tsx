@@ -12,6 +12,7 @@ interface PublicCssLoaderState {
   selectedRepo: SingleDropdownOption;
   isInstalling: boolean;
   currentExpandedTheme: browseThemeEntry | undefined;
+  browserCardSize: number;
 }
 
 // The localThemeEntry interface refers to the theme data as given by the python function, the Theme class refers to a theme after it has been formatted and the generate function has been added
@@ -25,6 +26,7 @@ interface PublicCssLoaderContext extends PublicCssLoaderState {
   setRepo(value: SingleDropdownOption): void;
   setInstalling(bool: boolean): void;
   setCurExpandedTheme(theme: browseThemeEntry | undefined): void;
+  setBrowserCardSize(num: number): void;
 }
 
 // This class creates the getter and setter functions for all of the global state data.
@@ -43,6 +45,7 @@ export class CssLoaderState {
   };
   private isInstalling: boolean = false;
   private currentExpandedTheme: browseThemeEntry | undefined = undefined;
+  private browserCardSize: number = 3;
 
   // You can listen to this eventBus' 'stateUpdate' event and use that to trigger a useState or other function that causes a re-render
   public eventBus = new EventTarget();
@@ -57,6 +60,7 @@ export class CssLoaderState {
       selectedRepo: this.selectedRepo,
       isInstalling: this.isInstalling,
       currentExpandedTheme: this.currentExpandedTheme,
+      browserCardSize: this.browserCardSize,
     };
   }
 
@@ -110,6 +114,11 @@ export class CssLoaderState {
     this.forceUpdate();
   }
 
+  setBrowserCardSize(num: number) {
+    this.browserCardSize = num;
+    this.forceUpdate();
+  }
+
   private forceUpdate() {
     this.eventBus.dispatchEvent(new Event("stateUpdate"));
   }
@@ -157,6 +166,8 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({
     cssLoaderStateClass.setInstalling(bool);
   const setCurExpandedTheme = (theme: browseThemeEntry | undefined) =>
     cssLoaderStateClass.setCurExpandedTheme(theme);
+  const setBrowserCardSize = (num: number) =>
+    cssLoaderStateClass.setBrowserCardSize(num);
 
   return (
     <CssLoaderContext.Provider
@@ -170,6 +181,7 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({
         setRepo,
         setInstalling,
         setCurExpandedTheme,
+        setBrowserCardSize,
       }}
     >
       {children}

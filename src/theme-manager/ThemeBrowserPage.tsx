@@ -1,14 +1,14 @@
 import {
-  ButtonItem,
   PanelSectionRow,
   Focusable,
   TextField,
   DropdownOption,
-  Router,
   Dropdown,
   DialogButton,
+  SliderField,
+  gamepadSliderClasses,
 } from "decky-frontend-lib";
-import { useLayoutEffect, useMemo, useState, VFC } from "react";
+import { useLayoutEffect, useMemo, useState, FC } from "react";
 
 import { TiRefreshOutline } from "react-icons/ti";
 
@@ -19,9 +19,13 @@ import * as python from "../python";
 import { browseThemeEntry } from "../customTypes";
 import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
-import { AiOutlineDownload } from "react-icons/ai";
+import {
+  ThreeWideCard,
+  FourWideCard,
+  FiveWideCard,
+} from "../components/BrowserItemCards";
 
-export const ThemeBrowserPage: VFC = () => {
+export const ThemeBrowserPage: FC = () => {
   const {
     browseThemeList: themeArr,
     setBrowseThemeList: setThemeArr,
@@ -35,8 +39,8 @@ export const ThemeBrowserPage: VFC = () => {
     setTarget,
     selectedRepo,
     setRepo,
-    isInstalling,
-    setCurExpandedTheme,
+    browserCardSize = 3,
+    setBrowserCardSize,
   } = useCssLoaderState();
 
   const [backendVersion, setBackendVer] = useState<number>(3);
@@ -209,7 +213,7 @@ export const ThemeBrowserPage: VFC = () => {
         <Focusable
           style={{ display: "flex", alignItems: "center", width: "96%" }}
         >
-          <div style={{ minWidth: "75%" }}>
+          <div style={{ minWidth: "55%", marginRight: "auto" }}>
             <TextField
               label="Search"
               value={searchFieldValue}
@@ -220,17 +224,59 @@ export const ThemeBrowserPage: VFC = () => {
             onClick={() => {
               reloadThemes();
             }}
-            style={{ maxWidth: "20%", marginLeft: "auto", height: "50%" }}
+            style={{
+              maxWidth: "20%",
+              height: "50%",
+              // marginRight: "auto",
+              // marginLeft: "auto",
+            }}
           >
             <TiRefreshOutline style={{ transform: "translate(0, 2px)" }} />
             <span>Refresh</span>
           </DialogButton>
+          <div
+            style={{ maxWidth: "20%", marginLeft: "auto" }}
+            className="CssLoader_ThemeBrowser_ScaleSlider"
+          >
+            <SliderField
+              min={3}
+              max={5}
+              step={1}
+              value={browserCardSize}
+              onChange={(num) => {
+                console.log(num);
+                setBrowserCardSize(num);
+              }}
+            />
+          </div>
+          <style>
+            {`
+              /* call me the css selector god */
+              .CssLoader_ThemeBrowser_ScaleSlider > div > div > .${gamepadSliderClasses.SliderControlWithIcon}.Panel.Focusable {
+                width: 62%;
+              }
+            `}
+          </style>
         </Focusable>
       </div>
       {/* I wrap everything in a Focusable, because that ensures that the dpad/stick navigation works correctly */}
       {/* The margin here is there because the card items themselves dont have margin left */}
       <Focusable
-        style={{ display: "flex", flexWrap: "wrap", marginLeft: "7.5px" }}
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          // i LOOOOOOOOOOOOVE self invoked functions
+          marginLeft: (() => {
+            switch (browserCardSize) {
+              case 5:
+                return "27.5px";
+              case 4:
+                return "6.1px";
+              default:
+                return "7.5px";
+            }
+          })(),
+        }}
       >
         {themeArr
           // searchFilter also includes backend version check
@@ -282,139 +328,14 @@ export const ThemeBrowserPage: VFC = () => {
             }
           })
           .map((e: browseThemeEntry) => {
-            const installStatus = checkIfThemeInstalled(e);
-            return (
-              // The outer 2 most divs are the background darkened/blurred image, and everything inside is the text/image/buttons
-              <>
-                <div style={{ position: "relative" }}>
-                  {installStatus === "outdated" && (
-                    <div
-                      className="CssLoader_ThemeBrowser_SingleItem_NotifBubble"
-                      style={{
-                        position: "absolute",
-                        top: "-10px",
-                        left: "-10px",
-                        padding: "5px 8px 2.5px 8px",
-                        background: "linear-gradient(135deg, #3a9bed, #235ecf)",
-                        borderRadius: "50%",
-                        // The focusRing has a z index of 10000, so this is just to be cheeky
-                        zIndex: "10001",
-                        boxShadow:
-                          "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
-                      }}
-                    >
-                      <AiOutlineDownload />
-                    </div>
-                  )}
-                  <Focusable
-                    focusWithinClassName="gpfocuswithin"
-                    onActivate={() => {
-                      setCurExpandedTheme(e);
-                      Router.Navigate("/theme-manager-expanded-view");
-                    }}
-                    className="CssLoader_ThemeBrowser_SingleItem_BgImage"
-                    style={{
-                      backgroundImage: 'url("' + e.preview_image + '")',
-                      backgroundSize: "cover",
-                      backgroundRepeat: "no-repeat",
-                      backgroundPosition: "center",
-                      width: "260px",
-                      borderRadius: "5px",
-                      marginLeft: "0px",
-                      marginRight: "5px",
-                      marginBottom: "5px",
-                    }}
-                  >
-                    <div
-                      className="CssLoader_ThemeBrowser_SingleItem_BgOverlay"
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        background: "RGBA(0,0,0,0.8)",
-                        backdropFilter: "blur(5px)",
-                        width: "100%",
-                        height: "100%",
-                        borderRadius: "3px",
-                      }}
-                    >
-                      <span
-                        className="CssLoader_ThemeBrowser_SingleItem_ThemeName"
-                        style={{
-                          textAlign: "center",
-                          marginTop: "5px",
-                          fontSize: "1.25em",
-                          fontWeight: "bold",
-                          // This stuff here truncates it if it's too long
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          width: "90%",
-                        }}
-                      >
-                        {e.name}
-                      </span>
-                      <span
-                        className="CssLoader_ThemeBrowser_SingleItem_ThemeTarget"
-                        style={{
-                          marginTop: "-6px",
-                          fontSize: "1em",
-                          textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                        }}
-                      >
-                        {e.target}
-                      </span>
-                      <div
-                        className="CssLoader_ThemeBrowser_SingleItem_PreviewImage"
-                        style={{
-                          width: "240px",
-                          backgroundImage: 'url("' + e.preview_image + '")',
-                          backgroundSize: "cover",
-                          backgroundRepeat: "no-repeat",
-                          height: "150px",
-                          display: "flex",
-                          position: "relative",
-                          flexDirection: "column",
-                          alignItems: "center",
-                        }}
-                      />
-                      <div
-                        className="CssLoader_ThemeBrowser_SingleItem_AuthorVersionContainer"
-                        style={{
-                          width: "240px",
-                          textAlign: "center",
-                          display: "flex",
-                          paddingBottom: "8px",
-                        }}
-                      >
-                        <span
-                          className="CssLoader_ThemeBrowser_SingleItem_AuthorText"
-                          style={{
-                            marginRight: "auto",
-                            marginLeft: "2px",
-                            fontSize: "1em",
-                            textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                          }}
-                        >
-                          {e.author}
-                        </span>
-                        <span
-                          className="CssLoader_ThemeBrowser_SingleItem_VersionText"
-                          style={{
-                            marginLeft: "auto",
-                            marginRight: "2px",
-                            fontSize: "1em",
-                            textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                          }}
-                        >
-                          {e.version}
-                        </span>
-                      </div>
-                    </div>
-                  </Focusable>
-                </div>
-              </>
-            );
+            switch (browserCardSize) {
+              case 5:
+                return <FiveWideCard data={e} />;
+              case 4:
+                return <FourWideCard data={e} />;
+              default:
+                return <ThreeWideCard data={e} />;
+            }
           })}
       </Focusable>
     </>
