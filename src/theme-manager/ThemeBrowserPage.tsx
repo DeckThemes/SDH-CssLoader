@@ -19,11 +19,7 @@ import * as python from "../python";
 import { browseThemeEntry } from "../customTypes";
 import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
-import {
-  ThreeWideCard,
-  FourWideCard,
-  FiveWideCard,
-} from "../components/BrowserItemCards";
+import { VariableSizeCard } from "../components/BrowserItemCards";
 
 export const ThemeBrowserPage: FC = () => {
   const {
@@ -294,7 +290,6 @@ export const ThemeBrowserPage: FC = () => {
               step={1}
               value={browserCardSize}
               onChange={(num) => {
-                console.log(num);
                 setBrowserCardSize(num);
               }}
             />
@@ -319,7 +314,7 @@ export const ThemeBrowserPage: FC = () => {
           marginLeft: (() => {
             switch (browserCardSize) {
               case 5:
-                return "27.5px";
+                return "12px";
               case 4:
                 return "6.1px";
               default:
@@ -328,16 +323,9 @@ export const ThemeBrowserPage: FC = () => {
           })(),
         }}
       >
-        {filteredData.map((e) => {
-          switch (browserCardSize) {
-            case 5:
-              return <FiveWideCard data={e} />;
-            case 4:
-              return <FourWideCard data={e} />;
-            default:
-              return <ThreeWideCard data={e} />;
-          }
-        })}
+        {filteredData.map((e) => (
+          <VariableSizeCard data={e} cols={browserCardSize} />
+        ))}
       </Focusable>
     </>
   );
