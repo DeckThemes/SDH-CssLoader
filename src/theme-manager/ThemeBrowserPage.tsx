@@ -148,6 +148,56 @@ export const ThemeBrowserPage: FC = () => {
     getInstalledThemes();
   }, []);
 
+  const filteredData = themeArr
+    // searchFilter also includes backend version check
+    .filter(searchFilter)
+    .filter((e: browseThemeEntry) => {
+      if (selectedTarget.label === "All") {
+        return e.target !== "Background";
+      } else if (selectedTarget.label === "Installed") {
+        const strValue = checkIfThemeInstalled(e);
+        return strValue === "installed" || strValue === "outdated";
+      } else if (selectedTarget.label === "Outdated") {
+        const strValue = checkIfThemeInstalled(e);
+        return strValue === "outdated";
+      } else {
+        return e.target === selectedTarget.label;
+      }
+    })
+    .filter((e: browseThemeEntry) => {
+      if (selectedRepo.label === "All") {
+        return true;
+      } else if (selectedRepo.label === "Official") {
+        return e.repo === "Official";
+      } else {
+        return e.repo !== "Official";
+      }
+    })
+    .sort((a, b) => {
+      // This handles the sort option the user has chosen
+      switch (selectedSort) {
+        case 2:
+          // Z-A
+          // localeCompare just sorts alphabetically
+          return b.name.localeCompare(a.name);
+        case 3:
+          // New-Old
+          return (
+            new Date(b.last_changed).valueOf() -
+            new Date(a.last_changed).valueOf()
+          );
+        case 4:
+          // Old-New
+          return (
+            new Date(a.last_changed).valueOf() -
+            new Date(b.last_changed).valueOf()
+          );
+        default:
+          // This is just A-Z
+          return a.name.localeCompare(b.name);
+      }
+    });
+
   return (
     <>
       <PanelSectionRow>
@@ -278,65 +328,16 @@ export const ThemeBrowserPage: FC = () => {
           })(),
         }}
       >
-        {themeArr
-          // searchFilter also includes backend version check
-          .filter(searchFilter)
-          .filter((e: browseThemeEntry) => {
-            if (selectedTarget.label === "All") {
-              return e.target !== "Background";
-            } else if (selectedTarget.label === "Installed") {
-              const strValue = checkIfThemeInstalled(e);
-              return strValue === "installed" || strValue === "outdated";
-            } else if (selectedTarget.label === "Outdated") {
-              const strValue = checkIfThemeInstalled(e);
-              return strValue === "outdated";
-            } else {
-              return e.target === selectedTarget.label;
-            }
-          })
-          .filter((e: browseThemeEntry) => {
-            if (selectedRepo.label === "All") {
-              return true;
-            } else if (selectedRepo.label === "Official") {
-              return e.repo === "Official";
-            } else {
-              return e.repo !== "Official";
-            }
-          })
-          .sort((a, b) => {
-            // This handles the sort option the user has chosen
-            switch (selectedSort) {
-              case 2:
-                // Z-A
-                // localeCompare just sorts alphabetically
-                return b.name.localeCompare(a.name);
-              case 3:
-                // New-Old
-                return (
-                  new Date(b.last_changed).valueOf() -
-                  new Date(a.last_changed).valueOf()
-                );
-              case 4:
-                // Old-New
-                return (
-                  new Date(a.last_changed).valueOf() -
-                  new Date(b.last_changed).valueOf()
-                );
-              default:
-                // This is just A-Z
-                return a.name.localeCompare(b.name);
-            }
-          })
-          .map((e: browseThemeEntry) => {
-            switch (browserCardSize) {
-              case 5:
-                return <FiveWideCard data={e} />;
-              case 4:
-                return <FourWideCard data={e} />;
-              default:
-                return <ThreeWideCard data={e} />;
-            }
-          })}
+        {filteredData.map((e) => {
+          switch (browserCardSize) {
+            case 5:
+              return <FiveWideCard data={e} />;
+            case 4:
+              return <FourWideCard data={e} />;
+            default:
+              return <ThreeWideCard data={e} />;
+          }
+        })}
       </Focusable>
     </>
   );
