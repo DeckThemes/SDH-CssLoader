@@ -19,7 +19,7 @@ import * as python from "../python";
 import { browseThemeEntry } from "../customTypes";
 import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
-import { VariableSizeCard } from "../components/BrowserItemCards";
+import { VariableSizeCard } from "../components";
 
 export const ThemeBrowserPage: FC = () => {
   const {
@@ -310,21 +310,17 @@ export const ThemeBrowserPage: FC = () => {
         style={{
           display: "flex",
           flexWrap: "wrap",
-          // i LOOOOOOOOOOOOVE self invoked functions
-          marginLeft: (() => {
-            switch (browserCardSize) {
-              case 5:
-                return "12px";
-              case 4:
-                return "6.1px";
-              default:
-                return "7.5px";
-            }
-          })(),
+          justifyContent: "center",
+          rowGap: "5px",
+          columnGap: "5px",
         }}
       >
         {filteredData.map((e) => (
-          <VariableSizeCard data={e} cols={browserCardSize} />
+          <VariableSizeCard
+            data={e}
+            cols={browserCardSize}
+            showTarget={selectedTarget.data <= 3}
+          />
         ))}
       </Focusable>
     </>

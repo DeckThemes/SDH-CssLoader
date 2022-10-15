@@ -5,6 +5,18 @@ import { Theme } from "../theme";
 import { Focusable, Router } from "decky-frontend-lib";
 import { AiOutlineDownload } from "react-icons/ai";
 
+const topMargin = {
+  5: "2px",
+  4: "3px",
+  3: "5px",
+};
+
+const bottomMargin = {
+  5: "4px",
+  4: "6px",
+  3: "8px",
+};
+
 const cardWidth = {
   5: "152px",
   4: "195px",
@@ -21,6 +33,12 @@ const imgHeight = {
   5: "87.6px",
   4: "112.5px",
   3: "150px",
+};
+
+const targetHeight = {
+  5: "12px",
+  4: "18px",
+  3: "25px",
 };
 
 const bubbleOffset = {
@@ -47,10 +65,11 @@ const smallText = {
   3: "1em",
 };
 
-export const VariableSizeCard: FC<{ data: browseThemeEntry; cols: number }> = ({
-  data: e,
-  cols: size,
-}) => {
+export const VariableSizeCard: FC<{
+  data: browseThemeEntry;
+  cols: number;
+  showTarget: boolean;
+}> = ({ data: e, cols: size, showTarget = true }) => {
   const { localThemeList, setCurExpandedTheme } = useCssLoaderState();
   function checkIfThemeInstalled(themeObj: browseThemeEntry) {
     const filteredArr: Theme[] = localThemeList.filter(
@@ -107,9 +126,6 @@ export const VariableSizeCard: FC<{ data: browseThemeEntry; cols: number }> = ({
             backgroundPosition: "center",
             width: cardWidth[size],
             borderRadius: "5px",
-            marginLeft: "0px",
-            marginRight: "5px",
-            marginBottom: "5px",
           }}
         >
           <div
@@ -129,7 +145,7 @@ export const VariableSizeCard: FC<{ data: browseThemeEntry; cols: number }> = ({
               className="CssLoader_ThemeBrowser_SingleItem_ThemeName"
               style={{
                 textAlign: "center",
-                marginTop: "5px",
+                marginTop: topMargin[size],
                 fontSize: bigText[size],
                 fontWeight: "bold",
                 // This stuff here truncates it if it's too long
@@ -141,17 +157,19 @@ export const VariableSizeCard: FC<{ data: browseThemeEntry; cols: number }> = ({
             >
               {e.name}
             </span>
-            <span
-              className="CssLoader_ThemeBrowser_SingleItem_ThemeTarget"
-              style={{
-                marginTop: "-6px",
-                fontSize: smallText[size],
-                height: "25px",
-                textShadow: "rgb(48, 48, 48) 0px 0 10px",
-              }}
-            >
-              {e.target}
-            </span>
+            {showTarget && (
+              <span
+                className="CssLoader_ThemeBrowser_SingleItem_ThemeTarget"
+                style={{
+                  marginTop: "-6px",
+                  fontSize: smallText[size],
+                  height: targetHeight[size],
+                  textShadow: "rgb(48, 48, 48) 0px 0 10px",
+                }}
+              >
+                {e.target}
+              </span>
+            )}
             <div
               className="CssLoader_ThemeBrowser_SingleItem_PreviewImage"
               style={{
@@ -172,7 +190,7 @@ export const VariableSizeCard: FC<{ data: browseThemeEntry; cols: number }> = ({
                 width: imgWidth[size],
                 textAlign: "center",
                 display: "flex",
-                paddingBottom: "8px",
+                paddingBottom: bottomMargin[size],
                 fontSize: smallText[size],
               }}
             >
