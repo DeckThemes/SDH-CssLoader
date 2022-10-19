@@ -233,15 +233,16 @@ class Plugin:
             configPath = configDir + "/" + x
             themeDataPath = themePath + "/theme.json"
 
-
-            if not path.exists(themeDataPath):
+            if (not path.exists(themeDataPath)) and (not path.exists(os.path.join(themePath, "theme.css"))):
                 continue
         
             Log(f"Analyzing theme {x}")
             
             try:
-                with open(themeDataPath, "r") as fp:
-                    theme = json.load(fp)
+                theme = None
+                if path.exists(themeDataPath):
+                    with open(themeDataPath, "r") as fp:
+                        theme = json.load(fp)
                     
                 themeData = Theme(themePath, theme, configPath)
 
