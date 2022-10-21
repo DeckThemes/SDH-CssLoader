@@ -4,8 +4,8 @@ from css_utils import get_theme_path, Log
 def load_tab_mappings():
     global TAB_MAPPINGS_INTERNAL
     TAB_MAPPINGS_INTERNAL = {
-        "QuickAccess": ["QuickAccess_uid2"],
-        "MainMenu": ["MainMenu_uid2"]
+        "QuickAccess": ["QuickAccess", "QuickAccess_uid2"],
+        "MainMenu": ["MainMenu", "MainMenu_uid2"]
     }
 
     tab_mappings_txt_path = os.path.join(get_theme_path(), "mappings.txt")
@@ -36,9 +36,7 @@ def load_tab_mappings():
 
 def get_tab_mappings(tab : str) -> list:
     if tab in TAB_MAPPINGS_INTERNAL:
-        tabs = [tab]
-        tabs.extend(TAB_MAPPINGS_INTERNAL[tab])
-        return tabs
+        return TAB_MAPPINGS_INTERNAL[tab]
     
     return [tab]
 

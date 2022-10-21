@@ -265,8 +265,6 @@ class Plugin:
                 for z in y.tabs:
                     if z not in self.tabs:
                         self.tabs.append(z)
-        
-        self.tabs = get_multiple_tab_mappings(self.tabs)
 
     async def _check_tabs(self):
         while True:
