@@ -1,6 +1,7 @@
 from typing import List
 from css_utils import Result, Log
 from utilities import Utilities
+from css_tab_mapping import get_multiple_tab_mappings
 
 pluginManagerUtils = Utilities(None)
 
@@ -8,7 +9,7 @@ class Inject:
     def __init__(self, cssPath : str, tabs : List[str], theme):
         self.css = None
         self.cssPath = cssPath
-        self.tabs = tabs
+        self.tabs = get_multiple_tab_mappings(tabs)
         self.uuids = {}
         self.theme = theme
         self.enabled = False
@@ -30,13 +31,16 @@ class Inject:
     async def inject(self, tab : str = None) -> Result:
         if (tab is None):
             for x in self.tabs:
-                await self.inject(x)
+                await self._inject_internal(x)
 
             return Result(True)
         else:
-            if (tab not in self.tabs):
-                return Result(True) # this is kind of cheating but
+            return await self._inject_internal(tab)
 
+    async def _inject_internal(self, tab : str) -> Result:
+        if (tab not in self.tabs):
+            return Result(True) # this is kind of cheating but
+        
         if (len(self.uuids[tab]) > 0):
             await self.remove(tab)
             self.enabled = True # In case the below code fails, it will never be re-injected unless it's still enabled

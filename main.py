@@ -9,6 +9,7 @@ from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
 from css_remoteinstall import RemoteInstall
+from css_tab_mapping import get_multiple_tab_mappings, load_tab_mappings
 
 Initialized = False
 
@@ -264,6 +265,8 @@ class Plugin:
                 for z in y.tabs:
                     if z not in self.tabs:
                         self.tabs.append(z)
+        
+        self.tabs = get_multiple_tab_mappings(self.tabs)
 
     async def _check_tabs(self):
         while True:
@@ -337,6 +340,7 @@ class Plugin:
         await create_symlink(f"{get_user_home()}/homebrew/themes", f"{get_user_home()}/.local/share/Steam/steamui/themes_custom")
         self.remote = RemoteInstall()
         await self.remote.load()
+        load_tab_mappings()
 
         await self._load(self)
         await self._inject_test_element(self, "SP", 9999)
