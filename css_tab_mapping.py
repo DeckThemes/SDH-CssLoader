@@ -5,7 +5,8 @@ def load_tab_mappings():
     global TAB_MAPPINGS_INTERNAL
     TAB_MAPPINGS_INTERNAL = {
         "QuickAccess": ["QuickAccess", "QuickAccess_uid2"],
-        "MainMenu": ["MainMenu", "MainMenu_uid2"]
+        "MainMenu": ["MainMenu", "MainMenu_uid2"],
+        "All": ["SP", "QuickAccess", "QuickAccess_uid2", "MainMenu", "MainMenu_uid2"]
     }
 
     tab_mappings_txt_path = os.path.join(get_theme_path(), "mappings.txt")

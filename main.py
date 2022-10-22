@@ -1,6 +1,6 @@
 import os, json, asyncio, sys
 from os import path
-from injector import inject_to_tab, tab_has_element
+from injector import inject_to_tab, tab_has_element, get_tabs
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -269,7 +269,12 @@ class Plugin:
     async def _check_tabs(self):
         while True:
             await asyncio.sleep(3)
+            tabs = await get_tabs()
+            tab_names = [x.title for x in tabs]
             for x in self.tabs:
+                if (x not in tab_names):
+                    continue # Tab does not exist, so not worth injecting into it
+
                 try:
                     # Log(f"Checking if tab {x} is still injected...")
                     if not await self._check_test_element(self, x):
