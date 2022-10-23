@@ -200,6 +200,10 @@ export const VariableSizeCard: FC<{
                   marginRight: "auto",
                   marginLeft: "2px",
                   textShadow: "rgb(48, 48, 48) 0px 0 10px",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  width: "80%",
                 }}
               >
                 {e.author}

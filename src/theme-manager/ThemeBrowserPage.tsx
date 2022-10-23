@@ -7,6 +7,7 @@ import {
   DialogButton,
   SliderField,
   gamepadSliderClasses,
+  gamepadDialogClasses,
 } from "decky-frontend-lib";
 import { useLayoutEffect, useMemo, useState, FC } from "react";
 
@@ -281,7 +282,7 @@ export const ThemeBrowserPage: FC = () => {
             <span>Refresh</span>
           </DialogButton>
           <div
-            style={{ maxWidth: "20%", marginLeft: "auto" }}
+            style={{ maxWidth: "20%", minWidth: "20%", marginLeft: "auto" }}
             className="CssLoader_ThemeBrowser_ScaleSlider"
           >
             <SliderField
@@ -297,8 +298,13 @@ export const ThemeBrowserPage: FC = () => {
           <style>
             {`
               /* call me the css selector god */
+              /* these scale the slider to the correct size regardless of display resolution */
+              .CssLoader_ThemeBrowser_ScaleSlider > div > .${gamepadDialogClasses.FieldChildren} {
+                min-width: 100% !important;
+              }
+
               .CssLoader_ThemeBrowser_ScaleSlider > div > div > .${gamepadSliderClasses.SliderControlWithIcon}.Panel.Focusable {
-                width: 62%;
+                width: 100%;
               }
             `}
           </style>
