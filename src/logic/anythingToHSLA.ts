@@ -6,14 +6,15 @@ export const anythingToHSLA = (colorStr: string) => {
   cssColorConverter.color = colorStr;
   const rgbString = cssColorConverter.color || "rgb(255, 255, 255)";
 
-  // This converts the 'rgb(r, g, b)' string value to an array [r, g, b]
+  // This converts the 'rgb(r, g, b)' (or rgba if alpha channel) string value to an array [r, g, b, a]
+  // If there is no alpha value, it still outputs an a of 1
   let [r, g, b, a = 1] = rgbString
     .slice(rgbString.indexOf("(") + 1)
     .slice(0, -1)
     .split(",")
     .map((e) => Number(e));
 
-  // This converts the rgb array to an array [h, s, l] and returns it
+  // This converts the rgb array to an array [h, s, l, a] and returns it
   r /= 255;
   g /= 255;
   b /= 255;
