@@ -111,7 +111,6 @@ const ThemeManagerRouter: FC = () => {
       }}
     >
       <Tabs
-        title="Theme Manager"
         activeTab={currentTabRoute}
         // @ts-ignore
         onShowTab={(tabID: string) => {
