@@ -1,6 +1,5 @@
 import os, json, asyncio, sys
 from os import path
-from injector import inject_to_tab
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -9,7 +8,7 @@ from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
 from css_remoteinstall import RemoteInstall
-from css_tab_mapping import get_multiple_tab_mappings, load_tab_mappings, tab_has_element, tab_exists
+from css_tab_mapping import get_multiple_tab_mappings, load_tab_mappings, tab_has_element, tab_exists, inject_to_tab
 
 Initialized = False
 

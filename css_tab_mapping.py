@@ -61,7 +61,7 @@ def check_decky_compat() -> bool:
 
 async def get_tab(tab_name : str):
     if (check_decky_compat()):
-        return await injector.get_tab_lambda(lambda x : x.title == tab_name or re.match(tab_name, x.title) is not None)
+        return await injector.get_tab_lambda(lambda x : x.title == tab_name or re.match(tab_name + "$", x.title) is not None)
     else:
         return await injector.get_tab(tab_name)
 
@@ -91,3 +91,10 @@ async def tab_exists(tab_name : str) -> bool:
         return (await get_tab(tab_name)) is not None
     except:
         return False
+
+async def inject_to_tab(tab_name : str, js : str, run_async=False):
+    if (check_decky_compat()):
+        tab = await get_tab(tab_name)
+        return await tab.evaluate_js(js, run_async)
+    else:
+        return await injector.inject_to_tab(tab_name, js, run_async)
