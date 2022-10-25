@@ -1,9 +1,6 @@
 from typing import List
 from css_utils import Result, Log
-from utilities import Utilities
-from css_tab_mapping import get_multiple_tab_mappings
-
-pluginManagerUtils = Utilities(None)
+from css_tab_mapping import get_multiple_tab_mappings, inject_css, remove_css
 
 class Inject:
     def __init__(self, cssPath : str, tabs : List[str], theme):
@@ -51,7 +48,7 @@ class Inject:
                 return result        
 
         try:
-            res = await pluginManagerUtils.inject_css_into_tab(tab, self.css)
+            res = await inject_css(tab, self.css)
             if not res["success"]:
                 return Result(False, str(res["result"]))
             
@@ -79,7 +76,7 @@ class Inject:
         try:
             for x in self.uuids[tab]:
                 Log(f"-{x} @ {tab}")
-                res = await pluginManagerUtils.remove_css_from_tab(tab, x)
+                res = await remove_css(tab, x)
                 #if not res["success"]:
                 #    return Result(False, res["result"])
                 # Silently ignore error. If any page gets reloaded, and there was css loaded. this will fail as it will fail to remove the css

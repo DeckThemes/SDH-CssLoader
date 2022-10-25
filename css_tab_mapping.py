@@ -1,12 +1,17 @@
 import os
 from css_utils import get_theme_path, Log
+import injector
+import re
+from utilities import Utilities
+
+pluginManagerUtils = Utilities(None)
 
 def load_tab_mappings():
     global TAB_MAPPINGS_INTERNAL
     TAB_MAPPINGS_INTERNAL = {
-        "QuickAccess": ["QuickAccess", "QuickAccess_uid2"],
-        "MainMenu": ["MainMenu", "MainMenu_uid2"],
-        "All": ["SP", "QuickAccess", "QuickAccess_uid2", "MainMenu", "MainMenu_uid2"]
+        "QuickAccess": ["QuickAccess", "QuickAccess.*"],
+        "MainMenu": ["MainMenu", "MainMenu.*"],
+        "All": ["SP", "QuickAccess", "QuickAccess.*", "MainMenu", "MainMenu.*"]
     }
 
     tab_mappings_txt_path = os.path.join(get_theme_path(), "mappings.txt")
@@ -48,3 +53,41 @@ def get_multiple_tab_mappings(tabs : list) -> list:
             if y not in final_tabs:
                 final_tabs.append(y)
     return final_tabs
+
+
+def check_decky_compat() -> bool:
+    '''True if using new decky, false if using old decky'''
+    return hasattr(injector, "get_tab_lambda")
+
+async def get_tab(tab_name : str):
+    if (check_decky_compat()):
+        return await injector.get_tab_lambda(lambda x : x.title == tab_name or re.match(tab_name, x.title) is not None)
+    else:
+        return await injector.get_tab(tab_name)
+
+async def inject_css(tab_name : str, css : str) -> dict:
+    if (check_decky_compat()):
+        tab = await get_tab(tab_name)
+        return await tab.inject_css(css)
+    else:
+        return await pluginManagerUtils.inject_css_into_tab(tab_name, css)
+
+async def remove_css(tab_name : str, css_id : str) -> dict:
+    if (check_decky_compat()):
+        tab = await get_tab(tab_name)
+        return await tab.remove_css(css_id)
+    else:
+        return await pluginManagerUtils.remove_css_from_tab(tab_name, css_id)
+
+async def tab_has_element(tab_name : str, element_name : str) -> bool:
+    if (check_decky_compat()):
+        tab = await get_tab(tab_name)
+        return await tab.has_element(element_name)
+    else:
+        return await injector.tab_has_element(tab_name, element_name)
+
+async def tab_exists(tab_name : str) -> bool:
+    try:
+        return (await get_tab(tab_name)) is not None
+    except:
+        return False

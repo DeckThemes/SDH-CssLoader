@@ -1,6 +1,6 @@
 import os, json, asyncio, sys
 from os import path
-from injector import inject_to_tab, tab_has_element, get_tabs
+from injector import inject_to_tab
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -9,7 +9,7 @@ from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
 from css_remoteinstall import RemoteInstall
-from css_tab_mapping import get_multiple_tab_mappings, load_tab_mappings
+from css_tab_mapping import get_multiple_tab_mappings, load_tab_mappings, tab_has_element, tab_exists
 
 Initialized = False
 
@@ -269,10 +269,8 @@ class Plugin:
     async def _check_tabs(self):
         while True:
             await asyncio.sleep(3)
-            tabs = await get_tabs()
-            tab_names = [x.title for x in tabs]
             for x in self.tabs:
-                if (x not in tab_names):
+                if not await tab_exists(x):
                     continue # Tab does not exist, so not worth injecting into it
 
                 try:
