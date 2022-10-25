@@ -1,6 +1,6 @@
 import os, json, asyncio, sys
 from os import path
-from injector import inject_to_tab, tab_has_element
+from injector import inject_to_tab
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -9,6 +9,7 @@ from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
 from css_remoteinstall import RemoteInstall
+from css_tab_mapping import get_multiple_tab_mappings, load_tab_mappings, tab_has_element, tab_exists
 
 Initialized = False
 
@@ -233,15 +234,16 @@ class Plugin:
             configPath = configDir + "/" + x
             themeDataPath = themePath + "/theme.json"
 
-
-            if not path.exists(themeDataPath):
+            if (not path.exists(themeDataPath)) and (not path.exists(os.path.join(themePath, "theme.css"))):
                 continue
         
             Log(f"Analyzing theme {x}")
             
             try:
-                with open(themeDataPath, "r") as fp:
-                    theme = json.load(fp)
+                theme = None
+                if path.exists(themeDataPath):
+                    with open(themeDataPath, "r") as fp:
+                        theme = json.load(fp)
                     
                 themeData = Theme(themePath, theme, configPath)
 
@@ -268,6 +270,9 @@ class Plugin:
         while True:
             await asyncio.sleep(3)
             for x in self.tabs:
+                if not await tab_exists(x):
+                    continue # Tab does not exist, so not worth injecting into it
+
                 try:
                     # Log(f"Checking if tab {x} is still injected...")
                     if not await self._check_test_element(self, x):
@@ -336,6 +341,7 @@ class Plugin:
         await create_symlink(f"{get_user_home()}/homebrew/themes", f"{get_user_home()}/.local/share/Steam/steamui/themes_custom")
         self.remote = RemoteInstall()
         await self.remote.load()
+        load_tab_mappings()
 
         await self._load(self)
         await self._inject_test_element(self, "SP", 9999)

@@ -1,14 +1,12 @@
 from typing import List
 from css_utils import Result, Log
-from utilities import Utilities
-
-pluginManagerUtils = Utilities(None)
+from css_tab_mapping import get_multiple_tab_mappings, inject_css, remove_css
 
 class Inject:
     def __init__(self, cssPath : str, tabs : List[str], theme):
         self.css = None
         self.cssPath = cssPath
-        self.tabs = tabs
+        self.tabs = get_multiple_tab_mappings(tabs)
         self.uuids = {}
         self.theme = theme
         self.enabled = False
@@ -30,13 +28,16 @@ class Inject:
     async def inject(self, tab : str = None) -> Result:
         if (tab is None):
             for x in self.tabs:
-                await self.inject(x)
+                await self._inject_internal(x)
 
             return Result(True)
         else:
-            if (tab not in self.tabs):
-                return Result(True) # this is kind of cheating but
+            return await self._inject_internal(tab)
 
+    async def _inject_internal(self, tab : str) -> Result:
+        if (tab not in self.tabs):
+            return Result(True) # this is kind of cheating but
+        
         if (len(self.uuids[tab]) > 0):
             await self.remove(tab)
             self.enabled = True # In case the below code fails, it will never be re-injected unless it's still enabled
@@ -47,7 +48,7 @@ class Inject:
                 return result        
 
         try:
-            res = await pluginManagerUtils.inject_css_into_tab(tab, self.css)
+            res = await inject_css(tab, self.css)
             if not res["success"]:
                 return Result(False, str(res["result"]))
             
@@ -75,7 +76,7 @@ class Inject:
         try:
             for x in self.uuids[tab]:
                 Log(f"-{x} @ {tab}")
-                res = await pluginManagerUtils.remove_css_from_tab(tab, x)
+                res = await remove_css(tab, x)
                 #if not res["success"]:
                 #    return Result(False, res["result"])
                 # Silently ignore error. If any page gets reloaded, and there was css loaded. this will fail as it will fail to remove the css

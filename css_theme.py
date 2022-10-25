@@ -9,6 +9,27 @@ CSS_LOADER_VER = 4
 
 class Theme:
     def __init__(self, themePath : str, json : dict, configPath : str = None):
+        self.configPath = configPath if (configPath is not None) else themePath
+        self.configJsonPath = self.configPath + "/config" + ("_ROOT.json" if os.geteuid() == 0 else "_USER.json")
+        self.patches = []
+        self.injects = []
+        self.themePath = themePath
+        self.bundled = self.configPath != self.themePath
+        self.enabled = False
+        self.json = json
+
+        if (json is None):
+            if not os.path.exists(os.path.join(themePath, "theme.css")):
+                raise Exception("Folder does not look like a theme?")
+
+            self.name = os.path.basename(themePath)
+            self.version = "v1.0"
+            self.author = ""
+            self.require = 1
+            self.injects = [Inject(os.path.join(themePath, "theme.css"), ["SP", "QuickAccess", "MainMenu"], self)]
+            self.dependencies = []
+            return
+
         self.name = json["name"]
         self.version = json["version"] if ("version" in json) else "v1.0"
         self.author = json["author"] if ("author" in json) else ""
@@ -17,17 +38,7 @@ class Theme:
         if (CSS_LOADER_VER < self.require):
             raise Exception("A newer version of the CssLoader is required to load this theme")
 
-        self.patches = []
-        self.injects = []
-
-        self.configPath = configPath if (configPath is not None) else themePath
-        self.configJsonPath = self.configPath + "/config" + ("_ROOT.json" if os.geteuid() == 0 else "_USER.json")
-        self.themePath = themePath
-        self.bundled = self.configPath != self.themePath
         self.dependencies = json["dependencies"] if "dependencies" in json else {}
-
-        self.enabled = False
-        self.json = json
 
         if "inject" in self.json:
             self.injects = [Inject(self.themePath + "/" + x, self.json["inject"][x], self) for x in self.json["inject"]]
