@@ -9,9 +9,9 @@ pluginManagerUtils = Utilities(None)
 def load_tab_mappings():
     global TAB_MAPPINGS_INTERNAL
     TAB_MAPPINGS_INTERNAL = {
-        "QuickAccess": ["QuickAccess", "QuickAccess.*"],
-        "MainMenu": ["MainMenu", "MainMenu.*"],
-        "All": ["SP", "QuickAccess", "QuickAccess.*", "MainMenu", "MainMenu.*"]
+        "QuickAccess": ["QuickAccess", "QuickAccess_.*"],
+        "MainMenu": ["MainMenu", "MainMenu_.*"],
+        "All": ["SP", "QuickAccess", "QuickAccess_.*", "MainMenu", "MainMenu_.*"]
     }
 
     tab_mappings_txt_path = os.path.join(get_theme_path(), "mappings.txt")
