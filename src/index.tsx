@@ -112,7 +112,6 @@ const ThemeManagerRouter: FC = () => {
     >
       <Tabs
         activeTab={currentTabRoute}
-        // @ts-ignore
         onShowTab={(tabID: string) => {
           setCurrentTabRoute(tabID);
         }}
