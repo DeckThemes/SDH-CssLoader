@@ -145,7 +145,7 @@ export const ExpandedViewPage: VFC = () => {
                       layout="below"
                       onClick={() => {
                         setCurExpandedTheme(undefined);
-                        Router.NavigateBackOrOpenMenu();
+                        Router.Navigate("/theme-manager");
                       }}
                     >
                       <span className="CssLoader_ThemeBrowser_ExpandedView_BackText">
