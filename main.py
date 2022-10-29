@@ -269,10 +269,10 @@ class Plugin:
         while True:
             await asyncio.sleep(3)
             for x in self.tabs:
-                if not await tab_exists(x):
-                    continue # Tab does not exist, so not worth injecting into it
-
                 try:
+                    if not await tab_exists(x):
+                        continue # Tab does not exist, so not worth injecting into it
+
                     # Log(f"Checking if tab {x} is still injected...")
                     if not await self._check_test_element(self, x):
                         Log(f"Tab {x} is not injected, reloading...")
@@ -308,7 +308,7 @@ class Plugin:
                 await self._set_theme_score(self, dependency)
                 self.scores[dependency.name] -= 1
 
-    async def _load_stage_2(self):
+    async def _load_stage_2(self, inject_now : bool = True):
         self.scores = {}
         for x in self.themes:
             await self._set_theme_score(self, x)
@@ -318,7 +318,7 @@ class Plugin:
 
         for x in self.themes:
             Log(f"Loading theme {x.name}")
-            await x.load()
+            await x.load(inject_now)
         
         await self._cache_lists(self)
         self.themes.sort(key=lambda d: d.name)
@@ -344,7 +344,7 @@ class Plugin:
 
         await self._load(self)
         await self._inject_test_element(self, "SP", 9999)
-        await self._load_stage_2(self)
+        await self._load_stage_2(self, False)
 
         Log(f"Initialized css loader. Found {len(self.themes)} themes, which inject into {len(self.tabs)} tabs ({self.tabs}). Total {len(self.injects)} injects, {len([x for x in self.injects if x.enabled])} injected")
         await self._check_tabs(self)

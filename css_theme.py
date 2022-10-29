@@ -46,7 +46,7 @@ class Theme:
         if "patches" in self.json:
             self.patches = [ThemePatch(self, self.json["patches"][x], x) for x in self.json["patches"]]
     
-    async def load(self) -> Result:
+    async def load(self, inject_now : bool = True) -> Result:
         if not path.exists(self.configJsonPath):
             return Result(True)
 
@@ -67,7 +67,7 @@ class Theme:
                         y.set_value(config[x])
         
         if activate:
-            result = await self.inject()
+            result = await self.inject(inject_now)
             if not result.success:
                 return result
         
@@ -89,15 +89,16 @@ class Theme:
         
         return Result(True)
 
-    async def inject(self) -> Result:
+    async def inject(self, inject_now : bool = True) -> Result:
         Log(f"Injecting theme '{self.name}'")
         for x in self.injects:
-            result = await x.inject()
-            if not result.success:
-                return result
+            if inject_now:
+                await x.inject() # Ignore result for now. It'll be logged but not acted upon
+            else:
+                x.enabled = True
 
         for x in self.patches:
-            result = await x.inject()
+            result = await x.inject(inject_now)
             if not result.success:
                 return result
         
