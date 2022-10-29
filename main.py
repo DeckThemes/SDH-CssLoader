@@ -190,10 +190,10 @@ class Plugin:
         await self._cache_lists(self)
         return Result(True).to_dict()
 
-    async def _inject_test_element(self, tab : str, timeout : int = 3) -> Result:
+    async def _inject_test_element(self, tab : str, timeout : int = 3, element_name : str = "test_css_loaded") -> Result:
         attempt = 0
         while True:
-            if await self._check_test_element(self, tab):
+            if await self._check_test_element(self, tab, element_name):
                 return Result(True)
             else:
                 try:
@@ -201,7 +201,7 @@ class Plugin:
                     f"""
                     (function() {{
                         const elem = document.createElement('div');
-                        elem.id = "test_css_loaded";
+                        elem.id = "{element_name}";
                         document.head.append(elem);
                     }})()
                     """, False)
@@ -216,9 +216,9 @@ class Plugin:
                 await asyncio.sleep(1)
             
     
-    async def _check_test_element(self, tab : str) -> bool:
+    async def _check_test_element(self, tab : str, element_name : str = "test_css_loaded") -> bool:
         try:
-            return await tab_has_element(tab, "test_css_loaded")
+            return await tab_has_element(tab, element_name)
         except:
             return False
 
@@ -343,7 +343,7 @@ class Plugin:
         load_tab_mappings()
 
         await self._load(self)
-        await self._inject_test_element(self, "SP", 9999)
+        await self._inject_test_element(self, "SP", 9999, "test_ui_loaded")
         await self._load_stage_2(self, False)
 
         Log(f"Initialized css loader. Found {len(self.themes)} themes, which inject into {len(self.tabs)} tabs ({self.tabs}). Total {len(self.injects)} injects, {len([x for x in self.injects if x.enabled])} injected")
