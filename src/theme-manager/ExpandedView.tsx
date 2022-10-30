@@ -153,16 +153,9 @@ export const ExpandedViewPage: VFC = () => {
                             "CSSLoader Error, Legacy router method not found",
                             e
                           );
-                        }
-                        // This method only works on newer (Beta/Preview as of writing) SteamOS, and doesn't exist in Stable
-                        try {
+                          // This method only works on newer (Beta/Preview as of writing) SteamOS, and doesn't exist in Stable
                           // @ts-ignore
                           Router.WindowStore.m_MainWindowInstance.NavigateBack();
-                        } catch (e) {
-                          console.log(
-                            "CSSLoader Error, New router method not found",
-                            e
-                          );
                         }
                       }}
                     >
