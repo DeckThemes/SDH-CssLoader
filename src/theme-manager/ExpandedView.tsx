@@ -145,7 +145,18 @@ export const ExpandedViewPage: VFC = () => {
                       layout="below"
                       onClick={() => {
                         setCurExpandedTheme(undefined);
-                        Router.NavigateBackOrOpenMenu();
+                        // This method only works on older (Stable branch as of writing this) versions of SteamOS, and has been removed in Beta/Preview
+                        try {
+                          Router.NavigateBackOrOpenMenu();
+                        } catch (e) {
+                          console.log(
+                            "CSSLoader Error, Legacy router method not found",
+                            e
+                          );
+                          // This method only works on newer (Beta/Preview as of writing) SteamOS, and doesn't exist in Stable
+                          // @ts-ignore
+                          Router.WindowStore.m_MainWindowInstance.NavigateBack();
+                        }
                       }}
                     >
                       <span className="CssLoader_ThemeBrowser_ExpandedView_BackText">

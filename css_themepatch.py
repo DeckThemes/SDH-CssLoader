@@ -101,14 +101,15 @@ class ThemePatch:
 
         self.check_value()
 
-    async def inject(self) -> Result:
+    async def inject(self, inject_now : bool = True) -> Result:
         self.check_value()
         Log(f"Injecting patch '{self.name}' of theme '{self.theme.name}'")
         for x in self.options[self.value]:
-            result = await x.inject()
-            if not result.success:
-                return result
-        
+            if inject_now:
+                await x.inject() # Ignore result for now. It'll be logged but not acted upon
+            else:
+                x.enabled = True
+
         return Result(True)
 
     async def remove(self) -> Result:
