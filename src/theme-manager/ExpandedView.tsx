@@ -153,9 +153,19 @@ export const ExpandedViewPage: VFC = () => {
                             "CSSLoader Error, Legacy router method not found",
                             e
                           );
-                          // This method only works on newer (Beta/Preview as of writing) SteamOS, and doesn't exist in Stable
-                          // @ts-ignore
-                          Router.WindowStore.m_MainWindowInstance.NavigateBack();
+                          // This method only works on specific beta/preview branches of SteamOS, but was quickly superseded
+                          try {
+                            // @ts-ignore
+                            Router.WindowStore.m_MainWindowInstance.NavigateBack();
+                          } catch (e) {
+                            console.log(
+                              "CSSLoader Error, Interim router method not found",
+                              e
+                            );
+                            // This method was added to beta/preview sometime right before 3.4, and appears to be the final change.
+                            // @ts-ignore
+                            Router.WindowStore.m_GamepadUIMainWindowInstance.NavigateBack();
+                          }
                         }
                       }}
                     >
