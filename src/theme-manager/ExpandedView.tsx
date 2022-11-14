@@ -32,8 +32,7 @@ export const ExpandedViewPage: VFC = () => {
 
   function checkIfThemeInstalled(themeObj: browseThemeEntry) {
     const filteredArr: Theme[] = installedThemes.filter(
-      (e: Theme) =>
-        e.data.name === themeObj.name && e.data.author === themeObj.author
+      (e: Theme) => e.data.name === themeObj.name && e.data.author === themeObj.author
     );
     if (filteredArr.length > 0) {
       if (filteredArr[0].data.version === themeObj.version) {
@@ -75,11 +74,24 @@ export const ExpandedViewPage: VFC = () => {
     const installStatus = checkIfThemeInstalled(currentExpandedTheme);
     return (
       // The outermost div is to push the content down into the visible area
-      <div style={{ marginTop: "40px" }}>
+      <div
+        style={{
+          marginTop: "40px",
+        }}
+      >
         <div
-          style={{ display: "flex", flexDirection: "column", margin: "20px" }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            margin: "20px",
+          }}
         >
-          <div style={{ display: "flex", marginBottom: "8px" }}>
+          <div
+            style={{
+              display: "flex",
+              marginBottom: "8px",
+            }}
+          >
             <img
               className="CssLoader_ThemeBrowser_ExpandedView_PreviewImage"
               src={currentExpandedTheme.preview_image}
@@ -87,7 +99,12 @@ export const ExpandedViewPage: VFC = () => {
                 width: "60%",
               }}
             />
-            <div style={{ width: "100%", marginLeft: "16px" }}>
+            <div
+              style={{
+                width: "100%",
+                marginLeft: "16px",
+              }}
+            >
               <div
                 style={{
                   marginBottom: "8px",
@@ -95,7 +112,12 @@ export const ExpandedViewPage: VFC = () => {
                   flexDirection: "column",
                 }}
               >
-                <span style={{ fontWeight: "bold", fontSize: "1.25em" }}>
+                <span
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: "1.25em",
+                  }}
+                >
                   {currentExpandedTheme.name}
                 </span>
                 <span>{currentExpandedTheme.author}</span>
@@ -146,42 +168,43 @@ export const ExpandedViewPage: VFC = () => {
                       onClick={() => {
                         setCurExpandedTheme(undefined);
                         // This method only works on older (Stable branch as of writing this) versions of SteamOS, and has been removed in Beta/Preview
-                        try {
-                          Router.NavigateBackOrOpenMenu();
-                        } catch (e) {
-                          console.log(
-                            "CSSLoader Error, Legacy router method not found",
-                            e
-                          );
-                          // This method only works on specific beta/preview branches of SteamOS, but was quickly superseded
-                          try {
-                            // @ts-ignore
-                            Router.WindowStore.m_MainWindowInstance.NavigateBack();
-                          } catch (e) {
-                            console.log(
-                              "CSSLoader Error, Interim router method not found",
-                              e
-                            );
-                            // This method was added to beta/preview sometime right before 3.4, and appears to be the final change.
-                            // @ts-ignore
-                            Router.WindowStore.m_GamepadUIMainWindowInstance.NavigateBack();
-                          }
-                        }
+                        Router?.NavigateBackOrOpenMenu && Router.NavigateBackOrOpenMenu();
+
+                        // This method only works on specific beta/preview branches of SteamOS, but was quickly superseded
+                        // @ts-ignore
+                        Router?.WindowStore?.m_MainWindowInstance?.NavigateBack &&
+                          // @ts-ignore
+                          Router.WindowStore.m_MainWindowInstance.NavigateBack();
+
+                        // This method was added to beta/preview sometime right before 3.4, and appears to be the final change.
+                        // @ts-ignore
+                        Router?.WindowStore?.m_GamepadUIMainWindowInstance?.NavigateBack &&
+                          // @ts-ignore
+                          Router.WindowStore.m_GamepadUIMainWindowInstance.NavigateBack();
                       }}
                     >
-                      <span className="CssLoader_ThemeBrowser_ExpandedView_BackText">
-                        Back
-                      </span>
+                      <span className="CssLoader_ThemeBrowser_ExpandedView_BackText">Back</span>
                     </ButtonItem>
                   </div>
                 </PanelSectionRow>
               </div>
             </div>
           </div>
-          <div style={{ flex: "1 1 0%", flexGrow: "1" }}>
+          <div
+            style={{
+              flex: "1 1 0%",
+              flexGrow: "1",
+            }}
+          >
             <span>
               {currentExpandedTheme?.description || (
-                <i style={{ color: "#666" }}>No description provided.</i>
+                <i
+                  style={{
+                    color: "#666",
+                  }}
+                >
+                  No description provided.
+                </i>
               )}
             </span>
           </div>

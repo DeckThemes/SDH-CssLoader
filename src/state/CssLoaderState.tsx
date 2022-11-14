@@ -132,10 +132,7 @@ interface ProviderProps {
 }
 
 // This is a React Component that you can wrap multiple separate things in, as long as they both have used the same instance of the CssLoaderState class, they will have synced state
-export const CssLoaderContextProvider: FC<ProviderProps> = ({
-  children,
-  cssLoaderStateClass,
-}) => {
+export const CssLoaderContextProvider: FC<ProviderProps> = ({ children, cssLoaderStateClass }) => {
   const [publicState, setPublicState] = useState<PublicCssLoaderState>({
     ...cssLoaderStateClass.getPublicState(),
   });
@@ -147,27 +144,21 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({
 
     cssLoaderStateClass.eventBus.addEventListener("stateUpdate", onUpdate);
 
-    return () =>
-      cssLoaderStateClass.eventBus.removeEventListener("stateUpdate", onUpdate);
+    return () => cssLoaderStateClass.eventBus.removeEventListener("stateUpdate", onUpdate);
   }, []);
 
   const setLocalThemeList = (listArr: localThemeEntry[]) =>
     cssLoaderStateClass.setLocalThemeList(listArr);
   const setBrowseThemeList = (listArr: browseThemeEntry[]) =>
     cssLoaderStateClass.setBrowseThemeList(listArr);
-  const setSearchValue = (value: string) =>
-    cssLoaderStateClass.setSearchValue(value);
+  const setSearchValue = (value: string) => cssLoaderStateClass.setSearchValue(value);
   const setSort = (value: number) => cssLoaderStateClass.setSort(value);
-  const setTarget = (value: SingleDropdownOption) =>
-    cssLoaderStateClass.setTarget(value);
-  const setRepo = (value: SingleDropdownOption) =>
-    cssLoaderStateClass.setRepo(value);
-  const setInstalling = (bool: boolean) =>
-    cssLoaderStateClass.setInstalling(bool);
+  const setTarget = (value: SingleDropdownOption) => cssLoaderStateClass.setTarget(value);
+  const setRepo = (value: SingleDropdownOption) => cssLoaderStateClass.setRepo(value);
+  const setInstalling = (bool: boolean) => cssLoaderStateClass.setInstalling(bool);
   const setCurExpandedTheme = (theme: browseThemeEntry | undefined) =>
     cssLoaderStateClass.setCurExpandedTheme(theme);
-  const setBrowserCardSize = (num: number) =>
-    cssLoaderStateClass.setBrowserCardSize(num);
+  const setBrowserCardSize = (num: number) => cssLoaderStateClass.setBrowserCardSize(num);
 
   return (
     <CssLoaderContext.Provider

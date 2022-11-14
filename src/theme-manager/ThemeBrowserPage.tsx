@@ -77,9 +77,7 @@ export const ThemeBrowserPage: FC = () => {
   );
 
   const targetOptions = useMemo((): DropdownOption[] => {
-    const uniqueTargets = new Set(
-      themeArr.filter(searchFilter).map((e) => e.target)
-    );
+    const uniqueTargets = new Set(themeArr.filter(searchFilter).map((e) => e.target));
     return [
       { data: 1, label: "All" },
       { data: 2, label: "Installed" },
@@ -124,8 +122,7 @@ export const ThemeBrowserPage: FC = () => {
 
   function checkIfThemeInstalled(themeObj: browseThemeEntry) {
     const filteredArr: Theme[] = installedThemes.filter(
-      (e: Theme) =>
-        e.data.name === themeObj.name && e.data.author === themeObj.author
+      (e: Theme) => e.data.name === themeObj.name && e.data.author === themeObj.author
     );
     if (filteredArr.length > 0) {
       if (filteredArr[0].data.version === themeObj.version) {
@@ -179,16 +176,10 @@ export const ThemeBrowserPage: FC = () => {
           return b.name.localeCompare(a.name);
         case 3:
           // New-Old
-          return (
-            new Date(b.last_changed).valueOf() -
-            new Date(a.last_changed).valueOf()
-          );
+          return new Date(b.last_changed).valueOf() - new Date(a.last_changed).valueOf();
         case 4:
           // Old-New
-          return (
-            new Date(a.last_changed).valueOf() -
-            new Date(b.last_changed).valueOf()
-          );
+          return new Date(a.last_changed).valueOf() - new Date(b.last_changed).valueOf();
         default:
           // This is just A-Z
           return a.name.localeCompare(b.name);
@@ -257,9 +248,7 @@ export const ThemeBrowserPage: FC = () => {
         </Focusable>
       </PanelSectionRow>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <Focusable
-          style={{ display: "flex", alignItems: "center", width: "96%" }}
-        >
+        <Focusable style={{ display: "flex", alignItems: "center", width: "96%" }}>
           <div style={{ minWidth: "55%", marginRight: "auto" }}>
             <TextField
               label="Search"
@@ -322,11 +311,7 @@ export const ThemeBrowserPage: FC = () => {
         }}
       >
         {filteredData.map((e) => (
-          <VariableSizeCard
-            data={e}
-            cols={browserCardSize}
-            showTarget={selectedTarget.data <= 3}
-          />
+          <VariableSizeCard data={e} cols={browserCardSize} showTarget={selectedTarget.data <= 3} />
         ))}
       </Focusable>
     </>

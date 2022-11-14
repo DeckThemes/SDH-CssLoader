@@ -53,11 +53,7 @@ export function reset(): Promise<any> {
   return server!.callPluginMethod("reset", {});
 }
 
-export function setPatchOfTheme(
-  themeName: string,
-  patchName: string,
-  value: string
-): Promise<any> {
+export function setPatchOfTheme(themeName: string, patchName: string, value: string): Promise<any> {
   return server!.callPluginMethod("set_patch_of_theme", {
     themeName: themeName,
     patchName: patchName,

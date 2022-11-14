@@ -37,9 +37,7 @@ export const PatchComponent: VFC<{
       case "image-picker":
         // This makes things compatible with people using HoloISO or who don't have the user /deck/
         function getRootPath() {
-          python.resolve(python.fetchThemePath(), (path: string) =>
-            pickImage(path)
-          );
+          python.resolve(python.fetchThemePath(), (path: string) => pickImage(path));
         }
         // These have to
         async function pickImage(rootPath: string) {

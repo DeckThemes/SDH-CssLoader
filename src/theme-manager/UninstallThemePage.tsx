@@ -9,8 +9,7 @@ import { Theme } from "../theme";
 import { browseThemeEntry } from "../customTypes";
 
 export const UninstallThemePage: VFC = () => {
-  const { localThemeList, setLocalThemeList, browseThemeList } =
-    useCssLoaderState();
+  const { localThemeList, setLocalThemeList, browseThemeList } = useCssLoaderState();
 
   const [isUninstalling, setUninstalling] = useState(false);
 
@@ -42,8 +41,7 @@ export const UninstallThemePage: VFC = () => {
   // It also returns the remote entry, so that it's id can be referenced for downloads
   function checkForUpdate(themeObj: Theme): [string, any] {
     const filteredArr: browseThemeEntry[] = browseThemeList.filter(
-      (e: browseThemeEntry) =>
-        e.name === themeObj.data.name && e.author === themeObj.data.author
+      (e: browseThemeEntry) => e.name === themeObj.data.name && e.author === themeObj.data.author
     );
     if (filteredArr.length > 0) {
       if (filteredArr[0].version === themeObj.data.version) {
@@ -59,9 +57,7 @@ export const UninstallThemePage: VFC = () => {
   if (localThemeList.filter((e) => !e.data.bundled).length === 0) {
     return (
       <PanelSectionRow>
-        <span>
-          No custom themes installed, find some in the 'Browse Themes' tab.
-        </span>
+        <span>No custom themes installed, find some in the 'Browse Themes' tab.</span>
       </PanelSectionRow>
     );
   }

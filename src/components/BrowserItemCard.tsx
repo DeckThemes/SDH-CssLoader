@@ -73,8 +73,7 @@ export const VariableSizeCard: FC<{
   const { localThemeList, setCurExpandedTheme } = useCssLoaderState();
   function checkIfThemeInstalled(themeObj: browseThemeEntry) {
     const filteredArr: Theme[] = localThemeList.filter(
-      (e: Theme) =>
-        e.data.name === themeObj.name && e.data.author === themeObj.author
+      (e: Theme) => e.data.name === themeObj.name && e.data.author === themeObj.author
     );
     if (filteredArr.length > 0) {
       if (filteredArr[0].data.version === themeObj.version) {
@@ -105,8 +104,7 @@ export const VariableSizeCard: FC<{
               borderRadius: "50%",
               // The focusRing has a z index of 10000, so this is just to be cheeky
               zIndex: "10001",
-              boxShadow:
-                "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+              boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
             }}
           >
             <AiOutlineDownload />
