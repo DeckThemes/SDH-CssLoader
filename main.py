@@ -1,5 +1,13 @@
-import os, json, asyncio, sys
+import os, json, asyncio, sys, time
 from os import path
+
+from watchdog.events import FileSystemEventHandler
+from watchdog.utils import UnsupportedLibc
+
+try:
+    from watchdog.observers.inotify import InotifyObserver as Observer
+except UnsupportedLibc:
+    from watchdog.observers.fsevents import FSEventsObserver as Observer
 
 sys.path.append(os.path.dirname(__file__))
 
@@ -11,6 +19,26 @@ from css_remoteinstall import RemoteInstall
 from css_tab_mapping import get_multiple_tab_mappings, load_tab_mappings, tab_has_element, tab_exists, inject_to_tab
 
 Initialized = False
+
+class FileChangeHandler(FileSystemEventHandler):
+    def __init__(self, plugin, loop):
+        self.plugin = plugin
+        self.loop = loop
+        self.last = 0
+        self.delay = 5
+
+    def on_modified(self, event):
+        Log(f"FS Event: {event}")
+
+        if (not event.src_path.endswith(".css")) or event.is_directory:
+            Log("FS Event is not on a CSS file. Ignoring!")
+            return
+
+        if ((self.last + self.delay) < time.time() and not self.plugin.busy):
+            self.last = time.time()
+            Log("Reloading themes due to FS event")
+            self.loop.create_task(self.plugin.reset(self.plugin))
+        
 
 class Plugin:
     async def dummy_function(self) -> bool:
@@ -164,11 +192,13 @@ class Plugin:
         return Result(True).to_dict()
     
     async def reset(self) -> dict:
+        self.busy = True
         for x in self.injects:
             await x.remove()
 
         await self._load(self)
         await self._load_stage_2(self)
+        self.busy = False
         return Result(True).to_dict()
 
     async def delete_theme(self, themeName : str) -> dict:
@@ -327,17 +357,17 @@ class Plugin:
         global Initialized
         if Initialized:
             return
-
-        Log("Waiting 1s...")
-        await asyncio.sleep(1)
         
         Initialized = True
 
+        await asyncio.sleep(1)
+
+        self.busy = False
         self.themes = []
         Log("Initializing css loader...")
         Log(f"Max supported manifest version: {CSS_LOADER_VER}")
         
-        await create_symlink(f"{get_user_home()}/homebrew/themes", f"{get_user_home()}/.local/share/Steam/steamui/themes_custom")
+        await create_symlink(get_theme_path(), f"{get_user_home()}/.local/share/Steam/steamui/themes_custom")
         self.remote = RemoteInstall()
         await self.remote.load()
         load_tab_mappings()
@@ -345,6 +375,15 @@ class Plugin:
         await self._load(self)
         await self._inject_test_element(self, "SP", 9999, "test_ui_loaded")
         await self._load_stage_2(self, False)
+
+        if (os.path.exists(f"{get_theme_path()}/WATCH")):
+            Log("Observing themes folder for file changes")
+            self.observer = Observer()
+            self.handler = FileChangeHandler(self, asyncio.get_running_loop())
+            self.observer.schedule(self.handler, get_theme_path(), recursive=True)
+            self.observer.start()
+        else:
+            Log("Not observing themes folder for file changes")
 
         Log(f"Initialized css loader. Found {len(self.themes)} themes, which inject into {len(self.tabs)} tabs ({self.tabs}). Total {len(self.injects)} injects, {len([x for x in self.injects if x.enabled])} injected")
         await self._check_tabs(self)
