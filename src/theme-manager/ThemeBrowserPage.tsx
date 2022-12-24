@@ -45,7 +45,6 @@ export const ThemeBrowserPage: FC = () => {
     python.resolve(python.getBackendVersion(), setBackendVer);
   }
 
-  console.log("test page 5");
   const searchFilter = (e: browseThemeEntry) => {
     // This means only compatible themes will show up, newer ones won't
     if (e.manifest_version > backendVersion) {
