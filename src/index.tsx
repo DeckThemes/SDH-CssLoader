@@ -146,6 +146,7 @@ export default definePlugin((serverApi: ServerAPI) => {
 
   return {
     title: <div className={staticClasses.Title}>CSS Loader</div>,
+    alwaysRender: true,
     content: (
       <CssLoaderContextProvider cssLoaderStateClass={state}>
         <Content serverAPI={serverApi} />

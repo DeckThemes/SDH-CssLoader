@@ -1,4 +1,4 @@
-import { ButtonItem, PanelSectionRow, Router } from "decky-frontend-lib";
+import { ButtonItem, Navigation, PanelSectionRow } from "decky-frontend-lib";
 import { useEffect, useRef, VFC } from "react";
 
 import * as python from "../python";
@@ -62,10 +62,11 @@ export const ExpandedViewPage: VFC = () => {
     return buttonText;
   }
 
-  const backButtonRef = useRef(null);
+  const backButtonRef = useRef<HTMLElement>(null);
   useEffect(() => {
-    // @ts-ignore
-    backButtonRef?.current.focus();
+    if (backButtonRef?.current) {
+      backButtonRef.current.focus();
+    }
   }, []);
 
   // if theres no theme in the detailed view
@@ -167,20 +168,8 @@ export const ExpandedViewPage: VFC = () => {
                       layout="below"
                       onClick={() => {
                         setCurExpandedTheme(undefined);
-                        // This method only works on older (Stable branch as of writing this) versions of SteamOS, and has been removed in Beta/Preview
-                        Router?.NavigateBackOrOpenMenu && Router.NavigateBackOrOpenMenu();
-
-                        // This method only works on specific beta/preview branches of SteamOS, but was quickly superseded
-                        // @ts-ignore
-                        Router?.WindowStore?.m_MainWindowInstance?.NavigateBack &&
-                          // @ts-ignore
-                          Router.WindowStore.m_MainWindowInstance.NavigateBack();
-
-                        // This method was added to beta/preview sometime right before 3.4, and appears to be the final change.
-                        // @ts-ignore
-                        Router?.WindowStore?.m_GamepadUIMainWindowInstance?.NavigateBack &&
-                          // @ts-ignore
-                          Router.WindowStore.m_GamepadUIMainWindowInstance.NavigateBack();
+                        // Wow amazing navigation interface I wonder who coded it
+                        Navigation.NavigateBack();
                       }}
                     >
                       <span className="CssLoader_ThemeBrowser_ExpandedView_BackText">Back</span>
