@@ -113,3 +113,34 @@ export function getBackendVersion(): Promise<any> {
 export function dummyFunction(): Promise<any> {
   return server!.callPluginMethod("dummy_function", {});
 }
+
+export function genericGET(fetchUrl: string) {
+  return server!
+    .fetchNoCors<Response>(`${fetchUrl}`, {
+      method: "GET",
+    })
+    .then((deckyRes) => {
+      console.log(deckyRes);
+      if (deckyRes.success) {
+        return deckyRes.result;
+      }
+      throw new Error(`Fetch not successful!`);
+    })
+    .then((res) => {
+      console.log(res);
+      if (res.status >= 200 && res.status <= 300 && res.body) {
+        // @ts-ignore
+        return JSON.parse(res.body || "");
+      }
+      throw new Error(`Res not OK!, code ${res.status}`);
+    })
+    .then((json) => {
+      if (json) {
+        return json;
+      }
+      throw new Error(`No json returned!`);
+    })
+    .catch((err) => {
+      console.error(`Error fetching ${fetchUrl}`, err);
+    });
+}

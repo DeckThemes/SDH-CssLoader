@@ -6,7 +6,7 @@ import * as python from "../python";
 
 import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
-import { browseThemeEntry } from "../customTypes";
+import { PartialCSSThemeInfo } from "../apiTypes";
 
 export const UninstallThemePage: VFC = () => {
   const { localThemeList, setLocalThemeList, browseThemeList } = useCssLoaderState();
@@ -23,7 +23,8 @@ export const UninstallThemePage: VFC = () => {
     });
   }
 
-  function updateTheme(remoteEntry: browseThemeEntry) {
+  // TODO: DOESNT WORK YET
+  function updateTheme(remoteEntry: PartialCSSThemeInfo) {
     // This check is just because the value might be false because of typescript woes
     if (remoteEntry.id) {
       const id = remoteEntry.id;
@@ -40,8 +41,9 @@ export const UninstallThemePage: VFC = () => {
   // This is a modified version of the checkIfThemeInstalled in the browser page, however it compares local themes to the remote ones instead of remote to local
   // It also returns the remote entry, so that it's id can be referenced for downloads
   function checkForUpdate(themeObj: Theme): [string, any] {
-    const filteredArr: browseThemeEntry[] = browseThemeList.filter(
-      (e: browseThemeEntry) => e.name === themeObj.data.name && e.author === themeObj.data.author
+    const filteredArr: PartialCSSThemeInfo[] = browseThemeList.items.filter(
+      (e: PartialCSSThemeInfo) =>
+        e.name === themeObj.data.name && e.specifiedAuthor === themeObj.data.author
     );
     if (filteredArr.length > 0) {
       if (filteredArr[0].version === themeObj.data.version) {

@@ -1,9 +1,9 @@
 import { FC } from "react";
-import { browseThemeEntry } from "../customTypes";
 import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
 import { Focusable, Router } from "decky-frontend-lib";
 import { AiOutlineDownload } from "react-icons/ai";
+import { PartialCSSThemeInfo } from "../apiTypes";
 
 const topMargin = {
   5: "2px",
@@ -66,14 +66,14 @@ const smallText = {
 };
 
 export const VariableSizeCard: FC<{
-  data: browseThemeEntry;
+  data: PartialCSSThemeInfo;
   cols: number;
   showTarget: boolean;
 }> = ({ data: e, cols: size, showTarget = true }) => {
-  const { localThemeList, setCurExpandedTheme } = useCssLoaderState();
-  function checkIfThemeInstalled(themeObj: browseThemeEntry) {
+  const { localThemeList, setCurExpandedTheme, apiUrl } = useCssLoaderState();
+  function checkIfThemeInstalled(themeObj: PartialCSSThemeInfo) {
     const filteredArr: Theme[] = localThemeList.filter(
-      (e: Theme) => e.data.name === themeObj.name && e.data.author === themeObj.author
+      (e: Theme) => e.data.name === themeObj.name && e.data.author === themeObj.specifiedAuthor
     );
     if (filteredArr.length > 0) {
       if (filteredArr[0].data.version === themeObj.version) {
@@ -118,7 +118,7 @@ export const VariableSizeCard: FC<{
           }}
           className="CssLoader_ThemeBrowser_SingleItem_BgImage"
           style={{
-            backgroundImage: 'url("' + e.preview_image + '")',
+            backgroundImage: 'url("' + apiUrl + "/blobs/" + (e?.images[0]?.id || "") + '")',
             backgroundSize: "cover",
             backgroundRepeat: "no-repeat",
             backgroundPosition: "center",
@@ -172,7 +172,7 @@ export const VariableSizeCard: FC<{
               className="CssLoader_ThemeBrowser_SingleItem_PreviewImage"
               style={{
                 width: imgWidth[size],
-                backgroundImage: 'url("' + e.preview_image + '")',
+                backgroundImage: 'url("' + apiUrl + "/blobs/" + (e?.images[0]?.id || "") + '")',
                 backgroundSize: "cover",
                 backgroundRepeat: "no-repeat",
                 height: imgHeight[size],
@@ -202,9 +202,10 @@ export const VariableSizeCard: FC<{
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   width: "80%",
+                  textAlign: "start",
                 }}
               >
-                {e.author}
+                {e.specifiedAuthor}
               </span>
               <span
                 className="CssLoader_ThemeBrowser_SingleItem_VersionText"
