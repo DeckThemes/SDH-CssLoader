@@ -86,8 +86,19 @@ class ThemePatch:
 
             for y in data:
                 inject = Inject(self.theme.themePath + "/" + y, data[y], self.theme)
+                if y.startswith("--"):
+                    value = data[y][0]
+                    tabs = data[y][1:]
+
+                    if (";" in value or ";" in y):
+                        raise Exception("Multiple css statements are unsupported in a variable")
+                    
+                    inject = Inject("", tabs, self.theme)
+                    inject.css = f":root {{ {y}: {value}; }}"
+
                 self.injects.append(inject)
                 self.options[x].append(inject)
+                
         
         if "components" in self.json:
             for x in self.json["components"]:
