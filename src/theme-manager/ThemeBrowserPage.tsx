@@ -1,14 +1,15 @@
 import {
-  ButtonItem,
   PanelSectionRow,
   Focusable,
   TextField,
   DropdownOption,
-  Router,
   Dropdown,
   DialogButton,
+  SliderField,
+  gamepadSliderClasses,
+  gamepadDialogClasses,
 } from "decky-frontend-lib";
-import { useLayoutEffect, useMemo, useState, VFC } from "react";
+import { useLayoutEffect, useMemo, useState, FC, useEffect } from "react";
 
 import { TiRefreshOutline } from "react-icons/ti";
 
@@ -16,27 +17,26 @@ import { TiRefreshOutline } from "react-icons/ti";
 import * as python from "../python";
 
 // Interfaces for the JSON objects the lists work with
-import { browseThemeEntry } from "../customTypes";
 import { useCssLoaderState } from "../state";
-import { Theme } from "../theme";
-import { AiOutlineDownload } from "react-icons/ai";
+import { VariableSizeCard } from "../components";
+import { ThemeQueryResponse } from "../apiTypes";
+import { generateParamStr } from "../logic";
+import { PageSelector } from "../components/PageSelector";
 
-export const ThemeBrowserPage: VFC = () => {
+export const ThemeBrowserPage: FC = () => {
   const {
     browseThemeList: themeArr,
     setBrowseThemeList: setThemeArr,
-    localThemeList: installedThemes,
     setLocalThemeList: setInstalledThemes,
-    searchFieldValue,
-    setSearchValue,
-    selectedSort,
-    setSort,
-    selectedTarget,
-    setTarget,
+    themeSearchOpts: searchOpts,
+    setThemeSearchOpts: setSearchOpts,
+    serverFilters,
+    setServerFilters,
     selectedRepo,
     setRepo,
-    isInstalling,
-    setCurExpandedTheme,
+    browserCardSize = 3,
+    setBrowserCardSize,
+    apiUrl,
   } = useCssLoaderState();
 
   const [backendVersion, setBackendVer] = useState<number>(3);
@@ -44,51 +44,19 @@ export const ThemeBrowserPage: VFC = () => {
     python.resolve(python.getBackendVersion(), setBackendVer);
   }
 
-  const searchFilter = (e: browseThemeEntry) => {
-    // This means only compatible themes will show up, newer ones won't
-    if (e.manifest_version > backendVersion) {
-      return false;
-    }
-    // This filter just implements the search stuff
-    if (searchFieldValue.length > 0) {
-      // Convert the theme and search to lowercase so that it's not case-sensitive
-      if (
-        // This checks for the theme name
-        !e.name.toLowerCase().includes(searchFieldValue.toLowerCase()) &&
-        // This checks for the author name
-        !e.author.toLowerCase().includes(searchFieldValue.toLowerCase())
-      ) {
-        // return false just means it won't show in the list
-        return false;
-      }
-    }
-    return true;
-  };
-
-  const sortOptions = useMemo(
-    (): DropdownOption[] => [
-      { data: 1, label: "Alphabetical (A to Z)" },
-      { data: 2, label: "Alphabetical (Z to A)" },
-      { data: 3, label: "Last Updated (Newest)" },
-      { data: 4, label: "Last Updated (Oldest)" },
-    ],
-    []
+  const formattedFilters = useMemo<{ filters: DropdownOption[]; order: DropdownOption[] }>(
+    () => ({
+      filters: [
+        { data: "All", label: "All" },
+        ...serverFilters.filters.map((e) => ({ data: e, label: e })),
+      ],
+      order: serverFilters.order.map((e) => ({ data: e, label: e })),
+    }),
+    [serverFilters]
   );
 
-  const targetOptions = useMemo((): DropdownOption[] => {
-    const uniqueTargets = new Set(
-      themeArr.filter(searchFilter).map((e) => e.target)
-    );
-    return [
-      { data: 1, label: "All" },
-      { data: 2, label: "Installed" },
-      { data: 3, label: "Outdated" },
-      ...[...uniqueTargets].map((e, i) => ({ data: i + 4, label: e })),
-    ];
-  }, [themeArr, searchFilter]);
-
   const repoOptions = useMemo((): DropdownOption[] => {
-    const uniqueRepos = new Set(themeArr.map((e) => e.repo));
+    const uniqueRepos = new Set(themeArr.items.map((e) => e.repo));
     // Spread operator is to turn set into array
     if ([...uniqueRepos].length <= 1) {
       // This says All but really is just official
@@ -104,16 +72,10 @@ export const ThemeBrowserPage: VFC = () => {
 
   function reloadThemes() {
     reloadBackendVer();
-    reloadThemeDb();
+    getThemes();
     // Reloads the local themes
     python.resolve(python.reset(), () => {
       python.resolve(python.getThemes(), setInstalledThemes);
-    });
-  }
-
-  function reloadThemeDb() {
-    python.resolve(python.reloadThemeDbData(), () => {
-      python.resolve(python.getThemeDbData(), setThemeArr);
     });
   }
 
@@ -121,27 +83,40 @@ export const ThemeBrowserPage: VFC = () => {
     python.resolve(python.getThemes(), setInstalledThemes);
   }
 
-  function checkIfThemeInstalled(themeObj: browseThemeEntry) {
-    const filteredArr: Theme[] = installedThemes.filter(
-      (e: Theme) =>
-        e.data.name === themeObj.name && e.data.author === themeObj.author
-    );
-    if (filteredArr.length > 0) {
-      if (filteredArr[0].data.version === themeObj.version) {
-        return "installed";
-      } else {
-        return "outdated";
+  function getThemeTargets() {
+    python.genericGET("${apiUrl}themes/filters?target=CSS").then((data) => {
+      if (data?.filters) {
+        setServerFilters({
+          filters: data.filters,
+          order: data.order,
+        });
       }
-    } else {
-      return "uninstalled";
-    }
+    });
   }
+  function getThemes() {
+    const queryStr = generateParamStr(
+      searchOpts.filters !== "All" ? searchOpts : { ...searchOpts, filters: "" },
+      "CSS."
+    );
+    python.genericGET(`${apiUrl}/themes${queryStr}`).then((data: ThemeQueryResponse) => {
+      if (data.total > 0) {
+        setThemeArr(data);
+      } else {
+        setThemeArr({ total: 0, items: [] });
+      }
+    });
+  }
+
+  useEffect(() => {
+    getThemes();
+  }, [searchOpts]);
 
   // Runs upon opening the page every time
   useLayoutEffect(() => {
     reloadBackendVer();
-    reloadThemeDb();
+    // Installed themes aren't used on this page, but they are used on other pages, so fetching them here means that as you navigate to the others they will be already loaded
     getInstalledThemes();
+    getThemeTargets();
   }, []);
 
   return (
@@ -159,10 +134,10 @@ export const ThemeBrowserPage: VFC = () => {
             <span>Sort</span>
             <Dropdown
               menuLabel="Sort"
-              rgOptions={sortOptions}
+              rgOptions={formattedFilters.order}
               strDefaultLabel="Last Updated (Newest)"
-              selectedOption={selectedSort}
-              onChange={(e) => setSort(e.data)}
+              selectedOption={searchOpts.order}
+              onChange={(e) => setSearchOpts({ ...searchOpts, order: e.data })}
             />
           </div>
           <div
@@ -177,10 +152,10 @@ export const ThemeBrowserPage: VFC = () => {
             <span>Filter</span>
             <Dropdown
               menuLabel="Filter"
-              rgOptions={targetOptions}
+              rgOptions={formattedFilters.filters}
               strDefaultLabel="All"
-              selectedOption={selectedTarget.data}
-              onChange={(e) => setTarget(e)}
+              selectedOption={searchOpts.filters}
+              onChange={(e) => setSearchOpts({ ...searchOpts, filters: e.data })}
             />
           </div>
           {repoOptions.length > 1 && (
@@ -206,217 +181,84 @@ export const ThemeBrowserPage: VFC = () => {
         </Focusable>
       </PanelSectionRow>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <Focusable
-          style={{ display: "flex", alignItems: "center", width: "96%" }}
-        >
-          <div style={{ minWidth: "75%" }}>
+        <Focusable style={{ display: "flex", alignItems: "center", width: "96%" }}>
+          <div style={{ minWidth: "55%", marginRight: "auto" }}>
             <TextField
               label="Search"
-              value={searchFieldValue}
-              onChange={(e) => setSearchValue(e.target.value)}
+              value={searchOpts.search}
+              onChange={(e) => setSearchOpts({ ...searchOpts, search: e.target.value })}
             />
           </div>
           <DialogButton
             onClick={() => {
               reloadThemes();
             }}
-            style={{ maxWidth: "20%", marginLeft: "auto", height: "50%" }}
+            style={{
+              maxWidth: "20%",
+              height: "50%",
+              // marginRight: "auto",
+              // marginLeft: "auto",
+            }}
           >
             <TiRefreshOutline style={{ transform: "translate(0, 2px)" }} />
             <span>Refresh</span>
           </DialogButton>
+          <div
+            style={{ maxWidth: "20%", minWidth: "20%", marginLeft: "auto" }}
+            className="CssLoader_ThemeBrowser_ScaleSlider"
+          >
+            <SliderField
+              min={3}
+              max={5}
+              step={1}
+              value={browserCardSize}
+              onChange={(num) => {
+                setBrowserCardSize(num);
+              }}
+            />
+          </div>
+          <style>
+            {`
+              /* call me the css selector god */
+              /* these scale the slider to the correct size regardless of display resolution */
+              .CssLoader_ThemeBrowser_ScaleSlider > div > .${gamepadDialogClasses.FieldChildren} {
+                min-width: 100% !important;
+              }
+
+              .CssLoader_ThemeBrowser_ScaleSlider > div > div > .${gamepadSliderClasses.SliderControlWithIcon}.Panel.Focusable {
+                width: 100%;
+              }
+            `}
+          </style>
         </Focusable>
       </div>
       {/* I wrap everything in a Focusable, because that ensures that the dpad/stick navigation works correctly */}
       {/* The margin here is there because the card items themselves dont have margin left */}
       <Focusable
-        style={{ display: "flex", flexWrap: "wrap", marginLeft: "7.5px" }}
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          rowGap: "5px",
+          columnGap: "5px",
+        }}
       >
-        {themeArr
-          // searchFilter also includes backend version check
-          .filter(searchFilter)
-          .filter((e: browseThemeEntry) => {
-            if (selectedTarget.label === "All") {
-              return e.target !== "Background";
-            } else if (selectedTarget.label === "Installed") {
-              const strValue = checkIfThemeInstalled(e);
-              return strValue === "installed" || strValue === "outdated";
-            } else if (selectedTarget.label === "Outdated") {
-              const strValue = checkIfThemeInstalled(e);
-              return strValue === "outdated";
-            } else {
-              return e.target === selectedTarget.label;
-            }
-          })
-          .filter((e: browseThemeEntry) => {
-            if (selectedRepo.label === "All") {
-              return true;
-            } else if (selectedRepo.label === "Official") {
-              return e.repo === "Official";
-            } else {
-              return e.repo !== "Official";
-            }
-          })
-          .sort((a, b) => {
-            // This handles the sort option the user has chosen
-            switch (selectedSort) {
-              case 2:
-                // Z-A
-                // localeCompare just sorts alphabetically
-                return b.name.localeCompare(a.name);
-              case 3:
-                // New-Old
-                return (
-                  new Date(b.last_changed).valueOf() -
-                  new Date(a.last_changed).valueOf()
-                );
-              case 4:
-                // Old-New
-                return (
-                  new Date(a.last_changed).valueOf() -
-                  new Date(b.last_changed).valueOf()
-                );
-              default:
-                // This is just A-Z
-                return a.name.localeCompare(b.name);
-            }
-          })
-          .map((e: browseThemeEntry) => {
-            const installStatus = checkIfThemeInstalled(e);
-            return (
-              // The outer 2 most divs are the background darkened/blurred image, and everything inside is the text/image/buttons
-              <>
-                <div style={{ position: "relative" }}>
-                  {installStatus === "outdated" && (
-                    <div
-                      className="CssLoader_ThemeBrowser_SingleItem_NotifBubble"
-                      style={{
-                        position: "absolute",
-                        top: "-10px",
-                        left: "-10px",
-                        padding: "5px 8px 2.5px 8px",
-                        background: "linear-gradient(135deg, #3a9bed, #235ecf)",
-                        borderRadius: "50%",
-                        // The focusRing has a z index of 10000, so this is just to be cheeky
-                        zIndex: "10001",
-                        boxShadow:
-                          "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
-                      }}
-                    >
-                      <AiOutlineDownload />
-                    </div>
-                  )}
-                  <Focusable
-                    focusWithinClassName="gpfocuswithin"
-                    onActivate={() => {
-                      setCurExpandedTheme(e);
-                      Router.Navigate("/theme-manager-expanded-view");
-                    }}
-                    className="CssLoader_ThemeBrowser_SingleItem_BgImage"
-                    style={{
-                      backgroundImage: 'url("' + e.preview_image + '")',
-                      backgroundSize: "cover",
-                      backgroundRepeat: "no-repeat",
-                      backgroundPosition: "center",
-                      width: "260px",
-                      borderRadius: "5px",
-                      marginLeft: "0px",
-                      marginRight: "5px",
-                      marginBottom: "5px",
-                    }}
-                  >
-                    <div
-                      className="CssLoader_ThemeBrowser_SingleItem_BgOverlay"
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        background: "RGBA(0,0,0,0.8)",
-                        backdropFilter: "blur(5px)",
-                        width: "100%",
-                        height: "100%",
-                        borderRadius: "3px",
-                      }}
-                    >
-                      <span
-                        className="CssLoader_ThemeBrowser_SingleItem_ThemeName"
-                        style={{
-                          textAlign: "center",
-                          marginTop: "5px",
-                          fontSize: "1.25em",
-                          fontWeight: "bold",
-                          // This stuff here truncates it if it's too long
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          width: "90%",
-                        }}
-                      >
-                        {e.name}
-                      </span>
-                      <span
-                        className="CssLoader_ThemeBrowser_SingleItem_ThemeTarget"
-                        style={{
-                          marginTop: "-6px",
-                          fontSize: "1em",
-                          textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                        }}
-                      >
-                        {e.target}
-                      </span>
-                      <div
-                        className="CssLoader_ThemeBrowser_SingleItem_PreviewImage"
-                        style={{
-                          width: "240px",
-                          backgroundImage: 'url("' + e.preview_image + '")',
-                          backgroundSize: "cover",
-                          backgroundRepeat: "no-repeat",
-                          height: "150px",
-                          display: "flex",
-                          position: "relative",
-                          flexDirection: "column",
-                          alignItems: "center",
-                        }}
-                      />
-                      <div
-                        className="CssLoader_ThemeBrowser_SingleItem_AuthorVersionContainer"
-                        style={{
-                          width: "240px",
-                          textAlign: "center",
-                          display: "flex",
-                          paddingBottom: "8px",
-                        }}
-                      >
-                        <span
-                          className="CssLoader_ThemeBrowser_SingleItem_AuthorText"
-                          style={{
-                            marginRight: "auto",
-                            marginLeft: "2px",
-                            fontSize: "1em",
-                            textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                          }}
-                        >
-                          {e.author}
-                        </span>
-                        <span
-                          className="CssLoader_ThemeBrowser_SingleItem_VersionText"
-                          style={{
-                            marginLeft: "auto",
-                            marginRight: "2px",
-                            fontSize: "1em",
-                            textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                          }}
-                        >
-                          {e.version}
-                        </span>
-                      </div>
-                    </div>
-                  </Focusable>
-                </div>
-              </>
-            );
-          })}
+        {themeArr.items
+          .filter((e) => e.manifestVersion <= backendVersion)
+          .map((e) => (
+            <VariableSizeCard
+              data={e}
+              cols={browserCardSize}
+              showTarget={searchOpts.filters !== "All"}
+            />
+          ))}
       </Focusable>
+      <PageSelector
+        total={themeArr.total}
+        perPage={searchOpts.perPage}
+        currentPage={searchOpts.page}
+        onChoose={(e) => setSearchOpts({ ...searchOpts, page: e })}
+      />
     </>
   );
 };

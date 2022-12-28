@@ -12,16 +12,8 @@ import { useEffect, useState, FC } from "react";
 import * as python from "./python";
 import { RiPaintFill } from "react-icons/ri";
 
-import {
-  AboutPage,
-  ThemeBrowserPage,
-  UninstallThemePage,
-} from "./theme-manager";
-import {
-  CssLoaderContextProvider,
-  CssLoaderState,
-  useCssLoaderState,
-} from "./state";
+import { AboutPage, ThemeBrowserPage, UninstallThemePage } from "./theme-manager";
+import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "./state";
 import { ThemeToggle } from "./components";
 import { ExpandedViewPage } from "./theme-manager/ExpandedView";
 
@@ -30,8 +22,7 @@ var firstTime: boolean = true;
 const Content: FC<{ serverAPI: ServerAPI }> = () => {
   // Originally, when SuchMeme wrote this, the names themeList, themeListInternal, and setThemeList were used for the getter and setter functions
   // These were renamed when state was moved to the context, but I simply re-defined them here as their original names so that none of the original code broke
-  const { localThemeList: themeList, setLocalThemeList: setThemeList } =
-    useCssLoaderState();
+  const { localThemeList: themeList, setLocalThemeList: setThemeList } = useCssLoaderState();
 
   // setThemeList is a function that takes the raw data from the python function and then formats it with init and generate functions
   // This still exists, it just has been moved into the CssLoaderState class' setter function, so it now happens automatically
@@ -78,8 +69,8 @@ const Content: FC<{ serverAPI: ServerAPI }> = () => {
       ) : (
         <PanelSectionRow>
           <span>
-            CssLoader failed to initialize, try reloading, and if that doesn't
-            work, try restarting your deck.
+            CssLoader failed to initialize, try reloading, and if that doesn't work, try restarting
+            your deck.
           </span>
         </PanelSectionRow>
       )}
@@ -99,8 +90,7 @@ const Content: FC<{ serverAPI: ServerAPI }> = () => {
 };
 
 const ThemeManagerRouter: FC = () => {
-  const [currentTabRoute, setCurrentTabRoute] =
-    useState<string>("ThemeBrowser");
+  const [currentTabRoute, setCurrentTabRoute] = useState<string>("ThemeBrowser");
 
   return (
     <div
@@ -156,6 +146,7 @@ export default definePlugin((serverApi: ServerAPI) => {
 
   return {
     title: <div className={staticClasses.Title}>CSS Loader</div>,
+    alwaysRender: true,
     content: (
       <CssLoaderContextProvider cssLoaderStateClass={state}>
         <Content serverAPI={serverApi} />

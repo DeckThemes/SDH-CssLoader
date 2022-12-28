@@ -1,13 +1,16 @@
-import { ButtonItem, PanelSectionRow, Router } from "decky-frontend-lib";
-import { useEffect, useRef, VFC } from "react";
+import { ButtonItem, Navigation, PanelSectionRow } from "decky-frontend-lib";
+import { useEffect, useRef, useState, VFC } from "react";
+import { ImSpinner5 } from "react-icons/im";
+import { BsStarFill } from "react-icons/bs";
+import { FiDownload } from "react-icons/fi";
 
 import * as python from "../python";
 
 // Interfaces for the JSON objects the lists work with
-import { browseThemeEntry } from "../customTypes";
 import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
 import { calcButtonColor } from "../logic";
+import { FullCSSThemeInfo, PartialCSSThemeInfo } from "../apiTypes";
 
 export const ExpandedViewPage: VFC = () => {
   const {
@@ -17,10 +20,14 @@ export const ExpandedViewPage: VFC = () => {
     setCurExpandedTheme,
     isInstalling,
     setInstalling,
+    apiUrl,
   } = useCssLoaderState();
 
+  const [fullThemeData, setFullData] = useState<FullCSSThemeInfo>();
+  const [loaded, setLoaded] = useState<boolean>(false);
+
+  // TODO: DOESNT WORK YET
   function installTheme(id: string) {
-    // TODO: most of this is repeating code in other functions, I can probably refactor it to shorten it
     setInstalling(true);
     python.resolve(python.downloadTheme(id), () => {
       python.resolve(python.reset(), () => {
@@ -30,10 +37,9 @@ export const ExpandedViewPage: VFC = () => {
     });
   }
 
-  function checkIfThemeInstalled(themeObj: browseThemeEntry) {
+  function checkIfThemeInstalled(themeObj: PartialCSSThemeInfo) {
     const filteredArr: Theme[] = installedThemes.filter(
-      (e: Theme) =>
-        e.data.name === themeObj.name && e.data.author === themeObj.author
+      (e: Theme) => e.data.name === themeObj.name && e.data.author === themeObj.specifiedAuthor
     );
     if (filteredArr.length > 0) {
       if (filteredArr[0].data.version === themeObj.version) {
@@ -63,31 +69,92 @@ export const ExpandedViewPage: VFC = () => {
     return buttonText;
   }
 
-  const backButtonRef = useRef(null);
+  const backButtonRef = useRef<HTMLElement>(null);
   useEffect(() => {
-    // @ts-ignore
-    backButtonRef?.current.focus();
+    if (backButtonRef?.current) {
+      backButtonRef.current.focus();
+    }
   }, []);
 
+  useEffect(() => {
+    if (currentExpandedTheme?.id) {
+      setLoaded(false);
+      python.genericGET(`${apiUrl}/themes/${currentExpandedTheme.id}`).then((data) => {
+        setFullData(data);
+        setLoaded(true);
+      });
+    }
+  }, [currentExpandedTheme]);
+
+  if (!loaded) {
+    return (
+      <>
+        <style>
+          {`
+            @keyframes spin {
+              to {
+                transform: rotate(360deg);
+              }
+            }
+            .spinny {
+              animation: spin 1s linear infinite;
+            }
+          `}
+        </style>
+        <div
+          style={{
+            marginTop: "40px",
+            display: "flex",
+            gap: "1em",
+            alignItems: "center",
+            justifyContent: "center",
+            flex: "1",
+          }}
+        >
+          <ImSpinner5 className="spinny" size={48} />
+          <span style={{ fontWeight: "bold", fontSize: "2.5em" }}>Loading</span>
+        </div>
+      </>
+    );
+  }
+
   // if theres no theme in the detailed view
-  if (currentExpandedTheme) {
+  if (fullThemeData) {
     // This returns 'installed', 'outdated', or 'uninstalled'
-    const installStatus = checkIfThemeInstalled(currentExpandedTheme);
+    const installStatus = checkIfThemeInstalled(fullThemeData);
     return (
       // The outermost div is to push the content down into the visible area
-      <div style={{ marginTop: "40px" }}>
+      <div
+        style={{
+          marginTop: "40px",
+        }}
+      >
         <div
-          style={{ display: "flex", flexDirection: "column", margin: "20px" }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            margin: "20px",
+          }}
         >
-          <div style={{ display: "flex", marginBottom: "8px" }}>
+          <div
+            style={{
+              display: "flex",
+              marginBottom: "8px",
+            }}
+          >
             <img
               className="CssLoader_ThemeBrowser_ExpandedView_PreviewImage"
-              src={currentExpandedTheme.preview_image}
+              src={`${apiUrl}/blobs/${fullThemeData?.images[0]?.id || ""}`}
               style={{
                 width: "60%",
               }}
             />
-            <div style={{ width: "100%", marginLeft: "16px" }}>
+            <div
+              style={{
+                width: "100%",
+                marginLeft: "16px",
+              }}
+            >
               <div
                 style={{
                   marginBottom: "8px",
@@ -95,12 +162,37 @@ export const ExpandedViewPage: VFC = () => {
                   flexDirection: "column",
                 }}
               >
-                <span style={{ fontWeight: "bold", fontSize: "1.25em" }}>
-                  {currentExpandedTheme.name}
+                <span
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: "1.25em",
+                  }}
+                >
+                  {fullThemeData.name}
                 </span>
-                <span>{currentExpandedTheme.author}</span>
-                <span>{currentExpandedTheme.target}</span>
-                <span>{currentExpandedTheme.version}</span>
+                <span>{fullThemeData.specifiedAuthor}</span>
+                <span>{fullThemeData.target}</span>
+                <span>{fullThemeData.version}</span>
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <div style={{ display: "flex", alignItems: "center", fontSize: "1em" }}>
+                    <BsStarFill />
+                    <span>{fullThemeData.starCount}</span>
+                  </div>
+                  {/* <div
+                    style={{
+                      background: "#1a2c3a",
+                      flex: "1",
+                      height: "0.3em",
+                      borderRadius: "3em",
+                      marginLeft: "1em",
+                      marginRight: "1em",
+                    }}
+                  /> */}
+                  <div style={{ display: "flex", alignItems: "center", fontSize: "1em" }}>
+                    <FiDownload />
+                    <span>{fullThemeData.download.downloadCount}</span>
+                  </div>
+                </div>
               </div>
               <div>
                 <PanelSectionRow>
@@ -119,7 +211,7 @@ export const ExpandedViewPage: VFC = () => {
                       layout="below"
                       disabled={installStatus === "installed" || isInstalling}
                       onClick={() => {
-                        installTheme(currentExpandedTheme.id);
+                        installTheme(fullThemeData.id);
                       }}
                     >
                       <span className="CssLoader_ThemeBrowser_ExpandedView_InstallText">
@@ -145,33 +237,34 @@ export const ExpandedViewPage: VFC = () => {
                       layout="below"
                       onClick={() => {
                         setCurExpandedTheme(undefined);
-                        // This method only works on older (Stable branch as of writing this) versions of SteamOS, and has been removed in Beta/Preview
-                        try {
-                          Router.NavigateBackOrOpenMenu();
-                        } catch (e) {
-                          console.log(
-                            "CSSLoader Error, Legacy router method not found",
-                            e
-                          );
-                          // This method only works on newer (Beta/Preview as of writing) SteamOS, and doesn't exist in Stable
-                          // @ts-ignore
-                          Router.WindowStore.m_MainWindowInstance.NavigateBack();
-                        }
+                        setFullData(undefined);
+                        setLoaded(false);
+                        // Wow amazing navigation interface I wonder who coded it
+                        Navigation.NavigateBack();
                       }}
                     >
-                      <span className="CssLoader_ThemeBrowser_ExpandedView_BackText">
-                        Back
-                      </span>
+                      <span className="CssLoader_ThemeBrowser_ExpandedView_BackText">Back</span>
                     </ButtonItem>
                   </div>
                 </PanelSectionRow>
               </div>
             </div>
           </div>
-          <div style={{ flex: "1 1 0%", flexGrow: "1" }}>
+          <div
+            style={{
+              flex: "1 1 0%",
+              flexGrow: "1",
+            }}
+          >
             <span>
-              {currentExpandedTheme?.description || (
-                <i style={{ color: "#666" }}>No description provided.</i>
+              {fullThemeData?.description || (
+                <i
+                  style={{
+                    color: "#666",
+                  }}
+                >
+                  No description provided.
+                </i>
               )}
             </span>
           </div>
@@ -181,7 +274,18 @@ export const ExpandedViewPage: VFC = () => {
   }
   return (
     <>
-      <span>Error fetching selected theme, please go back and retry.</span>
+      <div
+        style={{
+          marginTop: "40px",
+          display: "flex",
+          gap: "1em",
+          alignItems: "center",
+          justifyContent: "center",
+          flex: "1",
+        }}
+      >
+        <span>Error fetching selected theme, please go back and retry.</span>
+      </div>
     </>
   );
 };

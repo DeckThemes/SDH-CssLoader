@@ -1,9 +1,4 @@
-import {
-  DropdownItem,
-  PanelSectionRow,
-  SliderField,
-  ToggleField,
-} from "decky-frontend-lib";
+import { DropdownItem, PanelSectionRow, SliderField, ToggleField } from "decky-frontend-lib";
 import * as python from "../python";
 import { useState, VFC } from "react";
 import { Patch } from "../theme";
@@ -19,8 +14,7 @@ export const ThemePatch: VFC<{
 
   const [selectedLabel, setLabel] = useState(data.value);
 
-  const bottomSeparatorValue =
-    fullArr.length - 1 === index ? "standard" : "none";
+  const bottomSeparatorValue = fullArr.length - 1 === index ? "standard" : "none";
 
   switch (data.type) {
     case "slider":
@@ -35,11 +29,7 @@ export const ThemePatch: VFC<{
               value={sliderValue}
               onChange={(value) => {
                 python.execute(
-                  python.setPatchOfTheme(
-                    data.theme.name,
-                    data.name,
-                    data.options[value]
-                  )
+                  python.setPatchOfTheme(data.theme.name, data.name, data.options[value])
                 );
                 setSlider(value);
                 setLabel(data.options[value]);
@@ -80,9 +70,7 @@ export const ThemePatch: VFC<{
               checked={data.value === "Yes"}
               onChange={(bool) => {
                 const newValue = bool ? "Yes" : "No";
-                python.execute(
-                  python.setPatchOfTheme(data.theme.name, data.name, newValue)
-                );
+                python.execute(python.setPatchOfTheme(data.theme.name, data.name, newValue));
                 setLabel(newValue);
                 data.index = data.options.findIndex((e) => e === newValue);
                 data.value = newValue;
@@ -120,9 +108,7 @@ export const ThemePatch: VFC<{
                 data.index = index.data;
                 data.value = index.label as string;
                 setLabel(data.value);
-                python.execute(
-                  python.setPatchOfTheme(data.theme.name, data.name, data.value)
-                );
+                python.execute(python.setPatchOfTheme(data.theme.name, data.name, data.value));
               }}
             />
           </PanelSectionRow>
