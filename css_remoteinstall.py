@@ -1,6 +1,7 @@
 import asyncio, json, tempfile, os
 from css_utils import Result, Log, get_user_home, get_theme_path
 from css_theme import CSS_LOADER_VER
+import aiohttp
 
 async def run(command : str) -> str:
     proc = await asyncio.create_subprocess_shell(command,        
@@ -12,6 +13,48 @@ async def run(command : str) -> str:
         raise Exception(f"Process exited with error code {proc.returncode}")
 
     return stdout.decode()
+
+async def install(id : str, base_url : str, local_themes : list) -> Result:
+    if not base_url.endswith("/"):
+        base_url = base_url + "/"
+
+    url = f"{base_url}themes/{id}"
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Invalid status code {resp.status}")
+
+                data = await resp.json()
+    except Exception as e:
+        return Result(False, str(e))
+    
+    download_url = f"{base_url}blobs/{data['download']['id']}" 
+    tempDir = tempfile.TemporaryDirectory()
+
+    Log(f"Downloading {download_url} to {tempDir.name}...")
+    themeZipPath = os.path.join(tempDir.name, 'theme.zip')
+    try:
+        await run(f"curl \"{download_url}\" -L -o \"{themeZipPath}\"")
+    except Exception as e:
+        return Result(False, str(e))
+
+    Log(f"Unzipping {themeZipPath}")
+    try:
+        await run(f"unzip -o \"{themeZipPath}\" -d \"{get_user_home()}/homebrew/themes\"")
+    except Exception as e:
+        return Result(False, str(e))
+
+    tempDir.cleanup()
+
+    for x in data["dependencies"]:
+        if x["name"] in local_themes:
+            continue
+            
+        install(x["id"], base_url, local_themes)
+    
+    return Result(True)
 
 class RemoteInstallItem:
     def __init__(self, content : dict, repo_url : str):

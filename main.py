@@ -15,7 +15,7 @@ from css_utils import Log, create_dir, create_symlink, Result, get_user_home, ge
 from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
-from css_remoteinstall import RemoteInstall
+from css_remoteinstall import RemoteInstall, install
 from css_tab_mapping import get_multiple_tab_mappings, load_tab_mappings, tab_has_element, tab_exists, inject_to_tab
 
 Initialized = False
@@ -73,6 +73,10 @@ class Plugin:
                 return result.to_dict()
         
         return Result(False, f"Did not find theme {name}").to_dict()
+
+    async def download_theme_from_url(self, id : str, url : str) -> dict:
+        local_themes = [x.name for x in self.themes]
+        return install(id, url, local_themes).to_dict()
 
     async def download_theme(self, uuid : str) -> dict:
         try:
