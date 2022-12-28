@@ -52,7 +52,7 @@ async def install(id : str, base_url : str, local_themes : list) -> Result:
         if x["name"] in local_themes:
             continue
             
-        install(x["id"], base_url, local_themes)
+        await install(x["id"], base_url, local_themes)
     
     return Result(True)
 
