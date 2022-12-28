@@ -21,7 +21,7 @@ async def install(id : str, base_url : str, local_themes : list) -> Result:
     url = f"{base_url}themes/{id}"
 
     try:
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
             async with session.get(url) as resp:
                 if resp.status != 200:
                     raise Exception(f"Invalid status code {resp.status}")
