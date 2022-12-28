@@ -24,6 +24,7 @@ class Theme:
                 raise Exception("Folder does not look like a theme?")
 
             self.name = os.path.basename(themePath)
+            self.id = self.name
             self.version = "v1.0"
             self.author = ""
             self.require = 1
