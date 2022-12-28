@@ -87,3 +87,18 @@ class Inject:
 
         self.enabled = False
         return Result(True)
+
+def to_inject(key : str, tabs : list, basePath : str, theme) -> Inject:
+    inject = Inject(basePath + "/" + key, tabs, theme)
+    if key.startswith("--"):
+        value = tabs[0]
+        tabs = tabs[1:]
+        if (";" in value or ";" in key):
+            raise Exception("Multiple css statements are unsupported in a variable")
+        inject = Inject("", tabs, theme)
+        inject.css = f":root {{ {key}: {value}; }}"
+    
+    return inject
+
+def to_injects(items : dict, basePath : str, theme) -> list:
+    return [to_inject(x, items[x], basePath, theme) for x in items]

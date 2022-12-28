@@ -1,11 +1,11 @@
 import os, json, shutil
 from os import path
 from typing import List
-from css_inject import Inject
+from css_inject import Inject, to_injects
 from css_utils import Result, Log, create_dir
 from css_themepatch import ThemePatch
 
-CSS_LOADER_VER = 4
+CSS_LOADER_VER = 5
 
 class Theme:
     def __init__(self, themePath : str, json : dict, configPath : str = None):
@@ -18,7 +18,6 @@ class Theme:
         self.enabled = False
         self.json = json
         
-
         if (json is None):
             if not os.path.exists(os.path.join(themePath, "theme.css")):
                 raise Exception("Folder does not look like a theme?")
@@ -44,7 +43,7 @@ class Theme:
         self.dependencies = json["dependencies"] if "dependencies" in json else {}
 
         if "inject" in self.json:
-            self.injects = [Inject(self.themePath + "/" + x, self.json["inject"][x], self) for x in self.json["inject"]]
+            self.injects = to_injects(self.json["inject"], self.themePath, self)
         
         if "patches" in self.json:
             self.patches = [ThemePatch(self, self.json["patches"][x], x) for x in self.json["patches"]]

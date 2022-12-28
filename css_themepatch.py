@@ -1,4 +1,4 @@
-from css_inject import Inject
+from css_inject import Inject, to_injects
 from css_themepatchcomponent import ThemePatchComponent
 from css_utils import Log, Result
 
@@ -84,21 +84,9 @@ class ThemePatch:
         for x in self.options:
             data = self.json[x] if self.patchVersion == 1 else self.json["values"][x]
 
-            for y in data:
-                inject = Inject(self.theme.themePath + "/" + y, data[y], self.theme)
-                if y.startswith("--"):
-                    value = data[y][0]
-                    tabs = data[y][1:]
-
-                    if (";" in value or ";" in y):
-                        raise Exception("Multiple css statements are unsupported in a variable")
-                    
-                    inject = Inject("", tabs, self.theme)
-                    inject.css = f":root {{ {y}: {value}; }}"
-
-                self.injects.append(inject)
-                self.options[x].append(inject)
-                
+            items = to_injects(data, self.theme.themePath, self.theme)
+            self.injects.extend(items)
+            self.options[x].extend(items)
         
         if "components" in self.json:
             for x in self.json["components"]:
