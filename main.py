@@ -76,7 +76,7 @@ class Plugin:
 
     async def download_theme_from_url(self, id : str, url : str) -> dict:
         local_themes = [x.name for x in self.themes]
-        return install(id, url, local_themes).to_dict()
+        return (await install(id, url, local_themes)).to_dict()
 
     async def download_theme(self, uuid : str) -> dict:
         try:
