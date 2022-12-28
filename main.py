@@ -11,7 +11,7 @@ except UnsupportedLibc:
 
 sys.path.append(os.path.dirname(__file__))
 
-from css_utils import Log, create_dir, create_symlink, Result, get_user_home, get_theme_path
+from css_utils import Log, create_dir, create_symlink, Result, get_user_home, get_theme_path, store_read as util_store_read, store_write as util_store_write
 from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
@@ -218,6 +218,13 @@ class Plugin:
         
         self.themes.remove(theme)
         await self._cache_lists(self)
+        return Result(True).to_dict()
+
+    async def store_read(self, key : str) -> str:
+        return util_store_read(key)
+    
+    async def store_write(self, key : str, val : str) -> dict:
+        util_store_write(key, val)
         return Result(True).to_dict()
 
     async def _inject_test_element(self, tab : str, timeout : int = 3, element_name : str = "test_css_loaded") -> Result:
