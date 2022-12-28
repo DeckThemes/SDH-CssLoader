@@ -17,6 +17,7 @@ class Theme:
         self.bundled = self.configPath != self.themePath
         self.enabled = False
         self.json = json
+        
 
         if (json is None):
             if not os.path.exists(os.path.join(themePath, "theme.css")):
@@ -31,6 +32,7 @@ class Theme:
             return
 
         self.name = json["name"]
+        self.id = json["id"] if ("id" in json) else self.name
         self.version = json["version"] if ("version" in json) else "v1.0"
         self.author = json["author"] if ("author" in json) else ""
         self.require = int(json["manifest_version"]) if ("manifest_version" in json) else 1
@@ -142,6 +144,7 @@ class Theme:
     
     def to_dict(self) -> dict:
         return {
+            "id": self.id,
             "name": self.name,
             "version": self.version,
             "author": self.author,
