@@ -11,12 +11,14 @@ export function LoadMoreButton({
   setThemeArr,
   themeArr,
   paramStrFilterPrepend = "",
+  setSnapIndex = undefined,
 }: {
   fetchPath: string;
   origSearchOpts: ThemeQueryRequest;
   setThemeArr: any;
   themeArr: ThemeQueryResponse;
   paramStrFilterPrepend: string;
+  setSnapIndex?: Dispatch<SetStateAction<number>>;
 }) {
   const { apiUrl } = useCssLoaderState();
   const [loadMoreCurPage, setLoadMorePage] = useState<number>(1);
@@ -34,6 +36,9 @@ export function LoadMoreButton({
     python.genericGET(`${apiUrl}${fetchPath}${searchOpts}`).then((data) => {
       if (data) {
         setThemeArr({ total: themeArr.total, items: [...themeArr.items, ...data.items] });
+        if (setSnapIndex) {
+          setSnapIndex(origSearchOpts.perPage * loadMoreCurPage - 1);
+        }
         setLoadMorePage((curPage) => curPage + 1);
       }
       setLoading(false);

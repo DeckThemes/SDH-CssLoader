@@ -15,12 +15,14 @@ import { RiPaintFill } from "react-icons/ri";
 import {
   SettingsPage,
   StarredThemesPage,
+  SubmissionsPage,
   ThemeBrowserPage,
   UninstallThemePage,
 } from "./theme-manager";
 import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "./state";
 import { ThemeToggle } from "./components";
 import { ExpandedViewPage } from "./theme-manager/ExpandedView";
+import { Permissions } from "./apiTypes";
 
 var firstTime: boolean = true;
 
@@ -96,7 +98,7 @@ const Content: FC<{ serverAPI: ServerAPI }> = () => {
 
 const ThemeManagerRouter: FC = () => {
   const [currentTabRoute, setCurrentTabRoute] = useState<string>("ThemeBrowser");
-
+  const { apiShortToken, apiMeData } = useCssLoaderState();
   return (
     <div
       style={{
@@ -116,11 +118,24 @@ const ThemeManagerRouter: FC = () => {
             content: <ThemeBrowserPage />,
             id: "ThemeBrowser",
           },
-          {
-            title: "Starred Themes",
-            content: <StarredThemesPage />,
-            id: "StarredThemes",
-          },
+          ...(!!apiShortToken && apiShortToken.length === 12
+            ? [
+                {
+                  title: "Starred Themes",
+                  content: <StarredThemesPage />,
+                  id: "StarredThemes",
+                },
+              ]
+            : []),
+          ...(!!apiMeData && apiMeData.permissions.includes(Permissions.viewSubs)
+            ? [
+                {
+                  title: "Submissions",
+                  content: <SubmissionsPage />,
+                  id: "SubmissionsPage",
+                },
+              ]
+            : []),
           {
             title: "Installed Themes",
             content: <UninstallThemePage />,

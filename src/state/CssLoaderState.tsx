@@ -1,11 +1,11 @@
 import { SingleDropdownOption } from "decky-frontend-lib";
 import { createContext, FC, useContext, useEffect, useState } from "react";
 import {
+  AccountData,
   FilterQueryResponse,
   PartialCSSThemeInfo,
   ThemeQueryRequest,
   ThemeQueryResponse,
-  UserInfo,
 } from "../apiTypes";
 import { localThemeEntry } from "../customTypes";
 import { Theme } from "../theme";
@@ -15,7 +15,7 @@ interface PublicCssLoaderState {
   apiShortToken: string;
   apiFullToken: string;
   apiTokenExpireDate: Date | number | undefined;
-  apiMeData: UserInfo | undefined;
+  apiMeData: AccountData | undefined;
   serverFilters: FilterQueryResponse;
   themeSearchOpts: ThemeQueryRequest;
   localThemeList: Theme[];
@@ -27,6 +27,9 @@ interface PublicCssLoaderState {
   starredSearchOpts: ThemeQueryRequest;
   starredServerFilters: FilterQueryResponse;
   starredThemeList: ThemeQueryResponse;
+  submissionSearchOpts: ThemeQueryRequest;
+  submissionServerFilters: FilterQueryResponse;
+  submissionThemeList: ThemeQueryResponse;
 }
 
 // The localThemeEntry interface refers to the theme data as given by the python function, the Theme class refers to a theme after it has been formatted and the generate function has been added
@@ -36,7 +39,7 @@ interface PublicCssLoaderContext extends PublicCssLoaderState {
   setApiShortToken(data: string): void;
   setApiFullToken(data: string): void;
   setApiTokenExpireDate(data: Date | number | undefined): void;
-  setApiMeData(data: UserInfo | undefined): void;
+  setApiMeData(data: AccountData | undefined): void;
   setServerFilters(data: FilterQueryResponse): void;
   setThemeSearchOpts(data: ThemeQueryRequest): void;
   setLocalThemeList(listArr: localThemeEntry[]): void;
@@ -48,6 +51,9 @@ interface PublicCssLoaderContext extends PublicCssLoaderState {
   setStarredSearchOpts(data: ThemeQueryRequest): void;
   setStarredServerFilters(data: FilterQueryResponse): void;
   setStarredThemeList(data: ThemeQueryResponse): void;
+  setSubmissionSearchOpts(data: ThemeQueryRequest): void;
+  setSubmissionServerFilters(data: FilterQueryResponse): void;
+  setSubmissionThemeList(data: ThemeQueryResponse): void;
 }
 
 // This class creates the getter and setter functions for all of the global state data.
@@ -56,16 +62,16 @@ export class CssLoaderState {
   private apiShortToken: string = "";
   private apiFullToken: string = "";
   private apiTokenExpireDate: Date | number | undefined = undefined;
-  private apiMeData: UserInfo | undefined = undefined;
+  private apiMeData: AccountData | undefined = undefined;
   private serverFilters: FilterQueryResponse = {
     filters: ["All"],
-    order: ["Alphabetical (A to Z)"],
+    order: ["Last Updated"],
   };
   private themeSearchOpts: ThemeQueryRequest = {
     page: 1,
     perPage: 10,
     filters: "All",
-    order: "Alphabetical (A to Z)",
+    order: "Last Updated",
     search: "",
   };
   private localThemeList: Theme[] = [];
@@ -79,16 +85,28 @@ export class CssLoaderState {
   private browserCardSize: number = 3;
   private starredSearchOpts: ThemeQueryRequest = {
     page: 1,
-    perPage: 10,
+    perPage: 50,
     filters: "All",
-    order: "Alphabetical (A to Z)",
+    order: "Last Updated",
     search: "",
   };
   private starredServerFilters: FilterQueryResponse = {
     filters: ["All"],
-    order: ["Alphabetical (A to Z)"],
+    order: ["Last Updated"],
   };
   private starredThemeList: ThemeQueryResponse = { total: 0, items: [] };
+  private submissionSearchOpts: ThemeQueryRequest = {
+    page: 1,
+    perPage: 50,
+    filters: "All",
+    order: "Last Updated",
+    search: "",
+  };
+  private submissionServerFilters: FilterQueryResponse = {
+    filters: ["All"],
+    order: ["Last Updated"],
+  };
+  private submissionThemeList: ThemeQueryResponse = { total: 0, items: [] };
 
   // You can listen to this eventBus' 'stateUpdate' event and use that to trigger a useState or other function that causes a re-render
   public eventBus = new EventTarget();
@@ -111,6 +129,9 @@ export class CssLoaderState {
       starredSearchOpts: this.starredSearchOpts,
       starredServerFilters: this.starredServerFilters,
       starredThemeList: this.starredThemeList,
+      submissionSearchOpts: this.submissionSearchOpts,
+      submissionServerFilters: this.submissionServerFilters,
+      submissionThemeList: this.submissionThemeList,
     };
   }
 
@@ -134,7 +155,7 @@ export class CssLoaderState {
     this.forceUpdate();
   }
 
-  setApiMeData(data: UserInfo | undefined) {
+  setApiMeData(data: AccountData | undefined) {
     this.apiMeData = data;
     this.forceUpdate();
   }
@@ -202,6 +223,19 @@ export class CssLoaderState {
     this.forceUpdate();
   }
 
+  setSubmissionSearchOpts(data: ThemeQueryRequest) {
+    this.submissionSearchOpts = data;
+    this.forceUpdate();
+  }
+  setSubmissionServerFilters(data: FilterQueryResponse) {
+    this.submissionServerFilters = data;
+    this.forceUpdate();
+  }
+  setSubmissionThemeList(data: ThemeQueryResponse) {
+    this.submissionThemeList = data;
+    this.forceUpdate();
+  }
+
   private forceUpdate() {
     this.eventBus.dispatchEvent(new Event("stateUpdate"));
   }
@@ -235,7 +269,7 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({ children, cssLoade
   const setApiFullToken = (data: string) => cssLoaderStateClass.setApiFullToken(data);
   const setApiTokenExpireDate = (data: Date | number | undefined) =>
     cssLoaderStateClass.setApiTokenExpireDate(data);
-  const setApiMeData = (data: UserInfo | undefined) => cssLoaderStateClass.setApiMeData(data);
+  const setApiMeData = (data: AccountData | undefined) => cssLoaderStateClass.setApiMeData(data);
   const setServerFilters = (data: FilterQueryResponse) =>
     cssLoaderStateClass.setServerFilters(data);
   const setThemeSearchOpts = (data: ThemeQueryRequest) =>
@@ -258,6 +292,15 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({ children, cssLoade
   const setStarredThemeList = (data: ThemeQueryResponse) => {
     cssLoaderStateClass.setStarredThemeList(data);
   };
+  const setSubmissionSearchOpts = (data: ThemeQueryRequest) => {
+    cssLoaderStateClass.setSubmissionSearchOpts(data);
+  };
+  const setSubmissionServerFilters = (data: FilterQueryResponse) => {
+    cssLoaderStateClass.setSubmissionServerFilters(data);
+  };
+  const setSubmissionThemeList = (data: ThemeQueryResponse) => {
+    cssLoaderStateClass.setSubmissionThemeList(data);
+  };
 
   return (
     <CssLoaderContext.Provider
@@ -279,6 +322,9 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({ children, cssLoade
         setStarredSearchOpts,
         setStarredServerFilters,
         setStarredThemeList,
+        setSubmissionSearchOpts,
+        setSubmissionServerFilters,
+        setSubmissionThemeList,
       }}
     >
       {children}

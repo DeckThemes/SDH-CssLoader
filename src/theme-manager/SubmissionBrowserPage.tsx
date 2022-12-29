@@ -6,7 +6,7 @@ import { generateParamStr } from "../logic";
 import { ThemeQueryResponse } from "../apiTypes";
 import { useEffect, useRef, useState } from "react";
 
-export function StarredThemesPage() {
+export function SubmissionsPage() {
   const {
     apiUrl,
     apiFullToken,
@@ -14,12 +14,12 @@ export function StarredThemesPage() {
     setApiFullToken,
     setApiTokenExpireDate,
     setLocalThemeList: setInstalledThemes,
-    starredSearchOpts: searchOpts,
-    setStarredSearchOpts: setSearchOpts,
-    starredServerFilters: serverFilters,
-    setStarredServerFilters: setServerFilters,
-    starredThemeList: themeArr,
-    setStarredThemeList: setThemeArr,
+    submissionSearchOpts: searchOpts,
+    setSubmissionSearchOpts: setSearchOpts,
+    submissionServerFilters: serverFilters,
+    setSubmissionServerFilters: setServerFilters,
+    submissionThemeList: themeArr,
+    setSubmissionThemeList: setThemeArr,
     browserCardSize,
   } = useCssLoaderState();
 
@@ -56,7 +56,7 @@ export function StarredThemesPage() {
         "CSS."
       );
       python
-        .genericGET(`${apiUrl}/users/me/stars${queryStr}`, newToken)
+        .genericGET(`${apiUrl}/themes/awaiting_approval${queryStr}`, newToken)
         .then((data: ThemeQueryResponse) => {
           if (data.total > 0) {
             setThemeArr(data);
@@ -105,7 +105,7 @@ export function StarredThemesPage() {
         setSearchOpts={setSearchOpts}
         unformattedFilters={serverFilters}
         setUnformattedFilters={setServerFilters}
-        getTargetsPath="/themes/filters?target=CSS"
+        getTargetsPath="/themes/awaiting_approval/filters?target=CSS"
         onReload={reloadThemes}
       />
       <Focusable
@@ -141,7 +141,7 @@ export function StarredThemesPage() {
             setThemeArr={setThemeArr}
             origSearchOpts={searchOpts}
             paramStrFilterPrepend="CSS."
-            fetchPath="/users/me/stars"
+            fetchPath="/themes/awaiting_approval"
             setSnapIndex={setSnapIndex}
           />
         </div>

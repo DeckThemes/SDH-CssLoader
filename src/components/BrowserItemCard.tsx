@@ -69,7 +69,8 @@ export const VariableSizeCard: FC<{
   data: PartialCSSThemeInfo;
   cols: number;
   showTarget: boolean;
-}> = ({ data: e, cols: size, showTarget = true }) => {
+  refPassthrough?: any;
+}> = ({ data: e, cols: size, showTarget = true, refPassthrough = undefined }) => {
   const { localThemeList, setCurExpandedTheme, apiUrl } = useCssLoaderState();
   function checkIfThemeInstalled(themeObj: PartialCSSThemeInfo) {
     const filteredArr: Theme[] = localThemeList.filter(
@@ -111,6 +112,7 @@ export const VariableSizeCard: FC<{
           </div>
         )}
         <Focusable
+          ref={refPassthrough}
           focusWithinClassName="gpfocuswithin"
           onActivate={() => {
             setCurExpandedTheme(e);

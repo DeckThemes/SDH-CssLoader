@@ -1,5 +1,5 @@
-import { Focusable } from "decky-frontend-lib";
-import { useLayoutEffect, useState, FC, useEffect } from "react";
+import { DialogButton, Focusable } from "decky-frontend-lib";
+import { useLayoutEffect, useState, FC, useEffect, useRef } from "react";
 import * as python from "../python";
 
 // Interfaces for the JSON objects the lists work with
@@ -56,6 +56,7 @@ export const ThemeBrowserPage: FC = () => {
       } else {
         setThemeArr({ total: 0, items: [] });
       }
+      setSnapIndex(-1);
     });
   }
 
@@ -92,6 +93,14 @@ export const ThemeBrowserPage: FC = () => {
     getInstalledThemes();
   }, []);
 
+  const endOfPageRef = useRef<HTMLElement>();
+  const [indexToSnapTo, setSnapIndex] = useState<number>(-1);
+  useEffect(() => {
+    if (endOfPageRef?.current) {
+      endOfPageRef?.current?.focus();
+    }
+  }, [indexToSnapTo]);
+
   return (
     <>
       <BrowserSearchFields
@@ -114,8 +123,9 @@ export const ThemeBrowserPage: FC = () => {
       >
         {themeArr.items
           .filter((e) => e.manifestVersion <= backendVersion)
-          .map((e) => (
+          .map((e, i) => (
             <VariableSizeCard
+              refPassthrough={i === indexToSnapTo ? endOfPageRef : undefined}
               data={e}
               cols={browserCardSize}
               showTarget={searchOpts.filters !== "All"}
@@ -138,6 +148,7 @@ export const ThemeBrowserPage: FC = () => {
             origSearchOpts={searchOpts}
             paramStrFilterPrepend="CSS."
             fetchPath="/themes"
+            setSnapIndex={setSnapIndex}
           />
         </div>
       </div>

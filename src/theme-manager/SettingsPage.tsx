@@ -19,7 +19,7 @@ export const SettingsPage: VFC = () => {
 
   function authWithShortToken() {
     const shortTokenValue = shortTokenInterimValue;
-    if (shortTokenInterimValue.length === 24) {
+    if (shortTokenInterimValue.length === 12) {
       python.authWithShortToken(shortTokenValue, apiUrl).then((data) => {
         if (data && data?.token) {
           python.storeWrite("shortToken", shortTokenValue);
@@ -36,7 +36,7 @@ export const SettingsPage: VFC = () => {
         }
       });
     } else {
-      python.toast("Invalid Token", "Token must be 24 characters long.");
+      python.toast("Invalid Token", "Token must be 12 characters long.");
     }
   }
 
@@ -93,7 +93,7 @@ export const SettingsPage: VFC = () => {
                 />
               </div>
               <DialogButton
-                disabled={shortTokenInterimValue.length !== 24}
+                disabled={shortTokenInterimValue.length !== 12}
                 onClick={() => {
                   authWithShortToken();
                 }}
@@ -116,33 +116,47 @@ export const SettingsPage: VFC = () => {
       </div>
       <Focusable>
         <div>
-          <h1 style={{ fontWeight: "bold", fontSize: "2em" }}>About CSSLoader</h1>
-          <h2 style={{ fontWeight: "bold", fontSize: "1.5em", marginBottom: "0px" }}>Developers</h2>
-          <ul style={{ marginTop: "0px", marginBottom: "0px" }}>
-            <li>
-              <span>SuchMeme - github.com/suchmememanyskill</span>
-            </li>
-            <li>
-              <span>EMERALD - github.com/EMERALD0874</span>
-            </li>
-            <li>
-              <span>Beebles - github.com/beebls</span>
-            </li>
-          </ul>
-          <h2 style={{ fontWeight: "bold", fontSize: "1.5em", marginBottom: "0px" }}>Support</h2>
-          <span>
-            See the DeckThemes Discord server for support.
-            <br />
-            discord.gg/HsU72Kfnpf
-          </span>
-          <h2 style={{ fontWeight: "bold", fontSize: "1.5em", marginBottom: "0px" }}>
-            Create and Submit Your Own Theme
-          </h2>
-          <span>
-            Instructions for theme creation/submission are available DeckThemes' docs website.
-            <br />
-            docs.deckthemes.com
-          </span>
+          <h1 style={{ fontWeight: "bold", fontSize: "2em", marginBottom: "0px" }}>
+            About CSSLoader
+          </h1>
+          <div style={{ display: "flex", gap: "4em", fontSize: "0.9em" }}>
+            <div>
+              <h2 style={{ fontWeight: "bold", fontSize: "1.5em", marginBottom: "0px" }}>
+                Developers
+              </h2>
+              <ul style={{ marginTop: "0px", marginBottom: "0px" }}>
+                <li>
+                  <span>SuchMeme - github.com/suchmememanyskill</span>
+                </li>
+                <li>
+                  <span>EMERALD - github.com/EMERALD0874</span>
+                </li>
+                <li>
+                  <span>Beebles - github.com/beebls</span>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h2 style={{ fontWeight: "bold", fontSize: "1.5em", marginBottom: "0px" }}>
+                Support
+              </h2>
+              <span>
+                See the DeckThemes Discord server for support.
+                <br />
+                discord.gg/HsU72Kfnpf
+              </span>
+            </div>
+            <div>
+              <h2 style={{ fontWeight: "bold", fontSize: "1.5em", marginBottom: "0px" }}>
+                Create and Submit Your Own Theme
+              </h2>
+              <span>
+                Instructions for theme creation/submission are available DeckThemes' docs website.
+                <br />
+                docs.deckthemes.com
+              </span>
+            </div>
+          </div>
         </div>
       </Focusable>
     </div>
