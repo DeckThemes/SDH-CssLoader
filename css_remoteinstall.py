@@ -110,7 +110,7 @@ class RemoteInstallItem:
 
 class RemoteInstall:
     def __init__(self):
-        self.baseThemeDb = "https://github.com/suchmememanyskill/CssLoader-ThemeDb/releases/download/1.1.0/themes.json"
+        self.baseThemeDb = "https://github.com/suchmememanyskill/CssLoader-ThemeDb/releases/latest/download/themes.json"
         self.themes = []
         self.init = False
 
