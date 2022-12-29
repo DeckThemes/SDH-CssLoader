@@ -9,7 +9,7 @@ import { Theme } from "../theme";
 import { PartialCSSThemeInfo } from "../apiTypes";
 
 export const UninstallThemePage: VFC = () => {
-  const { localThemeList, setLocalThemeList, browseThemeList } = useCssLoaderState();
+  const { localThemeList, setLocalThemeList, browseThemeList, apiUrl } = useCssLoaderState();
 
   const [isUninstalling, setUninstalling] = useState(false);
 
@@ -23,13 +23,11 @@ export const UninstallThemePage: VFC = () => {
     });
   }
 
-  // TODO: DOESNT WORK YET
   function updateTheme(remoteEntry: PartialCSSThemeInfo) {
-    // This check is just because the value might be false because of typescript woes
     if (remoteEntry.id) {
       const id = remoteEntry.id;
       setUninstalling(true);
-      python.resolve(python.downloadTheme(id), () => {
+      python.resolve(python.downloadThemeFromUrl(id, apiUrl), () => {
         python.resolve(python.reset(), () => {
           python.resolve(python.getThemes(), setLocalThemeList);
           setUninstalling(false);

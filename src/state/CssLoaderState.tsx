@@ -5,12 +5,17 @@ import {
   PartialCSSThemeInfo,
   ThemeQueryRequest,
   ThemeQueryResponse,
+  UserInfo,
 } from "../apiTypes";
 import { localThemeEntry } from "../customTypes";
 import { Theme } from "../theme";
 
 interface PublicCssLoaderState {
   apiUrl: string;
+  apiShortToken: string;
+  apiFullToken: string;
+  apiTokenExpireDate: Date | number | undefined;
+  apiMeData: UserInfo | undefined;
   serverFilters: FilterQueryResponse;
   themeSearchOpts: ThemeQueryRequest;
   localThemeList: Theme[];
@@ -19,12 +24,19 @@ interface PublicCssLoaderState {
   isInstalling: boolean;
   currentExpandedTheme: PartialCSSThemeInfo | undefined;
   browserCardSize: number;
+  starredSearchOpts: ThemeQueryRequest;
+  starredServerFilters: FilterQueryResponse;
+  starredThemeList: ThemeQueryResponse;
 }
 
 // The localThemeEntry interface refers to the theme data as given by the python function, the Theme class refers to a theme after it has been formatted and the generate function has been added
 
 interface PublicCssLoaderContext extends PublicCssLoaderState {
   setApiUrl(data: string): void;
+  setApiShortToken(data: string): void;
+  setApiFullToken(data: string): void;
+  setApiTokenExpireDate(data: Date | number | undefined): void;
+  setApiMeData(data: UserInfo | undefined): void;
   setServerFilters(data: FilterQueryResponse): void;
   setThemeSearchOpts(data: ThemeQueryRequest): void;
   setLocalThemeList(listArr: localThemeEntry[]): void;
@@ -33,11 +45,18 @@ interface PublicCssLoaderContext extends PublicCssLoaderState {
   setInstalling(bool: boolean): void;
   setCurExpandedTheme(theme: PartialCSSThemeInfo | undefined): void;
   setBrowserCardSize(num: number): void;
+  setStarredSearchOpts(data: ThemeQueryRequest): void;
+  setStarredServerFilters(data: FilterQueryResponse): void;
+  setStarredThemeList(data: ThemeQueryResponse): void;
 }
 
 // This class creates the getter and setter functions for all of the global state data.
 export class CssLoaderState {
   private apiUrl: string = "https://api.deckthemes.com";
+  private apiShortToken: string = "";
+  private apiFullToken: string = "";
+  private apiTokenExpireDate: Date | number | undefined = undefined;
+  private apiMeData: UserInfo | undefined = undefined;
   private serverFilters: FilterQueryResponse = {
     filters: ["All"],
     order: ["Alphabetical (A to Z)"],
@@ -58,6 +77,18 @@ export class CssLoaderState {
   private isInstalling: boolean = false;
   private currentExpandedTheme: PartialCSSThemeInfo | undefined = undefined;
   private browserCardSize: number = 3;
+  private starredSearchOpts: ThemeQueryRequest = {
+    page: 1,
+    perPage: 10,
+    filters: "All",
+    order: "Alphabetical (A to Z)",
+    search: "",
+  };
+  private starredServerFilters: FilterQueryResponse = {
+    filters: ["All"],
+    order: ["Alphabetical (A to Z)"],
+  };
+  private starredThemeList: ThemeQueryResponse = { total: 0, items: [] };
 
   // You can listen to this eventBus' 'stateUpdate' event and use that to trigger a useState or other function that causes a re-render
   public eventBus = new EventTarget();
@@ -65,6 +96,10 @@ export class CssLoaderState {
   getPublicState() {
     return {
       apiUrl: this.apiUrl,
+      apiShortToken: this.apiShortToken,
+      apiFullToken: this.apiFullToken,
+      apiTokenExpireDate: this.apiTokenExpireDate,
+      apiMeData: this.apiMeData,
       serverFilters: this.serverFilters,
       themeSearchOpts: this.themeSearchOpts,
       localThemeList: this.localThemeList,
@@ -73,11 +108,34 @@ export class CssLoaderState {
       isInstalling: this.isInstalling,
       currentExpandedTheme: this.currentExpandedTheme,
       browserCardSize: this.browserCardSize,
+      starredSearchOpts: this.starredSearchOpts,
+      starredServerFilters: this.starredServerFilters,
+      starredThemeList: this.starredThemeList,
     };
   }
 
   setApiUrl(data: string) {
     this.apiUrl = data;
+    this.forceUpdate();
+  }
+
+  setApiShortToken(data: string) {
+    this.apiShortToken = data;
+    this.forceUpdate();
+  }
+
+  setApiFullToken(data: string) {
+    this.apiFullToken = data;
+    this.forceUpdate();
+  }
+
+  setApiTokenExpireDate(data: Date | number | undefined) {
+    this.apiTokenExpireDate = data;
+    this.forceUpdate();
+  }
+
+  setApiMeData(data: UserInfo | undefined) {
+    this.apiMeData = data;
     this.forceUpdate();
   }
 
@@ -131,6 +189,19 @@ export class CssLoaderState {
     this.forceUpdate();
   }
 
+  setStarredSearchOpts(data: ThemeQueryRequest) {
+    this.starredSearchOpts = data;
+    this.forceUpdate();
+  }
+  setStarredServerFilters(data: FilterQueryResponse) {
+    this.starredServerFilters = data;
+    this.forceUpdate();
+  }
+  setStarredThemeList(data: ThemeQueryResponse) {
+    this.starredThemeList = data;
+    this.forceUpdate();
+  }
+
   private forceUpdate() {
     this.eventBus.dispatchEvent(new Event("stateUpdate"));
   }
@@ -160,6 +231,11 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({ children, cssLoade
   }, []);
 
   const setApiUrl = (data: string) => cssLoaderStateClass.setApiUrl(data);
+  const setApiShortToken = (data: string) => cssLoaderStateClass.setApiShortToken(data);
+  const setApiFullToken = (data: string) => cssLoaderStateClass.setApiFullToken(data);
+  const setApiTokenExpireDate = (data: Date | number | undefined) =>
+    cssLoaderStateClass.setApiTokenExpireDate(data);
+  const setApiMeData = (data: UserInfo | undefined) => cssLoaderStateClass.setApiMeData(data);
   const setServerFilters = (data: FilterQueryResponse) =>
     cssLoaderStateClass.setServerFilters(data);
   const setThemeSearchOpts = (data: ThemeQueryRequest) =>
@@ -173,12 +249,25 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({ children, cssLoade
   const setCurExpandedTheme = (theme: PartialCSSThemeInfo | undefined) =>
     cssLoaderStateClass.setCurExpandedTheme(theme);
   const setBrowserCardSize = (num: number) => cssLoaderStateClass.setBrowserCardSize(num);
+  const setStarredSearchOpts = (data: ThemeQueryRequest) => {
+    cssLoaderStateClass.setStarredSearchOpts(data);
+  };
+  const setStarredServerFilters = (data: FilterQueryResponse) => {
+    cssLoaderStateClass.setStarredServerFilters(data);
+  };
+  const setStarredThemeList = (data: ThemeQueryResponse) => {
+    cssLoaderStateClass.setStarredThemeList(data);
+  };
 
   return (
     <CssLoaderContext.Provider
       value={{
         ...publicState,
         setApiUrl,
+        setApiShortToken,
+        setApiFullToken,
+        setApiTokenExpireDate,
+        setApiMeData,
         setServerFilters,
         setThemeSearchOpts,
         setLocalThemeList,
@@ -187,6 +276,9 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({ children, cssLoade
         setInstalling,
         setCurExpandedTheme,
         setBrowserCardSize,
+        setStarredSearchOpts,
+        setStarredServerFilters,
+        setStarredThemeList,
       }}
     >
       {children}

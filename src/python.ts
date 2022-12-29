@@ -1,5 +1,5 @@
 // Code from https://github.com/NGnius/PowerTools/blob/dev/src/python.ts
-import { ServerAPI } from "decky-frontend-lib";
+import { ServerAPI, ServerResponse } from "decky-frontend-lib";
 
 var server: ServerAPI | undefined = undefined;
 
@@ -90,20 +90,20 @@ export function toast(title: string, message: string) {
   })();
 }
 
-export function downloadTheme(uuid: string): Promise<any> {
-  return server!.callPluginMethod("download_theme", { uuid: uuid });
-}
-
-export function getThemeDbData(): Promise<any> {
-  return server!.callPluginMethod("get_theme_db_data", {});
-}
-
-export function reloadThemeDbData(): Promise<any> {
-  return server!.callPluginMethod("reload_theme_db_data", {});
+export function downloadThemeFromUrl(themeId: string, url: string): Promise<any> {
+  return server!.callPluginMethod("download_theme_from_url", { id: themeId, url: url });
 }
 
 export function deleteTheme(themeName: string): Promise<any> {
   return server!.callPluginMethod("delete_theme", { themeName: themeName });
+}
+
+export function storeRead(key: string) {
+  return server!.callPluginMethod("store_read", { key: key });
+}
+
+export function storeWrite(key: string, value: string) {
+  return server!.callPluginMethod("store_write", { key: key, val: value });
 }
 
 export function getBackendVersion(): Promise<any> {
@@ -114,10 +114,13 @@ export function dummyFunction(): Promise<any> {
   return server!.callPluginMethod("dummy_function", {});
 }
 
-export function genericGET(fetchUrl: string) {
+export function refreshToken(url: string, authToken: string | undefined) {
   return server!
-    .fetchNoCors<Response>(`${fetchUrl}`, {
-      method: "GET",
+    .fetchNoCors(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
     })
     .then((deckyRes) => {
       console.log(deckyRes);
@@ -128,6 +131,50 @@ export function genericGET(fetchUrl: string) {
     })
     .then((res) => {
       console.log(res);
+      // @ts-ignore
+
+      if (res.status >= 200 && res.status <= 300 && res.body) {
+        // @ts-ignore
+        return JSON.parse(res.body || "");
+      }
+      // @ts-ignore
+      throw new Error(`Res not OK!, code ${res.status}`);
+    })
+    .then((json) => {
+      if (json.token) {
+        return json.token;
+      }
+      throw new Error(`No token returned!`);
+    })
+    .catch((err) => {
+      console.error(`Error Refreshing Token!`, err);
+    });
+}
+
+export function genericGET(
+  fetchUrl: string,
+  authToken?: string | undefined,
+  expiryDate?: Date | number | undefined
+) {
+  if (new Date().valueOf()) {
+  }
+
+  return server!
+    .fetchNoCors<Response>(`${fetchUrl}`, {
+      method: "GET",
+      headers: authToken
+        ? {
+            Authorization: `Bearer ${authToken}`,
+          }
+        : {},
+    })
+    .then((deckyRes) => {
+      if (deckyRes.success) {
+        return deckyRes.result;
+      }
+      throw new Error(`Fetch not successful!`);
+    })
+    .then((res) => {
       if (res.status >= 200 && res.status <= 300 && res.body) {
         // @ts-ignore
         return JSON.parse(res.body || "");
@@ -142,5 +189,65 @@ export function genericGET(fetchUrl: string) {
     })
     .catch((err) => {
       console.error(`Error fetching ${fetchUrl}`, err);
+    });
+}
+
+export function toggleStar(themeId: string, isStarred: boolean, authToken: string, apiUrl: string) {
+  return server!
+    .fetchNoCors<Response>(`${apiUrl}/users/me/stars/${themeId}`, {
+      method: isStarred ? "DELETE" : "POST",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    })
+    .then((deckyRes) => {
+      if (deckyRes.success) {
+        return deckyRes.result;
+      }
+      throw new Error(`Fetch not successful!`);
+    })
+    .then((res) => {
+      if (res.status >= 200 && res.status <= 300) {
+        // @ts-ignore
+        return true;
+      }
+      throw new Error(`Res not OK!, code ${res.status}`);
+    })
+    .catch((err) => {
+      console.error(`Error starring theme`, err);
+    });
+}
+
+export function authWithShortToken(shortToken: string, apiUrl: string) {
+  return server!
+    .callServerMethod("http_request", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      url: `${apiUrl}/auth/authenticate_token`,
+      data: JSON.stringify({ token: shortToken }),
+    })
+    .then((deckyRes) => {
+      if (deckyRes.success) {
+        return deckyRes.result;
+      }
+      throw new Error(`Fetch not successful!`);
+    })
+    .then((res) => {
+      // @ts-ignore
+      if (res.status >= 200 && res.status <= 300 && res.body) {
+        // @ts-ignore
+        return JSON.parse(res.body || "");
+      }
+      // @ts-ignore
+      throw new Error(`Res not OK!, code ${res.status}`);
+    })
+    .then((json) => {
+      if (json) {
+        return json;
+      }
+      throw new Error(`No json returned!`);
+    })
+    .catch((err) => {
+      console.error(`Error authenticating from short token.`, err);
     });
 }

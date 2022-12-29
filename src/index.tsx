@@ -12,7 +12,12 @@ import { useEffect, useState, FC } from "react";
 import * as python from "./python";
 import { RiPaintFill } from "react-icons/ri";
 
-import { AboutPage, ThemeBrowserPage, UninstallThemePage } from "./theme-manager";
+import {
+  SettingsPage,
+  StarredThemesPage,
+  ThemeBrowserPage,
+  UninstallThemePage,
+} from "./theme-manager";
 import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "./state";
 import { ThemeToggle } from "./components";
 import { ExpandedViewPage } from "./theme-manager/ExpandedView";
@@ -107,9 +112,14 @@ const ThemeManagerRouter: FC = () => {
         }}
         tabs={[
           {
-            title: "Browse Themes",
+            title: "All Themes",
             content: <ThemeBrowserPage />,
             id: "ThemeBrowser",
+          },
+          {
+            title: "Starred Themes",
+            content: <StarredThemesPage />,
+            id: "StarredThemes",
           },
           {
             title: "Installed Themes",
@@ -117,9 +127,9 @@ const ThemeManagerRouter: FC = () => {
             id: "InstalledThemes",
           },
           {
-            title: "About CSS Loader",
-            content: <AboutPage />,
-            id: "AboutCSSLoader",
+            title: "Settings",
+            content: <SettingsPage />,
+            id: "SettingsPage",
           },
         ]}
       />
@@ -131,6 +141,12 @@ export default definePlugin((serverApi: ServerAPI) => {
   python.setServer(serverApi);
 
   const state: CssLoaderState = new CssLoaderState();
+
+  python.resolve(python.storeRead("shortToken"), (token: string) => {
+    if (token) {
+      state.setApiShortToken(token);
+    }
+  });
 
   serverApi.routerHook.addRoute("/theme-manager", () => (
     <CssLoaderContextProvider cssLoaderStateClass={state}>
