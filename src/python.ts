@@ -234,12 +234,7 @@ export function authWithShortToken(shortToken: string, apiUrl: string) {
     })
     .then((res) => {
       // @ts-ignore
-      if (res.status >= 200 && res.status <= 300 && res.body) {
-        // @ts-ignore
-        return JSON.parse(res.body || "");
-      }
-      // @ts-ignore
-      throw new Error(`Res not OK!, code ${res.status}`);
+      return JSON.parse(res?.body || "");
     })
     .then((json) => {
       if (json) {

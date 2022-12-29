@@ -12,7 +12,7 @@ export function PageSelector({
   currentPage: number;
   onChoose: (page: number) => void;
 }) {
-  const totalPages = Math.trunc(total / perPage) + 1;
+  const totalPages = Math.trunc(total / perPage) + (total % perPage === 0 ? 0 : 1);
   return (
     <>
       <style>

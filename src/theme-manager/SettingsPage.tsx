@@ -21,7 +21,7 @@ export const SettingsPage: VFC = () => {
     const shortTokenValue = shortTokenInterimValue;
     if (shortTokenInterimValue.length === 24) {
       python.authWithShortToken(shortTokenValue, apiUrl).then((data) => {
-        if (data.token) {
+        if (data && data?.token) {
           python.storeWrite("shortToken", shortTokenValue);
           setApiShortToken(shortTokenValue);
           setApiFullToken(data.token);

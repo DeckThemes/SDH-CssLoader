@@ -1,7 +1,7 @@
-import { DialogButton, Focusable } from "decky-frontend-lib";
+import { Focusable } from "decky-frontend-lib";
 import { useCssLoaderState } from "../state";
 import * as python from "../python";
-import { BrowserSearchFields, PageSelector, VariableSizeCard } from "../components";
+import { BrowserSearchFields, LoadMoreButton, VariableSizeCard } from "../components";
 import { generateParamStr } from "../logic";
 import { ThemeQueryResponse } from "../apiTypes";
 import { useEffect } from "react";
@@ -116,12 +116,25 @@ export function StarredThemesPage() {
           />
         ))}
       </Focusable>
-      <PageSelector
-        total={themeArr.total}
-        perPage={searchOpts.perPage}
-        currentPage={searchOpts.page}
-        onChoose={(e) => setSearchOpts({ ...searchOpts, page: e })}
-      />
+      <div
+        style={{
+          marginTop: "1em",
+          marginBottom: "1em",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ maxWidth: "50%" }}>
+          <LoadMoreButton
+            themeArr={themeArr}
+            setThemeArr={setThemeArr}
+            origSearchOpts={searchOpts}
+            paramStrFilterPrepend="CSS."
+            fetchPath="/users/me/stars"
+          />
+        </div>
+      </div>
     </>
   );
 }

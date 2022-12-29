@@ -4,3 +4,4 @@ export * from "./PatchComponent";
 export * from "./BrowserItemCard";
 export * from "./BrowserSearchFields";
 export * from "./PageSelector";
+export * from "./LoadMoreButton";

@@ -56,6 +56,12 @@ export const ExpandedViewPage: VFC = () => {
         if (data.starred) {
           setStarred(data.starred);
         }
+        if (data.starred && fullThemeData?.starCount === 0) {
+          setFullData({
+            ...fullThemeData,
+            starCount: 1,
+          });
+        }
       });
     }
   }
@@ -69,7 +75,12 @@ export const ExpandedViewPage: VFC = () => {
           if (bool) {
             setFullData({
               ...fullThemeData,
-              starCount: isStarred ? fullThemeData.starCount - 1 : fullThemeData.starCount + 1,
+              starCount: isStarred
+                ? fullThemeData.starCount === 0
+                  ? // This stops it from going below 0
+                    fullThemeData.starCount
+                  : fullThemeData.starCount - 1
+                : fullThemeData.starCount + 1,
             });
             setStarred((cur) => !cur);
             setBlurStar(false);

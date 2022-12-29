@@ -4,7 +4,7 @@ import * as python from "../python";
 
 // Interfaces for the JSON objects the lists work with
 import { useCssLoaderState } from "../state";
-import { BrowserSearchFields, VariableSizeCard, PageSelector } from "../components";
+import { BrowserSearchFields, VariableSizeCard, PageSelector, LoadMoreButton } from "../components";
 import { ThemeQueryResponse } from "../apiTypes";
 import { generateParamStr } from "../logic";
 
@@ -122,12 +122,25 @@ export const ThemeBrowserPage: FC = () => {
             />
           ))}
       </Focusable>
-      <PageSelector
-        total={themeArr.total}
-        perPage={searchOpts.perPage}
-        currentPage={searchOpts.page}
-        onChoose={(e) => setSearchOpts({ ...searchOpts, page: e })}
-      />
+      <div
+        style={{
+          marginTop: "1em",
+          marginBottom: "1em",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ maxWidth: "50%" }}>
+          <LoadMoreButton
+            themeArr={themeArr}
+            setThemeArr={setThemeArr}
+            origSearchOpts={searchOpts}
+            paramStrFilterPrepend="CSS."
+            fetchPath="/themes"
+          />
+        </div>
+      </div>
     </>
   );
 };
