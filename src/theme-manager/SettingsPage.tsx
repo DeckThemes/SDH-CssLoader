@@ -72,6 +72,7 @@ export const SettingsPage: VFC = () => {
                 onClick={() => {
                   setApiShortToken("");
                   setApiFullToken("");
+                  setApiMeData(undefined);
                   setApiTokenExpireDate(undefined);
                   python.storeWrite("shortToken", "");
                 }}
