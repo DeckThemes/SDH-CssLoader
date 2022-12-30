@@ -24,7 +24,7 @@ export function SubmissionsPage() {
   } = useCssLoaderState();
 
   function reloadThemes() {
-    // getThemes();
+    getThemes();
     python.resolve(python.reset(), () => {
       python.resolve(python.getThemes(), setInstalledThemes);
     });
