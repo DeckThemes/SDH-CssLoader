@@ -123,16 +123,13 @@ export function refreshToken(url: string, authToken: string | undefined) {
       },
     })
     .then((deckyRes) => {
-      console.log(deckyRes);
       if (deckyRes.success) {
         return deckyRes.result;
       }
       throw new Error(`Fetch not successful!`);
     })
     .then((res) => {
-      console.log(res);
       // @ts-ignore
-
       if (res.status >= 200 && res.status <= 300 && res.body) {
         // @ts-ignore
         return JSON.parse(res.body || "");

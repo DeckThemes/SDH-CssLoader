@@ -11,6 +11,7 @@ import { localThemeEntry } from "../customTypes";
 import { Theme } from "../theme";
 
 interface PublicCssLoaderState {
+  currentTab: string;
   apiUrl: string;
   apiShortToken: string;
   apiFullToken: string;
@@ -35,6 +36,7 @@ interface PublicCssLoaderState {
 // The localThemeEntry interface refers to the theme data as given by the python function, the Theme class refers to a theme after it has been formatted and the generate function has been added
 
 interface PublicCssLoaderContext extends PublicCssLoaderState {
+  setCurTab(data: string): void;
   setApiUrl(data: string): void;
   setApiShortToken(data: string): void;
   setApiFullToken(data: string): void;
@@ -58,6 +60,7 @@ interface PublicCssLoaderContext extends PublicCssLoaderState {
 
 // This class creates the getter and setter functions for all of the global state data.
 export class CssLoaderState {
+  private currentTab: string = "ThemeBrowser";
   private apiUrl: string = "https://api.deckthemes.com";
   private apiShortToken: string = "";
   private apiFullToken: string = "";
@@ -69,7 +72,7 @@ export class CssLoaderState {
   };
   private themeSearchOpts: ThemeQueryRequest = {
     page: 1,
-    perPage: 10,
+    perPage: 50,
     filters: "All",
     order: "Last Updated",
     search: "",
@@ -113,6 +116,7 @@ export class CssLoaderState {
 
   getPublicState() {
     return {
+      currentTab: this.currentTab,
       apiUrl: this.apiUrl,
       apiShortToken: this.apiShortToken,
       apiFullToken: this.apiFullToken,
@@ -133,6 +137,11 @@ export class CssLoaderState {
       submissionServerFilters: this.submissionServerFilters,
       submissionThemeList: this.submissionThemeList,
     };
+  }
+
+  setCurTab(data: string) {
+    this.currentTab = data;
+    this.forceUpdate();
   }
 
   setApiUrl(data: string) {
@@ -264,6 +273,7 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({ children, cssLoade
     return () => cssLoaderStateClass.eventBus.removeEventListener("stateUpdate", onUpdate);
   }, []);
 
+  const setCurTab = (data: string) => cssLoaderStateClass.setCurTab(data);
   const setApiUrl = (data: string) => cssLoaderStateClass.setApiUrl(data);
   const setApiShortToken = (data: string) => cssLoaderStateClass.setApiShortToken(data);
   const setApiFullToken = (data: string) => cssLoaderStateClass.setApiFullToken(data);
@@ -306,6 +316,7 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({ children, cssLoade
     <CssLoaderContext.Provider
       value={{
         ...publicState,
+        setCurTab,
         setApiUrl,
         setApiShortToken,
         setApiFullToken,

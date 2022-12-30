@@ -97,8 +97,7 @@ const Content: FC<{ serverAPI: ServerAPI }> = () => {
 };
 
 const ThemeManagerRouter: FC = () => {
-  const [currentTabRoute, setCurrentTabRoute] = useState<string>("ThemeBrowser");
-  const { apiShortToken, apiMeData } = useCssLoaderState();
+  const { apiShortToken, apiMeData, currentTab, setCurTab } = useCssLoaderState();
   return (
     <div
       style={{
@@ -108,9 +107,9 @@ const ThemeManagerRouter: FC = () => {
       }}
     >
       <Tabs
-        activeTab={currentTabRoute}
+        activeTab={currentTab}
         onShowTab={(tabID: string) => {
-          setCurrentTabRoute(tabID);
+          setCurTab(tabID);
         }}
         tabs={[
           {
