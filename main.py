@@ -15,7 +15,7 @@ from css_utils import Log, create_dir, create_symlink, Result, get_user_home, ge
 from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
-from css_remoteinstall import RemoteInstall, install
+from css_remoteinstall import install
 from css_tab_mapping import get_multiple_tab_mappings, load_tab_mappings, tab_has_element, tab_exists, inject_to_tab
 
 Initialized = False
@@ -77,50 +77,6 @@ class Plugin:
     async def download_theme_from_url(self, id : str, url : str) -> dict:
         local_themes = [x.name for x in self.themes]
         return (await install(id, url, local_themes)).to_dict()
-
-    async def download_theme(self, uuid : str) -> dict:
-        try:
-            theme_db_entry = await self.remote.get_theme_db_entry_by_uuid(uuid)
-        except Exception as e:
-            return Result(False, str(e)).to_dict()
-
-        result = await theme_db_entry.install()
-        if not result.success:
-            return result.to_dict()
-
-        possibleThemeJsonPath = os.path.join(get_theme_path(), theme_db_entry.name, "theme.json")
-        if (os.path.exists(possibleThemeJsonPath)):
-            with open(possibleThemeJsonPath, "r") as fp:
-                theme = json.load(fp)
-            
-            try:
-                parsedTheme = Theme(possibleThemeJsonPath, theme)
-            except Exception as e:
-                return Result(False, str(e)).to_dict()
-
-            for x in parsedTheme.dependencies:
-                found = False
-                for y in self.themes:
-                    if y.name == x:
-                        found = True
-                        break
-                
-                if not found:
-                    try:
-                        theme_db_dependency = await self.remote.get_theme_db_entry_by_name(x)
-                        result = await self.download_theme(self, theme_db_dependency.id)
-                        if not result["success"]:
-                            raise Exception(result["message"])
-                    except Exception as e:
-                        return Result(False, str(e)).to_dict()
-
-        return Result(True).to_dict()
-    
-    async def get_theme_db_data(self) -> list:
-        return [x.to_dict() for x in self.remote.themes]
-    
-    async def reload_theme_db_data(self) -> dict:
-        return (await self.remote.load(True)).to_dict()
 
     async def get_backend_version(self) -> int:
         return CSS_LOADER_VER
@@ -379,8 +335,6 @@ class Plugin:
         Log(f"Max supported manifest version: {CSS_LOADER_VER}")
         
         await create_symlink(get_theme_path(), f"{get_user_home()}/.local/share/Steam/steamui/themes_custom")
-        self.remote = RemoteInstall()
-        await self.remote.load()
         load_tab_mappings()
 
         await self._load(self)
