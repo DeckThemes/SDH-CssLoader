@@ -5,6 +5,7 @@ import { BrowserSearchFields, LoadMoreButton, VariableSizeCard } from "../compon
 import { generateParamStr } from "../logic";
 import { ThemeQueryResponse } from "../apiTypes";
 import { useEffect, useRef, useState } from "react";
+import { isEqual } from "lodash";
 
 export function SubmissionsPage() {
   const {
@@ -21,6 +22,8 @@ export function SubmissionsPage() {
     submissionThemeList: themeArr,
     setSubmissionThemeList: setThemeArr,
     browserCardSize,
+    setPrevSubSearchOpts: setPrevSearchOpts,
+    prevSubSearchOpts: prevSearchOpts,
   } = useCssLoaderState();
 
   function reloadThemes() {
@@ -69,8 +72,10 @@ export function SubmissionsPage() {
   }
 
   useEffect(() => {
-    getThemes();
-  }, [searchOpts]);
+    if (!isEqual(prevSearchOpts, searchOpts) || themeArr.total === 0) {
+      getThemes();
+    }
+  }, [searchOpts, prevSearchOpts]);
 
   const endOfPageRef = useRef<HTMLElement>();
   const [indexToSnapTo, setSnapIndex] = useState<number>(-1);
@@ -103,6 +108,7 @@ export function SubmissionsPage() {
       <BrowserSearchFields
         searchOpts={searchOpts}
         setSearchOpts={setSearchOpts}
+        setPrevSearchOpts={setPrevSearchOpts}
         unformattedFilters={serverFilters}
         setUnformattedFilters={setServerFilters}
         getTargetsPath="/themes/awaiting_approval/filters?target=CSS"
@@ -122,7 +128,7 @@ export function SubmissionsPage() {
             refPassthrough={i === indexToSnapTo ? endOfPageRef : undefined}
             data={e}
             cols={browserCardSize}
-            showTarget={searchOpts.filters !== "All"}
+            showTarget={true}
           />
         ))}
       </Focusable>

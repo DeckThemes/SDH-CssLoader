@@ -11,6 +11,9 @@ import { localThemeEntry } from "../customTypes";
 import { Theme } from "../theme";
 
 interface PublicCssLoaderState {
+  prevSearchOpts: ThemeQueryRequest;
+  prevStarSearchOpts: ThemeQueryRequest;
+  prevSubSearchOpts: ThemeQueryRequest;
   currentTab: string;
   apiUrl: string;
   apiShortToken: string;
@@ -36,6 +39,9 @@ interface PublicCssLoaderState {
 // The localThemeEntry interface refers to the theme data as given by the python function, the Theme class refers to a theme after it has been formatted and the generate function has been added
 
 interface PublicCssLoaderContext extends PublicCssLoaderState {
+  setPrevSearchOpts(data: ThemeQueryRequest): void;
+  setPrevStarSearchOpts(data: ThemeQueryRequest): void;
+  setPrevSubSearchOpts(data: ThemeQueryRequest): void;
   setCurTab(data: string): void;
   setApiUrl(data: string): void;
   setApiShortToken(data: string): void;
@@ -60,6 +66,27 @@ interface PublicCssLoaderContext extends PublicCssLoaderState {
 
 // This class creates the getter and setter functions for all of the global state data.
 export class CssLoaderState {
+  private prevSearchOpts: ThemeQueryRequest = {
+    page: 1,
+    perPage: 50,
+    filters: "All",
+    order: "Last Updated",
+    search: "",
+  };
+  private prevStarSearchOpts: ThemeQueryRequest = {
+    page: 1,
+    perPage: 50,
+    filters: "All",
+    order: "Last Updated",
+    search: "",
+  };
+  private prevSubSearchOpts: ThemeQueryRequest = {
+    page: 1,
+    perPage: 50,
+    filters: "All",
+    order: "Last Updated",
+    search: "",
+  };
   private currentTab: string = "ThemeBrowser";
   private apiUrl: string = "https://api.deckthemes.com";
   private apiShortToken: string = "";
@@ -116,6 +143,9 @@ export class CssLoaderState {
 
   getPublicState() {
     return {
+      prevSearchOpts: this.prevSearchOpts,
+      prevStarSearchOpts: this.prevStarSearchOpts,
+      prevSubSearchOpts: this.prevSubSearchOpts,
       currentTab: this.currentTab,
       apiUrl: this.apiUrl,
       apiShortToken: this.apiShortToken,
@@ -137,6 +167,19 @@ export class CssLoaderState {
       submissionServerFilters: this.submissionServerFilters,
       submissionThemeList: this.submissionThemeList,
     };
+  }
+
+  setPrevSearchOpts(data: ThemeQueryRequest) {
+    this.prevSearchOpts = data;
+    this.forceUpdate();
+  }
+  setPrevStarSearchOpts(data: ThemeQueryRequest) {
+    this.prevStarSearchOpts = data;
+    this.forceUpdate();
+  }
+  setPrevSubSearchOpts(data: ThemeQueryRequest) {
+    this.prevSubSearchOpts = data;
+    this.forceUpdate();
   }
 
   setCurTab(data: string) {
@@ -273,6 +316,12 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({ children, cssLoade
     return () => cssLoaderStateClass.eventBus.removeEventListener("stateUpdate", onUpdate);
   }, []);
 
+  const setPrevSearchOpts = (data: ThemeQueryRequest) =>
+    cssLoaderStateClass.setPrevSearchOpts(data);
+  const setPrevStarSearchOpts = (data: ThemeQueryRequest) =>
+    cssLoaderStateClass.setPrevStarSearchOpts(data);
+  const setPrevSubSearchOpts = (data: ThemeQueryRequest) =>
+    cssLoaderStateClass.setPrevSubSearchOpts(data);
   const setCurTab = (data: string) => cssLoaderStateClass.setCurTab(data);
   const setApiUrl = (data: string) => cssLoaderStateClass.setApiUrl(data);
   const setApiShortToken = (data: string) => cssLoaderStateClass.setApiShortToken(data);
@@ -316,6 +365,9 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({ children, cssLoade
     <CssLoaderContext.Provider
       value={{
         ...publicState,
+        setPrevSearchOpts,
+        setPrevStarSearchOpts,
+        setPrevSubSearchOpts,
         setCurTab,
         setApiUrl,
         setApiShortToken,

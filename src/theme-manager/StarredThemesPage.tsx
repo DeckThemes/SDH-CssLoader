@@ -5,6 +5,7 @@ import { BrowserSearchFields, LoadMoreButton, VariableSizeCard } from "../compon
 import { generateParamStr } from "../logic";
 import { ThemeQueryResponse } from "../apiTypes";
 import { useEffect, useRef, useState } from "react";
+import { isEqual } from "lodash";
 
 export function StarredThemesPage() {
   const {
@@ -21,6 +22,8 @@ export function StarredThemesPage() {
     starredThemeList: themeArr,
     setStarredThemeList: setThemeArr,
     browserCardSize,
+    prevStarSearchOpts: prevSearchOpts,
+    setPrevStarSearchOpts: setPrevSearchOpts,
   } = useCssLoaderState();
 
   function reloadThemes() {
@@ -69,8 +72,10 @@ export function StarredThemesPage() {
   }
 
   useEffect(() => {
-    getThemes();
-  }, [searchOpts]);
+    if (!isEqual(prevSearchOpts, searchOpts) || themeArr.total === 0) {
+      getThemes();
+    }
+  }, [searchOpts, prevSearchOpts]);
 
   const endOfPageRef = useRef<HTMLElement>();
   const [indexToSnapTo, setSnapIndex] = useState<number>(-1);
@@ -103,6 +108,7 @@ export function StarredThemesPage() {
       <BrowserSearchFields
         searchOpts={searchOpts}
         setSearchOpts={setSearchOpts}
+        setPrevSearchOpts={setPrevSearchOpts}
         unformattedFilters={serverFilters}
         setUnformattedFilters={setServerFilters}
         getTargetsPath="/themes/filters?target=CSS"
@@ -122,7 +128,7 @@ export function StarredThemesPage() {
             refPassthrough={i === indexToSnapTo ? endOfPageRef : undefined}
             data={e}
             cols={browserCardSize}
-            showTarget={searchOpts.filters !== "All"}
+            showTarget={true}
           />
         ))}
       </Focusable>

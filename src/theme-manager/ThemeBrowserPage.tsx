@@ -1,10 +1,11 @@
-import { DialogButton, Focusable } from "decky-frontend-lib";
+import { Focusable } from "decky-frontend-lib";
 import { useLayoutEffect, useState, FC, useEffect, useRef } from "react";
 import * as python from "../python";
+import { isEqual } from "lodash";
 
 // Interfaces for the JSON objects the lists work with
 import { useCssLoaderState } from "../state";
-import { BrowserSearchFields, VariableSizeCard, PageSelector, LoadMoreButton } from "../components";
+import { BrowserSearchFields, VariableSizeCard, LoadMoreButton } from "../components";
 import { ThemeQueryResponse } from "../apiTypes";
 import { generateParamStr } from "../logic";
 
@@ -25,6 +26,8 @@ export const ThemeBrowserPage: FC = () => {
     setServerFilters,
     browserCardSize = 3,
     apiUrl,
+    prevSearchOpts,
+    setPrevSearchOpts,
   } = useCssLoaderState();
 
   const [backendVersion, setBackendVer] = useState<number>(3);
@@ -51,6 +54,7 @@ export const ThemeBrowserPage: FC = () => {
       "CSS."
     );
     python.genericGET(`${apiUrl}/themes${queryStr}`).then((data: ThemeQueryResponse) => {
+      console.log("got themes");
       if (data.total > 0) {
         setThemeArr(data);
       } else {
@@ -61,8 +65,10 @@ export const ThemeBrowserPage: FC = () => {
   }
 
   useEffect(() => {
-    getThemes();
-  }, [searchOpts]);
+    if (!isEqual(prevSearchOpts, searchOpts) || themeArr.total === 0) {
+      getThemes();
+    }
+  }, [searchOpts, prevSearchOpts]);
 
   function authWithShortToken() {
     python.authWithShortToken(apiShortToken, apiUrl).then((data) => {
@@ -85,6 +91,7 @@ export const ThemeBrowserPage: FC = () => {
 
   // Runs upon opening the page every time
   useLayoutEffect(() => {
+    console.log("test");
     reloadBackendVer();
     if (apiShortToken && !apiFullToken) {
       authWithShortToken();
@@ -106,10 +113,13 @@ export const ThemeBrowserPage: FC = () => {
       <BrowserSearchFields
         searchOpts={searchOpts}
         setSearchOpts={setSearchOpts}
+        setPrevSearchOpts={setPrevSearchOpts}
         unformattedFilters={serverFilters}
         setUnformattedFilters={setServerFilters}
         getTargetsPath="/themes/filters?target=CSS"
-        onReload={reloadThemes}
+        onReload={() => {
+          reloadThemes();
+        }}
       />
       {/* I wrap everything in a Focusable, because that ensures that the dpad/stick navigation works correctly */}
       <Focusable
@@ -121,16 +131,14 @@ export const ThemeBrowserPage: FC = () => {
           columnGap: "5px",
         }}
       >
-        {themeArr.items
-          .filter((e) => e.manifestVersion <= backendVersion)
-          .map((e, i) => (
-            <VariableSizeCard
-              refPassthrough={i === indexToSnapTo ? endOfPageRef : undefined}
-              data={e}
-              cols={browserCardSize}
-              showTarget={searchOpts.filters !== "All"}
-            />
-          ))}
+        {themeArr.items.map((e, i) => (
+          <VariableSizeCard
+            refPassthrough={i === indexToSnapTo ? endOfPageRef : undefined}
+            data={e}
+            cols={browserCardSize}
+            showTarget={true}
+          />
+        ))}
       </Focusable>
       <div
         style={{

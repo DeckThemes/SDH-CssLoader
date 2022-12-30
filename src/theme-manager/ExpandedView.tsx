@@ -25,6 +25,13 @@ export const ExpandedViewPage: VFC = () => {
     apiTokenExpireDate,
     setApiFullToken,
     setApiTokenExpireDate,
+    // This is all bcus of the page being reloaded on going back
+    setPrevSearchOpts,
+    themeSearchOpts,
+    submissionSearchOpts,
+    starredSearchOpts,
+    setPrevStarSearchOpts,
+    setPrevSubSearchOpts,
   } = useCssLoaderState();
 
   const [fullThemeData, setFullData] = useState<FullCSSThemeInfo>();
@@ -147,6 +154,11 @@ export const ExpandedViewPage: VFC = () => {
         setLoaded(true);
       });
     }
+
+    // This is here
+    setPrevSearchOpts(themeSearchOpts);
+    setPrevStarSearchOpts(starredSearchOpts);
+    setPrevSubSearchOpts(submissionSearchOpts);
   }, [currentExpandedTheme]);
 
   useEffect(() => {

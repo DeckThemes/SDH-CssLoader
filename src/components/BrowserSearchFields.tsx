@@ -9,7 +9,7 @@ import {
   SliderField,
   TextField,
 } from "decky-frontend-lib";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, memo } from "react";
 import { TiRefreshOutline } from "react-icons/ti";
 import { ThemeQueryRequest } from "../apiTypes";
 import * as python from "../python";
@@ -18,6 +18,7 @@ import { useCssLoaderState } from "../state";
 export function BrowserSearchFields({
   searchOpts,
   setSearchOpts,
+  setPrevSearchOpts,
   unformattedFilters,
   setUnformattedFilters,
   onReload,
@@ -25,6 +26,7 @@ export function BrowserSearchFields({
 }: {
   searchOpts: ThemeQueryRequest;
   setSearchOpts: any;
+  setPrevSearchOpts: any;
   unformattedFilters: { filters: string[]; order: string[] };
   setUnformattedFilters: any;
   getTargetsPath: string;
@@ -52,7 +54,13 @@ export function BrowserSearchFields({
     [unformattedFilters]
   );
   useEffect(() => {
-    getThemeTargets();
+    console.log("targetCheck");
+
+    if (unformattedFilters.filters.length < 2) {
+      console.log("getting targets");
+
+      getThemeTargets();
+    }
   }, []);
 
   const repoOptions: never[] = [];
@@ -74,7 +82,10 @@ export function BrowserSearchFields({
               rgOptions={formattedFilters.order}
               strDefaultLabel="Last Updated (Newest)"
               selectedOption={searchOpts.order}
-              onChange={(e) => setSearchOpts({ ...searchOpts, order: e.data })}
+              onChange={(e) => {
+                setPrevSearchOpts(searchOpts);
+                setSearchOpts({ ...searchOpts, order: e.data });
+              }}
             />
           </div>
           <div
@@ -92,7 +103,10 @@ export function BrowserSearchFields({
               rgOptions={formattedFilters.filters}
               strDefaultLabel="All"
               selectedOption={searchOpts.filters}
-              onChange={(e) => setSearchOpts({ ...searchOpts, filters: e.data })}
+              onChange={(e) => {
+                setPrevSearchOpts(searchOpts);
+                setSearchOpts({ ...searchOpts, filters: e.data });
+              }}
             />
           </div>
           {/* TODO: re-add 3rd party repo stuff */}
@@ -124,7 +138,10 @@ export function BrowserSearchFields({
             <TextField
               label="Search"
               value={searchOpts.search}
-              onChange={(e) => setSearchOpts({ ...searchOpts, search: e.target.value })}
+              onChange={(e) => {
+                setPrevSearchOpts(searchOpts);
+                setSearchOpts({ ...searchOpts, search: e.target.value });
+              }}
             />
           </div>
           <DialogButton
@@ -169,3 +186,5 @@ export function BrowserSearchFields({
     </>
   );
 }
+
+export const MemoizedSearchFields = memo(BrowserSearchFields);
