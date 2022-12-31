@@ -12,22 +12,15 @@ import { generateParamStr } from "../logic";
 export const ThemeBrowserPage: FC = () => {
   const {
     browseThemeList: themeArr,
-    setBrowseThemeList: setThemeArr,
-    setLocalThemeList: setInstalledThemes,
+    setLocalThemeList,
     themeSearchOpts: searchOpts,
-    setThemeSearchOpts: setSearchOpts,
     apiShortToken,
     apiFullToken,
-    setApiShortToken,
-    setApiFullToken,
-    setApiMeData,
-    setApiTokenExpireDate,
     serverFilters,
-    setServerFilters,
     browserCardSize = 3,
     apiUrl,
     prevSearchOpts,
-    setPrevSearchOpts,
+    setGlobalState,
   } = useCssLoaderState();
 
   const [backendVersion, setBackendVer] = useState<number>(3);
@@ -40,12 +33,12 @@ export const ThemeBrowserPage: FC = () => {
     getThemes();
     // Reloads the local themes
     python.resolve(python.reset(), () => {
-      python.resolve(python.getThemes(), setInstalledThemes);
+      python.resolve(python.getThemes(), setLocalThemeList);
     });
   }
 
   function getInstalledThemes() {
-    python.resolve(python.getThemes(), setInstalledThemes);
+    python.resolve(python.getThemes(), setLocalThemeList);
   }
 
   function getThemes() {
@@ -56,9 +49,9 @@ export const ThemeBrowserPage: FC = () => {
     python.genericGET(`${apiUrl}/themes${queryStr}`).then((data: ThemeQueryResponse) => {
       console.log("got themes");
       if (data.total > 0) {
-        setThemeArr(data);
+        setGlobalState("browseThemeList", data);
       } else {
-        setThemeArr({ total: 0, items: [] });
+        setGlobalState("browseThemeList", { total: 0, items: [] });
       }
       setSnapIndex(-1);
     });
@@ -74,12 +67,12 @@ export const ThemeBrowserPage: FC = () => {
     python.authWithShortToken(apiShortToken, apiUrl).then((data) => {
       if (data.token) {
         python.storeWrite("shortToken", apiShortToken);
-        setApiShortToken(apiShortToken);
-        setApiFullToken(data.token);
-        setApiTokenExpireDate(new Date().valueOf() + 1000 * 60 * 10);
+        setGlobalState("apiShortToken", apiShortToken);
+        setGlobalState("apiFullToken", data.token);
+        setGlobalState("apiTokenExpireDate", new Date().valueOf() + 1000 * 60 * 10);
         python.genericGET(`${apiUrl}/auth/me`, data.token).then((meData) => {
           if (meData?.username) {
-            setApiMeData(meData);
+            setGlobalState("apiMeData", meData);
             python.toast("Logged In!", `Logged in as ${meData.username}`);
           }
         });
@@ -91,7 +84,6 @@ export const ThemeBrowserPage: FC = () => {
 
   // Runs upon opening the page every time
   useLayoutEffect(() => {
-    console.log("test");
     reloadBackendVer();
     if (apiShortToken && !apiFullToken) {
       authWithShortToken();
@@ -112,10 +104,10 @@ export const ThemeBrowserPage: FC = () => {
     <>
       <BrowserSearchFields
         searchOpts={searchOpts}
-        setSearchOpts={setSearchOpts}
-        setPrevSearchOpts={setPrevSearchOpts}
+        searchOptsVarName="themeSearchOpts"
+        prevSearchOptsVarName="prevSearchOpts"
         unformattedFilters={serverFilters}
-        setUnformattedFilters={setServerFilters}
+        unformattedFiltersVarName="serverFilters"
         getTargetsPath="/themes/filters?target=CSS"
         onReload={() => {
           reloadThemes();
@@ -137,6 +129,8 @@ export const ThemeBrowserPage: FC = () => {
             data={e}
             cols={browserCardSize}
             showTarget={true}
+            searchOpts={searchOpts}
+            prevSearchOptsVarName="prevSearchOpts"
           />
         ))}
       </Focusable>
@@ -152,7 +146,7 @@ export const ThemeBrowserPage: FC = () => {
         <div style={{ maxWidth: "50%" }}>
           <LoadMoreButton
             themeArr={themeArr}
-            setThemeArr={setThemeArr}
+            themeArrVarName="browseThemeList"
             origSearchOpts={searchOpts}
             paramStrFilterPrepend="CSS."
             fetchPath="/themes"

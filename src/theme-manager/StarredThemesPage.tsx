@@ -12,18 +12,13 @@ export function StarredThemesPage() {
     apiUrl,
     apiFullToken,
     apiTokenExpireDate,
-    setApiFullToken,
-    setApiTokenExpireDate,
     setLocalThemeList: setInstalledThemes,
     starredSearchOpts: searchOpts,
-    setStarredSearchOpts: setSearchOpts,
     starredServerFilters: serverFilters,
-    setStarredServerFilters: setServerFilters,
     starredThemeList: themeArr,
-    setStarredThemeList: setThemeArr,
     browserCardSize,
     prevStarSearchOpts: prevSearchOpts,
-    setPrevStarSearchOpts: setPrevSearchOpts,
+    setGlobalState,
   } = useCssLoaderState();
 
   function reloadThemes() {
@@ -45,8 +40,8 @@ export function StarredThemesPage() {
       return apiFullToken;
     }
     return python.refreshToken(`${apiUrl}/auth/refresh_token`, apiFullToken).then((token) => {
-      setApiFullToken(token);
-      setApiTokenExpireDate(new Date().valueOf() + 1000 * 10 * 60);
+      setGlobalState("apiFullToken", token);
+      setGlobalState("apiTokenExpireDate", new Date().valueOf() + 1000 * 10 * 60);
       return token;
     });
   }
@@ -62,9 +57,9 @@ export function StarredThemesPage() {
         .genericGET(`${apiUrl}/users/me/stars${queryStr}`, newToken)
         .then((data: ThemeQueryResponse) => {
           if (data.total > 0) {
-            setThemeArr(data);
+            setGlobalState("starredThemeList", data);
           } else {
-            setThemeArr({ total: 0, items: [] });
+            setGlobalState("starredThemeList", { total: 0, items: [] });
           }
           setSnapIndex(-1);
         });
@@ -107,10 +102,10 @@ export function StarredThemesPage() {
     <>
       <BrowserSearchFields
         searchOpts={searchOpts}
-        setSearchOpts={setSearchOpts}
-        setPrevSearchOpts={setPrevSearchOpts}
+        searchOptsVarName="starredSearchOpts"
+        prevSearchOptsVarName="prevStarSearchOpts"
         unformattedFilters={serverFilters}
-        setUnformattedFilters={setServerFilters}
+        unformattedFiltersVarName="starredServerFilters"
         getTargetsPath="/themes/filters?target=CSS"
         onReload={reloadThemes}
       />
@@ -129,6 +124,8 @@ export function StarredThemesPage() {
             data={e}
             cols={browserCardSize}
             showTarget={true}
+            searchOpts={searchOpts}
+            prevSearchOptsVarName="prevStarSearchOpts"
           />
         ))}
       </Focusable>
@@ -144,7 +141,7 @@ export function StarredThemesPage() {
         <div style={{ maxWidth: "50%" }}>
           <LoadMoreButton
             themeArr={themeArr}
-            setThemeArr={setThemeArr}
+            themeArrVarName="starredThemeList"
             origSearchOpts={searchOpts}
             paramStrFilterPrepend="CSS."
             fetchPath="/users/me/stars"

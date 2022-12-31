@@ -17,26 +17,26 @@ import { useCssLoaderState } from "../state";
 
 export function BrowserSearchFields({
   searchOpts,
-  setSearchOpts,
-  setPrevSearchOpts,
+  searchOptsVarName,
+  prevSearchOptsVarName,
   unformattedFilters,
-  setUnformattedFilters,
+  unformattedFiltersVarName,
   onReload,
   getTargetsPath,
 }: {
   searchOpts: ThemeQueryRequest;
-  setSearchOpts: any;
-  setPrevSearchOpts: any;
+  searchOptsVarName: string;
+  prevSearchOptsVarName: string;
   unformattedFilters: { filters: string[]; order: string[] };
-  setUnformattedFilters: any;
+  unformattedFiltersVarName: string;
   getTargetsPath: string;
   onReload: () => void;
 }) {
-  const { apiUrl, browserCardSize, setBrowserCardSize } = useCssLoaderState();
+  const { apiUrl, browserCardSize, setGlobalState } = useCssLoaderState();
   function getThemeTargets() {
     python.genericGET(`${apiUrl}${getTargetsPath}`).then((data) => {
       if (data?.filters) {
-        setUnformattedFilters({
+        setGlobalState(unformattedFiltersVarName, {
           filters: data.filters,
           order: data.order,
         });
@@ -54,11 +54,7 @@ export function BrowserSearchFields({
     [unformattedFilters]
   );
   useEffect(() => {
-    console.log("targetCheck");
-
     if (unformattedFilters.filters.length < 2) {
-      console.log("getting targets");
-
       getThemeTargets();
     }
   }, []);
@@ -83,8 +79,8 @@ export function BrowserSearchFields({
               strDefaultLabel="Last Updated (Newest)"
               selectedOption={searchOpts.order}
               onChange={(e) => {
-                setPrevSearchOpts(searchOpts);
-                setSearchOpts({ ...searchOpts, order: e.data });
+                setGlobalState(prevSearchOptsVarName, searchOpts);
+                setGlobalState(searchOptsVarName, { ...searchOpts, order: e.data });
               }}
             />
           </div>
@@ -104,8 +100,8 @@ export function BrowserSearchFields({
               strDefaultLabel="All"
               selectedOption={searchOpts.filters}
               onChange={(e) => {
-                setPrevSearchOpts(searchOpts);
-                setSearchOpts({ ...searchOpts, filters: e.data });
+                setGlobalState(prevSearchOptsVarName, searchOpts);
+                setGlobalState(searchOptsVarName, { ...searchOpts, filters: e.data });
               }}
             />
           </div>
@@ -139,8 +135,8 @@ export function BrowserSearchFields({
               label="Search"
               value={searchOpts.search}
               onChange={(e) => {
-                setPrevSearchOpts(searchOpts);
-                setSearchOpts({ ...searchOpts, search: e.target.value });
+                setGlobalState(prevSearchOptsVarName, searchOpts);
+                setGlobalState(searchOptsVarName, { ...searchOpts, search: e.target.value });
               }}
             />
           </div>
@@ -164,7 +160,7 @@ export function BrowserSearchFields({
               step={1}
               value={browserCardSize}
               onChange={(num) => {
-                setBrowserCardSize(num);
+                setGlobalState("browserCardSize", num);
               }}
             />
           </div>

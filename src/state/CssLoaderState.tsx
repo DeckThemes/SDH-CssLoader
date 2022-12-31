@@ -39,29 +39,9 @@ interface PublicCssLoaderState {
 // The localThemeEntry interface refers to the theme data as given by the python function, the Theme class refers to a theme after it has been formatted and the generate function has been added
 
 interface PublicCssLoaderContext extends PublicCssLoaderState {
-  setPrevSearchOpts(data: ThemeQueryRequest): void;
-  setPrevStarSearchOpts(data: ThemeQueryRequest): void;
-  setPrevSubSearchOpts(data: ThemeQueryRequest): void;
-  setCurTab(data: string): void;
-  setApiUrl(data: string): void;
-  setApiShortToken(data: string): void;
-  setApiFullToken(data: string): void;
-  setApiTokenExpireDate(data: Date | number | undefined): void;
-  setApiMeData(data: AccountData | undefined): void;
-  setServerFilters(data: FilterQueryResponse): void;
-  setThemeSearchOpts(data: ThemeQueryRequest): void;
+  setGlobalState(key: string, data: any): void;
+  getGlobalState(key: string): any;
   setLocalThemeList(listArr: localThemeEntry[]): void;
-  setBrowseThemeList(listArr: ThemeQueryResponse): void;
-  setRepo(value: SingleDropdownOption): void;
-  setInstalling(bool: boolean): void;
-  setCurExpandedTheme(theme: PartialCSSThemeInfo | undefined): void;
-  setBrowserCardSize(num: number): void;
-  setStarredSearchOpts(data: ThemeQueryRequest): void;
-  setStarredServerFilters(data: FilterQueryResponse): void;
-  setStarredThemeList(data: ThemeQueryResponse): void;
-  setSubmissionSearchOpts(data: ThemeQueryRequest): void;
-  setSubmissionServerFilters(data: FilterQueryResponse): void;
-  setSubmissionThemeList(data: ThemeQueryResponse): void;
 }
 
 // This class creates the getter and setter functions for all of the global state data.
@@ -169,56 +149,12 @@ export class CssLoaderState {
     };
   }
 
-  setPrevSearchOpts(data: ThemeQueryRequest) {
-    this.prevSearchOpts = data;
-    this.forceUpdate();
-  }
-  setPrevStarSearchOpts(data: ThemeQueryRequest) {
-    this.prevStarSearchOpts = data;
-    this.forceUpdate();
-  }
-  setPrevSubSearchOpts(data: ThemeQueryRequest) {
-    this.prevSubSearchOpts = data;
-    this.forceUpdate();
+  getGlobalState(key: string) {
+    return this[key];
   }
 
-  setCurTab(data: string) {
-    this.currentTab = data;
-    this.forceUpdate();
-  }
-
-  setApiUrl(data: string) {
-    this.apiUrl = data;
-    this.forceUpdate();
-  }
-
-  setApiShortToken(data: string) {
-    this.apiShortToken = data;
-    this.forceUpdate();
-  }
-
-  setApiFullToken(data: string) {
-    this.apiFullToken = data;
-    this.forceUpdate();
-  }
-
-  setApiTokenExpireDate(data: Date | number | undefined) {
-    this.apiTokenExpireDate = data;
-    this.forceUpdate();
-  }
-
-  setApiMeData(data: AccountData | undefined) {
-    this.apiMeData = data;
-    this.forceUpdate();
-  }
-
-  setServerFilters(data: FilterQueryResponse) {
-    this.serverFilters = data;
-    this.forceUpdate();
-  }
-
-  setThemeSearchOpts(data: ThemeQueryRequest) {
-    this.themeSearchOpts = data;
+  setGlobalState(key: string, data: any) {
+    this[key] = data;
     this.forceUpdate();
   }
 
@@ -234,57 +170,6 @@ export class CssLoaderState {
     list.forEach((x) => x.init());
 
     this.localThemeList = list;
-    this.forceUpdate();
-  }
-
-  setBrowseThemeList(listArr: ThemeQueryResponse) {
-    this.browseThemeList = listArr;
-    this.forceUpdate();
-  }
-
-  setRepo(value: SingleDropdownOption) {
-    this.selectedRepo = value;
-    this.forceUpdate();
-  }
-
-  setInstalling(bool: boolean) {
-    this.isInstalling = bool;
-    this.forceUpdate();
-  }
-
-  setCurExpandedTheme(theme: PartialCSSThemeInfo | undefined) {
-    this.currentExpandedTheme = theme;
-    this.forceUpdate();
-  }
-
-  setBrowserCardSize(num: number) {
-    this.browserCardSize = num;
-    this.forceUpdate();
-  }
-
-  setStarredSearchOpts(data: ThemeQueryRequest) {
-    this.starredSearchOpts = data;
-    this.forceUpdate();
-  }
-  setStarredServerFilters(data: FilterQueryResponse) {
-    this.starredServerFilters = data;
-    this.forceUpdate();
-  }
-  setStarredThemeList(data: ThemeQueryResponse) {
-    this.starredThemeList = data;
-    this.forceUpdate();
-  }
-
-  setSubmissionSearchOpts(data: ThemeQueryRequest) {
-    this.submissionSearchOpts = data;
-    this.forceUpdate();
-  }
-  setSubmissionServerFilters(data: FilterQueryResponse) {
-    this.submissionServerFilters = data;
-    this.forceUpdate();
-  }
-  setSubmissionThemeList(data: ThemeQueryResponse) {
-    this.submissionThemeList = data;
     this.forceUpdate();
   }
 
@@ -316,78 +201,18 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({ children, cssLoade
     return () => cssLoaderStateClass.eventBus.removeEventListener("stateUpdate", onUpdate);
   }, []);
 
-  const setPrevSearchOpts = (data: ThemeQueryRequest) =>
-    cssLoaderStateClass.setPrevSearchOpts(data);
-  const setPrevStarSearchOpts = (data: ThemeQueryRequest) =>
-    cssLoaderStateClass.setPrevStarSearchOpts(data);
-  const setPrevSubSearchOpts = (data: ThemeQueryRequest) =>
-    cssLoaderStateClass.setPrevSubSearchOpts(data);
-  const setCurTab = (data: string) => cssLoaderStateClass.setCurTab(data);
-  const setApiUrl = (data: string) => cssLoaderStateClass.setApiUrl(data);
-  const setApiShortToken = (data: string) => cssLoaderStateClass.setApiShortToken(data);
-  const setApiFullToken = (data: string) => cssLoaderStateClass.setApiFullToken(data);
-  const setApiTokenExpireDate = (data: Date | number | undefined) =>
-    cssLoaderStateClass.setApiTokenExpireDate(data);
-  const setApiMeData = (data: AccountData | undefined) => cssLoaderStateClass.setApiMeData(data);
-  const setServerFilters = (data: FilterQueryResponse) =>
-    cssLoaderStateClass.setServerFilters(data);
-  const setThemeSearchOpts = (data: ThemeQueryRequest) =>
-    cssLoaderStateClass.setThemeSearchOpts(data);
+  const getGlobalState = (key: string) => cssLoaderStateClass.getGlobalState(key);
+  const setGlobalState = (key: string, data: any) => cssLoaderStateClass.setGlobalState(key, data);
   const setLocalThemeList = (listArr: localThemeEntry[]) =>
     cssLoaderStateClass.setLocalThemeList(listArr);
-  const setBrowseThemeList = (listArr: ThemeQueryResponse) =>
-    cssLoaderStateClass.setBrowseThemeList(listArr);
-  const setRepo = (value: SingleDropdownOption) => cssLoaderStateClass.setRepo(value);
-  const setInstalling = (bool: boolean) => cssLoaderStateClass.setInstalling(bool);
-  const setCurExpandedTheme = (theme: PartialCSSThemeInfo | undefined) =>
-    cssLoaderStateClass.setCurExpandedTheme(theme);
-  const setBrowserCardSize = (num: number) => cssLoaderStateClass.setBrowserCardSize(num);
-  const setStarredSearchOpts = (data: ThemeQueryRequest) => {
-    cssLoaderStateClass.setStarredSearchOpts(data);
-  };
-  const setStarredServerFilters = (data: FilterQueryResponse) => {
-    cssLoaderStateClass.setStarredServerFilters(data);
-  };
-  const setStarredThemeList = (data: ThemeQueryResponse) => {
-    cssLoaderStateClass.setStarredThemeList(data);
-  };
-  const setSubmissionSearchOpts = (data: ThemeQueryRequest) => {
-    cssLoaderStateClass.setSubmissionSearchOpts(data);
-  };
-  const setSubmissionServerFilters = (data: FilterQueryResponse) => {
-    cssLoaderStateClass.setSubmissionServerFilters(data);
-  };
-  const setSubmissionThemeList = (data: ThemeQueryResponse) => {
-    cssLoaderStateClass.setSubmissionThemeList(data);
-  };
 
   return (
     <CssLoaderContext.Provider
       value={{
         ...publicState,
-        setPrevSearchOpts,
-        setPrevStarSearchOpts,
-        setPrevSubSearchOpts,
-        setCurTab,
-        setApiUrl,
-        setApiShortToken,
-        setApiFullToken,
-        setApiTokenExpireDate,
-        setApiMeData,
-        setServerFilters,
-        setThemeSearchOpts,
+        getGlobalState,
+        setGlobalState,
         setLocalThemeList,
-        setBrowseThemeList,
-        setRepo,
-        setInstalling,
-        setCurExpandedTheme,
-        setBrowserCardSize,
-        setStarredSearchOpts,
-        setStarredServerFilters,
-        setStarredThemeList,
-        setSubmissionSearchOpts,
-        setSubmissionServerFilters,
-        setSubmissionThemeList,
       }}
     >
       {children}

@@ -12,18 +12,13 @@ export function SubmissionsPage() {
     apiUrl,
     apiFullToken,
     apiTokenExpireDate,
-    setApiFullToken,
-    setApiTokenExpireDate,
     setLocalThemeList: setInstalledThemes,
     submissionSearchOpts: searchOpts,
-    setSubmissionSearchOpts: setSearchOpts,
     submissionServerFilters: serverFilters,
-    setSubmissionServerFilters: setServerFilters,
     submissionThemeList: themeArr,
-    setSubmissionThemeList: setThemeArr,
     browserCardSize,
-    setPrevSubSearchOpts: setPrevSearchOpts,
     prevSubSearchOpts: prevSearchOpts,
+    setGlobalState,
   } = useCssLoaderState();
 
   function reloadThemes() {
@@ -45,8 +40,8 @@ export function SubmissionsPage() {
       return apiFullToken;
     }
     return python.refreshToken(`${apiUrl}/auth/refresh_token`, apiFullToken).then((token) => {
-      setApiFullToken(token);
-      setApiTokenExpireDate(new Date().valueOf() + 1000 * 10 * 60);
+      setGlobalState("apiFullToken", token);
+      setGlobalState("apiTokenExpireDate", new Date().valueOf() + 1000 * 10 * 60);
       return token;
     });
   }
@@ -62,9 +57,9 @@ export function SubmissionsPage() {
         .genericGET(`${apiUrl}/themes/awaiting_approval${queryStr}`, newToken)
         .then((data: ThemeQueryResponse) => {
           if (data.total > 0) {
-            setThemeArr(data);
+            setGlobalState("submissionThemeList", data);
           } else {
-            setThemeArr({ total: 0, items: [] });
+            setGlobalState("submissionThemeList", { total: 0, items: [] });
           }
           setSnapIndex(-1);
         });
@@ -107,10 +102,10 @@ export function SubmissionsPage() {
     <>
       <BrowserSearchFields
         searchOpts={searchOpts}
-        setSearchOpts={setSearchOpts}
-        setPrevSearchOpts={setPrevSearchOpts}
+        searchOptsVarName="submissionSearchOpts"
+        prevSearchOptsVarName="prevSubSearchOpts"
         unformattedFilters={serverFilters}
-        setUnformattedFilters={setServerFilters}
+        unformattedFiltersVarName="submissionServerFilters"
         getTargetsPath="/themes/awaiting_approval/filters?target=CSS"
         onReload={reloadThemes}
       />
@@ -129,6 +124,8 @@ export function SubmissionsPage() {
             data={e}
             cols={browserCardSize}
             showTarget={true}
+            searchOpts={searchOpts}
+            prevSearchOptsVarName="setPrevSubSearchOpts"
           />
         ))}
       </Focusable>
@@ -144,7 +141,7 @@ export function SubmissionsPage() {
         <div style={{ maxWidth: "50%" }}>
           <LoadMoreButton
             themeArr={themeArr}
-            setThemeArr={setThemeArr}
+            themeArrVarName="submissionThemeList"
             origSearchOpts={searchOpts}
             paramStrFilterPrepend="CSS."
             fetchPath="/themes/awaiting_approval"

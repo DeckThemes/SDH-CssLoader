@@ -97,7 +97,7 @@ const Content: FC<{ serverAPI: ServerAPI }> = () => {
 };
 
 const ThemeManagerRouter: FC = () => {
-  const { apiShortToken, apiMeData, currentTab, setCurTab } = useCssLoaderState();
+  const { apiShortToken, apiMeData, currentTab, setGlobalState } = useCssLoaderState();
   return (
     <div
       style={{
@@ -109,7 +109,7 @@ const ThemeManagerRouter: FC = () => {
       <Tabs
         activeTab={currentTab}
         onShowTab={(tabID: string) => {
-          setCurTab(tabID);
+          setGlobalState("currentTab", tabID);
         }}
         tabs={[
           {
@@ -158,7 +158,7 @@ export default definePlugin((serverApi: ServerAPI) => {
 
   python.resolve(python.storeRead("shortToken"), (token: string) => {
     if (token) {
-      state.setApiShortToken(token);
+      state.setGlobalState("apiShortToken", token);
     }
   });
 

@@ -5,16 +5,7 @@ import * as python from "../python";
 import { useCssLoaderState } from "../state";
 
 export const SettingsPage: VFC = () => {
-  const {
-    apiUrl,
-    apiShortToken,
-    apiFullToken,
-    setApiShortToken,
-    setApiFullToken,
-    setApiTokenExpireDate,
-    setApiMeData,
-    apiMeData,
-  } = useCssLoaderState();
+  const { apiUrl, apiShortToken, apiFullToken, apiMeData, setGlobalState } = useCssLoaderState();
   const [shortTokenInterimValue, setShortTokenIntValue] = useState<string>(apiShortToken);
 
   function authWithShortToken() {
@@ -23,12 +14,12 @@ export const SettingsPage: VFC = () => {
       python.authWithShortToken(shortTokenValue, apiUrl).then((data) => {
         if (data && data?.token) {
           python.storeWrite("shortToken", shortTokenValue);
-          setApiShortToken(shortTokenValue);
-          setApiFullToken(data.token);
-          setApiTokenExpireDate(new Date().valueOf() + 1000 * 60 * 10);
+          setGlobalState("apiShortToken", apiShortToken);
+          setGlobalState("apiFullToken", data.token);
+          setGlobalState("apiTokenExpireDate", new Date().valueOf() + 1000 * 60 * 10);
           python.genericGET(`${apiUrl}/auth/me`, data.token).then((meData) => {
             if (meData?.username) {
-              setApiMeData(meData);
+              setGlobalState("apiMeData", meData);
             }
           });
         } else {
@@ -70,10 +61,10 @@ export const SettingsPage: VFC = () => {
                   gap: "0.5em",
                 }}
                 onClick={() => {
-                  setApiShortToken("");
-                  setApiFullToken("");
-                  setApiMeData(undefined);
-                  setApiTokenExpireDate(undefined);
+                  setGlobalState("apiShortToken", "");
+                  setGlobalState("apiFullToken", "");
+                  setGlobalState("apiTokenExpireDate", undefined);
+                  setGlobalState("apiMeData", undefined);
                   python.storeWrite("shortToken", "");
                 }}
               >

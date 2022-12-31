@@ -17,21 +17,11 @@ export const ExpandedViewPage: VFC = () => {
     localThemeList: installedThemes,
     setLocalThemeList: setInstalledThemes,
     currentExpandedTheme,
-    setCurExpandedTheme,
     isInstalling,
-    setInstalling,
     apiUrl,
     apiFullToken,
     apiTokenExpireDate,
-    setApiFullToken,
-    setApiTokenExpireDate,
-    // This is all bcus of the page being reloaded on going back
-    setPrevSearchOpts,
-    themeSearchOpts,
-    submissionSearchOpts,
-    starredSearchOpts,
-    setPrevStarSearchOpts,
-    setPrevSubSearchOpts,
+    setGlobalState,
   } = useCssLoaderState();
 
   const [fullThemeData, setFullData] = useState<FullCSSThemeInfo>();
@@ -50,8 +40,8 @@ export const ExpandedViewPage: VFC = () => {
       return apiFullToken;
     }
     return python.refreshToken(`${apiUrl}/auth/refresh_token`, apiFullToken).then((token) => {
-      setApiFullToken(token);
-      setApiTokenExpireDate(new Date().valueOf() + 1000 * 10 * 60);
+      setGlobalState("apiFullToken", token);
+      setGlobalState("apiTokenExpireDate", new Date().valueOf() + 1000 * 10 * 60);
       return token;
     });
   }
@@ -98,11 +88,11 @@ export const ExpandedViewPage: VFC = () => {
   }
 
   function installTheme() {
-    setInstalling(true);
+    setGlobalState("isInstalling", true);
     python.resolve(python.downloadThemeFromUrl(fullThemeData?.id || "ERROR", apiUrl), () => {
       python.resolve(python.reset(), () => {
         python.resolve(python.getThemes(), setInstalledThemes);
-        setInstalling(false);
+        setGlobalState("isInstalling", false);
       });
     });
   }
@@ -154,11 +144,6 @@ export const ExpandedViewPage: VFC = () => {
         setLoaded(true);
       });
     }
-
-    // This is here
-    setPrevSearchOpts(themeSearchOpts);
-    setPrevStarSearchOpts(starredSearchOpts);
-    setPrevSubSearchOpts(submissionSearchOpts);
   }, [currentExpandedTheme]);
 
   useEffect(() => {
@@ -345,7 +330,7 @@ export const ExpandedViewPage: VFC = () => {
                       bottomSeparator="none"
                       layout="below"
                       onClick={() => {
-                        setCurExpandedTheme(undefined);
+                        setGlobalState("currentExpandedTheme", undefined);
                         setFullData(undefined);
                         setLoaded(false);
                         // Wow amazing navigation interface I wonder who coded it

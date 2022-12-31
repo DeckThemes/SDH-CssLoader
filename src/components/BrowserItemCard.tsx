@@ -3,7 +3,7 @@ import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
 import { Focusable, Router } from "decky-frontend-lib";
 import { AiOutlineDownload } from "react-icons/ai";
-import { PartialCSSThemeInfo } from "../apiTypes";
+import { PartialCSSThemeInfo, ThemeQueryRequest } from "../apiTypes";
 
 const topMargin = {
   5: "2px",
@@ -69,9 +69,18 @@ export const VariableSizeCard: FC<{
   data: PartialCSSThemeInfo;
   cols: number;
   showTarget: boolean;
+  searchOpts: ThemeQueryRequest;
+  prevSearchOptsVarName: string;
   refPassthrough?: any;
-}> = ({ data: e, cols: size, showTarget = true, refPassthrough = undefined }) => {
-  const { localThemeList, setCurExpandedTheme, apiUrl } = useCssLoaderState();
+}> = ({
+  data: e,
+  cols: size,
+  showTarget = true,
+  refPassthrough = undefined,
+  searchOpts,
+  prevSearchOptsVarName,
+}) => {
+  const { localThemeList, apiUrl, setGlobalState } = useCssLoaderState();
   function checkIfThemeInstalled(themeObj: PartialCSSThemeInfo) {
     const filteredArr: Theme[] = localThemeList.filter(
       (e: Theme) => e.data.name === themeObj.name && e.data.author === themeObj.specifiedAuthor
@@ -115,7 +124,8 @@ export const VariableSizeCard: FC<{
           ref={refPassthrough}
           focusWithinClassName="gpfocuswithin"
           onActivate={() => {
-            setCurExpandedTheme(e);
+            setGlobalState(prevSearchOptsVarName, searchOpts);
+            setGlobalState("currentExpandedTheme", e);
             Router.Navigate("/theme-manager-expanded-view");
           }}
           className="CssLoader_ThemeBrowser_SingleItem_BgImage"
