@@ -47,7 +47,21 @@ export function BrowserSearchFields({
     () => ({
       filters: [
         { data: "All", label: "All" },
-        ...unformattedFilters.filters.map((e) => ({ data: e, label: e })),
+        ...Object.entries(unformattedFilters.filters).map(([filterValue, itemCount]) => ({
+          data: filterValue,
+          label: (
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+                justifyContent: "space-between",
+              }}
+            >
+              <span>{filterValue}</span>
+              <span style={{ fontWeight: "bold" }}>{itemCount}</span>
+            </div>
+          ),
+        })),
       ],
       order: unformattedFilters.order.map((e) => ({ data: e, label: e })),
     }),

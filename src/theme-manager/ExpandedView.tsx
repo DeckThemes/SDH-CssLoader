@@ -28,6 +28,9 @@ export const ExpandedViewPage: VFC = () => {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [isStarred, setStarred] = useState<boolean>(false);
   const [blurStarButton, setBlurStar] = useState<boolean>(false);
+  const [imageUrl, setImageUrl] = useState<string>(
+    `https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Steam_Deck_logo_%28blue_background%29.svg/2048px-Steam_Deck_logo_%28blue_background%29.svg.png`
+  );
 
   async function refreshToken() {
     if (!apiFullToken) {
@@ -141,6 +144,13 @@ export const ExpandedViewPage: VFC = () => {
       setLoaded(false);
       python.genericGET(`${apiUrl}/themes/${currentExpandedTheme.id}`).then((data) => {
         setFullData(data);
+        if (data?.images[0]?.id && data.images[0].id !== "MISSING") {
+          setImageUrl(`${apiUrl}/blobs/${fullThemeData?.images[0].id}`);
+        } else {
+          setImageUrl(
+            `https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Steam_Deck_logo_%28blue_background%29.svg/2048px-Steam_Deck_logo_%28blue_background%29.svg.png`
+          );
+        }
         setLoaded(true);
       });
     }
@@ -210,8 +220,9 @@ export const ExpandedViewPage: VFC = () => {
           >
             <img
               className="CssLoader_ThemeBrowser_ExpandedView_PreviewImage"
-              src={`${apiUrl}/blobs/${fullThemeData?.images[0]?.id || ""}`}
+              src={imageUrl}
               style={{
+                maxHeight: "400px",
                 width: "60%",
               }}
             />

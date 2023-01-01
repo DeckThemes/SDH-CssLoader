@@ -106,7 +106,7 @@ export function SubmissionsPage() {
         prevSearchOptsVarName="prevSubSearchOpts"
         unformattedFilters={serverFilters}
         unformattedFiltersVarName="submissionServerFilters"
-        getTargetsPath="/themes/awaiting_approval/filters?target=CSS"
+        getTargetsPath="/themes/awaiting_approval/filters?type=CSS"
         onReload={reloadThemes}
       />
       <Focusable

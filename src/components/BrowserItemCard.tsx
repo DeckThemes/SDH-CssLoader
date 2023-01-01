@@ -95,6 +95,13 @@ export const VariableSizeCard: FC<{
       return "uninstalled";
     }
   }
+  function imageURLCreator(): string {
+    if (e?.images[0]?.id && e.images[0].id !== "MISSING") {
+      return `url(${apiUrl}/blobs/${e?.images[0].id})`;
+    } else {
+      return `url(https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Steam_Deck_logo_%28blue_background%29.svg/2048px-Steam_Deck_logo_%28blue_background%29.svg.png)`;
+    }
+  }
 
   const installStatus = checkIfThemeInstalled(e);
   return (
@@ -130,7 +137,7 @@ export const VariableSizeCard: FC<{
           }}
           className="CssLoader_ThemeBrowser_SingleItem_BgImage"
           style={{
-            backgroundImage: 'url("' + apiUrl + "/blobs/" + (e?.images[0]?.id || "") + '")',
+            backgroundImage: imageURLCreator(),
             backgroundSize: "cover",
             backgroundRepeat: "no-repeat",
             backgroundPosition: "center",
@@ -184,9 +191,10 @@ export const VariableSizeCard: FC<{
               className="CssLoader_ThemeBrowser_SingleItem_PreviewImage"
               style={{
                 width: imgWidth[size],
-                backgroundImage: 'url("' + apiUrl + "/blobs/" + (e?.images[0]?.id || "") + '")',
+                backgroundImage: imageURLCreator(),
                 backgroundSize: "cover",
                 backgroundRepeat: "no-repeat",
+                backgroundPosition: "center",
                 height: imgHeight[size],
                 display: "flex",
                 position: "relative",

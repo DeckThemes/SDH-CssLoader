@@ -108,7 +108,7 @@ export const ThemeBrowserPage: FC = () => {
         prevSearchOptsVarName="prevSearchOpts"
         unformattedFilters={serverFilters}
         unformattedFiltersVarName="serverFilters"
-        getTargetsPath="/themes/filters?target=CSS"
+        getTargetsPath="/themes/filters?type=CSS"
         onReload={() => {
           reloadThemes();
         }}
