@@ -145,7 +145,7 @@ export const ExpandedViewPage: VFC = () => {
       python.genericGET(`${apiUrl}/themes/${currentExpandedTheme.id}`).then((data) => {
         setFullData(data);
         if (data?.images[0]?.id && data.images[0].id !== "MISSING") {
-          setImageUrl(`${apiUrl}/blobs/${fullThemeData?.images[0].id}`);
+          setImageUrl(`${apiUrl}/blobs/${data?.images[0].id}`);
         } else {
           setImageUrl(
             `https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Steam_Deck_logo_%28blue_background%29.svg/2048px-Steam_Deck_logo_%28blue_background%29.svg.png`

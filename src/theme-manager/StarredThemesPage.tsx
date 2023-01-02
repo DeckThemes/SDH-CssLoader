@@ -11,6 +11,7 @@ export function StarredThemesPage() {
   const {
     apiUrl,
     apiFullToken,
+    apiMeData,
     apiTokenExpireDate,
     setLocalThemeList: setInstalledThemes,
     starredSearchOpts: searchOpts,
@@ -70,7 +71,7 @@ export function StarredThemesPage() {
     if (!isEqual(prevSearchOpts, searchOpts) || themeArr.total === 0) {
       getThemes();
     }
-  }, [searchOpts, prevSearchOpts]);
+  }, [searchOpts, prevSearchOpts, apiMeData]);
 
   const endOfPageRef = useRef<HTMLElement>();
   const [indexToSnapTo, setSnapIndex] = useState<number>(-1);

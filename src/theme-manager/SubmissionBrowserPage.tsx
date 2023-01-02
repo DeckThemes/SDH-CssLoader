@@ -19,6 +19,7 @@ export function SubmissionsPage() {
     browserCardSize,
     prevSubSearchOpts: prevSearchOpts,
     setGlobalState,
+    apiMeData,
   } = useCssLoaderState();
 
   function reloadThemes() {
@@ -70,7 +71,7 @@ export function SubmissionsPage() {
     if (!isEqual(prevSearchOpts, searchOpts) || themeArr.total === 0) {
       getThemes();
     }
-  }, [searchOpts, prevSearchOpts]);
+  }, [searchOpts, prevSearchOpts, apiMeData]);
 
   const endOfPageRef = useRef<HTMLElement>();
   const [indexToSnapTo, setSnapIndex] = useState<number>(-1);
