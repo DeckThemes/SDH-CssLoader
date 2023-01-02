@@ -14,6 +14,7 @@ import { TiRefreshOutline } from "react-icons/ti";
 import { ThemeQueryRequest } from "../apiTypes";
 import * as python from "../python";
 import { useCssLoaderState } from "../state";
+import { FilterDropdownCustomLabel } from "./FilterDropdownCustomLabel";
 
 export function BrowserSearchFields({
   searchOpts,
@@ -81,38 +82,23 @@ export function BrowserSearchFields({
         {
           data: "All",
           label: (
-            <div
-              style={{
-                display: "flex",
-                width: "100%",
-                justifyContent: "space-between",
-              }}
-            >
-              <span>All</span>
-              <span style={{ fontWeight: "bold" }}>
-                {Object.values(unformattedFilters.filters).reduce(
+            <FilterDropdownCustomLabel
+              filterValue="All"
+              itemCount={
+                Object.values(unformattedFilters.filters).reduce(
                   (prev, cur) => prev + Number(cur),
                   0
-                ) || ""}
-              </span>
-            </div>
+                ) || ""
+              }
+            />
           ),
         },
-        ...Object.entries(unformattedFilters.filters).map(([filterValue, itemCount]) => ({
-          data: filterValue,
-          label: (
-            <div
-              style={{
-                display: "flex",
-                width: "100%",
-                justifyContent: "space-between",
-              }}
-            >
-              <span>{filterValue}</span>
-              <span style={{ fontWeight: "bold" }}>{itemCount}</span>
-            </div>
-          ),
-        })),
+        ...Object.entries(unformattedFilters.filters)
+          .filter(([_, itemCount]) => Number(itemCount) > 0)
+          .map(([filterValue, itemCount]) => ({
+            data: filterValue,
+            label: <FilterDropdownCustomLabel filterValue={filterValue} itemCount={itemCount} />,
+          })),
       ],
       order: unformattedFilters.order.map((e) => ({ data: e, label: e })),
     }),

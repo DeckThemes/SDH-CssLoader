@@ -5,3 +5,4 @@ export * from "./BrowserItemCard";
 export * from "./BrowserSearchFields";
 export * from "./PageSelector";
 export * from "./LoadMoreButton";
+export * from "./FilterDropdownCustomLabel";
