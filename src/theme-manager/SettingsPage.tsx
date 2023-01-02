@@ -20,6 +20,7 @@ export const SettingsPage: VFC = () => {
           python.genericGET(`${apiUrl}/auth/me`, data.token).then((meData) => {
             if (meData?.username) {
               setGlobalState("apiMeData", meData);
+              python.toast("Logged In!", `Logged in as ${meData.username}`);
             }
           });
         } else {
