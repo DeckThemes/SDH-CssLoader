@@ -14,7 +14,7 @@ export const SettingsPage: VFC = () => {
       python.authWithShortToken(shortTokenValue, apiUrl).then((data) => {
         if (data && data?.token) {
           python.storeWrite("shortToken", shortTokenValue);
-          setGlobalState("apiShortToken", apiShortToken);
+          setGlobalState("apiShortToken", shortTokenValue);
           setGlobalState("apiFullToken", data.token);
           setGlobalState("apiTokenExpireDate", new Date().valueOf() + 1000 * 60 * 10);
           python.genericGET(`${apiUrl}/auth/me`, data.token).then((meData) => {
