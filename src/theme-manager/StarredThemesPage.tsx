@@ -106,7 +106,7 @@ export function StarredThemesPage() {
         prevSearchOptsVarName="prevStarSearchOpts"
         unformattedFilters={serverFilters}
         unformattedFiltersVarName="starredServerFilters"
-        getTargetsPath="/themes/filters?type=CSS"
+        getTargetsPath="/users/me/stars/filters?type=CSS"
         onReload={reloadThemes}
       />
       <Focusable

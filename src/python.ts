@@ -153,7 +153,7 @@ export function genericGET(
   authToken?: string | undefined,
   expiryDate?: Date | number | undefined
 ) {
-  if (new Date().valueOf()) {
+  if (authToken && expiryDate) {
   }
 
   return server!
