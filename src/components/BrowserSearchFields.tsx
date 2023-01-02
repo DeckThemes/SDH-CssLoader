@@ -55,14 +55,25 @@ export function BrowserSearchFields({
   }
 
   async function getThemeTargets() {
-    python.genericGET(`${apiUrl}${getTargetsPath}`, apiFullToken).then((data) => {
-      if (data?.filters) {
-        setGlobalState(unformattedFiltersVarName, {
-          filters: data.filters,
-          order: data.order,
-        });
+    // This is probably not the best way of doing this
+    function fetch(newToken: string | undefined = undefined) {
+      python.genericGET(`${apiUrl}${getTargetsPath}`, newToken).then((data) => {
+        if (data?.filters) {
+          setGlobalState(unformattedFiltersVarName, {
+            filters: data.filters,
+            order: data.order,
+          });
+        }
+      });
+    }
+    if (requiresAuth) {
+      const newToken = await refreshToken();
+      if (newToken) {
+        fetch(newToken);
       }
-    });
+    } else {
+      fetch();
+    }
   }
   const formattedFilters = useMemo<{ filters: DropdownOption[]; order: DropdownOption[] }>(
     () => ({
@@ -120,6 +131,7 @@ export function BrowserSearchFields({
             />
           </div>
           <div
+            className="CSSLoader_FilterDropDown_Container"
             style={{
               display: "flex",
               flexDirection: "column",
@@ -139,28 +151,20 @@ export function BrowserSearchFields({
                 setGlobalState(searchOptsVarName, { ...searchOpts, filters: e.data });
               }}
             />
+            <style>
+              {/* The CSS Selector god has done it again */}
+              {`
+                .CSSLoader_FilterDropDown_Container > button > div > div {
+                  width: 100%;
+                  display: flex;
+                  align-items: start;
+                }
+                .CSSLoader_FilterDropDown_Container > button > div > .${gamepadDialogClasses.Spacer} {
+                  width: 0;
+                }
+              `}
+            </style>
           </div>
-          {/* TODO: re-add 3rd party repo stuff */}
-          {/* {repoOptions.length > 1 && (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                maxWidth: "30%",
-                minWidth: "30%",
-                marginLeft: "auto",
-              }}
-            >
-              <span>Repo</span>
-              <Dropdown
-                menuLabel="Filter"
-                rgOptions={repoOptions}
-                strDefaultLabel="Official"
-                selectedOption={selectedRepo.data}
-                onChange={(e) => setRepo(e)}
-              />
-            </div>
-          )} */}
         </Focusable>
       </PanelSectionRow>
       <div style={{ display: "flex", justifyContent: "center" }}>

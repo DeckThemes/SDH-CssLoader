@@ -107,6 +107,7 @@ export function StarredThemesPage() {
         unformattedFilters={serverFilters}
         unformattedFiltersVarName="starredServerFilters"
         getTargetsPath="/users/me/stars/filters?type=CSS"
+        requiresAuth
         onReload={reloadThemes}
       />
       <Focusable

@@ -107,6 +107,7 @@ export function SubmissionsPage() {
         unformattedFilters={serverFilters}
         unformattedFiltersVarName="submissionServerFilters"
         getTargetsPath="/themes/awaiting_approval/filters?type=CSS"
+        requiresAuth
         onReload={reloadThemes}
       />
       <Focusable
