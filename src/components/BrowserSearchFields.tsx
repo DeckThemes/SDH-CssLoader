@@ -78,7 +78,26 @@ export function BrowserSearchFields({
   const formattedFilters = useMemo<{ filters: DropdownOption[]; order: DropdownOption[] }>(
     () => ({
       filters: [
-        { data: "All", label: "All" },
+        {
+          data: "All",
+          label: (
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+                justifyContent: "space-between",
+              }}
+            >
+              <span>All</span>
+              <span style={{ fontWeight: "bold" }}>
+                {Object.values(unformattedFilters.filters).reduce(
+                  (prev, cur) => prev + Number(cur),
+                  0
+                ) || ""}
+              </span>
+            </div>
+          ),
+        },
         ...Object.entries(unformattedFilters.filters).map(([filterValue, itemCount]) => ({
           data: filterValue,
           label: (
