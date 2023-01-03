@@ -2,35 +2,12 @@ import { DialogButton, Focusable, PanelSectionRow, TextField } from "decky-front
 import { SiWebauthn } from "react-icons/si";
 import { useState, VFC } from "react";
 import * as python from "../python";
+import { logInWithShortToken, logOut } from "../api";
 import { useCssLoaderState } from "../state";
 
 export const SettingsPage: VFC = () => {
-  const { apiUrl, apiShortToken, apiFullToken, apiMeData, setGlobalState } = useCssLoaderState();
+  const { apiShortToken, apiFullToken, apiMeData } = useCssLoaderState();
   const [shortTokenInterimValue, setShortTokenIntValue] = useState<string>(apiShortToken);
-
-  function authWithShortToken() {
-    const shortTokenValue = shortTokenInterimValue;
-    if (shortTokenInterimValue.length === 12) {
-      python.authWithShortToken(shortTokenValue, apiUrl).then((data) => {
-        if (data && data?.token) {
-          python.storeWrite("shortToken", shortTokenValue);
-          setGlobalState("apiShortToken", shortTokenValue);
-          setGlobalState("apiFullToken", data.token);
-          setGlobalState("apiTokenExpireDate", new Date().valueOf() + 1000 * 60 * 10);
-          python.genericGET(`${apiUrl}/auth/me`, data.token).then((meData) => {
-            if (meData?.username) {
-              setGlobalState("apiMeData", meData);
-              python.toast("Logged In!", `Logged in as ${meData.username}`);
-            }
-          });
-        } else {
-          python.toast("Error Authenticating", JSON.stringify(data));
-        }
-      });
-    } else {
-      python.toast("Invalid Token", "Token must be 12 characters long.");
-    }
-  }
 
   return (
     // The outermost div is to push the content down into the visible area
@@ -61,13 +38,7 @@ export const SettingsPage: VFC = () => {
                   justifyContent: "center",
                   gap: "0.5em",
                 }}
-                onClick={() => {
-                  setGlobalState("apiShortToken", "");
-                  setGlobalState("apiFullToken", "");
-                  setGlobalState("apiTokenExpireDate", undefined);
-                  setGlobalState("apiMeData", undefined);
-                  python.storeWrite("shortToken", "");
-                }}
+                onClick={logOut}
               >
                 <span>Unlink My Deck</span>
               </DialogButton>
@@ -88,7 +59,7 @@ export const SettingsPage: VFC = () => {
               <DialogButton
                 disabled={shortTokenInterimValue.length !== 12}
                 onClick={() => {
-                  authWithShortToken();
+                  logInWithShortToken(shortTokenInterimValue);
                 }}
                 style={{
                   maxWidth: "30%",

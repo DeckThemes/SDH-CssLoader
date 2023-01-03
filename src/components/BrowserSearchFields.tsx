@@ -9,10 +9,11 @@ import {
   SliderField,
   TextField,
 } from "decky-frontend-lib";
+import { refreshToken } from "../api";
 import { useEffect, useMemo, memo } from "react";
 import { TiRefreshOutline } from "react-icons/ti";
 import { ThemeQueryRequest } from "../apiTypes";
-import * as python from "../python";
+import { genericGET } from "../api";
 import { useCssLoaderState } from "../state";
 import { FilterDropdownCustomLabel } from "./FilterDropdownCustomLabel";
 
@@ -35,30 +36,12 @@ export function BrowserSearchFields({
   requiresAuth?: boolean;
   onReload: () => void;
 }) {
-  const { apiUrl, browserCardSize, setGlobalState, apiFullToken, apiTokenExpireDate } =
-    useCssLoaderState();
-  // This returns the token that is intended to be used in whatever call
-  function refreshToken() {
-    if (!apiFullToken) {
-      return undefined;
-    }
-    if (apiTokenExpireDate === undefined) {
-      return apiFullToken;
-    }
-    if (new Date().valueOf() < apiTokenExpireDate) {
-      return apiFullToken;
-    }
-    return python.refreshToken(`${apiUrl}/auth/refresh_token`, apiFullToken).then((token) => {
-      setGlobalState("apiFullToken", token);
-      setGlobalState("apiTokenExpireDate", new Date().valueOf() + 1000 * 10 * 60);
-      return token;
-    });
-  }
+  const { apiUrl, browserCardSize, setGlobalState } = useCssLoaderState();
 
   async function getThemeTargets() {
     // This is probably not the best way of doing this
     function fetch(newToken: string | undefined = undefined) {
-      python.genericGET(`${apiUrl}${getTargetsPath}`, newToken).then((data) => {
+      genericGET(`${apiUrl}${getTargetsPath}`, newToken).then((data) => {
         if (data?.filters) {
           setGlobalState(unformattedFiltersVarName, {
             filters: data.filters,

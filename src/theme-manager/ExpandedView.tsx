@@ -5,6 +5,8 @@ import { BsStar, BsStarFill } from "react-icons/bs";
 import { FiDownload } from "react-icons/fi";
 
 import * as python from "../python";
+import { genericGET } from "../api";
+import { refreshToken } from "../api";
 
 // Interfaces for the JSON objects the lists work with
 import { useCssLoaderState } from "../state";
@@ -15,12 +17,10 @@ import { FullCSSThemeInfo, PartialCSSThemeInfo } from "../apiTypes";
 export const ExpandedViewPage: VFC = () => {
   const {
     localThemeList: installedThemes,
-    setLocalThemeList: setInstalledThemes,
     currentExpandedTheme,
     isInstalling,
     apiUrl,
     apiFullToken,
-    apiTokenExpireDate,
     setGlobalState,
   } = useCssLoaderState();
 
@@ -31,28 +31,10 @@ export const ExpandedViewPage: VFC = () => {
   const [imageUrl, setImageUrl] = useState<string>(
     `https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Steam_Deck_logo_%28blue_background%29.svg/2048px-Steam_Deck_logo_%28blue_background%29.svg.png`
   );
-
-  async function refreshToken() {
-    if (!apiFullToken) {
-      return undefined;
-    }
-    if (apiTokenExpireDate === undefined) {
-      return apiFullToken;
-    }
-    if (new Date().valueOf() < apiTokenExpireDate) {
-      return apiFullToken;
-    }
-    return python.refreshToken(`${apiUrl}/auth/refresh_token`, apiFullToken).then((token) => {
-      setGlobalState("apiFullToken", token);
-      setGlobalState("apiTokenExpireDate", new Date().valueOf() + 1000 * 10 * 60);
-      return token;
-    });
-  }
-
   async function getStarredStatus() {
     const newToken = await refreshToken();
     if (newToken && fullThemeData) {
-      python.genericGET(`${apiUrl}/users/me/stars/${fullThemeData.id}`, newToken).then((data) => {
+      genericGET(`${apiUrl}/users/me/stars/${fullThemeData.id}`, newToken).then((data) => {
         if (data.starred) {
           setStarred(data.starred);
         }
@@ -87,14 +69,15 @@ export const ExpandedViewPage: VFC = () => {
           }
         });
       }
+    } else {
+      python.toast("Not Logged In!", "You can only star themes if logged in.");
     }
   }
 
   function installTheme() {
     setGlobalState("isInstalling", true);
-    python.resolve(python.downloadThemeFromUrl(fullThemeData?.id || "ERROR", apiUrl), () => {
-      python.resolve(python.reset(), () => {
-        python.resolve(python.getThemes(), setInstalledThemes);
+    python.resolve(python.downloadThemeFromUrl(fullThemeData?.id || "ERROR"), () => {
+      python.reloadBackend().then(() => {
         setGlobalState("isInstalling", false);
       });
     });
@@ -142,7 +125,7 @@ export const ExpandedViewPage: VFC = () => {
   useEffect(() => {
     if (currentExpandedTheme?.id) {
       setLoaded(false);
-      python.genericGET(`${apiUrl}/themes/${currentExpandedTheme.id}`).then((data) => {
+      genericGET(`${apiUrl}/themes/${currentExpandedTheme.id}`).then((data) => {
         setFullData(data);
         if (data?.images[0]?.id && data.images[0].id !== "MISSING") {
           setImageUrl(`${apiUrl}/blobs/${data?.images[0].id}`);

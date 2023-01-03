@@ -2,7 +2,7 @@ import { DialogButton } from "decky-frontend-lib";
 import { useState, Dispatch, SetStateAction, useEffect } from "react";
 import { ThemeQueryRequest, ThemeQueryResponse } from "../apiTypes";
 import { generateParamStr } from "../logic";
-import * as python from "../python";
+import { genericGET } from "../api";
 import { useCssLoaderState } from "../state";
 
 export function LoadMoreButton({
@@ -33,7 +33,7 @@ export function LoadMoreButton({
       searchOptClone.filters !== "All" ? searchOptClone : { ...searchOptClone, filters: "" },
       paramStrFilterPrepend
     );
-    python.genericGET(`${apiUrl}${fetchPath}${searchOpts}`).then((data) => {
+    genericGET(`${apiUrl}${fetchPath}${searchOpts}`).then((data) => {
       if (data) {
         setGlobalState(themeArrVarName, {
           total: themeArr.total,

@@ -5,7 +5,7 @@ import { Theme } from "../theme";
 import * as python from "../python";
 import { ThemePatch } from "./ThemePatch";
 
-export const ThemeToggle: VFC<{ data: Theme; setThemeList: any }> = ({ data, setThemeList }) => {
+export const ThemeToggle: VFC<{ data: Theme }> = ({ data }) => {
   return (
     <>
       <PanelSectionRow>
@@ -17,7 +17,7 @@ export const ThemeToggle: VFC<{ data: Theme; setThemeList: any }> = ({ data, set
           onChange={(switchValue: boolean) => {
             // Actually enabling the theme
             python.resolve(python.setThemeState(data.name, switchValue), () => {
-              python.resolve(python.getThemes(), setThemeList);
+              python.getInstalledThemes();
             });
             // Dependency Toast
             if (switchValue === true && data.dependencies.length > 0) {

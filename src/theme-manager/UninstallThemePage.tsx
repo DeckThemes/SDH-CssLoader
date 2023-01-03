@@ -6,34 +6,36 @@ import * as python from "../python";
 
 import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
-import { FullCSSThemeInfo } from "../apiTypes";
+import { PartialCSSThemeInfo } from "../apiTypes";
+import { checkForUpdateById } from "../api";
+
+export type LocalThemeStatus = "installed" | "outdated" | "local";
 
 export const UninstallThemePage: VFC = () => {
-  const { localThemeList, setLocalThemeList, apiUrl } = useCssLoaderState();
+  const { localThemeList, browseThemeList } = useCssLoaderState();
 
   const [isUninstalling, setUninstalling] = useState(false);
 
-  const [updateStatuses, setUpdateStatuses] = useState<[string, false | FullCSSThemeInfo][]>([]);
+  const [updateStatuses, setUpdateStatuses] = useState<
+    [LocalThemeStatus, false | PartialCSSThemeInfo][]
+  >([]);
 
   function handleUninstall(listEntry: Theme) {
     setUninstalling(true);
     python.resolve(python.deleteTheme(listEntry.data.name), () => {
-      python.resolve(python.reset(), () => {
-        python.resolve(python.getThemes(), setLocalThemeList);
+      python.reloadBackend().then(() => {
         setUninstalling(false);
       });
     });
   }
 
-  function updateTheme(remoteEntry: FullCSSThemeInfo | false) {
+  function updateTheme(remoteEntry: PartialCSSThemeInfo | false) {
     if (remoteEntry && remoteEntry?.id) {
       const id = remoteEntry.id;
       setUninstalling(true);
-      python.resolve(python.downloadThemeFromUrl(id, apiUrl), () => {
-        python.resolve(python.reset(), () => {
-          python.resolve(python.getThemes(), setLocalThemeList);
-          setUninstalling(false);
-        });
+      python.resolve(python.downloadThemeFromUrl(id), () => {
+        python.reloadBackend();
+        setUninstalling(false);
       });
     }
   }
@@ -41,24 +43,38 @@ export const UninstallThemePage: VFC = () => {
   // This gets the update status of all installed themes by querying them all.
   useEffect(() => {
     if (localThemeList.length > 0) {
-      const promiseArr: Promise<FullCSSThemeInfo>[] = [];
+      const promiseArr: Promise<PartialCSSThemeInfo | false>[] = [];
       localThemeList.forEach((e) => {
-        const promise = python.genericGET(`${apiUrl}/themes/${e.id}`);
+        const entryInBrowseList: PartialCSSThemeInfo | undefined = browseThemeList.items.find(
+          (f) => e.id === f.id || e.id === f.name
+        );
+        if (entryInBrowseList) {
+          const promise: Promise<PartialCSSThemeInfo> = new Promise((resolve) => {
+            resolve(entryInBrowseList);
+          });
+          promiseArr.push(promise);
+          return;
+        }
+        // This function returns the data if it exists, or false if it doesn't
+        const promise = checkForUpdateById(e.id);
         promiseArr.push(promise);
       });
       Promise.all(promiseArr).then((themeArr) => {
-        let updateStatusArr: [string, false | FullCSSThemeInfo][] = [];
+        let updateStatusArr: [LocalThemeStatus, false | PartialCSSThemeInfo][] = [];
         themeArr.forEach((data, i) => {
-          const localEntry = localThemeList[i];
-          if (data?.version) {
-            if (data.version === localEntry.data.version) {
-              updateStatusArr.push(["installed", data]);
-            } else {
+          if (data) {
+            const localEntry = localThemeList[i];
+            if (data?.version) {
+              if (data.version === localEntry.data.version) {
+                updateStatusArr.push(["installed", data]);
+                return;
+              }
               updateStatusArr.push(["outdated", data]);
+              return;
             }
-          } else {
-            updateStatusArr.push(["uninstalled", false]);
           }
+          updateStatusArr.push(["local", false]);
+          return;
         });
         setUpdateStatuses(updateStatusArr);
       });
@@ -78,7 +94,7 @@ export const UninstallThemePage: VFC = () => {
       <div>
         <div>
           {localThemeList.map((e: Theme, i) => {
-            let [updateStatus, remoteEntry]: [string, false | FullCSSThemeInfo] = [
+            let [updateStatus, remoteEntry]: [string, false | PartialCSSThemeInfo] = [
               "installed",
               false,
             ];
@@ -108,27 +124,38 @@ export const UninstallThemePage: VFC = () => {
                     style={{
                       display: "flex",
                       marginLeft: "auto",
+                      position: "relative",
                       minWidth: "60%",
                       maxWidth: "60%",
                     }}
                   >
                     {/* Update Button */}
                     {updateStatus === "outdated" && (
-                      <>
-                        <DialogButton
-                          style={{
-                            marginRight: "8px",
-                            minWidth: "calc(50% - 8px)",
-                            maxWidth: "calc(50% - 8px)",
-                            filter:
-                              "invert(6%) sepia(90%) saturate(200%) hue-rotate(160deg) contrast(122%)",
-                          }}
-                          onClick={() => updateTheme(remoteEntry)}
-                          disabled={isUninstalling}
-                        >
-                          <AiOutlineDownload />
-                        </DialogButton>{" "}
-                      </>
+                      <DialogButton
+                        style={{
+                          marginRight: "8px",
+                          minWidth: "calc(50% - 8px)",
+                          maxWidth: "calc(50% - 8px)",
+                          filter:
+                            "invert(6%) sepia(90%) saturate(200%) hue-rotate(160deg) contrast(122%)",
+                        }}
+                        onClick={() => updateTheme(remoteEntry)}
+                        disabled={isUninstalling}
+                      >
+                        <AiOutlineDownload />
+                      </DialogButton>
+                    )}
+                    {updateStatus === "local" && (
+                      <span
+                        style={{
+                          position: "absolute",
+                          top: "50%",
+                          right: "50%",
+                          transform: "translate(0, -50%)",
+                        }}
+                      >
+                        <i>Local Theme</i>
+                      </span>
                     )}
                     <DialogButton
                       style={{

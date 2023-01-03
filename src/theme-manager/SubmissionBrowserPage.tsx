@@ -1,18 +1,19 @@
 import { Focusable } from "decky-frontend-lib";
 import { useCssLoaderState } from "../state";
 import * as python from "../python";
+import { genericGET } from "../api";
 import { BrowserSearchFields, LoadMoreButton, VariableSizeCard } from "../components";
 import { generateParamStr } from "../logic";
 import { ThemeQueryResponse } from "../apiTypes";
 import { useEffect, useRef, useState } from "react";
 import { isEqual } from "lodash";
+import { refreshToken } from "../api";
 
 export function SubmissionsPage() {
   const {
     apiUrl,
     apiFullToken,
     apiTokenExpireDate,
-    setLocalThemeList: setInstalledThemes,
     submissionSearchOpts: searchOpts,
     submissionServerFilters: serverFilters,
     submissionThemeList: themeArr,
@@ -24,27 +25,7 @@ export function SubmissionsPage() {
 
   function reloadThemes() {
     getThemes();
-    python.resolve(python.reset(), () => {
-      python.resolve(python.getThemes(), setInstalledThemes);
-    });
-  }
-
-  // This returns the token that is intended to be used in whatever call
-  function refreshToken() {
-    if (!apiFullToken) {
-      return undefined;
-    }
-    if (apiTokenExpireDate === undefined) {
-      return apiFullToken;
-    }
-    if (new Date().valueOf() < apiTokenExpireDate) {
-      return apiFullToken;
-    }
-    return python.refreshToken(`${apiUrl}/auth/refresh_token`, apiFullToken).then((token) => {
-      setGlobalState("apiFullToken", token);
-      setGlobalState("apiTokenExpireDate", new Date().valueOf() + 1000 * 10 * 60);
-      return token;
-    });
+    python.reloadBackend();
   }
 
   async function getThemes() {
@@ -54,16 +35,16 @@ export function SubmissionsPage() {
         searchOpts.filters !== "All" ? searchOpts : { ...searchOpts, filters: "" },
         "CSS."
       );
-      python
-        .genericGET(`${apiUrl}/themes/awaiting_approval${queryStr}`, newToken)
-        .then((data: ThemeQueryResponse) => {
+      genericGET(`${apiUrl}/themes/awaiting_approval${queryStr}`, newToken).then(
+        (data: ThemeQueryResponse) => {
           if (data.total > 0) {
             setGlobalState("submissionThemeList", data);
           } else {
             setGlobalState("submissionThemeList", { total: 0, items: [] });
           }
           setSnapIndex(-1);
-        });
+        }
+      );
     }
   }
 

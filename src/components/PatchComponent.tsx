@@ -18,7 +18,6 @@ export const PatchComponent: VFC<{
   bottomSeparatorValue: "standard" | "none";
 }> = ({ data, selectedLabel, themeName, patchName, bottomSeparatorValue }) => {
   if (selectedLabel === data.on) {
-    const { setLocalThemeList: setThemeList } = useCssLoaderState();
     // The only value that changes from component to component is the value, so this can just be re-used
     function setComponentAndReload(value: string) {
       python.resolve(
@@ -29,7 +28,7 @@ export const PatchComponent: VFC<{
           value
         ),
         () => {
-          python.resolve(python.getThemes(), setThemeList);
+          python.getInstalledThemes();
         }
       );
     }

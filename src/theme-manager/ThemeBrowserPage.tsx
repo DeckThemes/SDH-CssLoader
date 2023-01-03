@@ -1,6 +1,8 @@
 import { Focusable } from "decky-frontend-lib";
 import { useLayoutEffect, useState, FC, useEffect, useRef } from "react";
 import * as python from "../python";
+import { genericGET } from "../api";
+import { logInWithShortToken } from "../api";
 import { isEqual } from "lodash";
 
 // Interfaces for the JSON objects the lists work with
@@ -12,7 +14,6 @@ import { generateParamStr } from "../logic";
 export const ThemeBrowserPage: FC = () => {
   const {
     browseThemeList: themeArr,
-    setLocalThemeList,
     themeSearchOpts: searchOpts,
     apiShortToken,
     apiFullToken,
@@ -31,14 +32,7 @@ export const ThemeBrowserPage: FC = () => {
   function reloadThemes() {
     reloadBackendVer();
     getThemes();
-    // Reloads the local themes
-    python.resolve(python.reset(), () => {
-      python.resolve(python.getThemes(), setLocalThemeList);
-    });
-  }
-
-  function getInstalledThemes() {
-    python.resolve(python.getThemes(), setLocalThemeList);
+    python.reloadBackend();
   }
 
   function getThemes() {
@@ -46,7 +40,7 @@ export const ThemeBrowserPage: FC = () => {
       searchOpts.filters !== "All" ? searchOpts : { ...searchOpts, filters: "" },
       "CSS."
     );
-    python.genericGET(`${apiUrl}/themes${queryStr}`).then((data: ThemeQueryResponse) => {
+    genericGET(`${apiUrl}/themes${queryStr}`).then((data: ThemeQueryResponse) => {
       console.log("got themes");
       if (data.total > 0) {
         setGlobalState("browseThemeList", data);
@@ -63,33 +57,14 @@ export const ThemeBrowserPage: FC = () => {
     }
   }, [searchOpts, prevSearchOpts]);
 
-  function authWithShortToken() {
-    python.authWithShortToken(apiShortToken, apiUrl).then((data) => {
-      if (data.token) {
-        python.storeWrite("shortToken", apiShortToken);
-        setGlobalState("apiShortToken", apiShortToken);
-        setGlobalState("apiFullToken", data.token);
-        setGlobalState("apiTokenExpireDate", new Date().valueOf() + 1000 * 60 * 10);
-        python.genericGET(`${apiUrl}/auth/me`, data.token).then((meData) => {
-          if (meData?.username) {
-            setGlobalState("apiMeData", meData);
-            python.toast("Logged In!", `Logged in as ${meData.username}`);
-          }
-        });
-      } else {
-        python.toast("Error Authenticating", JSON.stringify(data));
-      }
-    });
-  }
-
   // Runs upon opening the page every time
   useLayoutEffect(() => {
     reloadBackendVer();
     if (apiShortToken && !apiFullToken) {
-      authWithShortToken();
+      logInWithShortToken();
     }
     // Installed themes aren't used on this page, but they are used on other pages, so fetching them here means that as you navigate to the others they will be already loaded
-    getInstalledThemes();
+    python.getInstalledThemes();
   }, []);
 
   const endOfPageRef = useRef<HTMLElement>();

@@ -10,6 +10,7 @@ import {
 } from "decky-frontend-lib";
 import { useEffect, useState, FC } from "react";
 import * as python from "./python";
+import * as api from "./api";
 import { RiPaintFill } from "react-icons/ri";
 
 import {
@@ -29,7 +30,7 @@ var firstTime: boolean = true;
 const Content: FC<{ serverAPI: ServerAPI }> = () => {
   // Originally, when SuchMeme wrote this, the names themeList, themeListInternal, and setThemeList were used for the getter and setter functions
   // These were renamed when state was moved to the context, but I simply re-defined them here as their original names so that none of the original code broke
-  const { localThemeList: themeList, setLocalThemeList: setThemeList } = useCssLoaderState();
+  const { localThemeList: themeList } = useCssLoaderState();
 
   // setThemeList is a function that takes the raw data from the python function and then formats it with init and generate functions
   // This still exists, it just has been moved into the CssLoaderState class' setter function, so it now happens automatically
@@ -37,7 +38,7 @@ const Content: FC<{ serverAPI: ServerAPI }> = () => {
   const [dummyFuncResult, setDummyResult] = useState<boolean>(false);
 
   const reload = function () {
-    python.resolve(python.getThemes(), setThemeList);
+    python.reloadBackend();
     dummyFuncTest();
   };
 
@@ -70,7 +71,7 @@ const Content: FC<{ serverAPI: ServerAPI }> = () => {
             </ButtonItem>
           </PanelSectionRow>
           {themeList.map((x) => (
-            <ThemeToggle data={x} setThemeList={setThemeList} />
+            <ThemeToggle data={x} />
           ))}
         </>
       ) : (
@@ -83,12 +84,7 @@ const Content: FC<{ serverAPI: ServerAPI }> = () => {
       )}
 
       <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={() => {
-            python.resolve(python.reset(), () => reload());
-          }}
-        >
+        <ButtonItem layout="below" onClick={() => reload()}>
           Reload Themes
         </ButtonItem>
       </PanelSectionRow>
@@ -97,7 +93,7 @@ const Content: FC<{ serverAPI: ServerAPI }> = () => {
 };
 
 const ThemeManagerRouter: FC = () => {
-  const { apiShortToken, apiMeData, currentTab, setGlobalState } = useCssLoaderState();
+  const { apiMeData, currentTab, setGlobalState } = useCssLoaderState();
   return (
     <div
       style={{
@@ -117,22 +113,22 @@ const ThemeManagerRouter: FC = () => {
             content: <ThemeBrowserPage />,
             id: "ThemeBrowser",
           },
-          ...(!!apiShortToken && apiShortToken.length === 12
+          ...(!!apiMeData
             ? [
                 {
                   title: "Starred Themes",
                   content: <StarredThemesPage />,
                   id: "StarredThemes",
                 },
-              ]
-            : []),
-          ...(!!apiMeData && apiMeData.permissions.includes(Permissions.viewSubs)
-            ? [
-                {
-                  title: "Submissions",
-                  content: <SubmissionsPage />,
-                  id: "SubmissionsPage",
-                },
+                ...(apiMeData.permissions.includes(Permissions.viewSubs)
+                  ? [
+                      {
+                        title: "Submissions",
+                        content: <SubmissionsPage />,
+                        id: "SubmissionsPage",
+                      },
+                    ]
+                  : []),
               ]
             : []),
           {
@@ -152,9 +148,11 @@ const ThemeManagerRouter: FC = () => {
 };
 
 export default definePlugin((serverApi: ServerAPI) => {
-  python.setServer(serverApi);
-
   const state: CssLoaderState = new CssLoaderState();
+  python.setServer(serverApi);
+  python.setStateClass(state);
+  api.setServer(serverApi);
+  api.setStateClass(state);
 
   python.resolve(python.storeRead("shortToken"), (token: string) => {
     if (token) {

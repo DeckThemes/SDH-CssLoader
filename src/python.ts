@@ -1,7 +1,17 @@
 // Code from https://github.com/NGnius/PowerTools/blob/dev/src/python.ts
-import { ServerAPI, ServerResponse } from "decky-frontend-lib";
+import { ServerAPI } from "decky-frontend-lib";
+import { CssLoaderState } from "./state";
+import { Theme } from "./theme";
 
 var server: ServerAPI | undefined = undefined;
+var globalState: CssLoaderState | undefined = undefined;
+
+export function setServer(s: ServerAPI) {
+  server = s;
+}
+export function setStateClass(s: CssLoaderState): void {
+  globalState = s;
+}
 
 export async function openFilePicker(path: string) {
   return await server!.openFilePicker(path, true);
@@ -34,8 +44,28 @@ export function execute(promise: Promise<any>) {
   })();
 }
 
-export function setServer(s: ServerAPI) {
-  server = s;
+export function getInstalledThemes(): Promise<void> {
+  const setGlobalState = globalState!.setGlobalState.bind(globalState);
+  return server!.callPluginMethod<{}, Theme[]>("get_themes", {}).then((data) => {
+    if (data.success) {
+      const listArr: Theme[] = data.result;
+      let list: Theme[] = [];
+
+      listArr.forEach((x: any) => {
+        let theme = new Theme();
+        theme.data = x;
+        list.push(theme);
+      });
+      list.forEach((x) => x.init());
+      setGlobalState("localThemeList", list);
+    }
+  });
+}
+
+export function reloadBackend(): Promise<void> {
+  return server!.callPluginMethod("reset", {}).then(() => {
+    getInstalledThemes();
+  });
 }
 
 export function getThemes(): Promise<any> {
@@ -47,10 +77,6 @@ export function setThemeState(name: string, state: boolean): Promise<any> {
     name: name,
     state: state,
   });
-}
-
-export function reset(): Promise<any> {
-  return server!.callPluginMethod("reset", {});
 }
 
 export function setPatchOfTheme(themeName: string, patchName: string, value: string): Promise<any> {
@@ -90,8 +116,9 @@ export function toast(title: string, message: string) {
   })();
 }
 
-export function downloadThemeFromUrl(themeId: string, url: string): Promise<any> {
-  return server!.callPluginMethod("download_theme_from_url", { id: themeId, url: url });
+export function downloadThemeFromUrl(themeId: string): Promise<any> {
+  const { apiUrl } = globalState!.getPublicState();
+  return server!.callPluginMethod("download_theme_from_url", { id: themeId, url: apiUrl });
 }
 
 export function deleteTheme(themeName: string): Promise<any> {
@@ -114,48 +141,7 @@ export function dummyFunction(): Promise<any> {
   return server!.callPluginMethod("dummy_function", {});
 }
 
-export function refreshToken(url: string, authToken: string | undefined) {
-  return server!
-    .fetchNoCors(url, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-      },
-    })
-    .then((deckyRes) => {
-      if (deckyRes.success) {
-        return deckyRes.result;
-      }
-      throw new Error(`Fetch not successful!`);
-    })
-    .then((res) => {
-      // @ts-ignore
-      if (res.status >= 200 && res.status <= 300 && res.body) {
-        // @ts-ignore
-        return JSON.parse(res.body || "");
-      }
-      // @ts-ignore
-      throw new Error(`Res not OK!, code ${res.status}`);
-    })
-    .then((json) => {
-      if (json.token) {
-        return json.token;
-      }
-      throw new Error(`No token returned!`);
-    })
-    .catch((err) => {
-      console.error(`Error Refreshing Token!`, err);
-    });
-}
-
-export function genericGET(
-  fetchUrl: string,
-  authToken?: string | undefined,
-  expiryDate?: Date | number | undefined
-) {
-  if (authToken && expiryDate) {
-  }
-
+export function genericGET(fetchUrl: string, authToken?: string | undefined) {
   return server!
     .fetchNoCors<Response>(`${fetchUrl}`, {
       method: "GET",
@@ -212,34 +198,5 @@ export function toggleStar(themeId: string, isStarred: boolean, authToken: strin
     })
     .catch((err) => {
       console.error(`Error starring theme`, err);
-    });
-}
-
-export function authWithShortToken(shortToken: string, apiUrl: string) {
-  return server!
-    .callServerMethod("http_request", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      url: `${apiUrl}/auth/authenticate_token`,
-      data: JSON.stringify({ token: shortToken }),
-    })
-    .then((deckyRes) => {
-      if (deckyRes.success) {
-        return deckyRes.result;
-      }
-      throw new Error(`Fetch not successful!`);
-    })
-    .then((res) => {
-      // @ts-ignore
-      return JSON.parse(res?.body || "");
-    })
-    .then((json) => {
-      if (json) {
-        return json;
-      }
-      throw new Error(`No json returned!`);
-    })
-    .catch((err) => {
-      console.error(`Error authenticating from short token.`, err);
     });
 }

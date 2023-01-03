@@ -41,7 +41,6 @@ interface PublicCssLoaderState {
 interface PublicCssLoaderContext extends PublicCssLoaderState {
   setGlobalState(key: string, data: any): void;
   getGlobalState(key: string): any;
-  setLocalThemeList(listArr: localThemeEntry[]): void;
 }
 
 // This class creates the getter and setter functions for all of the global state data.
@@ -158,21 +157,6 @@ export class CssLoaderState {
     this.forceUpdate();
   }
 
-  setLocalThemeList(listArr: localThemeEntry[]) {
-    // This formats the raw data grabbed by the python into the standardized Theme class
-    let list: Theme[] = [];
-
-    listArr.forEach((x: any) => {
-      let theme = new Theme();
-      theme.data = x;
-      list.push(theme);
-    });
-    list.forEach((x) => x.init());
-
-    this.localThemeList = list;
-    this.forceUpdate();
-  }
-
   private forceUpdate() {
     this.eventBus.dispatchEvent(new Event("stateUpdate"));
   }
@@ -203,8 +187,6 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({ children, cssLoade
 
   const getGlobalState = (key: string) => cssLoaderStateClass.getGlobalState(key);
   const setGlobalState = (key: string, data: any) => cssLoaderStateClass.setGlobalState(key, data);
-  const setLocalThemeList = (listArr: localThemeEntry[]) =>
-    cssLoaderStateClass.setLocalThemeList(listArr);
 
   return (
     <CssLoaderContext.Provider
@@ -212,7 +194,6 @@ export const CssLoaderContextProvider: FC<ProviderProps> = ({ children, cssLoade
         ...publicState,
         getGlobalState,
         setGlobalState,
-        setLocalThemeList,
       }}
     >
       {children}
