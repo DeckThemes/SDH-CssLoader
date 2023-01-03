@@ -7,7 +7,7 @@ import * as python from "../python";
 import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
 import { MinimalCSSThemeInfo, PartialCSSThemeInfo } from "../apiTypes";
-import { checkForUpdateById, genericGET } from "../api";
+import { genericGET } from "../api";
 
 export type LocalThemeStatus = "installed" | "outdated" | "local";
 

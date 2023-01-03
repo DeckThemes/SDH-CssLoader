@@ -125,38 +125,6 @@ export function refreshToken(): Promise<string | undefined> {
     });
 }
 
-// This is a different function than genericGET as we don't want this to error. If one promise in a Promise.all rejects, the whole function errors, so I want to treat a 404 as a return value of "false"
-// Kinda a hacky workaround, but that's the best kind
-export function checkForUpdateById(themeId: string): Promise<any> {
-  const { apiUrl } = globalState!.getPublicState();
-  return server!
-    .fetchNoCors<Response>(`${apiUrl}/themes/${themeId}`, {
-      method: "GET",
-    })
-    .then((deckyRes) => {
-      if (deckyRes.success) {
-        return deckyRes.result;
-      }
-      throw new Error(`Fetch not successful!`);
-    })
-    .then((res) => {
-      if (res.status >= 200 && res.status <= 300) {
-        // @ts-ignore
-        return JSON.parse(res.body || "");
-      }
-      throw new Error("Res Not OK!");
-    })
-    .then((body) => {
-      if (body) {
-        return body;
-      }
-      throw new Error("No Body");
-    })
-    .catch(() => {
-      return false;
-    });
-}
-
 export async function genericGET(
   fetchPath: string,
   requiresAuth: boolean = false,
