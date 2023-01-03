@@ -73,7 +73,7 @@ export const UninstallThemePage: VFC = () => {
           let updateStatusArr: [string, LocalThemeStatus, false | MinimalCSSThemeInfo][] = [];
           localThemeList.forEach((localEntry) => {
             const remoteEntry = themeArr.find(
-              (f) => f.id === localEntry.id || f.id === localEntry.name
+              (remote) => remote.id === localEntry.id || remote.name === localEntry.id
             );
             if (remoteEntry) {
               if (remoteEntry.version === localEntry.data.version) {
