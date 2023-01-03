@@ -1,6 +1,8 @@
 import { ServerAPI } from "decky-frontend-lib";
 import { CssLoaderState } from "./state";
 import { toast, storeWrite } from "./python";
+import { ThemeQueryRequest, ThemeQueryResponse } from "./apiTypes";
+import { generateParamStr } from "./logic";
 
 var server: ServerAPI | undefined = undefined;
 var globalState: CssLoaderState | undefined = undefined;
@@ -55,7 +57,7 @@ export function logInWithShortToken(shortTokenInterimValue?: string | undefined)
           setGlobalState("apiShortToken", shortTokenValue);
           setGlobalState("apiFullToken", data.token);
           setGlobalState("apiTokenExpireDate", new Date().valueOf() + 1000 * 60 * 10);
-          genericGET(`${apiUrl}/auth/me`, data.token).then((meData) => {
+          genericGET(`${apiUrl}/auth/me`, true, data.token).then((meData) => {
             if (meData?.username) {
               setGlobalState("apiMeData", meData);
               toast("Logged In!", `Logged in as ${meData.username}`);
@@ -74,17 +76,17 @@ export function logInWithShortToken(shortTokenInterimValue?: string | undefined)
 }
 
 // This returns the token that is intended to be used in whatever call
-export function refreshToken(): Promise<string> | string | undefined {
+export function refreshToken(): Promise<string | undefined> {
   const { apiFullToken, apiTokenExpireDate, apiUrl } = globalState!.getPublicState();
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
   if (!apiFullToken) {
-    return undefined;
+    return Promise.resolve(undefined);
   }
   if (apiTokenExpireDate === undefined) {
-    return apiFullToken;
+    return Promise.resolve(apiFullToken);
   }
   if (new Date().valueOf() < apiTokenExpireDate) {
-    return apiFullToken;
+    return Promise.resolve(apiFullToken);
   }
   return server!
     .fetchNoCors<Response>(`${apiUrl}/auth/refresh_token`, {
@@ -132,14 +134,12 @@ export function checkForUpdateById(themeId: string): Promise<any> {
       method: "GET",
     })
     .then((deckyRes) => {
-      console.log("deckyRes", deckyRes);
       if (deckyRes.success) {
         return deckyRes.result;
       }
       throw new Error(`Fetch not successful!`);
     })
     .then((res) => {
-      console.log("res", res);
       if (res.status >= 200 && res.status <= 300) {
         // @ts-ignore
         return JSON.parse(res.body || "");
@@ -147,47 +147,91 @@ export function checkForUpdateById(themeId: string): Promise<any> {
       throw new Error("Res Not OK!");
     })
     .then((body) => {
-      console.log("body", body);
       if (body) {
         return body;
       }
       throw new Error("No Body");
     })
-    .catch((err) => {
+    .catch(() => {
       return false;
     });
 }
 
-export function genericGET(fetchUrl: string, authToken?: string | undefined) {
-  return server!
-    .fetchNoCors<Response>(`${fetchUrl}`, {
-      method: "GET",
-      headers: authToken
-        ? {
-            Authorization: `Bearer ${authToken}`,
-          }
-        : {},
-    })
-    .then((deckyRes) => {
-      if (deckyRes.success) {
-        return deckyRes.result;
+export async function genericGET(
+  fetchUrl: string,
+  requiresAuth: boolean = false,
+  customAuthToken: string | undefined = undefined
+) {
+  function doTheFetching(authToken: string | undefined = undefined) {
+    return server!
+      .fetchNoCors<Response>(`${fetchUrl}`, {
+        method: "GET",
+        headers: authToken
+          ? {
+              Authorization: `Bearer ${authToken}`,
+            }
+          : {},
+      })
+      .then((deckyRes) => {
+        if (deckyRes.success) {
+          return deckyRes.result;
+        }
+        throw new Error(`Fetch not successful!`);
+      })
+      .then((res) => {
+        if (res.status >= 200 && res.status <= 300 && res.body) {
+          // @ts-ignore
+          return JSON.parse(res.body || "");
+        }
+        throw new Error(`Res not OK!, code ${res.status}`);
+      })
+      .then((json) => {
+        if (json) {
+          return json;
+        }
+        throw new Error(`No json returned!`);
+      })
+      .catch((err) => {
+        console.error(`Error fetching ${fetchUrl}`, err);
+      });
+  }
+  if (requiresAuth) {
+    if (customAuthToken) {
+      return doTheFetching(customAuthToken);
+    }
+    return refreshToken().then((token) => {
+      if (token) {
+        return doTheFetching(token);
+      } else {
+        toast("Error Refreshing Token!", "");
+        return;
       }
-      throw new Error(`Fetch not successful!`);
-    })
-    .then((res) => {
-      if (res.status >= 200 && res.status <= 300 && res.body) {
-        // @ts-ignore
-        return JSON.parse(res.body || "");
-      }
-      throw new Error(`Res not OK!, code ${res.status}`);
-    })
-    .then((json) => {
-      if (json) {
-        return json;
-      }
-      throw new Error(`No json returned!`);
-    })
-    .catch((err) => {
-      console.error(`Error fetching ${fetchUrl}`, err);
     });
+  } else {
+    return doTheFetching();
+  }
+}
+
+export function getThemes(
+  searchOpts: ThemeQueryRequest,
+  apiPath: string,
+  globalStateVarName: string,
+  setSnapIndex: (i: number) => void,
+  requiresAuth: boolean = false
+) {
+  const { apiUrl } = globalState!.getPublicState();
+  const setGlobalState = globalState!.setGlobalState.bind(globalState);
+  const queryStr = generateParamStr(
+    searchOpts.filters !== "All" ? searchOpts : { ...searchOpts, filters: "" },
+    "CSS."
+  );
+  genericGET(`${apiUrl}${apiPath}${queryStr}`, requiresAuth).then((data: ThemeQueryResponse) => {
+    console.log("got themes");
+    if (data.total > 0) {
+      setGlobalState(globalStateVarName, data);
+    } else {
+      setGlobalState(globalStateVarName, { total: 0, items: [] });
+    }
+    setSnapIndex(-1);
+  });
 }

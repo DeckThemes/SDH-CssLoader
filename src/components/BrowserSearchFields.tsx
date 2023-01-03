@@ -24,7 +24,7 @@ export function BrowserSearchFields({
   unformattedFilters,
   unformattedFiltersVarName,
   onReload,
-  requiresAuth,
+  requiresAuth = false,
   getTargetsPath,
 }: {
   searchOpts: ThemeQueryRequest;
@@ -40,25 +40,25 @@ export function BrowserSearchFields({
 
   async function getThemeTargets() {
     // This is probably not the best way of doing this
-    function fetch(newToken: string | undefined = undefined) {
-      genericGET(`${apiUrl}${getTargetsPath}`, newToken).then((data) => {
-        if (data?.filters) {
-          setGlobalState(unformattedFiltersVarName, {
-            filters: data.filters,
-            order: data.order,
-          });
-        }
-      });
-    }
-    if (requiresAuth) {
-      const newToken = await refreshToken();
-      if (newToken) {
-        fetch(newToken);
+    // function fetch(newToken: string | undefined = undefined) {
+    genericGET(`${apiUrl}${getTargetsPath}`, requiresAuth).then((data) => {
+      if (data?.filters) {
+        setGlobalState(unformattedFiltersVarName, {
+          filters: data.filters,
+          order: data.order,
+        });
       }
-    } else {
-      fetch();
-    }
+    });
   }
+  // if (requiresAuth) {
+  //   const newToken = await refreshToken();
+  //   if (newToken) {
+  //     fetch(newToken);
+  //   }
+  // } else {
+  //   fetch();
+  // }
+  // }
   const formattedFilters = useMemo<{ filters: DropdownOption[]; order: DropdownOption[] }>(
     () => ({
       filters: [

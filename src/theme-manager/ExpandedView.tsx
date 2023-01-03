@@ -8,7 +8,6 @@ import * as python from "../python";
 import { genericGET } from "../api";
 import { refreshToken } from "../api";
 
-// Interfaces for the JSON objects the lists work with
 import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
 import { calcButtonColor } from "../logic";
@@ -32,9 +31,8 @@ export const ExpandedViewPage: VFC = () => {
     `https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Steam_Deck_logo_%28blue_background%29.svg/2048px-Steam_Deck_logo_%28blue_background%29.svg.png`
   );
   async function getStarredStatus() {
-    const newToken = await refreshToken();
-    if (newToken && fullThemeData) {
-      genericGET(`${apiUrl}/users/me/stars/${fullThemeData.id}`, newToken).then((data) => {
+    if (fullThemeData) {
+      genericGET(`${apiUrl}/users/me/stars/${fullThemeData.id}`, true).then((data) => {
         if (data.starred) {
           setStarred(data.starred);
         }

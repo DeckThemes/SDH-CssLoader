@@ -1,56 +1,30 @@
 import { Focusable } from "decky-frontend-lib";
 import { useCssLoaderState } from "../state";
 import * as python from "../python";
-import { genericGET } from "../api";
 import { BrowserSearchFields, LoadMoreButton, VariableSizeCard } from "../components";
-import { generateParamStr } from "../logic";
-import { ThemeQueryResponse } from "../apiTypes";
 import { useEffect, useRef, useState } from "react";
 import { isEqual } from "lodash";
-import { refreshToken } from "../api";
+import { getThemes } from "../api";
 
 export function SubmissionsPage() {
   const {
-    apiUrl,
     apiFullToken,
-    apiTokenExpireDate,
     submissionSearchOpts: searchOpts,
     submissionServerFilters: serverFilters,
     submissionThemeList: themeArr,
     browserCardSize,
     prevSubSearchOpts: prevSearchOpts,
-    setGlobalState,
     apiMeData,
   } = useCssLoaderState();
 
   function reloadThemes() {
-    getThemes();
+    getThemes(searchOpts, "/themes/awaiting_approval", "submissionThemeList", setSnapIndex, true);
     python.reloadBackend();
-  }
-
-  async function getThemes() {
-    const newToken = await refreshToken();
-    if (newToken) {
-      const queryStr = generateParamStr(
-        searchOpts.filters !== "All" ? searchOpts : { ...searchOpts, filters: "" },
-        "CSS."
-      );
-      genericGET(`${apiUrl}/themes/awaiting_approval${queryStr}`, newToken).then(
-        (data: ThemeQueryResponse) => {
-          if (data.total > 0) {
-            setGlobalState("submissionThemeList", data);
-          } else {
-            setGlobalState("submissionThemeList", { total: 0, items: [] });
-          }
-          setSnapIndex(-1);
-        }
-      );
-    }
   }
 
   useEffect(() => {
     if (!isEqual(prevSearchOpts, searchOpts) || themeArr.total === 0) {
-      getThemes();
+      getThemes(searchOpts, "/themes/awaiting_approval", "submissionThemeList", setSnapIndex, true);
     }
   }, [searchOpts, prevSearchOpts, apiMeData]);
 

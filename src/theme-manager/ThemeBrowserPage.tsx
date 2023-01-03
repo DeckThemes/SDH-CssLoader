@@ -1,15 +1,13 @@
 import { Focusable } from "decky-frontend-lib";
 import { useLayoutEffect, useState, FC, useEffect, useRef } from "react";
 import * as python from "../python";
-import { genericGET } from "../api";
+import { getThemes } from "../api";
 import { logInWithShortToken } from "../api";
 import { isEqual } from "lodash";
 
 // Interfaces for the JSON objects the lists work with
 import { useCssLoaderState } from "../state";
 import { BrowserSearchFields, VariableSizeCard, LoadMoreButton } from "../components";
-import { ThemeQueryResponse } from "../apiTypes";
-import { generateParamStr } from "../logic";
 
 export const ThemeBrowserPage: FC = () => {
   const {
@@ -19,9 +17,7 @@ export const ThemeBrowserPage: FC = () => {
     apiFullToken,
     serverFilters,
     browserCardSize = 3,
-    apiUrl,
     prevSearchOpts,
-    setGlobalState,
   } = useCssLoaderState();
 
   const [backendVersion, setBackendVer] = useState<number>(3);
@@ -31,35 +27,20 @@ export const ThemeBrowserPage: FC = () => {
 
   function reloadThemes() {
     reloadBackendVer();
-    getThemes();
+    getThemes(searchOpts, "/themes", "browseThemeList", setSnapIndex);
     python.reloadBackend();
-  }
-
-  function getThemes() {
-    const queryStr = generateParamStr(
-      searchOpts.filters !== "All" ? searchOpts : { ...searchOpts, filters: "" },
-      "CSS."
-    );
-    genericGET(`${apiUrl}/themes${queryStr}`).then((data: ThemeQueryResponse) => {
-      console.log("got themes");
-      if (data.total > 0) {
-        setGlobalState("browseThemeList", data);
-      } else {
-        setGlobalState("browseThemeList", { total: 0, items: [] });
-      }
-      setSnapIndex(-1);
-    });
   }
 
   useEffect(() => {
     if (!isEqual(prevSearchOpts, searchOpts) || themeArr.total === 0) {
-      getThemes();
+      getThemes(searchOpts, "/themes", "browseThemeList", setSnapIndex);
     }
   }, [searchOpts, prevSearchOpts]);
 
   // Runs upon opening the page every time
   useLayoutEffect(() => {
     reloadBackendVer();
+    console.log("test", apiShortToken && !apiFullToken);
     if (apiShortToken && !apiFullToken) {
       logInWithShortToken();
     }

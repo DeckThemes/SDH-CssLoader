@@ -49,9 +49,7 @@ export const UninstallThemePage: VFC = () => {
           (f) => e.id === f.id || e.id === f.name
         );
         if (entryInBrowseList) {
-          const promise: Promise<PartialCSSThemeInfo> = new Promise((resolve) => {
-            resolve(entryInBrowseList);
-          });
+          const promise: Promise<PartialCSSThemeInfo> = Promise.resolve(entryInBrowseList);
           promiseArr.push(promise);
           return;
         }

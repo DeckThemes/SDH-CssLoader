@@ -28,12 +28,7 @@ import { Permissions } from "./apiTypes";
 var firstTime: boolean = true;
 
 const Content: FC<{ serverAPI: ServerAPI }> = () => {
-  // Originally, when SuchMeme wrote this, the names themeList, themeListInternal, and setThemeList were used for the getter and setter functions
-  // These were renamed when state was moved to the context, but I simply re-defined them here as their original names so that none of the original code broke
   const { localThemeList: themeList } = useCssLoaderState();
-
-  // setThemeList is a function that takes the raw data from the python function and then formats it with init and generate functions
-  // This still exists, it just has been moved into the CssLoaderState class' setter function, so it now happens automatically
 
   const [dummyFuncResult, setDummyResult] = useState<boolean>(false);
 
@@ -41,18 +36,13 @@ const Content: FC<{ serverAPI: ServerAPI }> = () => {
     python.reloadBackend();
     dummyFuncTest();
   };
-
-  if (firstTime) {
-    firstTime = false;
-    reload();
-  }
-
   function dummyFuncTest() {
     python.resolve(python.dummyFunction(), setDummyResult);
   }
 
   useEffect(() => {
     dummyFuncTest();
+    python.getInstalledThemes();
   }, []);
 
   return (

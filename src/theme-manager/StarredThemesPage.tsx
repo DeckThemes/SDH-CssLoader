@@ -1,17 +1,13 @@
 import { Focusable } from "decky-frontend-lib";
 import { useCssLoaderState } from "../state";
 import * as python from "../python";
-import { genericGET } from "../api";
 import { BrowserSearchFields, LoadMoreButton, VariableSizeCard } from "../components";
-import { generateParamStr } from "../logic";
-import { ThemeQueryResponse } from "../apiTypes";
 import { useEffect, useRef, useState } from "react";
 import { isEqual } from "lodash";
-import { refreshToken } from "../api";
+import { getThemes } from "../api";
 
 export function StarredThemesPage() {
   const {
-    apiUrl,
     apiFullToken,
     apiMeData,
     starredSearchOpts: searchOpts,
@@ -19,37 +15,16 @@ export function StarredThemesPage() {
     starredThemeList: themeArr,
     browserCardSize,
     prevStarSearchOpts: prevSearchOpts,
-    setGlobalState,
   } = useCssLoaderState();
 
   function reloadThemes() {
-    getThemes();
+    getThemes(searchOpts, "/users/me/stars", "starredThemeList", setSnapIndex, true);
     python.reloadBackend();
-  }
-
-  async function getThemes() {
-    const newToken = await refreshToken();
-    if (newToken) {
-      const queryStr = generateParamStr(
-        searchOpts.filters !== "All" ? searchOpts : { ...searchOpts, filters: "" },
-        "CSS."
-      );
-      genericGET(`${apiUrl}/users/me/stars${queryStr}`, newToken).then(
-        (data: ThemeQueryResponse) => {
-          if (data.total > 0) {
-            setGlobalState("starredThemeList", data);
-          } else {
-            setGlobalState("starredThemeList", { total: 0, items: [] });
-          }
-          setSnapIndex(-1);
-        }
-      );
-    }
   }
 
   useEffect(() => {
     if (!isEqual(prevSearchOpts, searchOpts) || themeArr.total === 0) {
-      getThemes();
+      getThemes(searchOpts, "/users/me/stars", "starredThemeList", setSnapIndex, true);
     }
   }, [searchOpts, prevSearchOpts, apiMeData]);
 
