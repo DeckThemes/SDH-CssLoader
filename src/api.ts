@@ -57,7 +57,7 @@ export function logInWithShortToken(shortTokenInterimValue?: string | undefined)
           setGlobalState("apiShortToken", shortTokenValue);
           setGlobalState("apiFullToken", data.token);
           setGlobalState("apiTokenExpireDate", new Date().valueOf() + 1000 * 60 * 10);
-          genericGET(`${apiUrl}/auth/me`, true, data.token).then((meData) => {
+          genericGET(`/auth/me`, true, data.token).then((meData) => {
             if (meData?.username) {
               setGlobalState("apiMeData", meData);
               toast("Logged In!", `Logged in as ${meData.username}`);
@@ -158,13 +158,14 @@ export function checkForUpdateById(themeId: string): Promise<any> {
 }
 
 export async function genericGET(
-  fetchUrl: string,
+  fetchPath: string,
   requiresAuth: boolean = false,
   customAuthToken: string | undefined = undefined
 ) {
+  const { apiUrl } = globalState!.getPublicState();
   function doTheFetching(authToken: string | undefined = undefined) {
     return server!
-      .fetchNoCors<Response>(`${fetchUrl}`, {
+      .fetchNoCors<Response>(`${apiUrl}${fetchPath}`, {
         method: "GET",
         headers: authToken
           ? {
@@ -192,7 +193,7 @@ export async function genericGET(
         throw new Error(`No json returned!`);
       })
       .catch((err) => {
-        console.error(`Error fetching ${fetchUrl}`, err);
+        console.error(`Error fetching ${fetchPath}`, err);
       });
   }
   if (requiresAuth) {
@@ -219,13 +220,12 @@ export function getThemes(
   setSnapIndex: (i: number) => void,
   requiresAuth: boolean = false
 ) {
-  const { apiUrl } = globalState!.getPublicState();
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
   const queryStr = generateParamStr(
     searchOpts.filters !== "All" ? searchOpts : { ...searchOpts, filters: "" },
     "CSS."
   );
-  genericGET(`${apiUrl}${apiPath}${queryStr}`, requiresAuth).then((data: ThemeQueryResponse) => {
+  genericGET(`${apiPath}${queryStr}`, requiresAuth).then((data: ThemeQueryResponse) => {
     console.log("got themes");
     if (data.total > 0) {
       setGlobalState(globalStateVarName, data);

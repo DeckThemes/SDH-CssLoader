@@ -58,7 +58,7 @@ export const UninstallThemePage: VFC = () => {
       if (idsToQuery.length > 0) {
         const queryStr = "?ids=" + idsToQuery.join(".");
         console.log(queryStr);
-        genericGET(`${apiUrl}/themes/ids${queryStr}`).then((data: MinimalCSSThemeInfo[]) => {
+        genericGET(`/themes/ids${queryStr}`).then((data: MinimalCSSThemeInfo[]) => {
           if (data) {
             themeArr.push(...data);
             console.log(data);

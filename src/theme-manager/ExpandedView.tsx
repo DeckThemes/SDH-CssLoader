@@ -32,7 +32,7 @@ export const ExpandedViewPage: VFC = () => {
   );
   async function getStarredStatus() {
     if (fullThemeData) {
-      genericGET(`${apiUrl}/users/me/stars/${fullThemeData.id}`, true).then((data) => {
+      genericGET(`/users/me/stars/${fullThemeData.id}`, true).then((data) => {
         if (data.starred) {
           setStarred(data.starred);
         }
@@ -123,7 +123,7 @@ export const ExpandedViewPage: VFC = () => {
   useEffect(() => {
     if (currentExpandedTheme?.id) {
       setLoaded(false);
-      genericGET(`${apiUrl}/themes/${currentExpandedTheme.id}`).then((data) => {
+      genericGET(`/themes/${currentExpandedTheme.id}`).then((data) => {
         setFullData(data);
         if (data?.images[0]?.id && data.images[0].id !== "MISSING") {
           setImageUrl(`${apiUrl}/blobs/${data?.images[0].id}`);

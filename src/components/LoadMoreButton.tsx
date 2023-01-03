@@ -20,7 +20,7 @@ export function LoadMoreButton({
   paramStrFilterPrepend: string;
   setSnapIndex?: Dispatch<SetStateAction<number>>;
 }) {
-  const { apiUrl, setGlobalState } = useCssLoaderState();
+  const { setGlobalState } = useCssLoaderState();
   const [loadMoreCurPage, setLoadMorePage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -33,7 +33,7 @@ export function LoadMoreButton({
       searchOptClone.filters !== "All" ? searchOptClone : { ...searchOptClone, filters: "" },
       paramStrFilterPrepend
     );
-    genericGET(`${apiUrl}${fetchPath}${searchOpts}`).then((data) => {
+    genericGET(`${fetchPath}${searchOpts}`).then((data) => {
       if (data) {
         setGlobalState(themeArrVarName, {
           total: themeArr.total,

@@ -9,7 +9,6 @@ import {
   SliderField,
   TextField,
 } from "decky-frontend-lib";
-import { refreshToken } from "../api";
 import { useEffect, useMemo, memo } from "react";
 import { TiRefreshOutline } from "react-icons/ti";
 import { ThemeQueryRequest } from "../apiTypes";
@@ -36,12 +35,10 @@ export function BrowserSearchFields({
   requiresAuth?: boolean;
   onReload: () => void;
 }) {
-  const { apiUrl, browserCardSize, setGlobalState } = useCssLoaderState();
+  const { browserCardSize, setGlobalState } = useCssLoaderState();
 
   async function getThemeTargets() {
-    // This is probably not the best way of doing this
-    // function fetch(newToken: string | undefined = undefined) {
-    genericGET(`${apiUrl}${getTargetsPath}`, requiresAuth).then((data) => {
+    genericGET(`${getTargetsPath}`, requiresAuth).then((data) => {
       if (data?.filters) {
         setGlobalState(unformattedFiltersVarName, {
           filters: data.filters,
@@ -50,15 +47,7 @@ export function BrowserSearchFields({
       }
     });
   }
-  // if (requiresAuth) {
-  //   const newToken = await refreshToken();
-  //   if (newToken) {
-  //     fetch(newToken);
-  //   }
-  // } else {
-  //   fetch();
-  // }
-  // }
+
   const formattedFilters = useMemo<{ filters: DropdownOption[]; order: DropdownOption[] }>(
     () => ({
       filters: [
