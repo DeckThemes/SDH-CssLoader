@@ -6,18 +6,18 @@ import * as python from "../python";
 
 import { useCssLoaderState } from "../state";
 import { Theme } from "../theme";
-import { PartialCSSThemeInfo } from "../apiTypes";
-import { checkForUpdateById } from "../api";
+import { MinimalCSSThemeInfo, PartialCSSThemeInfo } from "../apiTypes";
+import { checkForUpdateById, genericGET } from "../api";
 
 export type LocalThemeStatus = "installed" | "outdated" | "local";
 
 export const UninstallThemePage: VFC = () => {
-  const { localThemeList, browseThemeList } = useCssLoaderState();
+  const { localThemeList, browseThemeList, apiUrl } = useCssLoaderState();
 
   const [isUninstalling, setUninstalling] = useState(false);
 
   const [updateStatuses, setUpdateStatuses] = useState<
-    [LocalThemeStatus, false | PartialCSSThemeInfo][]
+    [string, LocalThemeStatus, false | MinimalCSSThemeInfo][]
   >([]);
 
   function handleUninstall(listEntry: Theme) {
@@ -29,7 +29,7 @@ export const UninstallThemePage: VFC = () => {
     });
   }
 
-  function updateTheme(remoteEntry: PartialCSSThemeInfo | false) {
+  function updateTheme(remoteEntry: MinimalCSSThemeInfo | false) {
     if (remoteEntry && remoteEntry?.id) {
       const id = remoteEntry.id;
       setUninstalling(true);
@@ -43,39 +43,52 @@ export const UninstallThemePage: VFC = () => {
   // This gets the update status of all installed themes by querying them all.
   useEffect(() => {
     if (localThemeList.length > 0) {
-      const promiseArr: Promise<PartialCSSThemeInfo | false>[] = [];
+      let themeArr: MinimalCSSThemeInfo[] = [];
+      let idsToQuery: string[] = [];
       localThemeList.forEach((e) => {
         const entryInBrowseList: PartialCSSThemeInfo | undefined = browseThemeList.items.find(
           (f) => e.id === f.id || e.id === f.name
         );
         if (entryInBrowseList) {
-          const promise: Promise<PartialCSSThemeInfo> = Promise.resolve(entryInBrowseList);
-          promiseArr.push(promise);
+          themeArr.push(entryInBrowseList);
           return;
         }
-        // This function returns the data if it exists, or false if it doesn't
-        const promise = checkForUpdateById(e.id);
-        promiseArr.push(promise);
+        idsToQuery.push(e.id);
       });
-      Promise.all(promiseArr).then((themeArr) => {
-        let updateStatusArr: [LocalThemeStatus, false | PartialCSSThemeInfo][] = [];
-        themeArr.forEach((data, i) => {
+      if (idsToQuery.length > 0) {
+        const queryStr = "?ids=" + idsToQuery.join(".");
+        console.log(queryStr);
+        genericGET(`${apiUrl}/themes/ids${queryStr}`).then((data: MinimalCSSThemeInfo[]) => {
           if (data) {
-            const localEntry = localThemeList[i];
-            if (data?.version) {
-              if (data.version === localEntry.data.version) {
-                updateStatusArr.push(["installed", data]);
+            themeArr.push(...data);
+            console.log(data);
+          }
+          formatData();
+        });
+      } else {
+        formatData();
+      }
+      function formatData() {
+        if (themeArr.length > 0) {
+          let updateStatusArr: [string, LocalThemeStatus, false | MinimalCSSThemeInfo][] = [];
+          localThemeList.forEach((localEntry) => {
+            const remoteEntry = themeArr.find(
+              (f) => f.id === localEntry.id || f.id === localEntry.name
+            );
+            if (remoteEntry) {
+              if (remoteEntry.version === localEntry.data.version) {
+                updateStatusArr.push([localEntry.id, "installed", remoteEntry]);
                 return;
               }
-              updateStatusArr.push(["outdated", data]);
+              updateStatusArr.push([localEntry.id, "outdated", remoteEntry]);
               return;
             }
-          }
-          updateStatusArr.push(["local", false]);
-          return;
-        });
-        setUpdateStatuses(updateStatusArr);
-      });
+            updateStatusArr.push([localEntry.id, "local", false]);
+            return;
+          });
+          setUpdateStatuses(updateStatusArr);
+        }
+      }
     }
   }, [localThemeList]);
 
@@ -92,13 +105,14 @@ export const UninstallThemePage: VFC = () => {
       <div>
         <div>
           {localThemeList.map((e: Theme, i) => {
-            let [updateStatus, remoteEntry]: [string, false | PartialCSSThemeInfo] = [
+            let [updateStatus, remoteEntry]: [string, false | MinimalCSSThemeInfo] = [
               "installed",
               false,
             ];
-            // It now needs to wait until the promises have resolves to get these values
-            if (updateStatuses[i]) {
-              [updateStatus, remoteEntry] = updateStatuses[i];
+            const themeArrPlace = updateStatuses.find((f) => f[0] === e.id);
+            if (themeArrPlace) {
+              updateStatus = themeArrPlace[1];
+              remoteEntry = themeArrPlace[2];
             }
             return (
               <PanelSectionRow>
