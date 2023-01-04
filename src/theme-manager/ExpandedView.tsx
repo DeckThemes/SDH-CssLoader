@@ -199,17 +199,28 @@ export const ExpandedViewPage: VFC = () => {
               marginBottom: "8px",
             }}
           >
-            <img
+            <div
+              style={{
+                backgroundImage: `url(${imageUrl})`,
+                backgroundSize: "contain",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "center",
+                width: "60%",
+              }}
+            />
+            {/* This is the old way images were handled, but it had cropping issues, I do want to revisit it eventually though */}
+            {/* <img
               className="CssLoader_ThemeBrowser_ExpandedView_PreviewImage"
               src={imageUrl}
               style={{
                 maxHeight: "400px",
                 width: "60%",
+                display: "none",
               }}
-            />
+            /> */}
             <div
               style={{
-                width: "100%",
+                width: "40%",
                 marginLeft: "16px",
               }}
             >
