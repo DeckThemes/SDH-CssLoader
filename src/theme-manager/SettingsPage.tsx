@@ -13,9 +13,14 @@ export const SettingsPage: VFC = () => {
     // The outermost div is to push the content down into the visible area
     <div>
       <div>
-        <h1 style={{ fontWeight: "bold", fontSize: "2em" }}>
-          {apiFullToken ? "Your Account" : "Log In"}
-        </h1>
+        {apiFullToken ? (
+          <h1 style={{ fontWeight: "bold", fontSize: "2em" }}>Your Account</h1>
+        ) : (
+          <h1 style={{ fontSize: "1em", fontWeight: "normal" }}>
+            <span style={{ fontWeight: "bold", fontSize: "2em" }}>Log In</span> - Create an account
+            on deckthemes.com and generate a deck token on your account page.
+          </h1>
+        )}
         {apiFullToken ? (
           <>
             <Focusable style={{ display: "flex", alignItems: "center" }}>
