@@ -26,7 +26,6 @@ export class Theme {
       patch.init();
       this.patches.push(patch);
     });
-    // console.log(`Init-ed theme ${this.name} with state ${this.checked}`);
   }
 }
 

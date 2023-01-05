@@ -20,7 +20,7 @@ export const ThemeBrowserPage: FC = () => {
     prevSearchOpts,
   } = useCssLoaderState();
 
-  const [backendVersion, setBackendVer] = useState<number>(3);
+  const [backendVersion, setBackendVer] = useState<number>(5);
   function reloadBackendVer() {
     python.resolve(python.getBackendVersion(), setBackendVer);
   }
@@ -40,7 +40,6 @@ export const ThemeBrowserPage: FC = () => {
   // Runs upon opening the page every time
   useLayoutEffect(() => {
     reloadBackendVer();
-    console.log("test", apiShortToken && !apiFullToken);
     if (apiShortToken && !apiFullToken) {
       logInWithShortToken();
     }

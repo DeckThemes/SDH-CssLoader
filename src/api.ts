@@ -102,7 +102,6 @@ export function refreshToken(): Promise<string | undefined> {
       throw new Error(`Fetch not successful!`);
     })
     .then((res) => {
-      console.log("res", res);
       if (res.status >= 200 && res.status <= 300 && res.body) {
         // @ts-ignore
         return JSON.parse(res.body || "");
@@ -194,7 +193,6 @@ export function getThemes(
     "CSS."
   );
   genericGET(`${apiPath}${queryStr}`, requiresAuth).then((data: ThemeQueryResponse) => {
-    console.log("got themes");
     if (data.total > 0) {
       setGlobalState(globalStateVarName, data);
     } else {
