@@ -1,16 +1,44 @@
-import os, json, asyncio, sys
+import os, json, asyncio, sys, time
 from os import path
+
+from watchdog.events import FileSystemEventHandler
+from watchdog.utils import UnsupportedLibc
+
+try:
+    from watchdog.observers.inotify import InotifyObserver as Observer
+except UnsupportedLibc:
+    from watchdog.observers.fsevents import FSEventsObserver as Observer
 
 sys.path.append(os.path.dirname(__file__))
 
-from css_utils import Log, create_dir, create_symlink, Result, get_user_home, get_theme_path
+from css_utils import Log, create_dir, create_symlink, Result, get_user_home, get_theme_path, store_read as util_store_read, store_write as util_store_write
 from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
-from css_remoteinstall import RemoteInstall
+from css_remoteinstall import install
 from css_tab_mapping import get_multiple_tab_mappings, load_tab_mappings, tab_has_element, tab_exists, inject_to_tab
 
 Initialized = False
+
+class FileChangeHandler(FileSystemEventHandler):
+    def __init__(self, plugin, loop):
+        self.plugin = plugin
+        self.loop = loop
+        self.last = 0
+        self.delay = 5
+
+    def on_modified(self, event):
+        Log(f"FS Event: {event}")
+
+        if (not event.src_path.endswith(".css")) or event.is_directory:
+            Log("FS Event is not on a CSS file. Ignoring!")
+            return
+
+        if ((self.last + self.delay) < time.time() and not self.plugin.busy):
+            self.last = time.time()
+            Log("Reloading themes due to FS event")
+            self.loop.create_task(self.plugin.reset(self.plugin))
+        
 
 class Plugin:
     async def dummy_function(self) -> bool:
@@ -46,49 +74,9 @@ class Plugin:
         
         return Result(False, f"Did not find theme {name}").to_dict()
 
-    async def download_theme(self, uuid : str) -> dict:
-        try:
-            theme_db_entry = await self.remote.get_theme_db_entry_by_uuid(uuid)
-        except Exception as e:
-            return Result(False, str(e)).to_dict()
-
-        result = await theme_db_entry.install()
-        if not result.success:
-            return result.to_dict()
-
-        possibleThemeJsonPath = os.path.join(get_theme_path(), theme_db_entry.name, "theme.json")
-        if (os.path.exists(possibleThemeJsonPath)):
-            with open(possibleThemeJsonPath, "r") as fp:
-                theme = json.load(fp)
-            
-            try:
-                parsedTheme = Theme(possibleThemeJsonPath, theme)
-            except Exception as e:
-                return Result(False, str(e)).to_dict()
-
-            for x in parsedTheme.dependencies:
-                found = False
-                for y in self.themes:
-                    if y.name == x:
-                        found = True
-                        break
-                
-                if not found:
-                    try:
-                        theme_db_dependency = await self.remote.get_theme_db_entry_by_name(x)
-                        result = await self.download_theme(self, theme_db_dependency.id)
-                        if not result["success"]:
-                            raise Exception(result["message"])
-                    except Exception as e:
-                        return Result(False, str(e)).to_dict()
-
-        return Result(True).to_dict()
-    
-    async def get_theme_db_data(self) -> list:
-        return [x.to_dict() for x in self.remote.themes]
-    
-    async def reload_theme_db_data(self) -> dict:
-        return (await self.remote.load(True)).to_dict()
+    async def download_theme_from_url(self, id : str, url : str) -> dict:
+        local_themes = [x.name for x in self.themes]
+        return (await install(id, url, local_themes)).to_dict()
 
     async def get_backend_version(self) -> int:
         return CSS_LOADER_VER
@@ -164,11 +152,13 @@ class Plugin:
         return Result(True).to_dict()
     
     async def reset(self) -> dict:
+        self.busy = True
         for x in self.injects:
             await x.remove()
 
         await self._load(self)
         await self._load_stage_2(self)
+        self.busy = False
         return Result(True).to_dict()
 
     async def delete_theme(self, themeName : str) -> dict:
@@ -188,6 +178,13 @@ class Plugin:
         
         self.themes.remove(theme)
         await self._cache_lists(self)
+        return Result(True).to_dict()
+
+    async def store_read(self, key : str) -> str:
+        return util_store_read(key)
+    
+    async def store_write(self, key : str, val : str) -> dict:
+        util_store_write(key, val)
         return Result(True).to_dict()
 
     async def _inject_test_element(self, tab : str, timeout : int = 3, element_name : str = "test_css_loaded") -> Result:
@@ -327,24 +324,31 @@ class Plugin:
         global Initialized
         if Initialized:
             return
-
-        Log("Waiting 1s...")
-        await asyncio.sleep(1)
         
         Initialized = True
 
+        await asyncio.sleep(1)
+
+        self.busy = False
         self.themes = []
         Log("Initializing css loader...")
         Log(f"Max supported manifest version: {CSS_LOADER_VER}")
         
-        await create_symlink(f"{get_user_home()}/homebrew/themes", f"{get_user_home()}/.local/share/Steam/steamui/themes_custom")
-        self.remote = RemoteInstall()
-        await self.remote.load()
+        await create_symlink(get_theme_path(), f"{get_user_home()}/.local/share/Steam/steamui/themes_custom")
         load_tab_mappings()
 
         await self._load(self)
         await self._inject_test_element(self, "SP", 9999, "test_ui_loaded")
         await self._load_stage_2(self, False)
+
+        if (os.path.exists(f"{get_theme_path()}/WATCH")):
+            Log("Observing themes folder for file changes")
+            self.observer = Observer()
+            self.handler = FileChangeHandler(self, asyncio.get_running_loop())
+            self.observer.schedule(self.handler, get_theme_path(), recursive=True)
+            self.observer.start()
+        else:
+            Log("Not observing themes folder for file changes")
 
         Log(f"Initialized css loader. Found {len(self.themes)} themes, which inject into {len(self.tabs)} tabs ({self.tabs}). Total {len(self.injects)} injects, {len([x for x in self.injects if x.enabled])} injected")
         await self._check_tabs(self)

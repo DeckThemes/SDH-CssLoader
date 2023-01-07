@@ -10,50 +10,39 @@ import {
 } from "decky-frontend-lib";
 import { useEffect, useState, FC } from "react";
 import * as python from "./python";
+import * as api from "./api";
 import { RiPaintFill } from "react-icons/ri";
 
 import {
-  AboutPage,
+  SettingsPage,
+  StarredThemesPage,
+  SubmissionsPage,
   ThemeBrowserPage,
   UninstallThemePage,
 } from "./theme-manager";
-import {
-  CssLoaderContextProvider,
-  CssLoaderState,
-  useCssLoaderState,
-} from "./state";
+import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "./state";
 import { ThemeToggle } from "./components";
 import { ExpandedViewPage } from "./theme-manager/ExpandedView";
+import { Permissions } from "./apiTypes";
 
 var firstTime: boolean = true;
 
 const Content: FC<{ serverAPI: ServerAPI }> = () => {
-  // Originally, when SuchMeme wrote this, the names themeList, themeListInternal, and setThemeList were used for the getter and setter functions
-  // These were renamed when state was moved to the context, but I simply re-defined them here as their original names so that none of the original code broke
-  const { localThemeList: themeList, setLocalThemeList: setThemeList } =
-    useCssLoaderState();
-
-  // setThemeList is a function that takes the raw data from the python function and then formats it with init and generate functions
-  // This still exists, it just has been moved into the CssLoaderState class' setter function, so it now happens automatically
+  const { localThemeList: themeList } = useCssLoaderState();
 
   const [dummyFuncResult, setDummyResult] = useState<boolean>(false);
 
   const reload = function () {
-    python.resolve(python.getThemes(), setThemeList);
+    python.reloadBackend();
     dummyFuncTest();
   };
-
-  if (firstTime) {
-    firstTime = false;
-    reload();
-  }
-
   function dummyFuncTest() {
     python.resolve(python.dummyFunction(), setDummyResult);
   }
 
   useEffect(() => {
     dummyFuncTest();
+    python.getInstalledThemes();
   }, []);
 
   return (
@@ -72,25 +61,20 @@ const Content: FC<{ serverAPI: ServerAPI }> = () => {
             </ButtonItem>
           </PanelSectionRow>
           {themeList.map((x) => (
-            <ThemeToggle data={x} setThemeList={setThemeList} />
+            <ThemeToggle data={x} />
           ))}
         </>
       ) : (
         <PanelSectionRow>
           <span>
-            CssLoader failed to initialize, try reloading, and if that doesn't
-            work, try restarting your deck.
+            CssLoader failed to initialize, try reloading, and if that doesn't work, try restarting
+            your deck.
           </span>
         </PanelSectionRow>
       )}
 
       <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={() => {
-            python.resolve(python.reset(), () => reload());
-          }}
-        >
+        <ButtonItem layout="below" onClick={() => reload()}>
           Reload Themes
         </ButtonItem>
       </PanelSectionRow>
@@ -99,9 +83,7 @@ const Content: FC<{ serverAPI: ServerAPI }> = () => {
 };
 
 const ThemeManagerRouter: FC = () => {
-  const [currentTabRoute, setCurrentTabRoute] =
-    useState<string>("ThemeBrowser");
-
+  const { apiMeData, currentTab, setGlobalState } = useCssLoaderState();
   return (
     <div
       style={{
@@ -111,25 +93,43 @@ const ThemeManagerRouter: FC = () => {
       }}
     >
       <Tabs
-        activeTab={currentTabRoute}
+        activeTab={currentTab}
         onShowTab={(tabID: string) => {
-          setCurrentTabRoute(tabID);
+          setGlobalState("currentTab", tabID);
         }}
         tabs={[
           {
-            title: "Browse Themes",
+            title: "All Themes",
             content: <ThemeBrowserPage />,
             id: "ThemeBrowser",
           },
+          ...(!!apiMeData
+            ? [
+                {
+                  title: "Starred Themes",
+                  content: <StarredThemesPage />,
+                  id: "StarredThemes",
+                },
+                ...(apiMeData.permissions.includes(Permissions.viewSubs)
+                  ? [
+                      {
+                        title: "Submissions",
+                        content: <SubmissionsPage />,
+                        id: "SubmissionsPage",
+                      },
+                    ]
+                  : []),
+              ]
+            : []),
           {
             title: "Installed Themes",
             content: <UninstallThemePage />,
             id: "InstalledThemes",
           },
           {
-            title: "About CSS Loader",
-            content: <AboutPage />,
-            id: "AboutCSSLoader",
+            title: "Settings",
+            content: <SettingsPage />,
+            id: "SettingsPage",
           },
         ]}
       />
@@ -138,9 +138,17 @@ const ThemeManagerRouter: FC = () => {
 };
 
 export default definePlugin((serverApi: ServerAPI) => {
-  python.setServer(serverApi);
-
   const state: CssLoaderState = new CssLoaderState();
+  python.setServer(serverApi);
+  python.setStateClass(state);
+  api.setServer(serverApi);
+  api.setStateClass(state);
+
+  python.resolve(python.storeRead("shortToken"), (token: string) => {
+    if (token) {
+      state.setGlobalState("apiShortToken", token);
+    }
+  });
 
   serverApi.routerHook.addRoute("/theme-manager", () => (
     <CssLoaderContextProvider cssLoaderStateClass={state}>
@@ -156,6 +164,7 @@ export default definePlugin((serverApi: ServerAPI) => {
 
   return {
     title: <div className={staticClasses.Title}>CSS Loader</div>,
+    alwaysRender: true,
     content: (
       <CssLoaderContextProvider cssLoaderStateClass={state}>
         <Content serverAPI={serverApi} />

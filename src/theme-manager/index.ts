@@ -1,4 +1,6 @@
 export * from "./ThemeBrowserPage";
 export * from "./UninstallThemePage";
 export * from "./ExpandedView";
-export * from "./AboutPage";
+export * from "./SettingsPage";
+export * from "./StarredThemesPage";
+export * from "./SubmissionBrowserPage";

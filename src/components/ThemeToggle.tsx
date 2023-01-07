@@ -5,24 +5,19 @@ import { Theme } from "../theme";
 import * as python from "../python";
 import { ThemePatch } from "./ThemePatch";
 
-export const ThemeToggle: VFC<{ data: Theme; setThemeList: any }> = ({
-  data,
-  setThemeList,
-}) => {
+export const ThemeToggle: VFC<{ data: Theme }> = ({ data }) => {
   return (
     <>
       <PanelSectionRow>
         <ToggleField
-          bottomSeparator={
-            data.checked && data?.patches?.length > 0 ? "none" : "standard"
-          }
+          bottomSeparator={data.checked && data?.patches?.length > 0 ? "none" : "standard"}
           checked={data.checked}
           label={data.name}
           description={data.description}
           onChange={(switchValue: boolean) => {
             // Actually enabling the theme
             python.resolve(python.setThemeState(data.name, switchValue), () => {
-              python.resolve(python.getThemes(), setThemeList);
+              python.getInstalledThemes();
             });
             // Dependency Toast
             if (switchValue === true && data.dependencies.length > 0) {
@@ -38,9 +33,7 @@ export const ThemeToggle: VFC<{ data: Theme; setThemeList: any }> = ({
         />
       </PanelSectionRow>
       {data.checked &&
-        data.patches.map((x, i, arr) => (
-          <ThemePatch data={x} index={i} fullArr={arr} />
-        ))}
+        data.patches.map((x, i, arr) => <ThemePatch data={x} index={i} fullArr={arr} />)}
     </>
   );
 };

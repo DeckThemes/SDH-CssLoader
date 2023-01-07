@@ -18,7 +18,6 @@ export const PatchComponent: VFC<{
   bottomSeparatorValue: "standard" | "none";
 }> = ({ data, selectedLabel, themeName, patchName, bottomSeparatorValue }) => {
   if (selectedLabel === data.on) {
-    const { setLocalThemeList: setThemeList } = useCssLoaderState();
     // The only value that changes from component to component is the value, so this can just be re-used
     function setComponentAndReload(value: string) {
       python.resolve(
@@ -29,7 +28,7 @@ export const PatchComponent: VFC<{
           value
         ),
         () => {
-          python.resolve(python.getThemes(), setThemeList);
+          python.getInstalledThemes();
         }
       );
     }
@@ -37,9 +36,7 @@ export const PatchComponent: VFC<{
       case "image-picker":
         // This makes things compatible with people using HoloISO or who don't have the user /deck/
         function getRootPath() {
-          python.resolve(python.fetchThemePath(), (path: string) =>
-            pickImage(path)
-          );
+          python.resolve(python.fetchThemePath(), (path: string) => pickImage(path));
         }
         // These have to
         async function pickImage(rootPath: string) {

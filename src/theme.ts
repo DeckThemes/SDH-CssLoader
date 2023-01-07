@@ -1,5 +1,6 @@
 export class Theme {
   data: any;
+  id: string = "";
   checked: boolean = false;
   name: string = "";
   description: string = "";
@@ -9,6 +10,7 @@ export class Theme {
   // This init function is called by the setter function in GlobalState
   init() {
     this.name = this.data.name;
+    this.id = this.data.id;
     this.checked = this.data.enabled;
     this.dependencies = this.data.dependencies;
 
@@ -24,7 +26,6 @@ export class Theme {
       patch.init();
       this.patches.push(patch);
     });
-    // console.log(`Init-ed theme ${this.name} with state ${this.checked}`);
   }
 }
 
