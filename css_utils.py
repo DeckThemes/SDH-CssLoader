@@ -6,6 +6,9 @@ import pwd
 
 Logger = getLogger("CSS_LOADER")
 
+FLAG_DISABLE_DEPENDENCIES_ALSO = "DISABLE_DEPENDENCIES_ALSO"
+FLAG_PRESET = "PRESET"
+
 def Log(text : str):
     Logger.info(f"[CSS_Loader] {text}")
 

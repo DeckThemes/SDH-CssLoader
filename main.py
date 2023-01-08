@@ -1,5 +1,5 @@
 import os, json, asyncio, sys, time
-from os import path
+from os import path, mkdir
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.utils import UnsupportedLibc
@@ -11,7 +11,7 @@ except UnsupportedLibc:
 
 sys.path.append(os.path.dirname(__file__))
 
-from css_utils import Log, create_dir, create_symlink, Result, get_user_home, get_theme_path, store_read as util_store_read, store_write as util_store_write
+from css_utils import Log, create_dir, create_symlink, Result, get_user_home, get_theme_path, store_read as util_store_read, store_write as util_store_write, FLAG_DISABLE_DEPENDENCIES_ALSO, FLAG_PRESET
 from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
@@ -52,27 +52,44 @@ class Plugin:
     
     async def set_theme_state(self, name : str, state : bool) -> dict:
         Log(f"Setting state for {name} to {state}")
-        for x in self.themes:
-            if (x.name == name):
-                if state:
-                    for y in x.dependencies:
-                        dependency = await self._get_theme(self, y)
-                        if dependency is not None:
-                            if dependency.enabled:
-                                await dependency.remove()
-                            
-                            for z in x.dependencies[y]:
-                                value = x.dependencies[y][z]
-                                for patch in dependency.patches:
-                                    if patch.name == z:
-                                        patch.set_value(value)
-                            
-                            await self.set_theme_state(self, dependency.name, True)
+        theme = await self._get_theme(self, name)
 
-                result = await x.inject() if state else await x.remove()
-                return result.to_dict()
+        if theme == None:
+            return Result(False, f"Did not find theme {name}").to_dict()
+
+        drilldown = state or FLAG_DISABLE_DEPENDENCIES_ALSO in theme.flags
+
+        try:
+            result = await self._set_theme_state_internal(self, theme, state, drilldown)
+            return result.to_dict()
+        except Exception as e:
+            return Result(False, str(e))
+    
+    async def _set_theme_state_internal(self, theme : Theme, state : bool, drilldown : bool) -> Result:
+        if theme is None:
+            return Result(False)
         
-        return Result(False, f"Did not find theme {name}").to_dict()
+        for dependency_name in theme.dependencies:
+            dependency = await self._get_theme(self, dependency_name)
+
+            if dependency == None:
+                continue
+
+            if state:
+                if dependency.enabled:
+                    await dependency.remove()
+
+                for dependency_patch_name in theme.dependencies[dependency_name]:
+                    dependency_patch_value = theme.dependencies[dependency_name][dependency_patch_name]
+                    for dependency_patch in dependency.patches:
+                        if dependency_patch.name == dependency_name:
+                            dependency_patch.set_value(dependency_patch_value)
+                
+            if drilldown:
+                await self._set_theme_state_internal(self, dependency, state, drilldown)
+        
+        result = await theme.inject() if state else await theme.remove()
+        return result
 
     async def download_theme_from_url(self, id : str, url : str) -> dict:
         local_themes = [x.name for x in self.themes]
@@ -186,6 +203,43 @@ class Plugin:
     async def store_write(self, key : str, val : str) -> dict:
         util_store_write(key, val)
         return Result(True).to_dict()
+
+    async def generate_preset_theme(self, name : str) -> dict:
+        Log("Generating theme preset...")
+
+        try:
+            result = await self._generate_preset_theme_internal(self, name)
+            return result.to_dict()
+        except Exception as e:
+            return Result(False, str(e))
+
+    async def _generate_preset_theme_internal(self, name : str) -> Result:
+        a = await self._get_theme(self, name)
+        if a != None:
+            return Result(False, f"Theme '{name}' already exists")
+        
+        deps = {}
+
+        for x in self.themes:
+            if x.enabled and FLAG_PRESET not in x.flags:
+                deps[x.name] = {}
+                for y in x.patches:
+                    deps[x.name][y.name] = y.get_value()
+        
+        theme_path = path.join(get_theme_path(), name)
+
+        if not path.exists(theme_path):
+            mkdir(theme_path)
+        
+        with open(path.join(theme_path, "theme.json"), "w") as fp:
+            json.dump({
+                "name": name,
+                "manifest_version": CSS_LOADER_VER,
+                "flags": [FLAG_DISABLE_DEPENDENCIES_ALSO, FLAG_PRESET],
+                "dependencies": deps
+            }, fp)
+        
+        return Result(True)
 
     async def _inject_test_element(self, tab : str, timeout : int = 3, element_name : str = "test_css_loaded") -> Result:
         attempt = 0
