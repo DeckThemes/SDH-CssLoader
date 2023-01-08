@@ -37,7 +37,7 @@ class Theme:
         self.version = json["version"] if ("version" in json) else "v1.0"
         self.author = json["author"] if ("author" in json) else ""
         self.require = int(json["manifest_version"]) if ("manifest_version" in json) else 1
-        self.flags = json["flags"] if ("flags" in json) else []
+        self.flags = [x.upper() for x in list(json["flags"])] if ("flags" in json) else []
 
         if (CSS_LOADER_VER < self.require):
             raise Exception("A newer version of the CssLoader is required to load this theme")
