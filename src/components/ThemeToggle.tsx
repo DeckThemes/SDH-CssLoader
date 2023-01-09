@@ -1,6 +1,6 @@
 import { PanelSectionRow, ToggleField } from "decky-frontend-lib";
 import { VFC } from "react";
-import { Theme } from "../theme";
+import { Theme } from "../Theme";
 
 import * as python from "../python";
 import { ThemePatch } from "./ThemePatch";
@@ -10,10 +10,10 @@ export const ThemeToggle: VFC<{ data: Theme }> = ({ data }) => {
     <>
       <PanelSectionRow>
         <ToggleField
-          bottomSeparator={data.checked && data?.patches?.length > 0 ? "none" : "standard"}
-          checked={data.checked}
+          bottomSeparator={data.enabled && data?.patches?.length > 0 ? "none" : "standard"}
+          checked={data.enabled}
           label={data.name}
-          description={data.description}
+          description={`${data.version} | ${data.author}`}
           onChange={(switchValue: boolean) => {
             // Actually enabling the theme
             python.resolve(python.setThemeState(data.name, switchValue), () => {
@@ -32,8 +32,10 @@ export const ThemeToggle: VFC<{ data: Theme }> = ({ data }) => {
           }}
         />
       </PanelSectionRow>
-      {data.checked &&
-        data.patches.map((x, i, arr) => <ThemePatch data={x} index={i} fullArr={arr} />)}
+      {data.enabled &&
+        data.patches.map((x, i, arr) => (
+          <ThemePatch data={x} index={i} fullArr={arr} themeName={data.name} />
+        ))}
     </>
   );
 };

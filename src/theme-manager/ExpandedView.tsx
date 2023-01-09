@@ -9,7 +9,7 @@ import { genericGET } from "../api";
 import { refreshToken } from "../api";
 
 import { useCssLoaderState } from "../state";
-import { Theme } from "../theme";
+import { Theme } from "../Theme";
 import { calcButtonColor } from "../logic";
 import { FullCSSThemeInfo, PartialCSSThemeInfo } from "../apiTypes";
 
@@ -83,10 +83,10 @@ export const ExpandedViewPage: VFC = () => {
 
   function checkIfThemeInstalled(themeObj: PartialCSSThemeInfo) {
     const filteredArr: Theme[] = installedThemes.filter(
-      (e: Theme) => e.data.name === themeObj.name && e.data.author === themeObj.specifiedAuthor
+      (e: Theme) => e.name === themeObj.name && e.author === themeObj.specifiedAuthor
     );
     if (filteredArr.length > 0) {
-      if (filteredArr[0].data.version === themeObj.version) {
+      if (filteredArr[0].version === themeObj.version) {
         return "installed";
       } else {
         return "outdated";

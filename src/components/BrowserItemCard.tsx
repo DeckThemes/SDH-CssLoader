@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { useCssLoaderState } from "../state";
-import { Theme } from "../theme";
+import { Theme } from "../Theme";
 import { Focusable, Router } from "decky-frontend-lib";
 import { AiOutlineDownload } from "react-icons/ai";
 import { PartialCSSThemeInfo, ThemeQueryRequest } from "../apiTypes";
@@ -83,10 +83,10 @@ export const VariableSizeCard: FC<{
   const { localThemeList, apiUrl, setGlobalState } = useCssLoaderState();
   function checkIfThemeInstalled(themeObj: PartialCSSThemeInfo) {
     const filteredArr: Theme[] = localThemeList.filter(
-      (e: Theme) => e.data.name === themeObj.name && e.data.author === themeObj.specifiedAuthor
+      (e: Theme) => e.name === themeObj.name && e.author === themeObj.specifiedAuthor
     );
     if (filteredArr.length > 0) {
-      if (filteredArr[0].data.version === themeObj.version) {
+      if (filteredArr[0].version === themeObj.version) {
         return "installed";
       } else {
         return "outdated";

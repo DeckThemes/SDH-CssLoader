@@ -1,7 +1,7 @@
 // Code from https://github.com/NGnius/PowerTools/blob/dev/src/python.ts
 import { ServerAPI } from "decky-frontend-lib";
 import { CssLoaderState } from "./state";
-import { Theme } from "./theme";
+import { Theme } from "./Theme";
 
 var server: ServerAPI | undefined = undefined;
 var globalState: CssLoaderState | undefined = undefined;
@@ -48,16 +48,7 @@ export function getInstalledThemes(): Promise<void> {
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
   return server!.callPluginMethod<{}, Theme[]>("get_themes", {}).then((data) => {
     if (data.success) {
-      const listArr: Theme[] = data.result;
-      let list: Theme[] = [];
-
-      listArr.forEach((x: any) => {
-        let theme = new Theme();
-        theme.data = x;
-        list.push(theme);
-      });
-      list.forEach((x) => x.init());
-      setGlobalState("localThemeList", list);
+      setGlobalState("localThemeList", data.result);
     }
   });
 }

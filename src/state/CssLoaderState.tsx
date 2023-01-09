@@ -8,7 +8,7 @@ import {
   ThemeQueryResponse,
 } from "../apiTypes";
 import { localThemeEntry } from "../customTypes";
-import { Theme } from "../theme";
+import { Theme } from "../Theme";
 
 interface PublicCssLoaderState {
   prevSearchOpts: ThemeQueryRequest;

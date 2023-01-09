@@ -5,13 +5,13 @@ import * as python from "../python";
 import { showModal, ButtonItem, PanelSectionRow } from "decky-frontend-lib";
 
 import { ColorPickerModal } from "decky-frontend-lib";
-import { themePatchComponent } from "../theme";
+import { ThemePatchComponent } from "../Theme";
 import { useCssLoaderState } from "../state";
 import { anythingToHSLA } from "../logic";
 import { FaFolder } from "react-icons/fa";
 
 export const PatchComponent: VFC<{
-  data: themePatchComponent;
+  data: ThemePatchComponent;
   selectedLabel: string;
   themeName: string;
   patchName: string;
