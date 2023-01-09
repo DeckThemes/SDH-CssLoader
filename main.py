@@ -11,7 +11,7 @@ except UnsupportedLibc:
 
 sys.path.append(os.path.dirname(__file__))
 
-from css_utils import Log, create_dir, create_symlink, Result, get_user_home, get_theme_path, store_read as util_store_read, store_write as util_store_write, FLAG_DISABLE_DEPENDENCIES_ALSO, FLAG_PRESET
+from css_utils import Log, create_dir, create_symlink, Result, get_user_home, get_theme_path, store_read as util_store_read, store_write as util_store_write, FLAG_KEEP_DEPENDENCIES, FLAG_PRESET
 from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
@@ -57,15 +57,16 @@ class Plugin:
         if theme == None:
             return Result(False, f"Did not find theme {name}").to_dict()
 
-        drilldown = state or FLAG_DISABLE_DEPENDENCIES_ALSO in theme.flags
-
         try:
-            result = await self._set_theme_state_internal(self, theme, state, drilldown)
+            if state:
+                result = await self._enable_theme(self, theme)
+            else:
+                result = await self._disable_theme(self, theme, FLAG_KEEP_DEPENDENCIES in theme.flags)
             return result.to_dict()
         except Exception as e:
             return Result(False, str(e))
     
-    async def _set_theme_state_internal(self, theme : Theme, state : bool, drilldown : bool) -> Result:
+    async def _enable_theme(self, theme : Theme) -> Result:
         if theme is None:
             return Result(False)
         
@@ -75,21 +76,47 @@ class Plugin:
             if dependency == None:
                 continue
 
-            if state:
-                if dependency.enabled:
-                    await dependency.remove()
+            if dependency.enabled:
+                await dependency.remove()
 
-                for dependency_patch_name in theme.dependencies[dependency_name]:
-                    dependency_patch_value = theme.dependencies[dependency_name][dependency_patch_name]
-                    for dependency_patch in dependency.patches:
-                        if dependency_patch.name == dependency_name:
-                            dependency_patch.set_value(dependency_patch_value)
+            for dependency_patch_name in theme.dependencies[dependency_name]:
+                dependency_patch_value = theme.dependencies[dependency_name][dependency_patch_name]
+                for dependency_patch in dependency.patches:
+                    if dependency_patch.name == dependency_name:
+                        dependency_patch.set_value(dependency_patch_value)
                 
-            if drilldown:
-                await self._set_theme_state_internal(self, dependency, state, drilldown)
+            await self._enable_theme(self, dependency)
         
-        result = await theme.inject() if state else await theme.remove()
+        result = await theme.inject()
         return result
+
+    async def _disable_theme(self, theme : Theme, keep_dependencies : bool) -> Result:
+        if theme is None:
+            return Result(False)
+
+        result = await theme.remove()
+
+        if keep_dependencies or not result.success:
+            return result
+
+        for dependency_name in theme.dependencies:
+            dependency = await self._get_theme(self, dependency_name)
+
+            if dependency == None:
+                continue
+        
+            used = False
+
+            for x in self.themes:
+                if x.enabled and dependency.name in [y for y in x.dependencies]:
+                    used = True
+                    break
+
+            if not used:
+                await self._disable_theme(self, dependency, False)
+        
+        return result
+
 
     async def download_theme_from_url(self, id : str, url : str) -> dict:
         local_themes = [x.name for x in self.themes]
@@ -235,7 +262,7 @@ class Plugin:
             json.dump({
                 "name": name,
                 "manifest_version": CSS_LOADER_VER,
-                "flags": [FLAG_DISABLE_DEPENDENCIES_ALSO, FLAG_PRESET],
+                "flags": [FLAG_PRESET],
                 "dependencies": deps
             }, fp)
         
