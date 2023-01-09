@@ -5,7 +5,7 @@ import { AiOutlineDownload } from "react-icons/ai";
 import * as python from "../python";
 
 import { useCssLoaderState } from "../state";
-import { Theme } from "../Theme";
+import { Theme } from "../ThemeTypes";
 import { MinimalCSSThemeInfo, PartialCSSThemeInfo } from "../apiTypes";
 import { genericGET } from "../api";
 

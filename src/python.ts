@@ -1,7 +1,7 @@
 // Code from https://github.com/NGnius/PowerTools/blob/dev/src/python.ts
 import { ServerAPI } from "decky-frontend-lib";
 import { CssLoaderState } from "./state";
-import { Theme } from "./Theme";
+import { Theme } from "./ThemeTypes";
 
 var server: ServerAPI | undefined = undefined;
 var globalState: CssLoaderState | undefined = undefined;

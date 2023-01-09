@@ -5,7 +5,7 @@ import * as python from "../python";
 import { showModal, ButtonItem, PanelSectionRow } from "decky-frontend-lib";
 
 import { ColorPickerModal } from "decky-frontend-lib";
-import { ThemePatchComponent } from "../Theme";
+import { ThemePatchComponent } from "../ThemeTypes";
 import { useCssLoaderState } from "../state";
 import { anythingToHSLA } from "../logic";
 import { FaFolder } from "react-icons/fa";

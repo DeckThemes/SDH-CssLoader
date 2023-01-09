@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { useCssLoaderState } from "../state";
-import { Theme } from "../Theme";
+import { Theme } from "../ThemeTypes";
 import { Focusable, Router } from "decky-frontend-lib";
 import { AiOutlineDownload } from "react-icons/ai";
 import { PartialCSSThemeInfo, ThemeQueryRequest } from "../apiTypes";

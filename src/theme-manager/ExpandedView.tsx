@@ -9,7 +9,7 @@ import { genericGET } from "../api";
 import { refreshToken } from "../api";
 
 import { useCssLoaderState } from "../state";
-import { Theme } from "../Theme";
+import { Theme } from "../ThemeTypes";
 import { calcButtonColor } from "../logic";
 import { FullCSSThemeInfo, PartialCSSThemeInfo } from "../apiTypes";
 

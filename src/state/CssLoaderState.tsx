@@ -7,8 +7,7 @@ import {
   ThemeQueryRequest,
   ThemeQueryResponse,
 } from "../apiTypes";
-import { localThemeEntry } from "../customTypes";
-import { Theme } from "../Theme";
+import { Theme } from "../ThemeTypes";
 
 interface PublicCssLoaderState {
   prevSearchOpts: ThemeQueryRequest;
@@ -35,8 +34,6 @@ interface PublicCssLoaderState {
   submissionServerFilters: FilterQueryResponse;
   submissionThemeList: ThemeQueryResponse;
 }
-
-// The localThemeEntry interface refers to the theme data as given by the python function, the Theme class refers to a theme after it has been formatted and the generate function has been added
 
 interface PublicCssLoaderContext extends PublicCssLoaderState {
   setGlobalState(key: string, data: any): void;

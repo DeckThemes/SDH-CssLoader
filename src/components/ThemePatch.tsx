@@ -1,7 +1,7 @@
 import { DropdownItem, PanelSectionRow, SliderField, ToggleField } from "decky-frontend-lib";
 import * as python from "../python";
 import { useState, VFC } from "react";
-import { Patch } from "../Theme";
+import { Patch } from "../ThemeTypes";
 import { PatchComponent } from "./PatchComponent";
 
 export const ThemePatch: VFC<{

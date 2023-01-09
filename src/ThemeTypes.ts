@@ -8,6 +8,7 @@ export interface Theme {
   version: string;
   patches: Patch[];
   dependencies: string[];
+  flags: Flags[];
 }
 
 export interface ThemePatchComponent {
@@ -24,4 +25,9 @@ export interface Patch {
   value: string;
   options: string[];
   components: ThemePatchComponent[];
+}
+
+export enum Flags {
+  "isPreset" = "PRESET",
+  "dontDisableDeps" = "KEEP_DEPENDENCIES",
 }
