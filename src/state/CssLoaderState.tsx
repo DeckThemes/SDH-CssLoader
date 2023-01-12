@@ -10,29 +10,38 @@ import {
 import { Theme } from "../ThemeTypes";
 
 interface PublicCssLoaderState {
+  // Browse Page
+  serverFilters: FilterQueryResponse;
   prevSearchOpts: ThemeQueryRequest;
+  browseThemeList: ThemeQueryResponse;
+  themeSearchOpts: ThemeQueryRequest;
+
+  // Starred Themes Page
+  starredSearchOpts: ThemeQueryRequest;
+  starredServerFilters: FilterQueryResponse;
+  starredThemeList: ThemeQueryResponse;
   prevStarSearchOpts: ThemeQueryRequest;
+
+  // Submission Page
   prevSubSearchOpts: ThemeQueryRequest;
+  submissionSearchOpts: ThemeQueryRequest;
+  submissionServerFilters: FilterQueryResponse;
+  submissionThemeList: ThemeQueryResponse;
+
   currentTab: string;
+
+  // Api
+  selectedRepo: SingleDropdownOption;
   apiUrl: string;
   apiShortToken: string;
   apiFullToken: string;
   apiTokenExpireDate: Date | number | undefined;
   apiMeData: AccountData | undefined;
-  serverFilters: FilterQueryResponse;
-  themeSearchOpts: ThemeQueryRequest;
+
   localThemeList: Theme[];
-  browseThemeList: ThemeQueryResponse;
-  selectedRepo: SingleDropdownOption;
   isInstalling: boolean;
   currentExpandedTheme: PartialCSSThemeInfo | undefined;
   browserCardSize: number;
-  starredSearchOpts: ThemeQueryRequest;
-  starredServerFilters: FilterQueryResponse;
-  starredThemeList: ThemeQueryResponse;
-  submissionSearchOpts: ThemeQueryRequest;
-  submissionServerFilters: FilterQueryResponse;
-  submissionThemeList: ThemeQueryResponse;
 }
 
 interface PublicCssLoaderContext extends PublicCssLoaderState {
@@ -42,6 +51,23 @@ interface PublicCssLoaderContext extends PublicCssLoaderState {
 
 // This class creates the getter and setter functions for all of the global state data.
 export class CssLoaderState {
+  private currentTab: string = "ThemeBrowser";
+
+  private apiUrl: string = "https://api.deckthemes.com";
+  private apiShortToken: string = "";
+  private apiFullToken: string = "";
+  private apiTokenExpireDate: Date | number | undefined = undefined;
+  private apiMeData: AccountData | undefined = undefined;
+  private localThemeList: Theme[] = [];
+  private selectedRepo: SingleDropdownOption = {
+    data: 1,
+    label: "All",
+  };
+  private isInstalling: boolean = false;
+  private currentExpandedTheme: PartialCSSThemeInfo | undefined = undefined;
+  private browserCardSize: number = 3;
+
+  private browseThemeList: ThemeQueryResponse = { total: 0, items: [] };
   private prevSearchOpts: ThemeQueryRequest = {
     page: 1,
     perPage: 50,
@@ -49,26 +75,6 @@ export class CssLoaderState {
     order: "Last Updated",
     search: "",
   };
-  private prevStarSearchOpts: ThemeQueryRequest = {
-    page: 1,
-    perPage: 50,
-    filters: "All",
-    order: "Last Updated",
-    search: "",
-  };
-  private prevSubSearchOpts: ThemeQueryRequest = {
-    page: 1,
-    perPage: 50,
-    filters: "All",
-    order: "Last Updated",
-    search: "",
-  };
-  private currentTab: string = "ThemeBrowser";
-  private apiUrl: string = "https://api.deckthemes.com";
-  private apiShortToken: string = "";
-  private apiFullToken: string = "";
-  private apiTokenExpireDate: Date | number | undefined = undefined;
-  private apiMeData: AccountData | undefined = undefined;
   private serverFilters: FilterQueryResponse = {
     filters: ["All"],
     order: ["Last Updated"],
@@ -80,15 +86,15 @@ export class CssLoaderState {
     order: "Last Updated",
     search: "",
   };
-  private localThemeList: Theme[] = [];
-  private browseThemeList: ThemeQueryResponse = { total: 0, items: [] };
-  private selectedRepo: SingleDropdownOption = {
-    data: 1,
-    label: "All",
+
+  // Stars
+  private prevStarSearchOpts: ThemeQueryRequest = {
+    page: 1,
+    perPage: 50,
+    filters: "All",
+    order: "Last Updated",
+    search: "",
   };
-  private isInstalling: boolean = false;
-  private currentExpandedTheme: PartialCSSThemeInfo | undefined = undefined;
-  private browserCardSize: number = 3;
   private starredSearchOpts: ThemeQueryRequest = {
     page: 1,
     perPage: 50,
@@ -101,6 +107,15 @@ export class CssLoaderState {
     order: ["Last Updated"],
   };
   private starredThemeList: ThemeQueryResponse = { total: 0, items: [] };
+
+  // Submissions
+  private prevSubSearchOpts: ThemeQueryRequest = {
+    page: 1,
+    perPage: 50,
+    filters: "All",
+    order: "Last Updated",
+    search: "",
+  };
   private submissionSearchOpts: ThemeQueryRequest = {
     page: 1,
     perPage: 50,
@@ -119,26 +134,32 @@ export class CssLoaderState {
 
   getPublicState() {
     return {
-      prevSearchOpts: this.prevSearchOpts,
-      prevStarSearchOpts: this.prevStarSearchOpts,
-      prevSubSearchOpts: this.prevSubSearchOpts,
       currentTab: this.currentTab,
       apiUrl: this.apiUrl,
       apiShortToken: this.apiShortToken,
       apiFullToken: this.apiFullToken,
       apiTokenExpireDate: this.apiTokenExpireDate,
       apiMeData: this.apiMeData,
-      serverFilters: this.serverFilters,
-      themeSearchOpts: this.themeSearchOpts,
       localThemeList: this.localThemeList,
-      browseThemeList: this.browseThemeList,
       selectedRepo: this.selectedRepo,
       isInstalling: this.isInstalling,
       currentExpandedTheme: this.currentExpandedTheme,
       browserCardSize: this.browserCardSize,
+
+      // Browse Page
+      themeSearchOpts: this.themeSearchOpts,
+      serverFilters: this.serverFilters,
+      browseThemeList: this.browseThemeList,
+      prevSearchOpts: this.prevSearchOpts,
+
+      // Starred
+      prevStarSearchOpts: this.prevStarSearchOpts,
       starredSearchOpts: this.starredSearchOpts,
       starredServerFilters: this.starredServerFilters,
       starredThemeList: this.starredThemeList,
+
+      // Submissions
+      prevSubSearchOpts: this.prevSubSearchOpts,
       submissionSearchOpts: this.submissionSearchOpts,
       submissionServerFilters: this.submissionServerFilters,
       submissionThemeList: this.submissionThemeList,

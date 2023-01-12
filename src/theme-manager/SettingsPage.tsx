@@ -1,7 +1,6 @@
-import { DialogButton, Focusable, PanelSectionRow, TextField } from "decky-frontend-lib";
+import { DialogButton, Focusable, TextField } from "decky-frontend-lib";
 import { SiWebauthn } from "react-icons/si";
 import { useState, VFC } from "react";
-import * as python from "../python";
 import { logInWithShortToken, logOut } from "../api";
 import { useCssLoaderState } from "../state";
 
