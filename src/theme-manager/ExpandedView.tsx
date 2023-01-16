@@ -5,8 +5,7 @@ import { BsStar, BsStarFill } from "react-icons/bs";
 import { FiDownload } from "react-icons/fi";
 
 import * as python from "../python";
-import { genericGET } from "../api";
-import { refreshToken } from "../api";
+import { genericGET, refreshToken, toggleStar as apiToggleStar } from "../api";
 
 import { useCssLoaderState } from "../state";
 import { Theme } from "../ThemeTypes";
@@ -51,7 +50,7 @@ export const ExpandedViewPage: VFC = () => {
       setBlurStar(true);
       const newToken = await refreshToken();
       if (fullThemeData && newToken) {
-        python.toggleStar(fullThemeData.id, isStarred, newToken, apiUrl).then((bool) => {
+        apiToggleStar(fullThemeData.id, isStarred, newToken, apiUrl).then((bool) => {
           if (bool) {
             setFullData({
               ...fullThemeData,

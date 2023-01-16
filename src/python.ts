@@ -165,29 +165,3 @@ export function genericGET(fetchUrl: string, authToken?: string | undefined) {
       console.error(`Error fetching ${fetchUrl}`, err);
     });
 }
-
-export function toggleStar(themeId: string, isStarred: boolean, authToken: string, apiUrl: string) {
-  return server!
-    .fetchNoCors<Response>(`${apiUrl}/users/me/stars/${themeId}`, {
-      method: isStarred ? "DELETE" : "POST",
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-      },
-    })
-    .then((deckyRes) => {
-      if (deckyRes.success) {
-        return deckyRes.result;
-      }
-      throw new Error(`Fetch not successful!`);
-    })
-    .then((res) => {
-      if (res.status >= 200 && res.status <= 300) {
-        // @ts-ignore
-        return true;
-      }
-      throw new Error(`Res not OK!, code ${res.status}`);
-    })
-    .catch((err) => {
-      console.error(`Error starring theme`, err);
-    });
-}
