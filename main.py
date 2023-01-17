@@ -338,7 +338,7 @@ class Plugin:
         load_tab_mappings()
 
         await self._load(self)
-        await self._inject_test_element(self, "SP", 9999, "test_ui_loaded")
+        await self._inject_test_element(self, "SP|Steam Big Picture Mode", 9999, "test_ui_loaded")
         await self._load_stage_2(self, False)
 
         if (os.path.exists(f"{get_theme_path()}/WATCH")):

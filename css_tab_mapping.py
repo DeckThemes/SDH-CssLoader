@@ -11,7 +11,8 @@ def load_tab_mappings():
     TAB_MAPPINGS_INTERNAL = {
         "QuickAccess": ["QuickAccess", "QuickAccess_.*"],
         "MainMenu": ["MainMenu", "MainMenu_.*"],
-        "All": ["SP", "QuickAccess", "QuickAccess_.*", "MainMenu", "MainMenu_.*"]
+        "All": ["SP", "QuickAccess", "QuickAccess_.*", "MainMenu", "MainMenu_.*", "Steam Big Picture Mode"],
+        "SP": ["SP", "Steam Big Picture Mode"]
     }
 
     tab_mappings_txt_path = os.path.join(get_theme_path(), "mappings.txt")
