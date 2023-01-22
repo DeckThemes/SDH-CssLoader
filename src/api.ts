@@ -28,14 +28,6 @@ export function logInWithShortToken(shortTokenInterimValue?: string | undefined)
   const shortTokenValue = shortTokenInterimValue ? shortTokenInterimValue : apiShortToken;
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
   if (shortTokenValue.length === 12) {
-    // server!
-    //   .callServerMethod("http_request", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     url: `${apiUrl}/auth/authenticate_token`,
-    //     data: JSON.stringify({ token: shortTokenValue }),
-    //   })
-    console.log("using Post method");
     server!
       .fetchNoCors(`${apiUrl}/auth/authenticate_token`, {
         method: "POST",
