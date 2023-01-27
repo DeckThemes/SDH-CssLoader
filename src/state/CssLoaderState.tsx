@@ -39,6 +39,8 @@ interface PublicCssLoaderState {
   apiMeData: AccountData | undefined;
 
   localThemeList: Theme[];
+  currentSettingsPageTheme: string | undefined;
+  pinnedThemes: string[];
   isInstalling: boolean;
   currentExpandedTheme: PartialCSSThemeInfo | undefined;
   browserCardSize: number;
@@ -95,6 +97,9 @@ export class CssLoaderState {
     order: "Last Updated",
     search: "",
   };
+  private currentSettingsPageTheme: string | undefined = undefined;
+  private pinnedThemes: string[] = [];
+
   private starredSearchOpts: ThemeQueryRequest = {
     page: 1,
     perPage: 50,
@@ -141,8 +146,11 @@ export class CssLoaderState {
       apiTokenExpireDate: this.apiTokenExpireDate,
       apiMeData: this.apiMeData,
       localThemeList: this.localThemeList,
-      selectedRepo: this.selectedRepo,
+      currentSettingsPageTheme: this.currentSettingsPageTheme,
+      pinnedThemes: this.pinnedThemes,
       isInstalling: this.isInstalling,
+
+      selectedRepo: this.selectedRepo,
       currentExpandedTheme: this.currentExpandedTheme,
       browserCardSize: this.browserCardSize,
 

@@ -7,6 +7,8 @@ import {
   staticClasses,
   Tabs,
   Router,
+  showModal,
+  ModalRoot,
 } from "decky-frontend-lib";
 import { useEffect, useState, FC } from "react";
 import * as python from "./python";
@@ -21,14 +23,12 @@ import {
   UninstallThemePage,
 } from "./theme-manager";
 import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "./state";
-import { ThemeToggle } from "./components";
+import { AllThemesModalRoot, ThemeToggle } from "./components";
 import { ExpandedViewPage } from "./theme-manager/ExpandedView";
 import { Permissions } from "./apiTypes";
 
-var firstTime: boolean = true;
-
-const Content: FC<{ serverAPI: ServerAPI }> = () => {
-  const { localThemeList: themeList } = useCssLoaderState();
+const Content: FC<{ stateClass: CssLoaderState }> = ({ stateClass }) => {
+  const { localThemeList: themeList, pinnedThemes } = useCssLoaderState();
 
   const [dummyFuncResult, setDummyResult] = useState<boolean>(false);
 
@@ -60,9 +60,22 @@ const Content: FC<{ serverAPI: ServerAPI }> = () => {
               Manage Themes
             </ButtonItem>
           </PanelSectionRow>
-          {themeList.map((x) => (
-            <ThemeToggle data={x} />
-          ))}
+          {themeList
+            // .filter((e) => pinnedThemes.includes(e.id))
+            .map((x) => (
+              <ThemeToggle data={x} />
+            ))}
+          <PanelSectionRow>
+            <ButtonItem
+              layout="below"
+              onClick={() => {
+                // @ts-ignore
+                showModal(<AllThemesModalRoot stateClass={stateClass} />);
+              }}
+            >
+              More Themes
+            </ButtonItem>
+          </PanelSectionRow>
         </>
       ) : (
         <PanelSectionRow>
@@ -150,6 +163,13 @@ export default definePlugin((serverApi: ServerAPI) => {
     }
   });
 
+  python.resolve(python.storeRead("pinnedThemes"), (jsonStr: string) => {
+    if (jsonStr) {
+      const pinnedArr = JSON.parse(jsonStr) || [];
+      state.setGlobalState("pinnedThemes", pinnedArr);
+    }
+  });
+
   serverApi.routerHook.addRoute("/theme-manager", () => (
     <CssLoaderContextProvider cssLoaderStateClass={state}>
       <ThemeManagerRouter />
@@ -167,7 +187,7 @@ export default definePlugin((serverApi: ServerAPI) => {
     alwaysRender: true,
     content: (
       <CssLoaderContextProvider cssLoaderStateClass={state}>
-        <Content serverAPI={serverApi} />
+        <Content stateClass={state} />
       </CssLoaderContextProvider>
     ),
     icon: <RiPaintFill />,
