@@ -29,11 +29,10 @@ export function logInWithShortToken(shortTokenInterimValue?: string | undefined)
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
   if (shortTokenValue.length === 12) {
     server!
-      .callServerMethod("http_request", {
+      .fetchNoCors(`${apiUrl}/auth/authenticate_token`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        url: `${apiUrl}/auth/authenticate_token`,
-        data: JSON.stringify({ token: shortTokenValue }),
+        body: JSON.stringify({ token: shortTokenValue }),
       })
       .then((deckyRes) => {
         if (deckyRes.success) {
