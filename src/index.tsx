@@ -57,14 +57,32 @@ const Content: FC<{ stateClass: CssLoaderState }> = ({ stateClass }) => {
                 Router.Navigate("/theme-manager");
               }}
             >
-              Manage Themes
+              Download Themes
             </ButtonItem>
           </PanelSectionRow>
-          {themeList
-            // .filter((e) => pinnedThemes.includes(e.id))
-            .map((x) => (
-              <ThemeToggle data={x} />
-            ))}
+          {themeList.length > 0 ? (
+            <>
+              {pinnedThemes.length > 0 ? (
+                <>
+                  {themeList
+                    .filter((e) => pinnedThemes.includes(e.id))
+                    .map((x) => (
+                      <ThemeToggle data={x} />
+                    ))}
+                </>
+              ) : (
+                <>
+                  <span>
+                    You have no pinned themes currently, themes that you pin from the "Your Themes"
+                    popup will show up here
+                  </span>
+                </>
+              )}
+            </>
+          ) : (
+            <span>You have no themes currently, click on "Download Themes" to download some!</span>
+          )}
+
           <PanelSectionRow>
             <ButtonItem
               layout="below"
@@ -73,7 +91,7 @@ const Content: FC<{ stateClass: CssLoaderState }> = ({ stateClass }) => {
                 showModal(<AllThemesModalRoot stateClass={stateClass} />);
               }}
             >
-              More Themes
+              Your Themes
             </ButtonItem>
           </PanelSectionRow>
         </>
@@ -88,7 +106,7 @@ const Content: FC<{ stateClass: CssLoaderState }> = ({ stateClass }) => {
 
       <PanelSectionRow>
         <ButtonItem layout="below" onClick={() => reload()}>
-          Reload Themes
+          Refresh
         </ButtonItem>
       </PanelSectionRow>
     </PanelSection>
@@ -164,9 +182,19 @@ export default definePlugin((serverApi: ServerAPI) => {
   });
 
   python.resolve(python.storeRead("pinnedThemes"), (jsonStr: string) => {
+    console.log(jsonStr);
     if (jsonStr) {
       const pinnedArr = JSON.parse(jsonStr) || [];
       state.setGlobalState("pinnedThemes", pinnedArr);
+    } else {
+      // This only happens if pinnedThemes has never been set before, and it auto-pins every currently installed theme
+      python.getInstalledThemes().then(() => {
+        const { localThemeList } = state.getPublicState();
+        state.setGlobalState(
+          "pinnedThemes",
+          localThemeList.map((e) => e.id)
+        );
+      });
     }
   });
 

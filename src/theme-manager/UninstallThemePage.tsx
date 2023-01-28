@@ -12,7 +12,7 @@ import { genericGET } from "../api";
 export type LocalThemeStatus = "installed" | "outdated" | "local";
 
 export const UninstallThemePage: VFC = () => {
-  const { localThemeList, browseThemeList } = useCssLoaderState();
+  const { localThemeList, browseThemeList, pinnedThemes } = useCssLoaderState();
 
   const [isUninstalling, setUninstalling] = useState(false);
 
@@ -23,6 +23,9 @@ export const UninstallThemePage: VFC = () => {
   function handleUninstall(listEntry: Theme) {
     setUninstalling(true);
     python.resolve(python.deleteTheme(listEntry.name), () => {
+      if (pinnedThemes.includes(listEntry.id)) {
+        python.unpinTheme(listEntry.id);
+      }
       python.reloadBackend().then(() => {
         setUninstalling(false);
       });

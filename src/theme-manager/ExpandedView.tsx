@@ -72,12 +72,17 @@ export const ExpandedViewPage: VFC = () => {
   }
 
   function installTheme() {
-    setGlobalState("isInstalling", true);
-    python.resolve(python.downloadThemeFromUrl(fullThemeData?.id || "ERROR"), () => {
-      python.reloadBackend().then(() => {
-        setGlobalState("isInstalling", false);
+    if (fullThemeData?.id) {
+      setGlobalState("isInstalling", true);
+      python.resolve(python.downloadThemeFromUrl(fullThemeData.id), () => {
+        python.pinTheme(fullThemeData.id);
+        python.reloadBackend().then(() => {
+          setGlobalState("isInstalling", false);
+        });
       });
-    });
+    } else {
+      python.toast("Error Downloading!", "Can't find theme ID");
+    }
   }
 
   function checkIfThemeInstalled(themeObj: PartialCSSThemeInfo) {

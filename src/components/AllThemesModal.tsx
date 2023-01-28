@@ -145,14 +145,11 @@ export function AllThemesModal({
                   <DialogButton
                     className="CSSLoader_FullTheme_DialogButton"
                     onClick={() => {
-                      let newArr: string[] = [];
                       if (isPinned) {
-                        newArr = pinnedThemes.filter((id) => id !== e.id);
+                        python.unpinTheme(e.id);
                       } else {
-                        newArr = [...pinnedThemes, e.id];
+                        python.pinTheme(e.id);
                       }
-                      python.storeWrite("pinnedThemes", JSON.stringify(newArr));
-                      setGlobalState("pinnedThemes", newArr);
                     }}
                   >
                     {isPinned ? (
