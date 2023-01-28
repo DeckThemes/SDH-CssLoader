@@ -9,7 +9,7 @@ specifiers:
   '@types/lodash': ^4.14.191
   '@types/react': 16.14.0
   '@types/webpack': ^5.28.0
-  decky-frontend-lib: ^3.18.5
+  decky-frontend-lib: ^3.18.10
   lodash: ^4.17.21
   react-icons: ^4.3.1
   rollup: ^2.70.2
@@ -20,7 +20,7 @@ specifiers:
   typescript: ^4.6.4
 
 dependencies:
-  decky-frontend-lib: 3.18.5
+  decky-frontend-lib: 3.18.10
   lodash: 4.17.21
   react-icons: 4.4.0
 
@@ -639,8 +639,8 @@ packages:
     resolution: {integrity: sha512-uX1KG+x9h5hIJsaKR9xHUeUraxf8IODOwq9JLNPq6BwB04a/xgpq3rcx47l5BZu5zBPlgD342tdke3Hom/nJRA==}
     dev: true
 
-  /decky-frontend-lib/3.18.5:
-    resolution: {integrity: sha512-CTIJs61La17spws5IzAbLbZ/Bqe+gYgnO6xOrolK1QZh7ZbZeoQ67dtnI0zqRMMC10J8H7jPdqmQnwGN10/bzw==}
+  /decky-frontend-lib/3.18.10:
+    resolution: {integrity: sha512-2mgbA3sSkuwQR/FnmhXVrcW6LyTS95IuL6muJAmQCruhBvXapDtjk1TcgxqMZxFZwGD1IPnemPYxHZll6IgnZw==}
     dev: false
 
   /decode-uri-component/0.2.2:
