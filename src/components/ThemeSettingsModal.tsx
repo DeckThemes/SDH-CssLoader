@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 
-import { ButtonItem, ModalRoot } from "decky-frontend-lib";
+import { DialogButton, ModalRoot } from "decky-frontend-lib";
 import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "../state";
 import { ThemeToggle } from "./ThemeToggle";
-import { Theme } from "../theme";
+import { Theme } from "../ThemeTypes";
 export function ThemeSettingsModalRoot({
   stateClass,
   closeModal,
@@ -42,13 +42,13 @@ export function ThemeSettingsModal({
   return (
     <>
       {themeData ? <ThemeToggle data={themeData} /> : <span>No Theme Data</span>}
-      <ButtonItem
+      <DialogButton
         onClick={() => {
           closeModal();
         }}
       >
         Close
-      </ButtonItem>
+      </DialogButton>
     </>
   );
 }
