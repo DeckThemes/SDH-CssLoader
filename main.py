@@ -16,7 +16,7 @@ from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
 from css_remoteinstall import install
-from css_tab_mapping import get_multiple_tab_mappings, load_tab_mappings, tab_has_element, tab_exists, inject_to_tab
+from css_tab_mapping import load_tab_mappings, get_single_tab, get_tabs
 
 Initialized = False
 
@@ -275,15 +275,16 @@ class Plugin:
                 return Result(True)
             else:
                 try:
-                    await inject_to_tab(tab, 
+                    found_tab = get_single_tab(tab)
+                    await found_tab.evaluate_js(
                     f"""
                     (function() {{
                         const elem = document.createElement('div');
                         elem.id = "{element_name}";
                         document.head.append(elem);
                     }})()
-                    """, False)
-                except:
+                    """)
+                except Exception as e:
                     pass
 
                 attempt += 1
@@ -296,7 +297,8 @@ class Plugin:
     
     async def _check_test_element(self, tab : str, element_name : str = "test_css_loaded") -> bool:
         try:
-            return await tab_has_element(tab, element_name)
+            found_tab = get_single_tab(tab)
+            return await found_tab.has_element(element_name) # I'm aware this will throw an exception if found_tab is None
         except:
             return False
 
@@ -348,13 +350,13 @@ class Plugin:
             await asyncio.sleep(3)
             for x in self.tabs:
                 try:
-                    if not await tab_exists(x):
+                    if not await x.available():
                         continue # Tab does not exist, so not worth injecting into it
 
                     # Log(f"Checking if tab {x} is still injected...")
-                    if not await self._check_test_element(self, x):
-                        Log(f"Tab {x} is not injected, reloading...")
-                        await self._inject_test_element(self, x)
+                    if not await self._check_test_element(self, x.get_name()):
+                        Log(f"Tab {x.get_name()} is not injected, reloading...")
+                        await self._inject_test_element(self, x.get_name())
                         for y in self.injects:
                             if y.enabled:
                                 (await y.inject(x)).raise_on_failure()
@@ -419,7 +421,7 @@ class Plugin:
         load_tab_mappings()
 
         await self._load(self)
-        await self._inject_test_element(self, "SP|Steam Big Picture Mode", 9999, "test_ui_loaded")
+        await self._inject_test_element(self, "SP", 9999, "test_ui_loaded")
         await self._load_stage_2(self, False)
 
         if (os.path.exists(f"{get_theme_path()}/WATCH")):
