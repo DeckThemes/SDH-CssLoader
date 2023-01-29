@@ -16,7 +16,7 @@ from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
 from css_remoteinstall import install
-from css_tab_mapping import load_tab_mappings, get_single_tab, get_tabs
+from css_tab_mapping import load_tab_mappings, get_single_tab, get_tabs, commit_all
 
 Initialized = False
 
@@ -28,10 +28,10 @@ class FileChangeHandler(FileSystemEventHandler):
         self.delay = 5
 
     def on_modified(self, event):
-        Log(f"FS Event: {event}")
+        #Log(f"FS Event: {event}")
 
         if (not event.src_path.endswith(".css")) or event.is_directory:
-            Log("FS Event is not on a CSS file. Ignoring!")
+            #Log("FS Event is not on a CSS file. Ignoring!")
             return
 
         if ((self.last + self.delay) < time.time() and not self.plugin.busy):
@@ -62,6 +62,8 @@ class Plugin:
                 result = await self._enable_theme(self, theme)
             else:
                 result = await self._disable_theme(self, theme, FLAG_KEEP_DEPENDENCIES in theme.flags)
+
+            await commit_all()
             return result.to_dict()
         except Exception as e:
             return Result(False, str(e))
@@ -170,6 +172,7 @@ class Plugin:
             await themePatch.inject()
         
         await themePatch.theme.save()
+        await commit_all()
         return Result(True).to_dict()
     
     async def set_component_of_theme_patch(self, themeName : str, patchName : str, componentName : str, value : str) -> dict:
@@ -193,6 +196,7 @@ class Plugin:
             return result
 
         await themePatch.theme.save()
+        await commit_all()
         return Result(True).to_dict()
     
     async def reset(self) -> dict:
@@ -202,6 +206,7 @@ class Plugin:
 
         await self._load(self)
         await self._load_stage_2(self)
+        await commit_all()
         self.busy = False
         return Result(True).to_dict()
 
@@ -285,6 +290,7 @@ class Plugin:
                     }})()
                     """)
                 except Exception as e:
+                    Log(str(e))
                     pass
 
                 attempt += 1
@@ -360,6 +366,8 @@ class Plugin:
                         for y in self.injects:
                             if y.enabled:
                                 (await y.inject(x)).raise_on_failure()
+
+                        await x.commit_css_transaction()
                 except Exception as e:
                     Log(f":( {str(e)}")
                     pass

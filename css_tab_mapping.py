@@ -1,9 +1,7 @@
-import os
+import os, re, uuid, asyncio, json
 from css_utils import get_theme_path, Log, Result
 import injector
-import re
 from utilities import Utilities
-import uuid
 
 pluginManagerUtils = Utilities(None)
 
@@ -25,7 +23,56 @@ class Tab:
         self.tab_names_regex = name_mappings
         self.tab_url_parts = url_parts
         self.keywords = extra_keywords
+        self.pending_add = {}
+        self.pending_remove = []
+
+    async def _commit_css_transaction(self) -> Result:
+        pending_add = self.pending_add
+        pending_remove = self.pending_remove
+        self.pending_add = {}
+        self.pending_remove = []
+
+        if len(pending_add) + len(pending_remove) == 0:
+            return Result(True)
+
+        data = {
+            "add": [{"id": x, "css": pending_add[x]} for x in pending_add],
+            "remove": pending_remove
+        }
+
+        data_str = json.dumps(data)
+
+        js = f"""
+        (function() {{
+            let css_data = {data_str};
+
+            css_data.add.forEach(x => {{
+                let style = document.createElement('style');
+	            style.id = x.id;
+	            document.head.append(style);
+	            style.textContent = x.css;
+            }});
+            
+            css_data.remove.forEach(x => {{
+                let style = document.getElementById(x);
+                style?.parentNode.removeChild(style);
+            }});
+        }})()
+        """
+
+        return await self.evaluate_js(js)
     
+    async def commit_css_transaction(self, retry : int = 3) -> Result:
+        while (retry > 0):
+            retry -= 1
+            res = await self._commit_css_transaction()
+            if res.success:
+                return res
+            else:
+                await asyncio.sleep(0.2)
+        
+        return Result(False, "Css Commit Retry Count Exceeded")
+
     def compare(self, name : str) -> bool:
         if name in self.tab_names_regex:
             return True
@@ -72,52 +119,64 @@ class Tab:
                 return Result(False, str(e))
         
         return Result(True)
+
+    async def manage_webhook(self) -> Result:
+        if self.tab == None or self.tab.websocket == None or self.tab.websocket.closed:
+            return await self.open()
+        
+        return Result(True)
     
-    async def close(self):
+    async def close_webhook(self):
         try:
             await self.tab.close_websocket()
         except:
             pass
     
     async def available(self) -> bool:
-        res = await self.open()
-        await self.close()
+        res = await self.manage_webhook()
+        
         return res.success
 
     async def inject_css(self, css : str) -> Result:
-        res = await self.open()
-        if not res.success:
-            return res
-        
-        inject_res = await self.tab.inject_css(css, False)
-        await self.close()
-        return Result(inject_res["success"], inject_res["result"])
+        id = str(uuid.uuid4())
+        self.pending_add[id] = css
+        return Result(True, id)
     
     async def remove_css(self, css_id : str) -> Result:
-        res = await self.open()
-        if not res.success:
-            return res
-        
-        remove_res = await self.tab.remove_css(css_id)
-        await self.close()
-        return Result(remove_res["success"], remove_res["result"] if remove_res["success"] else "Success")
+        if css_id in self.pending_add:
+            del self.pending_add[css_id]
+        else:
+            self.pending_remove.append(css_id)
+
+        return Result(True)
     
     async def has_element(self, element_name) -> bool:
-        res = await self.open()
+        res = await self.manage_webhook()
         if not res.success:
             return False
 
-        res = await self.tab.has_element(element_name)
-        await self.close()
+        try:
+            res = await self.tab.has_element(element_name)
+        except Exception as e:
+            res = False 
+            Result(False, str(e))
+
         return res
     
     async def evaluate_js(self, js : str, run_async=False) -> Result:
-        res = await self.open()
+        res = await self.manage_webhook()
         if not res.success:
             return res
 
-        await self.tab.evaluate_js(js, run_async, False)
-        await self.close()
+        try:
+            res = await self.tab.evaluate_js(js, run_async, False)
+
+            if res == None:
+                raise Exception("No response from eval_js")
+        except Exception as e:
+            return Result(False, str(e))
+            
+        #Log(res)
         return Result(True)
 
 def load_tab_mappings():
@@ -186,3 +245,10 @@ def get_tabs(tab_names : list):
                 tabs.append(y)
     
     return tabs
+
+def get_cached_tabs():
+    return CSS_LOADER_TAB_CACHE
+
+async def commit_all():
+    for x in get_cached_tabs():
+        await x.commit_css_transaction()
