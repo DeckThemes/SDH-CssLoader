@@ -74,7 +74,6 @@ class Plugin:
         
         for dependency_name in theme.dependencies:
             dependency = await self._get_theme(self, dependency_name)
-
             if dependency == None:
                 continue
 
@@ -84,7 +83,7 @@ class Plugin:
             for dependency_patch_name in theme.dependencies[dependency_name]:
                 dependency_patch_value = theme.dependencies[dependency_name][dependency_patch_name]
                 for dependency_patch in dependency.patches:
-                    if dependency_patch.name == dependency_name:
+                    if dependency_patch.name == dependency_patch_name:
                         dependency_patch.set_value(dependency_patch_value)
                 
             await self._enable_theme(self, dependency)
