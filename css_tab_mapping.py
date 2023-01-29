@@ -26,14 +26,15 @@ class Tab:
         self.pending_add = {}
         self.pending_remove = []
 
-    async def _commit_css_transaction(self) -> Result:
+    async def commit_css_transaction(self, retry : int = 3) -> Result:
         pending_add = self.pending_add
         pending_remove = self.pending_remove
-        self.pending_add = {}
-        self.pending_remove = []
 
         if len(pending_add) + len(pending_remove) == 0:
             return Result(True)
+
+        self.pending_add = {}
+        self.pending_remove = []
 
         data = {
             "add": [{"id": x, "css": pending_add[x]} for x in pending_add],
@@ -47,6 +48,10 @@ class Tab:
             let css_data = {data_str};
 
             css_data.add.forEach(x => {{
+                if (document.getElementById(x.id) !== null){{
+                    return;
+                }}
+
                 let style = document.createElement('style');
 	            style.id = x.id;
 	            document.head.append(style);
@@ -60,17 +65,15 @@ class Tab:
         }})()
         """
 
-        return await self.evaluate_js(js)
-    
-    async def commit_css_transaction(self, retry : int = 3) -> Result:
         while (retry > 0):
             retry -= 1
-            res = await self._commit_css_transaction()
+            res = await self.evaluate_js(js)
             if res.success:
                 return res
             else:
+                Log("Transaction failed! retrying in 0.2 seconds")
                 await asyncio.sleep(0.2)
-        
+
         return Result(False, "Css Commit Retry Count Exceeded")
 
     def compare(self, name : str) -> bool:
