@@ -8,7 +8,6 @@ import {
   Tabs,
   Router,
   showModal,
-  ModalRoot,
 } from "decky-frontend-lib";
 import { useEffect, useState, FC } from "react";
 import * as python from "./python";
@@ -79,22 +78,21 @@ const Content: FC<{ stateClass: CssLoaderState }> = ({ stateClass }) => {
                     ))}
                 </>
               )}
+              <PanelSectionRow>
+                <ButtonItem
+                  layout="below"
+                  onClick={() => {
+                    // @ts-ignore
+                    showModal(<AllThemesModalRoot stateClass={stateClass} />);
+                  }}
+                >
+                  Your Themes
+                </ButtonItem>
+              </PanelSectionRow>
             </>
           ) : (
             <span>You have no themes currently, click on "Download Themes" to download some!</span>
           )}
-
-          <PanelSectionRow>
-            <ButtonItem
-              layout="below"
-              onClick={() => {
-                // @ts-ignore
-                showModal(<AllThemesModalRoot stateClass={stateClass} />);
-              }}
-            >
-              Your Themes
-            </ButtonItem>
-          </PanelSectionRow>
         </>
       ) : (
         <PanelSectionRow>
