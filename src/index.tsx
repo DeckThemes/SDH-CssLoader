@@ -176,13 +176,9 @@ export default definePlugin((serverApi: ServerAPI) => {
   api.setServer(serverApi);
   api.setStateClass(state);
 
-  console.log("test1");
   python.resolve(python.getThemes(), (allThemes: Theme[]) => {
-    console.log("test2");
     python.resolve(python.storeRead("registeredThemes"), (registeredThemes: string) => {
-      console.log("test3");
       python.resolve(python.storeRead("pinnedThemes"), (pinnedThemes: string) => {
-        console.log("test4");
         let registerOrig: string[] = registeredThemes ? JSON.parse(registeredThemes) : [];
 
         let pinClone: string[] = pinnedThemes ? JSON.parse(pinnedThemes) : [];
