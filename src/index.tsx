@@ -29,7 +29,7 @@ import { Permissions } from "./apiTypes";
 import { Theme } from "./ThemeTypes";
 
 const Content: FC<{ stateClass: CssLoaderState }> = ({ stateClass }) => {
-  const { localThemeList: themeList, pinnedThemes } = useCssLoaderState();
+  const { localThemeList: themeList, unpinnedThemes } = useCssLoaderState();
 
   const [dummyFuncResult, setDummyResult] = useState<boolean>(false);
 
@@ -63,20 +63,20 @@ const Content: FC<{ stateClass: CssLoaderState }> = ({ stateClass }) => {
           </PanelSectionRow>
           {themeList.length > 0 ? (
             <>
-              {pinnedThemes.length > 0 ? (
-                <>
-                  {themeList
-                    .filter((e) => pinnedThemes.includes(e.id))
-                    .map((x) => (
-                      <ThemeToggle data={x} />
-                    ))}
-                </>
-              ) : (
+              {unpinnedThemes.length === themeList.length ? (
                 <>
                   <span>
                     You have no pinned themes currently, themes that you pin from the "Your Themes"
                     popup will show up here
                   </span>
+                </>
+              ) : (
+                <>
+                  {themeList
+                    .filter((e) => !unpinnedThemes.includes(e.id))
+                    .map((x) => (
+                      <ThemeToggle data={x} />
+                    ))}
                 </>
               )}
             </>
@@ -177,46 +177,24 @@ export default definePlugin((serverApi: ServerAPI) => {
   api.setStateClass(state);
 
   python.resolve(python.getThemes(), (allThemes: Theme[]) => {
-    python.resolve(python.storeRead("registeredThemes"), (registeredThemes: string) => {
-      python.resolve(python.storeRead("pinnedThemes"), (pinnedThemes: string) => {
-        let registerOrig: string[] = registeredThemes ? JSON.parse(registeredThemes) : [];
+    python.resolve(python.storeRead("unpinnedThemes"), (unpinnedJsonStr: string) => {
+      const unpinnedThemes: string[] = unpinnedJsonStr ? JSON.parse(unpinnedJsonStr) : [];
+      const allIds = allThemes.map((e) => e.id);
 
-        let pinClone: string[] = pinnedThemes ? JSON.parse(pinnedThemes) : [];
-        let registerClone: string[] = registeredThemes ? JSON.parse(registeredThemes) : [];
-
-        const allIds = allThemes.map((e) => e.id);
-
-        // Adds unregistered themes
-        allIds.forEach((e) => {
-          if (!registerOrig.includes(e)) {
-            console.log(e, " not registered");
-            // If the theme hasn't been registered
-            registerClone.push(e);
-            pinClone.push(e);
-          }
-        });
-
-        registerOrig.forEach((e) => {
-          if (!allIds.includes(e)) {
-            console.log(e, " deleted");
-            // If the theme is still in the registered array but doesn't exist
-            registerClone = registerClone.filter((id) => id !== e);
-            pinClone = pinClone.filter((id) => id !== e);
-          }
-        });
-
-        state.setGlobalState("registeredThemes", pinClone);
-        state.setGlobalState("pinnedThemes", pinClone);
-
-        if (JSON.stringify(pinClone) !== pinnedThemes) {
-          console.log("updating store");
-          python.storeWrite("pinnedThemes", JSON.stringify(pinClone));
-        }
-        if (JSON.stringify(registerClone) !== registeredThemes) {
-          console.log("updating store");
-          python.storeWrite("registeredThemes", JSON.stringify(registerClone));
+      // If a theme is in the unpinned store but no longer exists, remove it from the unpinned store
+      let unpinnedClone = [...unpinnedThemes];
+      unpinnedThemes.forEach((e) => {
+        if (!allIds.includes(e)) {
+          console.log(e, " manually deleted");
+          unpinnedClone = unpinnedClone.filter((id) => id !== e);
         }
       });
+
+      state.setGlobalState("unpinnedThemes", unpinnedClone);
+      if (JSON.stringify(unpinnedClone) !== unpinnedJsonStr) {
+        console.log("updating store");
+        python.storeWrite("unpinnedThemes", JSON.stringify(unpinnedClone));
+      }
     });
   });
 

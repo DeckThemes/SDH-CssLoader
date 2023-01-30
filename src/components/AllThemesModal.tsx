@@ -39,7 +39,7 @@ export function AllThemesModal({
   stateClass: CssLoaderState;
   closeModal: any;
 }) {
-  const { localThemeList, pinnedThemes, setGlobalState } = useCssLoaderState();
+  const { localThemeList, unpinnedThemes, setGlobalState } = useCssLoaderState();
   return (
     <>
       <h1 style={{ marginBlockEnd: "10px", marginBlockStart: "0px" }}>Your Themes</h1>
@@ -84,8 +84,8 @@ export function AllThemesModal({
       <Focusable style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gridGap: "1em" }}>
         {localThemeList
           .sort((a, b) => {
-            const aPinned = pinnedThemes.includes(a.id);
-            const bPinned = pinnedThemes.includes(b.id);
+            const aPinned = !unpinnedThemes.includes(a.id);
+            const bPinned = !unpinnedThemes.includes(b.id);
             // This sorts the pinned themes alphabetically, then the non-pinned alphabetically
             if (aPinned === bPinned) {
               return a.name.localeCompare(b.name);
@@ -93,7 +93,7 @@ export function AllThemesModal({
             return Number(bPinned) - Number(aPinned);
           })
           .map((e) => {
-            const isPinned = pinnedThemes.includes(e.id);
+            const isPinned = !unpinnedThemes.includes(e.id);
             return (
               <>
                 <div className="CSSLoader_FullTheme_EntryContainer">

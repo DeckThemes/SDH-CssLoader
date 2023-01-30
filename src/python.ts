@@ -166,18 +166,18 @@ export function genericGET(fetchUrl: string, authToken?: string | undefined) {
     });
 }
 
-export function pinTheme(id: string) {
-  const { pinnedThemes } = globalState!.getPublicState();
+export function unpinTheme(id: string) {
+  const { unpinnedThemes } = globalState!.getPublicState();
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
-  const newArr = [...pinnedThemes, id];
-  setGlobalState("pinnedThemes", newArr);
-  return storeWrite("pinnedThemes", JSON.stringify(newArr));
+  const newArr = [...unpinnedThemes, id];
+  setGlobalState("unpinnedThemes", newArr);
+  return storeWrite("unpinnedThemes", JSON.stringify(newArr));
 }
 
-export function unpinTheme(id: string) {
-  const { pinnedThemes } = globalState!.getPublicState();
+export function pinTheme(id: string) {
+  const { unpinnedThemes } = globalState!.getPublicState();
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
-  const newArr = pinnedThemes.filter((e) => e !== id);
-  setGlobalState("pinnedThemes", newArr);
-  return storeWrite("pinnedThemes", JSON.stringify(newArr));
+  const newArr = unpinnedThemes.filter((e) => e !== id);
+  setGlobalState("unpinnedThemes", newArr);
+  return storeWrite("unpinnedThemes", JSON.stringify(newArr));
 }

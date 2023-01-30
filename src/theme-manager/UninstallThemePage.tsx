@@ -12,8 +12,7 @@ import { genericGET } from "../api";
 export type LocalThemeStatus = "installed" | "outdated" | "local";
 
 export const UninstallThemePage: VFC = () => {
-  const { localThemeList, browseThemeList, pinnedThemes, registeredThemes, setGlobalState } =
-    useCssLoaderState();
+  const { localThemeList, browseThemeList, unpinnedThemes } = useCssLoaderState();
 
   const [isUninstalling, setUninstalling] = useState(false);
 
@@ -24,16 +23,9 @@ export const UninstallThemePage: VFC = () => {
   function handleUninstall(listEntry: Theme) {
     setUninstalling(true);
     python.resolve(python.deleteTheme(listEntry.name), () => {
-      if (pinnedThemes.includes(listEntry.id)) {
-        python.unpinTheme(listEntry.id);
-        python.storeWrite(
-          "registeredThemes",
-          JSON.stringify(registeredThemes.filter((e) => e !== listEntry.id))
-        );
-        setGlobalState(
-          "registeredThemes",
-          registeredThemes.filter((e) => e !== listEntry.id)
-        );
+      if (unpinnedThemes.includes(listEntry.id)) {
+        // This isn't really pinning it, it's just removing its name from the unpinned list.
+        python.pinTheme(listEntry.id);
       }
       python.reloadBackend().then(() => {
         setUninstalling(false);
