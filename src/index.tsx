@@ -205,11 +205,13 @@ export default definePlugin((serverApi: ServerAPI) => {
           }
         });
 
+        state.setGlobalState("registeredThemes", pinClone);
+        state.setGlobalState("pinnedThemes", pinClone);
+
         if (JSON.stringify(pinClone) !== pinnedThemes) {
           console.log("updating store");
           python.storeWrite("pinnedThemes", JSON.stringify(pinClone));
         }
-        state.setGlobalState("pinnedThemes", pinClone);
         if (JSON.stringify(registerClone) !== registeredThemes) {
           console.log("updating store");
           python.storeWrite("registeredThemes", JSON.stringify(registerClone));

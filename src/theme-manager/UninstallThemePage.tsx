@@ -12,7 +12,8 @@ import { genericGET } from "../api";
 export type LocalThemeStatus = "installed" | "outdated" | "local";
 
 export const UninstallThemePage: VFC = () => {
-  const { localThemeList, browseThemeList, pinnedThemes } = useCssLoaderState();
+  const { localThemeList, browseThemeList, pinnedThemes, registeredThemes, setGlobalState } =
+    useCssLoaderState();
 
   const [isUninstalling, setUninstalling] = useState(false);
 
@@ -25,6 +26,14 @@ export const UninstallThemePage: VFC = () => {
     python.resolve(python.deleteTheme(listEntry.name), () => {
       if (pinnedThemes.includes(listEntry.id)) {
         python.unpinTheme(listEntry.id);
+        python.storeWrite(
+          "registeredThemes",
+          JSON.stringify(registeredThemes.filter((e) => e !== listEntry.id))
+        );
+        setGlobalState(
+          "registeredThemes",
+          registeredThemes.filter((e) => e !== listEntry.id)
+        );
       }
       python.reloadBackend().then(() => {
         setUninstalling(false);

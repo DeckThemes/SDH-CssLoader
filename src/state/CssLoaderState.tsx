@@ -41,6 +41,7 @@ interface PublicCssLoaderState {
   localThemeList: Theme[];
   currentSettingsPageTheme: string | undefined;
   pinnedThemes: string[];
+  registeredThemes: string[];
   isInstalling: boolean;
   currentExpandedTheme: PartialCSSThemeInfo | undefined;
   browserCardSize: number;
@@ -99,6 +100,7 @@ export class CssLoaderState {
   };
   private currentSettingsPageTheme: string | undefined = undefined;
   private pinnedThemes: string[] = [];
+  private registeredThemes: string[] = [];
 
   private starredSearchOpts: ThemeQueryRequest = {
     page: 1,
@@ -148,6 +150,7 @@ export class CssLoaderState {
       localThemeList: this.localThemeList,
       currentSettingsPageTheme: this.currentSettingsPageTheme,
       pinnedThemes: this.pinnedThemes,
+      registeredThemes: this.registeredThemes,
       isInstalling: this.isInstalling,
 
       selectedRepo: this.selectedRepo,

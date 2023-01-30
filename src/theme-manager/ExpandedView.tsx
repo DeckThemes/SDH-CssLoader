@@ -20,6 +20,7 @@ export const ExpandedViewPage: VFC = () => {
     apiUrl,
     apiFullToken,
     setGlobalState,
+    registeredThemes,
   } = useCssLoaderState();
 
   const [fullThemeData, setFullData] = useState<FullCSSThemeInfo>();
@@ -76,6 +77,11 @@ export const ExpandedViewPage: VFC = () => {
       setGlobalState("isInstalling", true);
       python.resolve(python.downloadThemeFromUrl(fullThemeData.id), () => {
         python.pinTheme(fullThemeData.id);
+        python.storeWrite(
+          "registeredThemes",
+          JSON.stringify([...registeredThemes, fullThemeData.id])
+        );
+        setGlobalState("registeredThemes", [...registeredThemes, fullThemeData.id]);
         python.reloadBackend().then(() => {
           setGlobalState("isInstalling", false);
         });
