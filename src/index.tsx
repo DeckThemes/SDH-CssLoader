@@ -26,6 +26,7 @@ import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "./s
 import { AllThemesModalRoot, ThemeToggle } from "./components";
 import { ExpandedViewPage } from "./theme-manager/ExpandedView";
 import { Permissions } from "./apiTypes";
+import { Theme } from "./ThemeTypes";
 
 const Content: FC<{ stateClass: CssLoaderState }> = ({ stateClass }) => {
   const { localThemeList: themeList, pinnedThemes } = useCssLoaderState();
@@ -175,26 +176,55 @@ export default definePlugin((serverApi: ServerAPI) => {
   api.setServer(serverApi);
   api.setStateClass(state);
 
+  console.log("test1");
+  python.resolve(python.getThemes(), (allThemes: Theme[]) => {
+    console.log("test2");
+    python.resolve(python.storeRead("registeredThemes"), (registeredThemes: string) => {
+      console.log("test3");
+      python.resolve(python.storeRead("pinnedThemes"), (pinnedThemes: string) => {
+        console.log("test4");
+        let registerOrig: string[] = registeredThemes ? JSON.parse(registeredThemes) : [];
+
+        let pinClone: string[] = pinnedThemes ? JSON.parse(pinnedThemes) : [];
+        let registerClone: string[] = registeredThemes ? JSON.parse(registeredThemes) : [];
+
+        const allIds = allThemes.map((e) => e.id);
+
+        // Adds unregistered themes
+        allIds.forEach((e) => {
+          if (!registerOrig.includes(e)) {
+            console.log(e, " not registered");
+            // If the theme hasn't been registered
+            registerClone.push(e);
+            pinClone.push(e);
+          }
+        });
+
+        registerOrig.forEach((e) => {
+          if (!allIds.includes(e)) {
+            console.log(e, " deleted");
+            // If the theme is still in the registered array but doesn't exist
+            registerClone = registerClone.filter((id) => id !== e);
+            pinClone = pinClone.filter((id) => id !== e);
+          }
+        });
+
+        if (JSON.stringify(pinClone) !== pinnedThemes) {
+          console.log("updating store");
+          python.storeWrite("pinnedThemes", JSON.stringify(pinClone));
+        }
+        state.setGlobalState("pinnedThemes", pinClone);
+        if (JSON.stringify(registerClone) !== registeredThemes) {
+          console.log("updating store");
+          python.storeWrite("registeredThemes", JSON.stringify(registerClone));
+        }
+      });
+    });
+  });
+
   python.resolve(python.storeRead("shortToken"), (token: string) => {
     if (token) {
       state.setGlobalState("apiShortToken", token);
-    }
-  });
-
-  python.resolve(python.storeRead("pinnedThemes"), (jsonStr: string) => {
-    console.log(jsonStr);
-    if (jsonStr) {
-      const pinnedArr = JSON.parse(jsonStr) || [];
-      state.setGlobalState("pinnedThemes", pinnedArr);
-    } else {
-      // This only happens if pinnedThemes has never been set before, and it auto-pins every currently installed theme
-      python.getInstalledThemes().then(() => {
-        const { localThemeList } = state.getPublicState();
-        state.setGlobalState(
-          "pinnedThemes",
-          localThemeList.map((e) => e.id)
-        );
-      });
     }
   });
 

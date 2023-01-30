@@ -60,7 +60,7 @@ export function reloadBackend(): Promise<void> {
 }
 
 export function getThemes(): Promise<any> {
-  return server!.callPluginMethod("get_themes", {});
+  return server!.callPluginMethod<{}, Theme[]>("get_themes", {});
 }
 
 export function setThemeState(name: string, state: boolean): Promise<any> {
