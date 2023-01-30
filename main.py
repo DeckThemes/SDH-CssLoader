@@ -16,7 +16,7 @@ from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
 from css_remoteinstall import install
-from css_tab_mapping import get_multiple_tab_mappings, load_tab_mappings, tab_has_element, tab_exists, inject_to_tab
+from css_tab_mapping import load_tab_mappings, get_single_tab, get_tabs, commit_all
 
 Initialized = False
 
@@ -28,10 +28,10 @@ class FileChangeHandler(FileSystemEventHandler):
         self.delay = 5
 
     def on_modified(self, event):
-        Log(f"FS Event: {event}")
+        #Log(f"FS Event: {event}")
 
         if (not event.src_path.endswith(".css")) or event.is_directory:
-            Log("FS Event is not on a CSS file. Ignoring!")
+            #Log("FS Event is not on a CSS file. Ignoring!")
             return
 
         if ((self.last + self.delay) < time.time() and not self.plugin.busy):
@@ -62,6 +62,8 @@ class Plugin:
                 result = await self._enable_theme(self, theme)
             else:
                 result = await self._disable_theme(self, theme, FLAG_KEEP_DEPENDENCIES in theme.flags)
+
+            await commit_all()
             return result.to_dict()
         except Exception as e:
             return Result(False, str(e))
@@ -72,7 +74,6 @@ class Plugin:
         
         for dependency_name in theme.dependencies:
             dependency = await self._get_theme(self, dependency_name)
-
             if dependency == None:
                 continue
 
@@ -82,7 +83,7 @@ class Plugin:
             for dependency_patch_name in theme.dependencies[dependency_name]:
                 dependency_patch_value = theme.dependencies[dependency_name][dependency_patch_name]
                 for dependency_patch in dependency.patches:
-                    if dependency_patch.name == dependency_name:
+                    if dependency_patch.name == dependency_patch_name:
                         dependency_patch.set_value(dependency_patch_value)
                 
             await self._enable_theme(self, dependency)
@@ -170,6 +171,7 @@ class Plugin:
             await themePatch.inject()
         
         await themePatch.theme.save()
+        await commit_all()
         return Result(True).to_dict()
     
     async def set_component_of_theme_patch(self, themeName : str, patchName : str, componentName : str, value : str) -> dict:
@@ -193,6 +195,7 @@ class Plugin:
             return result
 
         await themePatch.theme.save()
+        await commit_all()
         return Result(True).to_dict()
     
     async def reset(self) -> dict:
@@ -202,6 +205,7 @@ class Plugin:
 
         await self._load(self)
         await self._load_stage_2(self)
+        await commit_all()
         self.busy = False
         return Result(True).to_dict()
 
@@ -275,15 +279,17 @@ class Plugin:
                 return Result(True)
             else:
                 try:
-                    await inject_to_tab(tab, 
+                    found_tab = get_single_tab(tab)
+                    await found_tab.evaluate_js(
                     f"""
                     (function() {{
                         const elem = document.createElement('div');
                         elem.id = "{element_name}";
                         document.head.append(elem);
                     }})()
-                    """, False)
-                except:
+                    """)
+                except Exception as e:
+                    Log(str(e))
                     pass
 
                 attempt += 1
@@ -296,7 +302,8 @@ class Plugin:
     
     async def _check_test_element(self, tab : str, element_name : str = "test_css_loaded") -> bool:
         try:
-            return await tab_has_element(tab, element_name)
+            found_tab = get_single_tab(tab)
+            return await found_tab.has_element(element_name) # I'm aware this will throw an exception if found_tab is None
         except:
             return False
 
@@ -348,16 +355,18 @@ class Plugin:
             await asyncio.sleep(3)
             for x in self.tabs:
                 try:
-                    if not await tab_exists(x):
+                    if not await x.available():
                         continue # Tab does not exist, so not worth injecting into it
 
                     # Log(f"Checking if tab {x} is still injected...")
-                    if not await self._check_test_element(self, x):
-                        Log(f"Tab {x} is not injected, reloading...")
-                        await self._inject_test_element(self, x)
+                    if not await self._check_test_element(self, x.get_name()):
+                        Log(f"Tab {x.get_name()} is not injected, reloading...")
+                        await self._inject_test_element(self, x.get_name())
                         for y in self.injects:
                             if y.enabled:
                                 (await y.inject(x)).raise_on_failure()
+
+                        await x.commit_css_transaction()
                 except Exception as e:
                     Log(f":( {str(e)}")
                     pass
@@ -419,7 +428,7 @@ class Plugin:
         load_tab_mappings()
 
         await self._load(self)
-        await self._inject_test_element(self, "SP|Steam Big Picture Mode", 9999, "test_ui_loaded")
+        await self._inject_test_element(self, "SP", 9999, "test_ui_loaded")
         await self._load_stage_2(self, False)
 
         if (os.path.exists(f"{get_theme_path()}/WATCH")):
