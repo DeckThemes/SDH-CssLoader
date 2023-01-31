@@ -8,6 +8,7 @@ import {
   Tabs,
   Router,
   showModal,
+  Focusable,
 } from "decky-frontend-lib";
 import { useEffect, useState, FC } from "react";
 import * as python from "./python";
@@ -62,41 +63,49 @@ const Content: FC<{ stateClass: CssLoaderState }> = ({ stateClass }) => {
           </PanelSectionRow>
           {themeList.length > 0 ? (
             <>
-              {unpinnedThemes.length === themeList.length ? (
-                <>
-                  <span>
-                    You have no pinned themes currently, themes that you pin from the "Your Themes"
-                    popup will show up here
-                  </span>
-                </>
-              ) : (
-                <>
-                  {/* This styles the collapse buttons, putting it here just means it only needs to be rendered once instead of like 20 times */}
-                  <style>
-                    {`
-                      .CSSLoader_QAM_CollapseButton_Container > div > div > div > button {
-                        height: 10px !important;
-                      }
-                    `}
-                  </style>
-                  {themeList
-                    .filter((e) => !unpinnedThemes.includes(e.id))
-                    .map((x) => (
-                      <ThemeToggle data={x} collapsible />
-                    ))}
-                </>
-              )}
-              <PanelSectionRow>
-                <ButtonItem
-                  layout="below"
-                  onClick={() => {
-                    // @ts-ignore
-                    showModal(<AllThemesModalRoot stateClass={stateClass} />);
-                  }}
-                >
-                  Your Themes
-                </ButtonItem>
-              </PanelSectionRow>
+              {/* This styles the collapse buttons, putting it here just means it only needs to be rendered once instead of like 20 times */}
+              <style>
+                {`
+                  .CSSLoader_ThemeListContainer {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: stretch;
+                    width: 100%;
+                  }
+                  .CSSLoader_QAM_CollapseButton_Container > div > div > div > button {
+                    height: 10px !important;
+                  }
+                `}
+              </style>
+              <Focusable className="CSSLoader_ThemeListContainer">
+                {unpinnedThemes.length === themeList.length ? (
+                  <>
+                    <span>
+                      You have no pinned themes currently, themes that you pin from the "Your
+                      Themes" popup will show up here
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    {themeList
+                      .filter((e) => !unpinnedThemes.includes(e.id))
+                      .map((x) => (
+                        <ThemeToggle data={x} collapsible />
+                      ))}
+                  </>
+                )}
+                <PanelSectionRow>
+                  <ButtonItem
+                    layout="below"
+                    onClick={() => {
+                      // @ts-ignore
+                      showModal(<AllThemesModalRoot stateClass={stateClass} />);
+                    }}
+                  >
+                    Your Themes
+                  </ButtonItem>
+                </PanelSectionRow>
+              </Focusable>
             </>
           ) : (
             <span>You have no themes currently, click on "Download Themes" to download some!</span>
