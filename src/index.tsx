@@ -71,10 +71,18 @@ const Content: FC<{ stateClass: CssLoaderState }> = ({ stateClass }) => {
                 </>
               ) : (
                 <>
+                  {/* This styles the collapse buttons, putting it here just means it only needs to be rendered once instead of like 20 times */}
+                  <style>
+                    {`
+                      .CSSLoader_QAM_CollapseButton_Container > div > div > div > button {
+                        height: 10px !important;
+                      }
+                    `}
+                  </style>
                   {themeList
                     .filter((e) => !unpinnedThemes.includes(e.id))
                     .map((x) => (
-                      <ThemeToggle data={x} />
+                      <ThemeToggle data={x} collapsible />
                     ))}
                 </>
               )}

@@ -41,14 +41,31 @@ export function ThemeSettingsModal({
   }, [selectedTheme, localThemeList]);
   return (
     <>
-      {themeData ? <ThemeToggle data={themeData} /> : <span>No Theme Data</span>}
-      <DialogButton
-        onClick={() => {
-          closeModal();
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "10px",
+          width: "100%",
         }}
       >
-        Close
-      </DialogButton>
+        {themeData ? (
+          <div style={{ width: "90%" }}>
+            <ThemeToggle data={themeData} collapsible={false} />
+          </div>
+        ) : (
+          <span>No Theme Data</span>
+        )}
+        <DialogButton
+          style={{ width: "fit-content" }}
+          onClick={() => {
+            closeModal();
+          }}
+        >
+          Close
+        </DialogButton>
+      </div>
     </>
   );
 }

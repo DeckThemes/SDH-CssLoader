@@ -1,11 +1,17 @@
-import { PanelSectionRow, ToggleField } from "decky-frontend-lib";
-import { VFC } from "react";
+import { ButtonItem, DialogButton, PanelSectionRow, ToggleField } from "decky-frontend-lib";
+import { VFC, useState } from "react";
 import { Flags, Theme } from "../ThemeTypes";
 
 import * as python from "../python";
 import { ThemePatch } from "./ThemePatch";
+import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
 
-export const ThemeToggle: VFC<{ data: Theme }> = ({ data }) => {
+export const ThemeToggle: VFC<{ data: Theme; collapsible?: boolean }> = ({
+  data,
+  collapsible = false,
+}) => {
+  const [collapsed, setCollapsed] = useState<boolean>(true);
+
   return (
     <>
       <PanelSectionRow>
@@ -55,10 +61,36 @@ export const ThemeToggle: VFC<{ data: Theme }> = ({ data }) => {
           }}
         />
       </PanelSectionRow>
-      {data.enabled &&
-        data.patches.map((x, i, arr) => (
-          <ThemePatch data={x} index={i} fullArr={arr} themeName={data.name} />
-        ))}
+      {data.enabled && (
+        <>
+          {collapsible && (
+            <div className="CSSLoader_QAM_CollapseButton_Container">
+              <PanelSectionRow>
+                <ButtonItem
+                  layout="below"
+                  bottomSeparator={collapsed ? "standard" : "none"}
+                  onClick={() => setCollapsed(!collapsed)}
+                >
+                  {collapsed ? (
+                    <RiArrowDownSFill
+                      style={{ transform: "translate(0, -13px)", fontSize: "1.5em" }}
+                    />
+                  ) : (
+                    <RiArrowUpSFill
+                      style={{ transform: "translate(0, -12px)", fontSize: "1.5em" }}
+                    />
+                  )}
+                </ButtonItem>
+              </PanelSectionRow>
+            </div>
+          )}
+          {!collapsible || !collapsed
+            ? data.patches.map((x, i, arr) => (
+                <ThemePatch data={x} index={i} fullArr={arr} themeName={data.name} />
+              ))
+            : null}
+        </>
+      )}
     </>
   );
 };
