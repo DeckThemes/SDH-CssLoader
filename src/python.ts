@@ -50,6 +50,7 @@ export function getInstalledThemes(): Promise<void> {
     if (data.success) {
       setGlobalState("localThemeList", data.result);
     }
+    return;
   });
 }
 
@@ -180,4 +181,8 @@ export function pinTheme(id: string) {
   const newArr = unpinnedThemes.filter((e) => e !== id);
   setGlobalState("unpinnedThemes", newArr);
   return storeWrite("unpinnedThemes", JSON.stringify(newArr));
+}
+
+export function generatePreset(name: string) {
+  return server!.callPluginMethod("generate_preset_theme", { name: name });
 }

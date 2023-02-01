@@ -8,3 +8,4 @@ export * from "./LoadMoreButton";
 export * from "./FilterDropdownCustomLabel";
 export * from "./AllThemesModal";
 export * from "./ThemeSettingsModal";
+export * from "./CreatePresetModal";

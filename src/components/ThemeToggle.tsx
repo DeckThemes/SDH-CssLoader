@@ -25,6 +25,8 @@ export const ThemeToggle: VFC<{ data: Theme; collapsible?: boolean }> = ({
             python.resolve(python.setThemeState(data.name, switchValue), () => {
               python.getInstalledThemes();
             });
+            // Re-collapse menu
+            setCollapsed(true);
             // Dependency Toast
             if (data.dependencies.length > 0) {
               if (switchValue === true) {

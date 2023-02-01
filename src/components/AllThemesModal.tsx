@@ -1,12 +1,10 @@
 import {
   ButtonItem,
   DialogButton,
-  DialogCheckbox,
   Focusable,
-  gamepadDialogClasses,
   ModalRoot,
+  PanelSectionRow,
   showModal,
-  Toggle,
   ToggleField,
 } from "decky-frontend-lib";
 import { BsPinAngle, BsPinAngleFill } from "react-icons/bs";
@@ -15,6 +13,7 @@ import { ThemeSettingsModalRoot } from "./ThemeSettingsModal";
 import * as python from "../python";
 import { Flags } from "../ThemeTypes";
 import { ImCog } from "react-icons/im";
+import { CreatePresetModal } from "./CreatePresetModal";
 
 export function AllThemesModalRoot({
   stateClass,
@@ -177,14 +176,30 @@ export function AllThemesModal({
             );
           })}
       </Focusable>
-      <ButtonItem
-        layout="below"
-        onClick={() => {
-          closeModal();
-        }}
-      >
-        Close
-      </ButtonItem>
+      <PanelSectionRow>
+        <ButtonItem
+          layout="below"
+          bottomSeparator="standard"
+          onClick={() => {
+            showModal(
+              // @ts-ignore
+              <CreatePresetModal enabledNumber={localThemeList.filter((e) => e.enabled).length} />
+            );
+          }}
+        >
+          Create Preset
+        </ButtonItem>
+      </PanelSectionRow>
+      <PanelSectionRow>
+        <ButtonItem
+          layout="below"
+          onClick={() => {
+            closeModal();
+          }}
+        >
+          Close
+        </ButtonItem>
+      </PanelSectionRow>
     </>
   );
 }
