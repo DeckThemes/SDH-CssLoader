@@ -63,7 +63,7 @@ export const ThemeToggle: VFC<{ data: Theme; collapsible?: boolean }> = ({
           }}
         />
       </PanelSectionRow>
-      {data.enabled && (
+      {data.enabled && data.patches.length > 0 && (
         <>
           {collapsible && (
             <div className="CSSLoader_QAM_CollapseButton_Container">
