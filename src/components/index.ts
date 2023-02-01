@@ -6,3 +6,6 @@ export * from "./BrowserSearchFields";
 export * from "./PageSelector";
 export * from "./LoadMoreButton";
 export * from "./FilterDropdownCustomLabel";
+export * from "./AllThemesModal";
+export * from "./ThemeSettingsModal";
+export * from "./CreatePresetModal";

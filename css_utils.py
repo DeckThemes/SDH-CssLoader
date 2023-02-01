@@ -6,6 +6,9 @@ import pwd
 
 Logger = getLogger("CSS_LOADER")
 
+FLAG_KEEP_DEPENDENCIES = "KEEP_DEPENDENCIES"
+FLAG_PRESET = "PRESET"
+
 def Log(text : str):
     Logger.info(f"[CSS_Loader] {text}")
 
@@ -64,10 +67,11 @@ def store_reads() -> dict:
 
     with open(path, 'r') as fp:
         for x in fp.readlines():
-            if (x.strip() == ""):
+            c = x.strip()
+            if (c == ""):
                 continue
 
-            split = x.split(":", 1)
+            split = c.split(":", 1)
 
             if (len(split) <= 1):
                 continue
@@ -83,6 +87,6 @@ def store_read(key : str) -> str:
 def store_write(key : str, val : str):
     path = store_path()
     items = store_reads()
-    items[key] = val
+    items[key] = val.replace('\n', '')
     with open(path, 'w') as fp:
-        fp.writelines([f"{x}:{items[x]}" for x in items])
+        fp.write("\n".join([f"{x}:{items[x]}" for x in items]))

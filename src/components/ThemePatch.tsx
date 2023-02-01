@@ -1,16 +1,16 @@
 import { DropdownItem, PanelSectionRow, SliderField, ToggleField } from "decky-frontend-lib";
 import * as python from "../python";
 import { useState, VFC } from "react";
-import { Patch } from "../theme";
+import { Patch } from "../ThemeTypes";
 import { PatchComponent } from "./PatchComponent";
 
 export const ThemePatch: VFC<{
   data: Patch;
   index: number;
   fullArr: Patch[];
-}> = ({ data, index, fullArr }) => {
-  // For some reason, the other 2 don't require useStates, the slider does though.
-  const [sliderValue, setSlider] = useState(data.index);
+  themeName: string;
+}> = ({ data, index, fullArr, themeName }) => {
+  const [selectedIndex, setIndex] = useState(data.options.indexOf(data.value));
 
   const [selectedLabel, setLabel] = useState(data.value);
 
@@ -26,15 +26,11 @@ export const ThemePatch: VFC<{
               label={` ↳ ${data.name}`}
               min={0}
               max={data.options.length - 1}
-              value={sliderValue}
+              value={selectedIndex}
               onChange={(value) => {
-                python.execute(
-                  python.setPatchOfTheme(data.theme.name, data.name, data.options[value])
-                );
-                setSlider(value);
+                python.execute(python.setPatchOfTheme(themeName, data.name, data.options[value]));
+                setIndex(value);
                 setLabel(data.options[value]);
-
-                data.index = value;
                 data.value = data.options[value];
               }}
               notchCount={data.options.length}
@@ -51,7 +47,7 @@ export const ThemePatch: VFC<{
                 <PatchComponent
                   data={e}
                   selectedLabel={selectedLabel}
-                  themeName={data.theme.name}
+                  themeName={themeName}
                   patchName={data.name}
                   bottomSeparatorValue={bottomSeparatorValue}
                 />
@@ -70,9 +66,9 @@ export const ThemePatch: VFC<{
               checked={data.value === "Yes"}
               onChange={(bool) => {
                 const newValue = bool ? "Yes" : "No";
-                python.execute(python.setPatchOfTheme(data.theme.name, data.name, newValue));
+                python.execute(python.setPatchOfTheme(themeName, data.name, newValue));
                 setLabel(newValue);
-                data.index = data.options.findIndex((e) => e === newValue);
+                setIndex(data.options.findIndex((e) => e === newValue));
                 data.value = newValue;
               }}
             />
@@ -83,7 +79,7 @@ export const ThemePatch: VFC<{
                 <PatchComponent
                   data={e}
                   selectedLabel={selectedLabel}
-                  themeName={data.theme.name}
+                  themeName={themeName}
                   patchName={data.name}
                   bottomSeparatorValue={bottomSeparatorValue}
                 />
@@ -103,12 +99,12 @@ export const ThemePatch: VFC<{
               rgOptions={data.options.map((x, i) => {
                 return { data: i, label: x };
               })}
-              selectedOption={data.index}
+              selectedOption={selectedIndex}
               onChange={(index) => {
-                data.index = index.data;
+                setIndex(index.data);
                 data.value = index.label as string;
                 setLabel(data.value);
-                python.execute(python.setPatchOfTheme(data.theme.name, data.name, data.value));
+                python.execute(python.setPatchOfTheme(themeName, data.name, data.value));
               }}
             />
           </PanelSectionRow>
@@ -118,7 +114,7 @@ export const ThemePatch: VFC<{
                 <PatchComponent
                   data={e}
                   selectedLabel={selectedLabel}
-                  themeName={data.theme.name}
+                  themeName={themeName}
                   patchName={data.name}
                   bottomSeparatorValue={bottomSeparatorValue}
                 />
@@ -140,7 +136,7 @@ export const ThemePatch: VFC<{
                 <PatchComponent
                   data={e}
                   selectedLabel={selectedLabel}
-                  themeName={data.theme.name}
+                  themeName={themeName}
                   patchName={data.name}
                   bottomSeparatorValue={bottomSeparatorValue}
                 />

@@ -29,11 +29,10 @@ export function logInWithShortToken(shortTokenInterimValue?: string | undefined)
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
   if (shortTokenValue.length === 12) {
     server!
-      .callServerMethod("http_request", {
+      .fetchNoCors(`${apiUrl}/auth/authenticate_token`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        url: `${apiUrl}/auth/authenticate_token`,
-        data: JSON.stringify({ token: shortTokenValue }),
+        body: JSON.stringify({ token: shortTokenValue }),
       })
       .then((deckyRes) => {
         if (deckyRes.success) {
@@ -200,4 +199,30 @@ export function getThemes(
     }
     setSnapIndex(-1);
   });
+}
+
+export function toggleStar(themeId: string, isStarred: boolean, authToken: string, apiUrl: string) {
+  return server!
+    .fetchNoCors<Response>(`${apiUrl}/users/me/stars/${themeId}`, {
+      method: isStarred ? "DELETE" : "POST",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    })
+    .then((deckyRes) => {
+      if (deckyRes.success) {
+        return deckyRes.result;
+      }
+      throw new Error(`Fetch not successful!`);
+    })
+    .then((res) => {
+      if (res.status >= 200 && res.status <= 300) {
+        // @ts-ignore
+        return true;
+      }
+      throw new Error(`Res not OK!, code ${res.status}`);
+    })
+    .catch((err) => {
+      console.error(`Error starring theme`, err);
+    });
 }

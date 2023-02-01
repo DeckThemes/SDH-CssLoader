@@ -5,14 +5,14 @@ import { AiOutlineDownload } from "react-icons/ai";
 import * as python from "../python";
 
 import { useCssLoaderState } from "../state";
-import { Theme } from "../theme";
+import { Theme } from "../ThemeTypes";
 import { MinimalCSSThemeInfo, PartialCSSThemeInfo } from "../apiTypes";
 import { genericGET } from "../api";
 
 export type LocalThemeStatus = "installed" | "outdated" | "local";
 
 export const UninstallThemePage: VFC = () => {
-  const { localThemeList, browseThemeList, apiUrl } = useCssLoaderState();
+  const { localThemeList, browseThemeList, unpinnedThemes } = useCssLoaderState();
 
   const [isUninstalling, setUninstalling] = useState(false);
 
@@ -22,7 +22,11 @@ export const UninstallThemePage: VFC = () => {
 
   function handleUninstall(listEntry: Theme) {
     setUninstalling(true);
-    python.resolve(python.deleteTheme(listEntry.data.name), () => {
+    python.resolve(python.deleteTheme(listEntry.name), () => {
+      if (unpinnedThemes.includes(listEntry.id)) {
+        // This isn't really pinning it, it's just removing its name from the unpinned list.
+        python.pinTheme(listEntry.id);
+      }
       python.reloadBackend().then(() => {
         setUninstalling(false);
       });
@@ -74,7 +78,7 @@ export const UninstallThemePage: VFC = () => {
               (remote) => remote.id === localEntry.id || remote.name === localEntry.id
             );
             if (remoteEntry) {
-              if (remoteEntry.version === localEntry.data.version) {
+              if (remoteEntry.version === localEntry.version) {
                 updateStatusArr.push([localEntry.id, "installed", remoteEntry]);
                 return;
               }
@@ -90,7 +94,7 @@ export const UninstallThemePage: VFC = () => {
     }
   }, [localThemeList]);
 
-  if (localThemeList.filter((e) => !e.data.bundled).length === 0) {
+  if (localThemeList.filter((e) => !e.bundled).length === 0) {
     return (
       <PanelSectionRow>
         <span>No custom themes installed, find some in the 'Browse Themes' tab.</span>
@@ -121,14 +125,14 @@ export const UninstallThemePage: VFC = () => {
                     width: "96%",
                   }}
                 >
-                  <span>{e.data.name}</span>
+                  <span>{e.name}</span>
                   <span
                     style={{
                       color: "#dcdedf55",
                       marginLeft: "8px",
                     }}
                   >
-                    {e.data.version}
+                    {e.version}
                   </span>
                   <Focusable
                     style={{

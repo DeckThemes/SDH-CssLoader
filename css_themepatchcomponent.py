@@ -16,16 +16,11 @@ class ThemePatchComponent:
         self.default = component["default"]
 
         if self.type == "color-picker":
-            # Expected: #0123456
-            if self.default[0] != "#":
-                raise Exception("Color picker default is not a valid hex value")
-            
-            if len(self.default) not in [4,5,7,9]:
-                raise Exception("Color picker default is not a valid hex value")
-
-            for x in self.default[1:]:
-                if x not in "1234567890ABCDEFabcdef":
-                    raise Exception("Color picker default is not a valid hex value")
+            try:
+                self.check_value_color_picker(self.default)
+            except Exception as e:
+                Result(False, str(e))
+                self.default = "#FFFFFF"
         elif self.type == "image-picker":
             self.check_path_image_picker(self.default)
 
@@ -33,9 +28,24 @@ class ThemePatchComponent:
         self.on = component["on"]
         self.css_variable = component["css_variable"]
 
+        if not self.css_variable.startswith("--"):
+            self.css_variable = f"--{self.css_variable}"
+
         self.tabs = component["tabs"]
         self.inject = Inject("", self.tabs, self.themePatch.theme)
         self.generate()
+
+    def check_value_color_picker(self, value : str):
+        '''Expected: #0123456'''
+        if value[0] != "#":
+            raise Exception("Color picker default is not a valid hex value")
+            
+        if len(value) not in [4,5,7,9]:
+            raise Exception("Color picker default is not a valid hex value")
+
+        for x in value[1:]:
+            if x not in "1234567890ABCDEFabcdef":
+                raise Exception("Color picker default is not a valid hex value")
     
     def check_path_image_picker(self, path : str):
         themePath = get_theme_path()
@@ -54,14 +64,14 @@ class ThemePatchComponent:
             return Result(False, "???")
 
         if self.type == "color-picker":        
-            self.inject.css = f":root {{ --{self.css_variable}: {self.value}; }}"
+            self.inject.css = f":root {{ {self.css_variable}: {self.value}; }}"
         elif self.type == "image-picker":
             try:
                 self.check_path_image_picker(self.value)
             except Exception as e:
                 return Result(False, str(e))
 
-            self.inject.css = f":root {{ --{self.css_variable}: url({join('/themes_custom/', self.value.replace(' ', '%20'))}) }}"
+            self.inject.css = f":root {{ {self.css_variable}: url({join('/themes_custom/', self.value.replace(' ', '%20'))}) }}"
         return Result(True)
 
     async def generate_and_reinject(self) -> Result:

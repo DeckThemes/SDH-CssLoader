@@ -1,7 +1,7 @@
 // Code from https://github.com/NGnius/PowerTools/blob/dev/src/python.ts
 import { ServerAPI } from "decky-frontend-lib";
 import { CssLoaderState } from "./state";
-import { Theme } from "./theme";
+import { Theme } from "./ThemeTypes";
 
 var server: ServerAPI | undefined = undefined;
 var globalState: CssLoaderState | undefined = undefined;
@@ -48,17 +48,9 @@ export function getInstalledThemes(): Promise<void> {
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
   return server!.callPluginMethod<{}, Theme[]>("get_themes", {}).then((data) => {
     if (data.success) {
-      const listArr: Theme[] = data.result;
-      let list: Theme[] = [];
-
-      listArr.forEach((x: any) => {
-        let theme = new Theme();
-        theme.data = x;
-        list.push(theme);
-      });
-      list.forEach((x) => x.init());
-      setGlobalState("localThemeList", list);
+      setGlobalState("localThemeList", data.result);
     }
+    return;
   });
 }
 
@@ -69,7 +61,7 @@ export function reloadBackend(): Promise<void> {
 }
 
 export function getThemes(): Promise<any> {
-  return server!.callPluginMethod("get_themes", {});
+  return server!.callPluginMethod<{}, Theme[]>("get_themes", {});
 }
 
 export function setThemeState(name: string, state: boolean): Promise<any> {
@@ -175,28 +167,22 @@ export function genericGET(fetchUrl: string, authToken?: string | undefined) {
     });
 }
 
-export function toggleStar(themeId: string, isStarred: boolean, authToken: string, apiUrl: string) {
-  return server!
-    .fetchNoCors<Response>(`${apiUrl}/users/me/stars/${themeId}`, {
-      method: isStarred ? "DELETE" : "POST",
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-      },
-    })
-    .then((deckyRes) => {
-      if (deckyRes.success) {
-        return deckyRes.result;
-      }
-      throw new Error(`Fetch not successful!`);
-    })
-    .then((res) => {
-      if (res.status >= 200 && res.status <= 300) {
-        // @ts-ignore
-        return true;
-      }
-      throw new Error(`Res not OK!, code ${res.status}`);
-    })
-    .catch((err) => {
-      console.error(`Error starring theme`, err);
-    });
+export function unpinTheme(id: string) {
+  const { unpinnedThemes } = globalState!.getPublicState();
+  const setGlobalState = globalState!.setGlobalState.bind(globalState);
+  const newArr = [...unpinnedThemes, id];
+  setGlobalState("unpinnedThemes", newArr);
+  return storeWrite("unpinnedThemes", JSON.stringify(newArr));
+}
+
+export function pinTheme(id: string) {
+  const { unpinnedThemes } = globalState!.getPublicState();
+  const setGlobalState = globalState!.setGlobalState.bind(globalState);
+  const newArr = unpinnedThemes.filter((e) => e !== id);
+  setGlobalState("unpinnedThemes", newArr);
+  return storeWrite("unpinnedThemes", JSON.stringify(newArr));
+}
+
+export function generatePreset(name: string) {
+  return server!.callPluginMethod("generate_preset_theme", { name: name });
 }

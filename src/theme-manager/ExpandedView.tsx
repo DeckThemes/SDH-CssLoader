@@ -5,11 +5,10 @@ import { BsStar, BsStarFill } from "react-icons/bs";
 import { FiDownload } from "react-icons/fi";
 
 import * as python from "../python";
-import { genericGET } from "../api";
-import { refreshToken } from "../api";
+import { genericGET, refreshToken, toggleStar as apiToggleStar } from "../api";
 
 import { useCssLoaderState } from "../state";
-import { Theme } from "../theme";
+import { Theme } from "../ThemeTypes";
 import { calcButtonColor } from "../logic";
 import { FullCSSThemeInfo, PartialCSSThemeInfo } from "../apiTypes";
 
@@ -51,7 +50,7 @@ export const ExpandedViewPage: VFC = () => {
       setBlurStar(true);
       const newToken = await refreshToken();
       if (fullThemeData && newToken) {
-        python.toggleStar(fullThemeData.id, isStarred, newToken, apiUrl).then((bool) => {
+        apiToggleStar(fullThemeData.id, isStarred, newToken, apiUrl).then((bool) => {
           if (bool) {
             setFullData({
               ...fullThemeData,
@@ -73,20 +72,24 @@ export const ExpandedViewPage: VFC = () => {
   }
 
   function installTheme() {
-    setGlobalState("isInstalling", true);
-    python.resolve(python.downloadThemeFromUrl(fullThemeData?.id || "ERROR"), () => {
-      python.reloadBackend().then(() => {
-        setGlobalState("isInstalling", false);
+    if (fullThemeData?.id) {
+      setGlobalState("isInstalling", true);
+      python.resolve(python.downloadThemeFromUrl(fullThemeData.id), () => {
+        python.reloadBackend().then(() => {
+          setGlobalState("isInstalling", false);
+        });
       });
-    });
+    } else {
+      python.toast("Error Downloading!", "Can't find theme ID");
+    }
   }
 
   function checkIfThemeInstalled(themeObj: PartialCSSThemeInfo) {
     const filteredArr: Theme[] = installedThemes.filter(
-      (e: Theme) => e.data.name === themeObj.name && e.data.author === themeObj.specifiedAuthor
+      (e: Theme) => e.name === themeObj.name && e.author === themeObj.specifiedAuthor
     );
     if (filteredArr.length > 0) {
-      if (filteredArr[0].data.version === themeObj.version) {
+      if (filteredArr[0].version === themeObj.version) {
         return "installed";
       } else {
         return "outdated";
