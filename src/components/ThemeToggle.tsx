@@ -1,5 +1,5 @@
-import { ButtonItem, DialogButton, PanelSectionRow, ToggleField } from "decky-frontend-lib";
-import { VFC, useState } from "react";
+import { ButtonItem, PanelSectionRow, ToggleField } from "decky-frontend-lib";
+import { VFC, useState, useMemo } from "react";
 import { Flags, Theme } from "../ThemeTypes";
 
 import * as python from "../python";
@@ -11,6 +11,13 @@ export const ThemeToggle: VFC<{ data: Theme; collapsible?: boolean }> = ({
   collapsible = false,
 }) => {
   const [collapsed, setCollapsed] = useState<boolean>(true);
+  const isPreset = useMemo(() => {
+    if (data.flags.includes(Flags.isPreset)) {
+      return true;
+    }
+    return false;
+    // This might not actually memoize it as data.flags is an array, so idk if it deep checks the values here
+  }, [data.flags]);
 
   return (
     <>
@@ -19,7 +26,7 @@ export const ThemeToggle: VFC<{ data: Theme; collapsible?: boolean }> = ({
           bottomSeparator={data.enabled && data?.patches?.length > 0 ? "none" : "standard"}
           checked={data.enabled}
           label={data.name}
-          description={`${data.version} | ${data.author}`}
+          description={isPreset ? `Preset` : `${data.version} | ${data.author}`}
           onChange={(switchValue: boolean) => {
             // Actually enabling the theme
             python.resolve(python.setThemeState(data.name, switchValue), () => {
