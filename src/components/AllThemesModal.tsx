@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useMemo } from "react";
 import {
   ButtonItem,
   DialogButton,
@@ -11,7 +11,7 @@ import {
 import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "../state";
 import { ThemeSettingsModalRoot } from "./ThemeSettingsModal";
 import * as python from "../python";
-import { Flags, Theme } from "../ThemeTypes";
+import { Flags } from "../ThemeTypes";
 import { ImCog } from "react-icons/im";
 import { CreatePresetModal } from "./CreatePresetModal";
 import { AiFillEye, AiOutlineEyeInvisible } from "react-icons/ai";
@@ -40,20 +40,17 @@ export function AllThemesModal({
   closeModal: any;
 }) {
   const { localThemeList, unpinnedThemes } = useCssLoaderState();
-  const [sortedList, setSortedList] = useState<Theme[]>([]);
 
-  useEffect(() => {
-    setSortedList(
-      localThemeList.sort((a, b) => {
-        const aPinned = !unpinnedThemes.includes(a.id);
-        const bPinned = !unpinnedThemes.includes(b.id);
-        // This sorts the pinned themes alphabetically, then the non-pinned alphabetically
-        if (aPinned === bPinned) {
-          return a.name.localeCompare(b.name);
-        }
-        return Number(bPinned) - Number(aPinned);
-      })
-    );
+  const sortedList = useMemo(() => {
+    return localThemeList.sort((a, b) => {
+      const aPinned = !unpinnedThemes.includes(a.id);
+      const bPinned = !unpinnedThemes.includes(b.id);
+      // This sorts the pinned themes alphabetically, then the non-pinned alphabetically
+      if (aPinned === bPinned) {
+        return a.name.localeCompare(b.name);
+      }
+      return Number(bPinned) - Number(aPinned);
+    });
   }, [localThemeList.length]);
 
   return (
@@ -98,7 +95,7 @@ export function AllThemesModal({
         `}
       </style>
       <Focusable style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gridGap: "1em" }}>
-        {sortedList.map((e, i) => {
+        {sortedList.map((e) => {
           const isPinned = !unpinnedThemes.includes(e.id);
           return (
             <>
