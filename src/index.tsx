@@ -49,6 +49,17 @@ const Content: FC<{ stateClass: CssLoaderState }> = ({ stateClass }) => {
     <PanelSection title="Themes">
       {dummyFuncResult ? (
         <>
+          <PanelSectionRow>
+            <ButtonItem
+              layout="below"
+              onClick={() => {
+                Router.CloseSideMenus();
+                Router.Navigate("/theme-manager");
+              }}
+            >
+              Download Themes
+            </ButtonItem>
+          </PanelSectionRow>
           {themeList.length > 0 ? (
             <>
               {/* This styles the collapse buttons, putting it here just means it only needs to be rendered once instead of like 20 times */}
