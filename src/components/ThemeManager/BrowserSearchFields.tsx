@@ -11,9 +11,9 @@ import {
 } from "decky-frontend-lib";
 import { useEffect, useMemo, memo } from "react";
 import { TiRefreshOutline } from "react-icons/ti";
-import { ThemeQueryRequest } from "../apiTypes";
-import { genericGET } from "../api";
-import { useCssLoaderState } from "../state";
+import { ThemeQueryRequest } from "../../apiTypes";
+import { genericGET } from "../../api";
+import { useCssLoaderState } from "../../state";
 import { FilterDropdownCustomLabel } from "./FilterDropdownCustomLabel";
 
 export function BrowserSearchFields({

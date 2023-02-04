@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 
 import { DialogButton, ModalRoot } from "decky-frontend-lib";
-import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "../state";
-import { ThemeToggle } from "./ThemeToggle";
-import { Theme } from "../ThemeTypes";
+import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "../../state";
+import { ThemeToggle } from "../ThemeToggle";
+import { Theme } from "../../ThemeTypes";
 export function ThemeSettingsModalRoot({
   stateClass,
   closeModal,

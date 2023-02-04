@@ -1,6 +1,6 @@
 import { ConfirmModal, TextField } from "decky-frontend-lib";
 import { useState } from "react";
-import * as python from "../python";
+import * as python from "../../python";
 
 export function CreatePresetModal({
   closeModal,

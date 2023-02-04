@@ -8,10 +8,10 @@ import {
   showModal,
   ToggleField,
 } from "decky-frontend-lib";
-import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "../state";
+import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "../../state";
 import { ThemeSettingsModalRoot } from "./ThemeSettingsModal";
-import * as python from "../python";
-import { Flags } from "../ThemeTypes";
+import * as python from "../../python";
+import { Flags } from "../../ThemeTypes";
 import { ImCog } from "react-icons/im";
 import { CreatePresetModal } from "./CreatePresetModal";
 import { AiFillEye, AiOutlineEyeInvisible } from "react-icons/ai";

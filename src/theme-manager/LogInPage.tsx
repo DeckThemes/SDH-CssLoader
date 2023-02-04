@@ -4,7 +4,7 @@ import { useState, VFC } from "react";
 import { logInWithShortToken, logOut } from "../api";
 import { useCssLoaderState } from "../state";
 
-export const SettingsPage: VFC = () => {
+export const LogInPage: VFC = () => {
   const { apiShortToken, apiFullToken, apiMeData } = useCssLoaderState();
   const [shortTokenInterimValue, setShortTokenIntValue] = useState<string>(apiShortToken);
 
@@ -29,7 +29,7 @@ export const SettingsPage: VFC = () => {
                     <span>Logged In As {apiMeData.username}</span>
                   </>
                 ) : (
-                  <span>Logged In</span>
+                  <span>Loading...</span>
                 )}
               </div>
               <DialogButton
