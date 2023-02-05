@@ -2,11 +2,11 @@ import { VFC } from "react";
 
 import * as python from "../python";
 
+import Color from "color";
 import { showModal, ButtonItem, PanelSectionRow } from "decky-frontend-lib";
 
 import { ColorPickerModal } from "decky-frontend-lib";
 import { ThemePatchComponent } from "../ThemeTypes";
-import { anythingToHSLA } from "../logic";
 import { FaFolder } from "react-icons/fa";
 
 export const PatchComponent: VFC<{
@@ -77,8 +77,8 @@ export const PatchComponent: VFC<{
           </PanelSectionRow>
         );
       case "color-picker":
-        const curColorHSLArray = anythingToHSLA(data.value);
-        const hslString = `hsla(${curColorHSLArray[0]}, ${curColorHSLArray[1]}%, ${curColorHSLArray[2]}%, ${curColorHSLArray[3]})`;
+        const colorObj = Color(data.value).hsl();
+        const curColorHSLArray = colorObj.array();
 
         return (
           <>
@@ -95,7 +95,7 @@ export const PatchComponent: VFC<{
                       defaultH={curColorHSLArray[0]}
                       defaultS={curColorHSLArray[1]}
                       defaultL={curColorHSLArray[2]}
-                      defaultA={curColorHSLArray[3]}
+                      defaultA={curColorHSLArray[3] ?? 1}
                       title={data.name}
                     />
                   )
@@ -117,7 +117,7 @@ export const PatchComponent: VFC<{
                   >
                     <div
                       style={{
-                        backgroundColor: hslString,
+                        backgroundColor: colorObj.string(),
                         width: "20px",
                         height: "20px",
                       }}
