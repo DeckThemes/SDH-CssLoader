@@ -246,7 +246,7 @@ class Plugin:
 
     async def _generate_preset_theme_internal(self, name : str) -> Result:
         a = await self._get_theme(self, name)
-        if a != None:
+        if a != None and FLAG_PRESET not in a.flags:
             return Result(False, f"Theme '{name}' already exists")
         
         deps = {}
