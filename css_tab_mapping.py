@@ -159,7 +159,7 @@ class Tab:
             return False
 
         try:
-            res = await self.tab.has_element(element_name)
+            res = await self.tab.has_element(element_name, False)
         except Exception as e:
             res = False 
             Result(False, str(e))
