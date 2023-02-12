@@ -2,7 +2,7 @@ import os, json, shutil
 from os import path
 from typing import List
 from css_inject import Inject, to_injects
-from css_utils import Result, Log, create_dir
+from css_utils import Result, Log, create_dir, USER
 from css_themepatch import ThemePatch
 
 CSS_LOADER_VER = 6
@@ -10,7 +10,7 @@ CSS_LOADER_VER = 6
 class Theme:
     def __init__(self, themePath : str, json : dict, configPath : str = None):
         self.configPath = configPath if (configPath is not None) else themePath
-        self.configJsonPath = self.configPath + "/config" + ("_ROOT.json" if os.geteuid() == 0 else "_USER.json")
+        self.configJsonPath = self.configPath + "/config" + ("_ROOT.json" if USER == "root" else "_USER.json")
         self.patches = []
         self.injects = []
         self.flags = []

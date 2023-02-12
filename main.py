@@ -2,12 +2,7 @@ import os, json, asyncio, sys, time
 from os import path, mkdir
 
 from watchdog.events import FileSystemEventHandler
-from watchdog.utils import UnsupportedLibc
-
-try:
-    from watchdog.observers.inotify import InotifyObserver as Observer
-except UnsupportedLibc:
-    from watchdog.observers.fsevents import FSEventsObserver as Observer
+from watchdog.observers import Observer
 
 sys.path.append(os.path.dirname(__file__))
 
