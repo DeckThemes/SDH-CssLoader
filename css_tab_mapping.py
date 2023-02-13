@@ -132,6 +132,8 @@ class Tab:
     async def close_webhook(self):
         try:
             await self.tab.close_websocket()
+        except:
+            pass
         finally:
             self.tab.websocket = None
     
