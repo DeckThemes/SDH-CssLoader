@@ -22,7 +22,11 @@ import {
   UninstallThemePage,
 } from "./theme-manager";
 import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "./state";
-import { AllThemesModalRoot, ThemeToggle, TitleView } from "./components";
+import {
+  AllThemesModalRoot,
+  ThemeToggle,
+  // TitleView
+} from "./components";
 import { ExpandedViewPage } from "./theme-manager/ExpandedView";
 import { Permissions } from "./apiTypes";
 import { Theme } from "./ThemeTypes";
@@ -54,7 +58,7 @@ const Content: FC<{ stateClass: CssLoaderState }> = ({ stateClass }) => {
               layout="below"
               onClick={() => {
                 Router.CloseSideMenus();
-                Router.Navigate("/theme-manager");
+                Router.Navigate("/cssloader/theme-manager");
               }}
             >
               Download Themes
@@ -230,9 +234,9 @@ export default definePlugin((serverApi: ServerAPI) => {
     </CssLoaderContextProvider>
   ));
 
-  console.log("test2");
   return {
-    title: <TitleView />,
+    // CustomTitleView: <TitleView />,
+    title: <div>CSSLoader</div>,
     alwaysRender: true,
     content: (
       <CssLoaderContextProvider cssLoaderStateClass={state}>

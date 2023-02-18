@@ -189,7 +189,7 @@ export function getThemes(
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
   const queryStr = generateParamStr(
     searchOpts.filters !== "All" ? searchOpts : { ...searchOpts, filters: "" },
-    "CSS."
+    "CSS.-Preset."
   );
   genericGET(`${apiPath}${queryStr}`, requiresAuth).then((data: ThemeQueryResponse) => {
     if (data.total > 0) {
