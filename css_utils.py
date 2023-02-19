@@ -63,6 +63,23 @@ async def create_symlink(src : str, dst : str) -> Result:
 
     return Result(True)
 
+async def create_steam_symlink() -> Result:
+    if PLATFORM_WIN:
+        try:
+            import winreg
+            conn = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
+            key = winreg.OpenKey(conn, "SOFTWARE\\Wow6432Node\\Valve\\Steam")
+            val, type = winreg.QueryValueEx(key, "InstallPath")
+            if type != winreg.REG_SZ:
+                raise Exception(f"Expected type {winreg.REG_SZ}, got {type}")
+            
+            Log(f"Got win steam install path: '{val}'")
+            return await create_symlink(get_theme_path(), os.path.join(val, "steamui", "themes_custom"))
+        except Exception as e:
+            return Result(False, str(e))
+    else:
+        return await create_symlink(get_theme_path(), f"{get_user_home()}/.local/share/Steam/steamui/themes_custom")
+
 def store_path() -> str:
     return os.path.join(get_theme_path(), "STORE")
 
