@@ -2,16 +2,11 @@ import os, json, asyncio, sys, time
 from os import path, mkdir
 
 from watchdog.events import FileSystemEventHandler
-from watchdog.utils import UnsupportedLibc
-
-try:
-    from watchdog.observers.inotify import InotifyObserver as Observer
-except UnsupportedLibc:
-    from watchdog.observers.fsevents import FSEventsObserver as Observer
+from watchdog.observers import Observer
 
 sys.path.append(os.path.dirname(__file__))
 
-from css_utils import Log, create_dir, create_symlink, Result, get_user_home, get_theme_path, store_read as util_store_read, store_write as util_store_write, FLAG_KEEP_DEPENDENCIES, FLAG_PRESET
+from css_utils import Log, create_dir, create_steam_symlink, Result, get_user_home, get_theme_path, store_read as util_store_read, store_write as util_store_write, FLAG_KEEP_DEPENDENCIES, FLAG_PRESET
 from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
@@ -246,7 +241,7 @@ class Plugin:
 
     async def _generate_preset_theme_internal(self, name : str) -> Result:
         a = await self._get_theme(self, name)
-        if a != None:
+        if a != None and FLAG_PRESET not in a.flags:
             return Result(False, f"Theme '{name}' already exists")
         
         deps = {}
@@ -424,7 +419,7 @@ class Plugin:
         Log("Initializing css loader...")
         Log(f"Max supported manifest version: {CSS_LOADER_VER}")
         
-        await create_symlink(get_theme_path(), f"{get_user_home()}/.local/share/Steam/steamui/themes_custom")
+        await create_steam_symlink()
         load_tab_mappings()
 
         await self._load(self)

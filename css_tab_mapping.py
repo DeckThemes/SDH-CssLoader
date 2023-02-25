@@ -134,6 +134,8 @@ class Tab:
             await self.tab.close_websocket()
         except:
             pass
+        finally:
+            self.tab.websocket = None
     
     async def available(self) -> bool:
         res = await self.manage_webhook()
@@ -159,8 +161,11 @@ class Tab:
             return False
 
         try:
-            res = await self.tab.has_element(element_name)
+            res = await self.tab.has_element(element_name, False)
         except Exception as e:
+            if str(e) == "Cannot write to closing transport": # Hack but closed property seems to not be set
+                await self.close_webhook()
+
             res = False 
             Result(False, str(e))
 
@@ -177,6 +182,9 @@ class Tab:
             if res == None:
                 raise Exception("No response from eval_js")
         except Exception as e:
+            if str(e) == "Cannot write to closing transport": # Hack but closed property seems to not be set
+                await self.close_webhook()
+
             return Result(False, str(e))
             
         #Log(res)

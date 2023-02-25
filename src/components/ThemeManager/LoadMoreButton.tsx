@@ -1,9 +1,9 @@
 import { DialogButton } from "decky-frontend-lib";
 import { useState, Dispatch, SetStateAction, useEffect } from "react";
-import { ThemeQueryRequest, ThemeQueryResponse } from "../apiTypes";
-import { generateParamStr } from "../logic";
-import { genericGET } from "../api";
-import { useCssLoaderState } from "../state";
+import { ThemeQueryRequest, ThemeQueryResponse } from "../../apiTypes";
+import { generateParamStr } from "../../logic";
+import { genericGET } from "../../api";
+import { useCssLoaderState } from "../../state";
 
 export function LoadMoreButton({
   fetchPath = "/themes",

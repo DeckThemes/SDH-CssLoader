@@ -1,0 +1,46 @@
+name: Builder
+
+on: ["push", "pull_request"]
+
+jobs:
+  build:
+    name: Build SDH-CSSLoader
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up NodeJS 18
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+  
+    - name: Install JS dependencies
+      run: |
+        npm i -g pnpm
+        pnpm install
+      
+    - name: Build Frontend
+      run: |
+        pnpm run build
+    
+    - name: Archive Release
+      uses: thedoctor0/zip-release@0.7.1
+      with:
+        type: 'zip'
+        filename: 'build.zip'
+        exclusions: '*.git* /*node_modules/* /*assets/* /*src/* package-lock.json .prettierrc pnpm-lock.yaml README.md rollup.config.js tsconfig.json'
+      
+    - name: Upload package artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: SDH-CSSLoader
+        path: ./build.zip
+    
+    - name: Send Zip in discord
+      uses: tsickert/discord-webhook@v5.3.0
+      with:
+        webhook-url: ${{ secrets.WEBHOOK_URL }}
+        content: ${{ github.event.head_commit.message }}
+        filename: "./build.zip"

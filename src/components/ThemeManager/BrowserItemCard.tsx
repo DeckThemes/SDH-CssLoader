@@ -1,9 +1,9 @@
 import { FC } from "react";
-import { useCssLoaderState } from "../state";
-import { Theme } from "../ThemeTypes";
+import { useCssLoaderState } from "../../state";
+import { Theme } from "../../ThemeTypes";
 import { Focusable, Router } from "decky-frontend-lib";
 import { AiOutlineDownload } from "react-icons/ai";
-import { PartialCSSThemeInfo, ThemeQueryRequest } from "../apiTypes";
+import { PartialCSSThemeInfo, ThemeQueryRequest } from "../../apiTypes";
 
 const topMargin = {
   5: "2px",
@@ -133,7 +133,7 @@ export const VariableSizeCard: FC<{
           onActivate={() => {
             setGlobalState(prevSearchOptsVarName, searchOpts);
             setGlobalState("currentExpandedTheme", e);
-            Router.Navigate("/theme-manager-expanded-view");
+            Router.Navigate("/cssloader/expanded-view");
           }}
           className="CssLoader_ThemeBrowser_SingleItem_BgImage"
           style={{

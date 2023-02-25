@@ -4,7 +4,6 @@ import {
   PanelSection,
   PanelSectionRow,
   ServerAPI,
-  staticClasses,
   Tabs,
   Router,
   showModal,
@@ -16,14 +15,18 @@ import * as api from "./api";
 import { RiPaintFill } from "react-icons/ri";
 
 import {
-  SettingsPage,
+  LogInPage,
   StarredThemesPage,
   SubmissionsPage,
   ThemeBrowserPage,
   UninstallThemePage,
 } from "./theme-manager";
 import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "./state";
-import { AllThemesModalRoot, ThemeToggle } from "./components";
+import {
+  AllThemesModalRoot,
+  ThemeToggle,
+  // TitleView
+} from "./components";
 import { ExpandedViewPage } from "./theme-manager/ExpandedView";
 import { Permissions } from "./apiTypes";
 import { Theme } from "./ThemeTypes";
@@ -55,7 +58,7 @@ const Content: FC<{ stateClass: CssLoaderState }> = ({ stateClass }) => {
               layout="below"
               onClick={() => {
                 Router.CloseSideMenus();
-                Router.Navigate("/theme-manager");
+                Router.Navigate("/cssloader/theme-manager");
               }}
             >
               Download Themes
@@ -174,9 +177,9 @@ const ThemeManagerRouter: FC = () => {
             id: "InstalledThemes",
           },
           {
-            title: "Settings",
-            content: <SettingsPage />,
-            id: "SettingsPage",
+            title: !!apiMeData ? "Account" : "Log In",
+            content: <LogInPage />,
+            id: "LogInPage",
           },
         ]}
       />
@@ -219,20 +222,21 @@ export default definePlugin((serverApi: ServerAPI) => {
     }
   });
 
-  serverApi.routerHook.addRoute("/theme-manager", () => (
+  serverApi.routerHook.addRoute("/cssloader/theme-manager", () => (
     <CssLoaderContextProvider cssLoaderStateClass={state}>
       <ThemeManagerRouter />
     </CssLoaderContextProvider>
   ));
 
-  serverApi.routerHook.addRoute("/theme-manager-expanded-view", () => (
+  serverApi.routerHook.addRoute("/cssloader/expanded-view", () => (
     <CssLoaderContextProvider cssLoaderStateClass={state}>
       <ExpandedViewPage />
     </CssLoaderContextProvider>
   ));
 
   return {
-    title: <div className={staticClasses.Title}>CSS Loader</div>,
+    // CustomTitleView: <TitleView />,
+    title: <div>CSSLoader</div>,
     alwaysRender: true,
     content: (
       <CssLoaderContextProvider cssLoaderStateClass={state}>
