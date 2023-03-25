@@ -13,6 +13,8 @@ from css_themepatch import ThemePatch
 from css_remoteinstall import install
 from css_tab_mapping import load_tab_mappings, get_single_tab, get_tabs, commit_all
 
+import decky_plugin
+
 Initialized = False
 
 class FileChangeHandler(FileSystemEventHandler):
