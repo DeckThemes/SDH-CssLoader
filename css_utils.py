@@ -115,3 +115,10 @@ def store_write(key : str, val : str):
     items[key] = val.replace('\n', '')
     with open(path, 'w') as fp:
         fp.write("\n".join([f"{x}:{items[x]}" for x in items]))
+    
+def store_or_file_config(key : str) -> bool:
+    if os.path.exists(os.path.join(get_theme_path(), key.upper())):
+        return True
+    
+    read = store_read(key)
+    return read == "True" or read == "1"

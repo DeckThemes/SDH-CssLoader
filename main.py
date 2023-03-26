@@ -6,14 +6,21 @@ from watchdog.observers import Observer
 
 sys.path.append(os.path.dirname(__file__))
 
-from css_utils import Log, create_dir, create_steam_symlink, Result, get_user_home, get_theme_path, store_read as util_store_read, store_write as util_store_write, FLAG_KEEP_DEPENDENCIES, FLAG_PRESET
+from css_utils import Log, create_dir, create_steam_symlink, Result, get_user_home, get_theme_path, store_read as util_store_read, store_write as util_store_write, FLAG_KEEP_DEPENDENCIES, FLAG_PRESET, store_or_file_config
 from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
 from css_remoteinstall import install
 from css_tab_mapping import load_tab_mappings, get_single_tab, get_tabs, commit_all, remove_all
+from css_server import start_server
 
-import decky_plugin
+
+try:
+    if not store_or_file_config("no_redirect_logs"):
+        import decky_plugin
+except:
+    pass
+
 
 Initialized = False
 
@@ -424,10 +431,10 @@ class Plugin:
         load_tab_mappings()
 
         await self._load(self)
-        await self._inject_test_element(self, "SP", 9999, "test_ui_loaded")
+        #await self._inject_test_element(self, "SP", 9999, "test_ui_loaded")
         await self._load_stage_2(self, False)
 
-        if (os.path.exists(f"{get_theme_path()}/WATCH")):
+        if (store_or_file_config("watch")):
             Log("Observing themes folder for file changes")
             self.observer = Observer()
             self.handler = FileChangeHandler(self, asyncio.get_running_loop())
@@ -437,4 +444,8 @@ class Plugin:
             Log("Not observing themes folder for file changes")
 
         Log(f"Initialized css loader. Found {len(self.themes)} themes, which inject into {len(self.tabs)} tabs ({self.tabs}). Total {len(self.injects)} injects, {len([x for x in self.injects if x.enabled])} injected")
+        
+        if (store_or_file_config("server")):
+            start_server(self)
+
         await self._check_tabs(self)
