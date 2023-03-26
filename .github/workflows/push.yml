@@ -1,6 +1,6 @@
 name: Builder
 
-on: ["push", "pull_request"]
+on: ["push", "pull_request", "workflow_dispatch"]
 
 jobs:
   build:
@@ -40,6 +40,7 @@ jobs:
     
     - name: Send Zip in discord
       uses: tsickert/discord-webhook@v5.3.0
+      if: ${{ github.event_name == 'workflow_dispatch' }}
       with:
         webhook-url: ${{ secrets.WEBHOOK_URL }}
         content: ${{ github.event.head_commit.message }}
@@ -67,7 +68,7 @@ jobs:
     - name: Get inject.py dependency from decky-loader
       run: |
         git clone --depth=1 https://github.com/SteamDeckHomebrew/decky-loader 
-        copy ./decky-loader/backend/inject.py inject.py
+        copy ./decky-loader/backend/injector.py injector.py
 
     - name: Build Python Backend
       run: pyinstaller --noconfirm --onefile --name "CssLoader-Standalone" ./main.py ./injector.py
