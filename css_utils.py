@@ -1,10 +1,18 @@
 from logging import getLogger
 import os, platform
 
-HOME = os.getenv("HOME", os.path.expanduser("~"))
+HOME = os.getenv("HOME")
+
+if not HOME:
+    HOME = os.path.expanduser("~")
+
 USER = os.getenv("USER", "user") # USER is just used for config name
+
 DECKY_HOME = os.getenv("DECKY_HOME", os.path.join(HOME, "homebrew"))
-DECKY_USER = os.getenv("DECKY_USER", os.getlogin())
+DECKY_USER = os.getenv("DECKY_USER")
+
+if not DECKY_USER:
+    DECKY_USER = os.getlogin()
 
 if not os.path.exists(DECKY_HOME):
     os.mkdir(DECKY_HOME)

@@ -1,4 +1,5 @@
 import asyncio, aiohttp.web, json
+from css_utils import Log
 
 PLUGIN_CLASS = None
 
@@ -23,3 +24,4 @@ def start_server(plugin):
     app = aiohttp.web.Application(loop=loop)
     app.router.add_route('POST', '/req', handle)
     loop.create_task(aiohttp.web._run_app(app, host="127.0.0.1", port=35821))
+    Log("Started CSS_Loader server on port 35821")
