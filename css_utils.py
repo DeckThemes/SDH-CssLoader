@@ -1,10 +1,14 @@
 from logging import getLogger
 import os, platform
 
-HOME = os.environ["HOME"]
-USER = os.environ["USER"]
-DECKY_USER = os.environ["DECKY_USER"]
-DECKY_HOME = os.environ["DECKY_HOME"]
+HOME = os.getenv("HOME", os.path.expanduser("~"))
+USER = os.getenv("USER", "user") # USER is just used for config name
+DECKY_HOME = os.getenv("DECKY_HOME", os.path.join(HOME, "homebrew"))
+DECKY_USER = os.getenv("DECKY_USER", os.getlogin())
+
+if not os.path.exists(DECKY_HOME):
+    os.mkdir(DECKY_HOME)
+
 PLATFORM_WIN = platform.system() == "Windows"
 
 if not PLATFORM_WIN:
@@ -14,7 +18,6 @@ Logger = getLogger("CSS_LOADER")
 
 FLAG_KEEP_DEPENDENCIES = "KEEP_DEPENDENCIES"
 FLAG_PRESET = "PRESET"
-
 
 def Log(text : str):
     Logger.info(f"[CSS_Loader] {text}")
