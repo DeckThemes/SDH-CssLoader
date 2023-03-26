@@ -14,13 +14,13 @@ from css_remoteinstall import install
 from css_tab_mapping import load_tab_mappings, get_single_tab, get_tabs, commit_all, remove_all
 from css_server import start_server
 
+ALWAYS_RUN_SERVER = False
 
 try:
     if not store_or_file_config("no_redirect_logs"):
         import decky_plugin
 except:
     pass
-
 
 Initialized = False
 
@@ -445,12 +445,13 @@ class Plugin:
 
         Log(f"Initialized css loader. Found {len(self.themes)} themes, which inject into {len(self.tabs)} tabs ({self.tabs}). Total {len(self.injects)} injects, {len([x for x in self.injects if x.enabled])} injected")
         
-        if (store_or_file_config("server")):
+        if (ALWAYS_RUN_SERVER or store_or_file_config("server")):
             start_server(self)
 
         await self._check_tabs(self)
 
 if __name__ == '__main__':
+    ALWAYS_RUN_SERVER = True
     import logging
 
     logging.basicConfig(
