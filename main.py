@@ -11,7 +11,7 @@ from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
 from css_remoteinstall import install
-from css_tab_mapping import load_tab_mappings, get_single_tab, get_tabs, commit_all
+from css_tab_mapping import load_tab_mappings, get_single_tab, get_tabs, commit_all, remove_all
 
 import decky_plugin
 
@@ -197,9 +197,8 @@ class Plugin:
     
     async def reset(self) -> dict:
         self.busy = True
-        for x in self.injects:
-            await x.remove()
 
+        await remove_all()
         await self._load(self)
         await self._load_stage_2(self)
         await commit_all()

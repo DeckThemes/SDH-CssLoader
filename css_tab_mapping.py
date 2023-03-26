@@ -54,6 +54,7 @@ class Tab:
 
                 let style = document.createElement('style');
 	            style.id = x.id;
+                style.classList.add('css-loader-style');
 	            document.head.append(style);
 	            style.textContent = x.css;
             }});
@@ -63,6 +64,24 @@ class Tab:
                 style?.parentNode.removeChild(style);
             }});
         }})()
+        """
+
+        while (retry > 0):
+            retry -= 1
+            res = await self.evaluate_js(js)
+            if res.success:
+                return res
+            else:
+                Log("Transaction failed! retrying in 0.2 seconds")
+                await asyncio.sleep(0.2)
+
+        return Result(False, "Css Commit Retry Count Exceeded")
+    
+    async def remove_all_css(self, retry : int = 3) -> Result:
+        js = """
+        (function() {
+            document.querySelectorAll('.css-loader-style').forEach(x => x.remove());
+        })()
         """
 
         while (retry > 0):
@@ -263,3 +282,9 @@ def get_cached_tabs():
 async def commit_all():
     for x in get_cached_tabs():
         await x.commit_css_transaction()
+
+async def remove_all():
+    for x in get_cached_tabs():
+        x.pending_add = {}
+        x.pending_remove = []
+        await x.remove_all_css()
