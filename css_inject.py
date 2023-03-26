@@ -90,14 +90,15 @@ class Inject:
         return Result(True)
 
 def to_inject(key : str, tabs : list, basePath : str, theme) -> Inject:
-    inject = Inject(basePath + "/" + key, tabs, theme)
     if key.startswith("--"):
         value = tabs[0]
-        tabs = tabs[1:]
         if (";" in value or ";" in key):
             raise Exception("Multiple css statements are unsupported in a variable")
-        inject = Inject("", tabs, theme)
+        
+        inject = Inject("", tabs[1:], theme)
         inject.css = f":root {{ {key}: {value}; }}"
+    else:
+        inject = Inject(basePath + "/" + key, tabs, theme)
     
     return inject
 
