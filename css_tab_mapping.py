@@ -1,9 +1,6 @@
 import os, re, uuid, asyncio, json
 from css_utils import get_theme_path, Log, Result
 import injector
-from utilities import Utilities
-
-pluginManagerUtils = Utilities(None)
 
 def _match_tab(tab, name_mappings: list = [], url_parts : list = []) -> bool:
     for x in url_parts:

@@ -449,3 +449,21 @@ class Plugin:
             start_server(self)
 
         await self._check_tabs(self)
+
+if __name__ == '__main__':
+    import logging
+
+    logging.basicConfig(
+        format='[%(asctime)s][%(levelname)s]: %(message)s',
+        force=True
+    )
+    Logger = logging.getLogger("CSS_LOADER")
+    Logger.setLevel(logging.INFO)
+
+
+    asyncio.set_event_loop(asyncio.new_event_loop())
+    class A:
+        def run(self):
+            asyncio.get_event_loop().run_until_complete(Plugin._main(Plugin))
+
+    A().run()
