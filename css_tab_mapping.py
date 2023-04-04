@@ -81,6 +81,9 @@ class Tab:
         })()
         """
 
+        self.pending_add = {}
+        self.pending_remove = []
+
         while (retry > 0):
             retry -= 1
             res = await self.evaluate_js(js)
@@ -139,8 +142,11 @@ class Tab:
         
         return Result(True)
 
+    def is_connected(self) -> bool:
+        return self.tab != None and self.tab.websocket != None and not self.tab.websocket.closed
+
     async def manage_webhook(self) -> Result:
-        if self.tab == None or self.tab.websocket == None or self.tab.websocket.closed:
+        if not self.is_connected():
             return await self.open()
         
         return Result(True)
@@ -277,11 +283,7 @@ def get_cached_tabs():
     return CSS_LOADER_TAB_CACHE
 
 async def commit_all():
-    for x in get_cached_tabs():
-        await x.commit_css_transaction()
+    await asyncio.gather(*[x.commit_css_transaction() for x in get_cached_tabs() if x.is_connected()])
 
 async def remove_all():
-    for x in get_cached_tabs():
-        x.pending_add = {}
-        x.pending_remove = []
-        await x.remove_all_css()
+    await asyncio.gather(*[x.remove_all_css() for x in get_cached_tabs() if x.is_connected()])

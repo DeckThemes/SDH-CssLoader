@@ -11,7 +11,7 @@ from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
 from css_remoteinstall import install
-from css_tab_mapping import load_tab_mappings, get_single_tab, get_tabs, commit_all, remove_all
+from css_tab_mapping import load_tab_mappings, get_single_tab, get_tabs, commit_all, remove_all, Tab
 from css_server import start_server
 
 ALWAYS_RUN_SERVER = False
@@ -353,26 +353,29 @@ class Plugin:
                     if z not in self.tabs:
                         self.tabs.append(z)
 
+    async def _check_tab(self, tab : Tab):
+        try:
+            if not await tab.available():
+                return # Tab does not exist, so not worth injecting into it
+
+            # Log(f"Checking if tab {x} is still injected...")
+            if not await self._check_test_element(self, tab.get_name()):
+                Log(f"Tab {tab.get_name()} is not injected, reloading...")
+                await self._inject_test_element(self, tab.get_name())
+                for y in self.injects:
+                    if y.enabled:
+                        (await y.inject(tab)).raise_on_failure()
+
+                    await tab.commit_css_transaction()
+        except Exception as e:
+            Log(f":( {str(e)}")
+            pass
+
     async def _check_tabs(self):
         while True:
             await asyncio.sleep(3)
-            for x in self.tabs:
-                try:
-                    if not await x.available():
-                        continue # Tab does not exist, so not worth injecting into it
+            await asyncio.gather(*[self._check_tab(self, x) for x in self.tabs])
 
-                    # Log(f"Checking if tab {x} is still injected...")
-                    if not await self._check_test_element(self, x.get_name()):
-                        Log(f"Tab {x.get_name()} is not injected, reloading...")
-                        await self._inject_test_element(self, x.get_name())
-                        for y in self.injects:
-                            if y.enabled:
-                                (await y.inject(x)).raise_on_failure()
-
-                        await x.commit_css_transaction()
-                except Exception as e:
-                    Log(f":( {str(e)}")
-                    pass
 
     async def _load(self):
         Log("Loading themes...")
