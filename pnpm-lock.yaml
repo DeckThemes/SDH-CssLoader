@@ -11,7 +11,7 @@ specifiers:
   '@types/react': 16.14.0
   '@types/webpack': ^5.28.0
   color: ^4.2.3
-  decky-frontend-lib: ^3.19.1
+  decky-frontend-lib: ^3.20.5
   lodash: ^4.17.21
   react-icons: ^4.3.1
   rollup: ^2.70.2
@@ -23,7 +23,7 @@ specifiers:
 
 dependencies:
   color: 4.2.3
-  decky-frontend-lib: 3.19.1
+  decky-frontend-lib: 3.20.5
   lodash: 4.17.21
   react-icons: 4.4.0
 
@@ -685,8 +685,8 @@ packages:
     resolution: {integrity: sha512-uX1KG+x9h5hIJsaKR9xHUeUraxf8IODOwq9JLNPq6BwB04a/xgpq3rcx47l5BZu5zBPlgD342tdke3Hom/nJRA==}
     dev: true
 
-  /decky-frontend-lib/3.19.1:
-    resolution: {integrity: sha512-hU4+EFs74MGzUCv8l1AO2+EBj9RRbnpU19Crm4u+3lbLu6d63U2GsUeQ9ssmNRcOMY1OuVZkRoZBE58soOBJ3A==}
+  /decky-frontend-lib/3.20.5:
+    resolution: {integrity: sha512-aXllFYhWovoiyBHNzH8PW9EYgXotY9ysuU9icFNgrOWFotyJV+2KGLnfYEyBlDNiexKvXKVRKPw1gRFX2hP4AQ==}
     dev: false
 
   /decode-uri-component/0.2.2:
