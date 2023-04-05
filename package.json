@@ -1,6 +1,6 @@
 {
   "name": "SDH-CssLoader",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "A css loader",
   "scripts": {
     "build": "shx rm -rf dist && rollup -c",
@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "color": "^4.2.3",
-    "decky-frontend-lib": "^3.19.1",
+    "decky-frontend-lib": "^3.20.5",
     "lodash": "^4.17.21",
     "react-icons": "^4.3.1"
   },
