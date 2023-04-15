@@ -65,7 +65,7 @@ def get_user_home() -> str:
 def get_theme_path() -> str:
     return os.path.join(DECKY_HOME, "themes")
 
-async def create_symlink(src : str, dst : str) -> Result:
+def create_symlink(src : str, dst : str) -> Result:
     try:
         if not os.path.exists(dst):
             os.symlink(src, dst, True)
@@ -96,7 +96,7 @@ def create_steam_symlink() -> Result:
 
 def create_cef_flag() -> Result:
     path = os.path.join(get_steam_path(), ".cef-enable-remote-debugging")
-    if os.path.exists(path):
+    if not os.path.exists(path):
         with open(path, 'w') as fp:
             pass
 
