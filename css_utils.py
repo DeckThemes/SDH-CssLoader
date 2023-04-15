@@ -74,7 +74,7 @@ async def create_symlink(src : str, dst : str) -> Result:
 
     return Result(True)
 
-async def create_steam_symlink() -> Result:
+async def get_steam_path() -> str:
     if PLATFORM_WIN:
         try:
             import winreg
@@ -85,11 +85,20 @@ async def create_steam_symlink() -> Result:
                 raise Exception(f"Expected type {winreg.REG_SZ}, got {type}")
             
             Log(f"Got win steam install path: '{val}'")
-            return await create_symlink(get_theme_path(), os.path.join(val, "steamui", "themes_custom"))
+            return val
         except Exception as e:
-            return Result(False, str(e))
+            return "C:\\Program Files (x86)\\Steam" # Taking a guess here
     else:
-        return await create_symlink(get_theme_path(), f"{get_user_home()}/.local/share/Steam/steamui/themes_custom")
+        return f"{get_user_home()}/.local/share/Steam"
+
+async def create_steam_symlink() -> Result:
+    return await create_symlink(get_theme_path(), os.path.join(await get_steam_path(), "steamui", "themes_custom"))
+
+async def create_cef_flag() -> Result:
+    path = os.path.join(get_steam_path(), ".cef-enable-remote-debugging")
+    if os.path.exists(path):
+        with open(path, 'w') as fp:
+            pass
 
 def store_path() -> str:
     return os.path.join(get_theme_path(), "STORE")

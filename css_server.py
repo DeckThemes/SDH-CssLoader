@@ -1,5 +1,5 @@
 import asyncio, aiohttp.web, json
-from css_utils import Log
+from css_utils import Log, create_cef_flag
 
 PLUGIN_CLASS = None
 
@@ -21,6 +21,7 @@ def start_server(plugin):
 
     PLUGIN_CLASS = plugin
     loop = asyncio.get_running_loop()
+    loop.create_task(create_cef_flag())
     app = aiohttp.web.Application(loop=loop)
     app.router.add_route('POST', '/req', handle)
     loop.create_task(aiohttp.web._run_app(app, host="127.0.0.1", port=35821))
