@@ -430,7 +430,7 @@ class Plugin:
         Log("Initializing css loader...")
         Log(f"Max supported manifest version: {CSS_LOADER_VER}")
         
-        await create_steam_symlink()
+        create_steam_symlink()
         load_tab_mappings()
 
         await self._load(self)

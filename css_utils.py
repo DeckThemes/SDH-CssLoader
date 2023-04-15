@@ -74,7 +74,7 @@ async def create_symlink(src : str, dst : str) -> Result:
 
     return Result(True)
 
-async def get_steam_path() -> str:
+def get_steam_path() -> str:
     if PLATFORM_WIN:
         try:
             import winreg
@@ -91,11 +91,11 @@ async def get_steam_path() -> str:
     else:
         return f"{get_user_home()}/.local/share/Steam"
 
-async def create_steam_symlink() -> Result:
-    return await create_symlink(get_theme_path(), os.path.join(await get_steam_path(), "steamui", "themes_custom"))
+def create_steam_symlink() -> Result:
+    return create_symlink(get_theme_path(), os.path.join(get_steam_path(), "steamui", "themes_custom"))
 
-async def create_cef_flag() -> Result:
-    path = os.path.join(await get_steam_path(), ".cef-enable-remote-debugging")
+def create_cef_flag() -> Result:
+    path = os.path.join(get_steam_path(), ".cef-enable-remote-debugging")
     if os.path.exists(path):
         with open(path, 'w') as fp:
             pass
