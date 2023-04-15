@@ -95,7 +95,7 @@ async def create_steam_symlink() -> Result:
     return await create_symlink(get_theme_path(), os.path.join(await get_steam_path(), "steamui", "themes_custom"))
 
 async def create_cef_flag() -> Result:
-    path = os.path.join(get_steam_path(), ".cef-enable-remote-debugging")
+    path = os.path.join(await get_steam_path(), ".cef-enable-remote-debugging")
     if os.path.exists(path):
         with open(path, 'w') as fp:
             pass
