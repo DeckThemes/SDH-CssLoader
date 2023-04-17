@@ -54,7 +54,7 @@ class Plugin:
     async def get_themes(self) -> list:
         return [x.to_dict() for x in self.themes]
     
-    async def set_theme_state(self, name : str, state : bool) -> dict:
+    async def set_theme_state(self, name : str, state : bool, set_deps : bool = True, set_deps_value : bool = True) -> dict:
         Log(f"Setting state for {name} to {state}")
         theme = await self._get_theme(self, name)
 
@@ -63,7 +63,7 @@ class Plugin:
 
         try:
             if state:
-                result = await self._enable_theme(self, theme)
+                result = await self._enable_theme(self, theme, set_deps, set_deps_value)
             else:
                 result = await self._disable_theme(self, theme, FLAG_KEEP_DEPENDENCIES in theme.flags)
 
@@ -72,25 +72,28 @@ class Plugin:
         except Exception as e:
             return Result(False, str(e))
     
-    async def _enable_theme(self, theme : Theme) -> Result:
+    async def _enable_theme(self, theme : Theme, set_deps : bool = True, set_deps_value : bool = True) -> Result:
         if theme is None:
             return Result(False)
         
-        for dependency_name in theme.dependencies:
-            dependency = await self._get_theme(self, dependency_name)
-            if dependency == None:
-                continue
+        if set_deps:
+            for dependency_name in theme.dependencies:
+                dependency = await self._get_theme(self, dependency_name)
+                if dependency == None:
+                    continue
 
-            if dependency.enabled:
-                await dependency.remove()
+                if set_deps_value:
+                    if dependency.enabled:
+                        await dependency.remove()
 
-            for dependency_patch_name in theme.dependencies[dependency_name]:
-                dependency_patch_value = theme.dependencies[dependency_name][dependency_patch_name]
-                for dependency_patch in dependency.patches:
-                    if dependency_patch.name == dependency_patch_name:
-                        dependency_patch.set_value(dependency_patch_value)
-                
-            await self._enable_theme(self, dependency)
+                    for dependency_patch_name in theme.dependencies[dependency_name]:
+                        dependency_patch_value = theme.dependencies[dependency_name][dependency_patch_name]
+                        for dependency_patch in dependency.patches:
+                            if dependency_patch.name == dependency_patch_name:
+                                dependency_patch.set_value(dependency_patch_value)
+
+
+                await self._enable_theme(self, dependency)
         
         result = await theme.inject()
         return result
