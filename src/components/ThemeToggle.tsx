@@ -1,10 +1,11 @@
-import { ButtonItem, PanelSectionRow, ToggleField } from "decky-frontend-lib";
+import { ButtonItem, PanelSectionRow, ToggleField, showModal } from "decky-frontend-lib";
 import { VFC, useState, useMemo } from "react";
 import { Flags, Theme } from "../ThemeTypes";
 
 import * as python from "../python";
 import { ThemePatch } from "./ThemePatch";
 import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
+import { OptionalDepsModalRoot } from "./OptionalDepsModal";
 
 export const ThemeToggle: VFC<{ data: Theme; collapsible?: boolean }> = ({
   data,
@@ -28,6 +29,11 @@ export const ThemeToggle: VFC<{ data: Theme; collapsible?: boolean }> = ({
           label={data.name}
           description={isPreset ? `Preset` : `${data.version} | ${data.author}`}
           onChange={(switchValue: boolean) => {
+            if (switchValue === true && data.flags.includes(Flags.optionalDeps)) {
+              // @ts-ignore
+              showModal(<OptionalDepsModalRoot themeData={data} />);
+              return;
+            }
             // Actually enabling the theme
             python.resolve(python.setThemeState(data.name, switchValue), () => {
               python.getInstalledThemes();

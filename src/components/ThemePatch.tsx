@@ -16,6 +16,26 @@ export const ThemePatch: VFC<{
 
   const bottomSeparatorValue = fullArr.length - 1 === index ? "standard" : "none";
 
+  function ComponentWrapper() {
+    return (
+      <>
+        {data.components.length > 0 ? (
+          <>
+            {data.components.map((e) => (
+              <PatchComponent
+                data={e}
+                selectedLabel={selectedLabel}
+                themeName={themeName}
+                patchName={data.name}
+                bottomSeparatorValue={bottomSeparatorValue}
+              />
+            ))}
+          </>
+        ) : null}
+      </>
+    );
+  }
+
   switch (data.type) {
     case "slider":
       return (
@@ -41,19 +61,7 @@ export const ThemePatch: VFC<{
               }))}
             />
           </PanelSectionRow>
-          {data.components.length > 0 ? (
-            <>
-              {data.components.map((e) => (
-                <PatchComponent
-                  data={e}
-                  selectedLabel={selectedLabel}
-                  themeName={themeName}
-                  patchName={data.name}
-                  bottomSeparatorValue={bottomSeparatorValue}
-                />
-              ))}
-            </>
-          ) : null}
+          <ComponentWrapper />
         </>
       );
     case "checkbox":
@@ -73,19 +81,7 @@ export const ThemePatch: VFC<{
               }}
             />
           </PanelSectionRow>
-          {data.components.length > 0 ? (
-            <>
-              {data.components.map((e) => (
-                <PatchComponent
-                  data={e}
-                  selectedLabel={selectedLabel}
-                  themeName={themeName}
-                  patchName={data.name}
-                  bottomSeparatorValue={bottomSeparatorValue}
-                />
-              ))}
-            </>
-          ) : null}
+          <ComponentWrapper />
         </>
       );
     case "dropdown":
@@ -108,19 +104,7 @@ export const ThemePatch: VFC<{
               }}
             />
           </PanelSectionRow>
-          {data.components.length > 0 ? (
-            <>
-              {data.components.map((e) => (
-                <PatchComponent
-                  data={e}
-                  selectedLabel={selectedLabel}
-                  themeName={themeName}
-                  patchName={data.name}
-                  bottomSeparatorValue={bottomSeparatorValue}
-                />
-              ))}
-            </>
-          ) : null}
+          <ComponentWrapper />
         </>
       );
     case "none":
@@ -130,19 +114,7 @@ export const ThemePatch: VFC<{
             {/* For some reason spans by default have a gray color, so I manually set it to the same white as the other titles */}
             <span style={{ color: "#dcdedf" }}>↳ {data.name}</span>
           </PanelSectionRow>
-          {data.components.length > 0 ? (
-            <>
-              {data.components.map((e) => (
-                <PatchComponent
-                  data={e}
-                  selectedLabel={selectedLabel}
-                  themeName={themeName}
-                  patchName={data.name}
-                  bottomSeparatorValue={bottomSeparatorValue}
-                />
-              ))}
-            </>
-          ) : null}
+          <ComponentWrapper />
         </>
       );
     default:

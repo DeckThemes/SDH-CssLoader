@@ -8,6 +8,7 @@ import {
   Router,
   showModal,
   Focusable,
+  Carousel,
 } from "decky-frontend-lib";
 import { useEffect, useState, FC } from "react";
 import * as python from "./python";
@@ -48,6 +49,8 @@ const Content: FC<{ stateClass: CssLoaderState }> = ({ stateClass }) => {
     dummyFuncTest();
     python.getInstalledThemes();
   }, []);
+
+  console.log(Carousel);
 
   return (
     <PanelSection title="Themes">
