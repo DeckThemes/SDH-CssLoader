@@ -260,11 +260,11 @@ def get_tab(tab_name : str) -> list:
     
     if len(tabs) <= 0:
         
-        if (tab_name.startswith("~") and tab_name.endswith("~")):
-            tab = Tab(url_parts=[tab_name])
+        if (tab_name.startswith("~") and tab_name.endswith("~") and len(tab_name) > 2):
+            tab = Tab(url_parts=[tab_name[1:-1]])
         else:
             tab = Tab([tab_name])
-            
+
         tabs.append(tab)
         CSS_LOADER_TAB_CACHE.append(tab)
     
