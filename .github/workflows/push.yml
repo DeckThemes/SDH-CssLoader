@@ -73,8 +73,13 @@ jobs:
     - name: Build Python Backend
       run: pyinstaller --noconfirm --onefile --name "CssLoader-Standalone" ./main.py ./injector.py
 
+    - name: Build Python Backend Headless
+      run: pyinstaller --noconfirm --noconsole --onefile --name "CssLoader-Standalone-Headless" ./main.py ./injector.py
+
     - name: Upload package artifact
       uses: actions/upload-artifact@v3
       with:
         name: SDH-CSSLoader-Win-Standalone
-        path: ./dist/CssLoader-Standalone.exe
+        path: |
+          ./dist/CssLoader-Standalone.exe
+          ./dist/CssLoader-Standalone-Headless.exe
