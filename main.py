@@ -419,6 +419,9 @@ class Plugin:
         await self._cache_lists(self)
         self.themes.sort(key=lambda d: d.name)
 
+    async def exit(self):
+        sys.exit(0)
+
     async def _main(self):
         global Initialized
         if Initialized:
