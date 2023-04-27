@@ -105,7 +105,7 @@ class Tab:
         if name == self.get_name():
             return True
         
-        if name in self.tab_url_parts:
+        if name in self.tab_url_parts or (name.startswith("~") and name.endswith("~") and name[1:-1] in self.tab_url_parts):
             return True
 
         return False
