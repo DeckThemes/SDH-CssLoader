@@ -104,6 +104,9 @@ class Tab:
         
         if name == self.get_name():
             return True
+        
+        if name in self.tab_url_parts:
+            return True
 
         return False
     
@@ -256,7 +259,12 @@ def get_tab(tab_name : str) -> list:
             tabs.append(x)
     
     if len(tabs) <= 0:
-        tab = Tab([tab_name])
+        
+        if (tab_name.startswith("~") and tab_name.endswith("~")):
+            tab = Tab(url_parts=[tab_name])
+        else:
+            tab = Tab([tab_name])
+            
         tabs.append(tab)
         CSS_LOADER_TAB_CACHE.append(tab)
     
