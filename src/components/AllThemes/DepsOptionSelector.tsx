@@ -15,15 +15,16 @@ export function DepsOptionSelector({
     });
   }
   return (
-    <Focusable>
-      <DialogButton onClick={() => enableTheme(true, true)}>
-        <span>Enable And Configure Dependencies {"(Default)"}</span>
+    <Focusable 
+      style={{display: "flex"}}>
+      <DialogButton onClick={() => enableTheme(true, true)} style={{margin: "0 10px"}}>
+        <span>Enable with configuration {"(Recommended)"}</span>
       </DialogButton>
-      <DialogButton onClick={() => enableTheme(true, false)}>
-        <span>Enable Dependencies Unconfigured</span>
+      <DialogButton onClick={() => enableTheme(true, false)} style={{margin: "0 10px"}}>
+        <span>Enable without configuration</span>
       </DialogButton>
-      <DialogButton onClick={() => enableTheme(false, false)}>
-        <span>Don't Enable Dependencies</span>
+      <DialogButton onClick={() => enableTheme(false, false)} style={{margin: "0 10px"}}>
+        <span>Enable only this theme</span>
       </DialogButton>
     </Focusable>
   );

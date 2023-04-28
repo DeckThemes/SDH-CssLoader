@@ -25,21 +25,23 @@ export function OptionalDepsModal({
 }) {
   return (
     <>
+      <h1 style={{ marginBlockEnd: "10px", marginBlockStart: "0px" }}>Enable dependencies for {themeData.name}?</h1>
       <span>
-        {themeData.name} is intended to depend on other themes, but the author has marked them as
-        optional.
+        {themeData.name} enables optional themes to enhance this theme. Disabling these may break the theme, or make the theme look completely different. Specific optional themes can be configured and or enabled/disabled anytime via the Quick Access Menu.
       </span>
+      <ul>
+        <li>
+          <b>Enable with configuration</b> will enable and overwrite any existing configuration for the optional themes. Recommended option.
+        </li>
+        <li>
+          <b>Enable without configuration</b> will only enable the optional themes, leaving configuration intact.
+        </li>
+        <li>
+          <b>Enable only this theme</b> will only enable this theme, without optional themes.
+        </li>
+      </ul>
+
       <DepsOptionSelector themeName={themeData.name} closeModal={closeModal} />
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={() => {
-            closeModal();
-          }}
-        >
-          Close
-        </ButtonItem>
-      </PanelSectionRow>
     </>
   );
 }
