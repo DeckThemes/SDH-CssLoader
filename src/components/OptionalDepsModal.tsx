@@ -31,10 +31,10 @@ export function OptionalDepsModal({
       </span>
       <ul>
         <li>
-          <b>Enable with configuration</b> will enable and overwrite any existing configuration for the optional themes. Recommended option.
+          <b>Enable with configuration</b> will enable and overwrite any existing configuration for optional themes. Recommended option.
         </li>
         <li>
-          <b>Enable without configuration</b> will only enable the optional themes, leaving configuration intact.
+          <b>Enable without configuration</b> will only enable the optional themes, leaving existing configuration intact.
         </li>
         <li>
           <b>Enable only this theme</b> will only enable this theme, without optional themes.
