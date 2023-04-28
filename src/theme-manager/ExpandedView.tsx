@@ -1,8 +1,8 @@
 import { ButtonItem, Navigation, PanelSectionRow } from "decky-frontend-lib";
-import { useEffect, useRef, useState, VFC } from "react";
+import { useEffect, useMemo, useRef, useState, VFC } from "react";
 import { ImSpinner5 } from "react-icons/im";
 import { BsStar, BsStarFill } from "react-icons/bs";
-import { FiDownload } from "react-icons/fi";
+import { FiArrowLeft, FiArrowRight, FiDownload } from "react-icons/fi";
 
 import * as python from "../python";
 import { genericGET, refreshToken, toggleStar as apiToggleStar } from "../api";
@@ -26,9 +26,33 @@ export const ExpandedViewPage: VFC = () => {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [isStarred, setStarred] = useState<boolean>(false);
   const [blurStarButton, setBlurStar] = useState<boolean>(false);
-  const [imageUrl, setImageUrl] = useState<string>(
-    `https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Steam_Deck_logo_%28blue_background%29.svg/2048px-Steam_Deck_logo_%28blue_background%29.svg.png`
-  );
+  const [selectedImage, setSelected] = useState<number>(0);
+
+  const currentImg = useMemo(() => {
+    if (
+      fullThemeData?.images[selectedImage]?.id &&
+      fullThemeData.images[selectedImage].id !== "MISSING"
+    ) {
+      return `url(https://api.deckthemes.com/blobs/${fullThemeData?.images[selectedImage].id})`;
+    } else {
+      return `url(https://share.deckthemes.com/${fullThemeData?.type.toLowerCase()}placeholder.png)`;
+    }
+  }, [selectedImage, fullThemeData]);
+
+  function incrementImg() {
+    if (selectedImage < fullThemeData!.images.length - 1) {
+      setSelected(selectedImage + 1);
+      return;
+    }
+    setSelected(0);
+  }
+  function decrementImg() {
+    if (selectedImage === 0) {
+      setSelected(fullThemeData!.images.length - 1);
+      return;
+    }
+    setSelected(selectedImage - 1);
+  }
   async function getStarredStatus() {
     if (fullThemeData) {
       genericGET(`/users/me/stars/${fullThemeData.id}`, true).then((data) => {
@@ -128,13 +152,6 @@ export const ExpandedViewPage: VFC = () => {
       setLoaded(false);
       genericGET(`/themes/${currentExpandedTheme.id}`).then((data) => {
         setFullData(data);
-        if (data?.images[0]?.id && data.images[0].id !== "MISSING") {
-          setImageUrl(`${apiUrl}/blobs/${data?.images[0].id}`);
-        } else {
-          setImageUrl(
-            `https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Steam_Deck_logo_%28blue_background%29.svg/2048px-Steam_Deck_logo_%28blue_background%29.svg.png`
-          );
-        }
         setLoaded(true);
       });
     }
@@ -204,23 +221,23 @@ export const ExpandedViewPage: VFC = () => {
           >
             <div
               style={{
-                backgroundImage: `url(${imageUrl})`,
+                backgroundImage: `${currentImg}`,
                 backgroundSize: "contain",
                 backgroundRepeat: "no-repeat",
                 backgroundPosition: "center",
                 width: "60%",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
               }}
-            />
-            {/* This is the old way images were handled, but it had cropping issues, I do want to revisit it eventually though */}
-            {/* <img
-              className="CssLoader_ThemeBrowser_ExpandedView_PreviewImage"
-              src={imageUrl}
-              style={{
-                maxHeight: "400px",
-                width: "60%",
-                display: "none",
-              }}
-            /> */}
+            >
+              {fullThemeData.images.length > 1 && (
+                <>
+                  <FiArrowLeft size={36} onClick={decrementImg} style={{ padding: "4px" }} />
+                  <FiArrowRight size={36} onClick={incrementImg} style={{ padding: "4px" }} />
+                </>
+              )}
+            </div>
             <div
               style={{
                 width: "40%",
