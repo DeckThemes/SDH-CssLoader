@@ -15,6 +15,7 @@ export function SubmissionsPage() {
     browserCardSize,
     prevSubSearchOpts: prevSearchOpts,
     apiMeData,
+    backendVersion,
   } = useCssLoaderState();
 
   function reloadThemes() {
@@ -75,16 +76,18 @@ export function SubmissionsPage() {
           columnGap: "5px",
         }}
       >
-        {themeArr.items.map((e, i) => (
-          <VariableSizeCard
-            refPassthrough={i === indexToSnapTo ? endOfPageRef : undefined}
-            data={e}
-            cols={browserCardSize}
-            showTarget={true}
-            searchOpts={searchOpts}
-            prevSearchOptsVarName="setPrevSubSearchOpts"
-          />
-        ))}
+        {themeArr.items
+          .filter((e) => e.manifestVersion <= backendVersion)
+          .map((e, i) => (
+            <VariableSizeCard
+              refPassthrough={i === indexToSnapTo ? endOfPageRef : undefined}
+              data={e}
+              cols={browserCardSize}
+              showTarget={true}
+              searchOpts={searchOpts}
+              prevSearchOptsVarName="setPrevSubSearchOpts"
+            />
+          ))}
       </Focusable>
       <div
         style={{

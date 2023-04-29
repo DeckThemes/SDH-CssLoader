@@ -44,6 +44,7 @@ interface PublicCssLoaderState {
   isInstalling: boolean;
   currentExpandedTheme: PartialCSSThemeInfo | undefined;
   browserCardSize: number;
+  backendVersion: number;
 }
 
 interface PublicCssLoaderContext extends PublicCssLoaderState {
@@ -133,6 +134,7 @@ export class CssLoaderState {
     order: ["Last Updated"],
   };
   private submissionThemeList: ThemeQueryResponse = { total: 0, items: [] };
+  private backendVersion: number = 6;
 
   // You can listen to this eventBus' 'stateUpdate' event and use that to trigger a useState or other function that causes a re-render
   public eventBus = new EventTarget();
@@ -171,6 +173,7 @@ export class CssLoaderState {
       submissionSearchOpts: this.submissionSearchOpts,
       submissionServerFilters: this.submissionServerFilters,
       submissionThemeList: this.submissionThemeList,
+      backendVersion: this.backendVersion,
     };
   }
 

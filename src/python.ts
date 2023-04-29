@@ -133,7 +133,13 @@ export function storeWrite(key: string, value: string) {
 }
 
 export function getBackendVersion(): Promise<any> {
-  return server!.callPluginMethod("get_backend_version", {});
+  const setGlobalState = globalState!.setGlobalState.bind(globalState);
+  return server!.callPluginMethod<{}, Theme[]>("get_backend_version", {}).then((data) => {
+    if (data.success) {
+      setGlobalState("backendVersion", data.result);
+    }
+    return;
+  });
 }
 
 export function dummyFunction(): Promise<any> {

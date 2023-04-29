@@ -50,8 +50,6 @@ const Content: FC<{ stateClass: CssLoaderState }> = ({ stateClass }) => {
     python.getInstalledThemes();
   }, []);
 
-  console.log(Carousel);
-
   return (
     <PanelSection title="Themes">
       {dummyFuncResult ? (

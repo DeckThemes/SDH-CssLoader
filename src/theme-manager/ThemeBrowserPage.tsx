@@ -18,15 +18,10 @@ export const ThemeBrowserPage: FC = () => {
     serverFilters,
     browserCardSize = 3,
     prevSearchOpts,
+    backendVersion,
   } = useCssLoaderState();
 
-  const [backendVersion, setBackendVer] = useState<number>(5);
-  function reloadBackendVer() {
-    python.resolve(python.getBackendVersion(), setBackendVer);
-  }
-
   function reloadThemes() {
-    reloadBackendVer();
     getThemes(searchOpts, "/themes", "browseThemeList", setSnapIndex);
     python.reloadBackend();
   }
@@ -39,7 +34,7 @@ export const ThemeBrowserPage: FC = () => {
 
   // Runs upon opening the page every time
   useLayoutEffect(() => {
-    reloadBackendVer();
+    python.getBackendVersion();
     if (apiShortToken && !apiFullToken) {
       logInWithShortToken();
     }
@@ -78,16 +73,18 @@ export const ThemeBrowserPage: FC = () => {
           columnGap: "5px",
         }}
       >
-        {themeArr.items.map((e, i) => (
-          <VariableSizeCard
-            refPassthrough={i === indexToSnapTo ? endOfPageRef : undefined}
-            data={e}
-            cols={browserCardSize}
-            showTarget={true}
-            searchOpts={searchOpts}
-            prevSearchOptsVarName="prevSearchOpts"
-          />
-        ))}
+        {themeArr.items
+          .filter((e) => e.manifestVersion <= backendVersion)
+          .map((e, i) => (
+            <VariableSizeCard
+              refPassthrough={i === indexToSnapTo ? endOfPageRef : undefined}
+              data={e}
+              cols={browserCardSize}
+              showTarget={true}
+              searchOpts={searchOpts}
+              prevSearchOptsVarName="prevSearchOpts"
+            />
+          ))}
       </Focusable>
       <div
         style={{
