@@ -57,7 +57,7 @@ async def install(id : str, base_url : str, local_themes : list) -> Result:
 
     tempDir.cleanup()
 
-    if store_or_file_config("no_deps_install"):
+    if not store_or_file_config("no_deps_install"):
         for x in data["dependencies"]:
             if x["name"] in local_themes:
                 continue
