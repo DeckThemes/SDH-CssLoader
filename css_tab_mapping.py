@@ -22,6 +22,7 @@ class Tab:
         self.keywords = extra_keywords
         self.pending_add = {}
         self.pending_remove = []
+        self.primary_instance = None
 
     async def commit_css_transaction(self, retry : int = 3) -> Result:
         pending_add = self.pending_add
@@ -273,7 +274,7 @@ def get_tab(tab_name : str) -> list:
 def get_single_tab(tab_name : str) -> Tab | None:
     tabs = get_tab(tab_name)
 
-    if (len(tabs) != 1):
+    if len(tabs) != 1:
         return None
 
     return tabs[0]
@@ -289,6 +290,36 @@ def get_tabs(tab_names : list):
 
 def get_cached_tabs():
     return CSS_LOADER_TAB_CACHE
+
+def optimize_tabs() -> bool:
+    global CSS_LOADER_TAB_CACHE
+    changed = False
+    items = [x for x in get_cached_tabs() if x.is_connected() and x.get_name() != None]
+
+    for x in items:
+        for y in items:
+            if x == y or x.primary_instance != None or y.primary_instance != None:
+                continue
+
+            if x.get_name() == y.get_name():
+                x.primary_instance = y
+
+                for tab_name_regex in x.tab_names_regex:
+                    if tab_name_regex not in y.tab_names_regex:
+                        y.tab_names_regex.append(tab_name_regex)
+
+                for tab_url_part in x.tab_url_parts:
+                    if tab_url_part not in y.tab_url_parts:
+                        y.tab_url_parts.append(tab_url_part)
+
+                for keyword in x.keywords:
+                    if keyword not in y.keywords:
+                        y.keywords.append(keyword)
+                
+                CSS_LOADER_TAB_CACHE.remove(x)
+                changed = True
+    
+    return changed
 
 async def commit_all():
     await asyncio.gather(*[x.commit_css_transaction() for x in get_cached_tabs() if x.is_connected()])

@@ -11,7 +11,7 @@ from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
 from css_remoteinstall import install
-from css_tab_mapping import load_tab_mappings, get_single_tab, get_tabs, commit_all, remove_all, Tab
+from css_tab_mapping import load_tab_mappings, get_single_tab, get_tabs, commit_all, remove_all, Tab, get_cached_tabs, optimize_tabs
 from css_server import start_server
 
 ALWAYS_RUN_SERVER = False
@@ -346,15 +346,10 @@ class Plugin:
 
     async def _cache_lists(self):
         self.injects = []
-        self.tabs = []
 
         for x in self.themes:
             injects = x.get_all_injects()
             self.injects.extend(injects)
-            for y in injects:
-                for z in y.tabs:
-                    if z not in self.tabs:
-                        self.tabs.append(z)
 
     async def _check_tab(self, tab : Tab):
         try:
@@ -377,8 +372,12 @@ class Plugin:
     async def _check_tabs(self):
         while True:
             await asyncio.sleep(3)
-            await asyncio.gather(*[self._check_tab(self, x) for x in self.tabs])
 
+            if optimize_tabs():
+                Log("Resetting due to duplicate tab instances!")
+                await self.reset(self)
+            else:
+                await asyncio.gather(*[self._check_tab(self, x) for x in get_cached_tabs()])
 
     async def _load(self):
         Log("Loading themes...")
@@ -452,7 +451,7 @@ class Plugin:
         else:
             Log("Not observing themes folder for file changes")
 
-        Log(f"Initialized css loader. Found {len(self.themes)} themes, which inject into {len(self.tabs)} tabs ({self.tabs}). Total {len(self.injects)} injects, {len([x for x in self.injects if x.enabled])} injected")
+        Log(f"Initialized css loader. Found {len(self.themes)} themes, which inject into {len(get_cached_tabs())} tabs. Total {len(self.injects)} injects, {len([x for x in self.injects if x.enabled])} injected")
         
         if (ALWAYS_RUN_SERVER or store_or_file_config("server")):
             start_server(self)
