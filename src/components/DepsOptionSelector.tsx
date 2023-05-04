@@ -1,5 +1,5 @@
 import { DialogButton, Focusable } from "decky-frontend-lib";
-import * as python from "../../python";
+import * as python from "../python";
 
 export function DepsOptionSelector({
   themeName,
@@ -15,15 +15,14 @@ export function DepsOptionSelector({
     });
   }
   return (
-    <Focusable 
-      style={{display: "flex"}}>
-      <DialogButton onClick={() => enableTheme(true, true)} style={{margin: "0 10px"}}>
+    <Focusable style={{ display: "flex" }}>
+      <DialogButton onClick={() => enableTheme(true, true)} style={{ margin: "0 10px" }}>
         <span>Enable with configuration {"(Recommended)"}</span>
       </DialogButton>
-      <DialogButton onClick={() => enableTheme(true, false)} style={{margin: "0 10px"}}>
+      <DialogButton onClick={() => enableTheme(true, false)} style={{ margin: "0 10px" }}>
         <span>Enable without configuration</span>
       </DialogButton>
-      <DialogButton onClick={() => enableTheme(false, false)} style={{margin: "0 10px"}}>
+      <DialogButton onClick={() => enableTheme(false, false)} style={{ margin: "0 10px" }}>
         <span>Enable only this theme</span>
       </DialogButton>
     </Focusable>
