@@ -8,6 +8,7 @@ import {
   Router,
   showModal,
   Focusable,
+  Carousel,
 } from "decky-frontend-lib";
 import { useEffect, useState, FC } from "react";
 import * as python from "./python";

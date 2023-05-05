@@ -1,10 +1,22 @@
 from logging import getLogger
 import os, platform
 
-HOME = os.environ["HOME"]
-USER = os.environ["USER"]
-DECKY_USER = os.environ["DECKY_USER"]
-DECKY_HOME = os.environ["DECKY_HOME"]
+HOME = os.getenv("HOME")
+
+if not HOME:
+    HOME = os.path.expanduser("~")
+
+USER = os.getenv("USER", "user") # USER is just used for config name
+
+DECKY_HOME = os.getenv("DECKY_HOME", os.path.join(HOME, "homebrew"))
+DECKY_USER = os.getenv("DECKY_USER")
+
+if not DECKY_USER:
+    DECKY_USER = os.getlogin()
+
+if not os.path.exists(DECKY_HOME):
+    os.mkdir(DECKY_HOME)
+
 PLATFORM_WIN = platform.system() == "Windows"
 
 if not PLATFORM_WIN:
@@ -14,7 +26,6 @@ Logger = getLogger("CSS_LOADER")
 
 FLAG_KEEP_DEPENDENCIES = "KEEP_DEPENDENCIES"
 FLAG_PRESET = "PRESET"
-
 
 def Log(text : str):
     Logger.info(f"[CSS_Loader] {text}")
@@ -54,7 +65,7 @@ def get_user_home() -> str:
 def get_theme_path() -> str:
     return os.path.join(DECKY_HOME, "themes")
 
-async def create_symlink(src : str, dst : str) -> Result:
+def create_symlink(src : str, dst : str) -> Result:
     try:
         if not os.path.exists(dst):
             os.symlink(src, dst, True)
@@ -63,7 +74,7 @@ async def create_symlink(src : str, dst : str) -> Result:
 
     return Result(True)
 
-async def create_steam_symlink() -> Result:
+def get_steam_path() -> str:
     if PLATFORM_WIN:
         try:
             import winreg
@@ -74,11 +85,20 @@ async def create_steam_symlink() -> Result:
                 raise Exception(f"Expected type {winreg.REG_SZ}, got {type}")
             
             Log(f"Got win steam install path: '{val}'")
-            return await create_symlink(get_theme_path(), os.path.join(val, "steamui", "themes_custom"))
+            return val
         except Exception as e:
-            return Result(False, str(e))
+            return "C:\\Program Files (x86)\\Steam" # Taking a guess here
     else:
-        return await create_symlink(get_theme_path(), f"{get_user_home()}/.local/share/Steam/steamui/themes_custom")
+        return f"{get_user_home()}/.local/share/Steam"
+
+def create_steam_symlink() -> Result:
+    return create_symlink(get_theme_path(), os.path.join(get_steam_path(), "steamui", "themes_custom"))
+
+def create_cef_flag() -> Result:
+    path = os.path.join(get_steam_path(), ".cef-enable-remote-debugging")
+    if not os.path.exists(path):
+        with open(path, 'w') as fp:
+            pass
 
 def store_path() -> str:
     return os.path.join(get_theme_path(), "STORE")
@@ -115,3 +135,10 @@ def store_write(key : str, val : str):
     items[key] = val.replace('\n', '')
     with open(path, 'w') as fp:
         fp.write("\n".join([f"{x}:{items[x]}" for x in items]))
+    
+def store_or_file_config(key : str) -> bool:
+    if os.path.exists(os.path.join(get_theme_path(), key.upper())):
+        return True
+    
+    read = store_read(key)
+    return read == "True" or read == "1"

@@ -15,6 +15,7 @@ export function StarredThemesPage() {
     starredThemeList: themeArr,
     browserCardSize,
     prevStarSearchOpts: prevSearchOpts,
+    backendVersion,
   } = useCssLoaderState();
 
   function reloadThemes() {
@@ -75,16 +76,18 @@ export function StarredThemesPage() {
           columnGap: "5px",
         }}
       >
-        {themeArr.items.map((e, i) => (
-          <VariableSizeCard
-            refPassthrough={i === indexToSnapTo ? endOfPageRef : undefined}
-            data={e}
-            cols={browserCardSize}
-            showTarget={true}
-            searchOpts={searchOpts}
-            prevSearchOptsVarName="prevStarSearchOpts"
-          />
-        ))}
+        {themeArr.items
+          .filter((e) => e.manifestVersion <= backendVersion)
+          .map((e, i) => (
+            <VariableSizeCard
+              refPassthrough={i === indexToSnapTo ? endOfPageRef : undefined}
+              data={e}
+              cols={browserCardSize}
+              showTarget={true}
+              searchOpts={searchOpts}
+              prevSearchOptsVarName="prevStarSearchOpts"
+            />
+          ))}
       </Focusable>
       <div
         style={{

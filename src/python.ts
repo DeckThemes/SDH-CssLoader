@@ -64,10 +64,17 @@ export function getThemes(): Promise<any> {
   return server!.callPluginMethod<{}, Theme[]>("get_themes", {});
 }
 
-export function setThemeState(name: string, state: boolean): Promise<any> {
+export function setThemeState(
+  name: string,
+  state: boolean,
+  set_deps?: boolean,
+  set_deps_value?: boolean
+): Promise<any> {
   return server!.callPluginMethod("set_theme_state", {
     name: name,
     state: state,
+    set_deps: set_deps ?? true,
+    set_deps_value: set_deps_value ?? true,
   });
 }
 
@@ -126,7 +133,13 @@ export function storeWrite(key: string, value: string) {
 }
 
 export function getBackendVersion(): Promise<any> {
-  return server!.callPluginMethod("get_backend_version", {});
+  const setGlobalState = globalState!.setGlobalState.bind(globalState);
+  return server!.callPluginMethod<{}, Theme[]>("get_backend_version", {}).then((data) => {
+    if (data.success) {
+      setGlobalState("backendVersion", data.result);
+    }
+    return;
+  });
 }
 
 export function dummyFunction(): Promise<any> {

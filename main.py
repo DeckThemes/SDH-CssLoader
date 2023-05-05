@@ -6,12 +6,21 @@ from watchdog.observers import Observer
 
 sys.path.append(os.path.dirname(__file__))
 
-from css_utils import Log, create_dir, create_steam_symlink, Result, get_user_home, get_theme_path, store_read as util_store_read, store_write as util_store_write, FLAG_KEEP_DEPENDENCIES, FLAG_PRESET
+from css_utils import Log, create_dir, create_steam_symlink, Result, get_user_home, get_theme_path, store_read as util_store_read, store_write as util_store_write, FLAG_KEEP_DEPENDENCIES, FLAG_PRESET, store_or_file_config
 from css_inject import Inject
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
 from css_remoteinstall import install
-from css_tab_mapping import load_tab_mappings, get_single_tab, get_tabs, commit_all
+from css_tab_mapping import load_tab_mappings, get_single_tab, get_tabs, commit_all, remove_all, Tab, get_cached_tabs, optimize_tabs
+from css_server import start_server
+
+ALWAYS_RUN_SERVER = False
+
+try:
+    if not store_or_file_config("no_redirect_logs"):
+        import decky_plugin
+except:
+    pass
 
 Initialized = False
 
@@ -45,7 +54,7 @@ class Plugin:
     async def get_themes(self) -> list:
         return [x.to_dict() for x in self.themes]
     
-    async def set_theme_state(self, name : str, state : bool) -> dict:
+    async def set_theme_state(self, name : str, state : bool, set_deps : bool = True, set_deps_value : bool = True) -> dict:
         Log(f"Setting state for {name} to {state}")
         theme = await self._get_theme(self, name)
 
@@ -54,7 +63,7 @@ class Plugin:
 
         try:
             if state:
-                result = await self._enable_theme(self, theme)
+                result = await self._enable_theme(self, theme, set_deps, set_deps_value)
             else:
                 result = await self._disable_theme(self, theme, FLAG_KEEP_DEPENDENCIES in theme.flags)
 
@@ -63,25 +72,28 @@ class Plugin:
         except Exception as e:
             return Result(False, str(e))
     
-    async def _enable_theme(self, theme : Theme) -> Result:
+    async def _enable_theme(self, theme : Theme, set_deps : bool = True, set_deps_value : bool = True) -> Result:
         if theme is None:
             return Result(False)
         
-        for dependency_name in theme.dependencies:
-            dependency = await self._get_theme(self, dependency_name)
-            if dependency == None:
-                continue
+        if set_deps:
+            for dependency_name in theme.dependencies:
+                dependency = await self._get_theme(self, dependency_name)
+                if dependency == None:
+                    continue
 
-            if dependency.enabled:
-                await dependency.remove()
+                if set_deps_value:
+                    if dependency.enabled:
+                        await dependency.remove()
 
-            for dependency_patch_name in theme.dependencies[dependency_name]:
-                dependency_patch_value = theme.dependencies[dependency_name][dependency_patch_name]
-                for dependency_patch in dependency.patches:
-                    if dependency_patch.name == dependency_patch_name:
-                        dependency_patch.set_value(dependency_patch_value)
-                
-            await self._enable_theme(self, dependency)
+                    for dependency_patch_name in theme.dependencies[dependency_name]:
+                        dependency_patch_value = theme.dependencies[dependency_name][dependency_patch_name]
+                        for dependency_patch in dependency.patches:
+                            if dependency_patch.name == dependency_patch_name:
+                                dependency_patch.set_value(dependency_patch_value)
+
+
+                await self._enable_theme(self, dependency)
         
         result = await theme.inject()
         return result
@@ -195,9 +207,8 @@ class Plugin:
     
     async def reset(self) -> dict:
         self.busy = True
-        for x in self.injects:
-            await x.remove()
 
+        await remove_all()
         await self._load(self)
         await self._load_stage_2(self)
         await commit_all()
@@ -335,36 +346,38 @@ class Plugin:
 
     async def _cache_lists(self):
         self.injects = []
-        self.tabs = []
 
         for x in self.themes:
             injects = x.get_all_injects()
             self.injects.extend(injects)
-            for y in injects:
-                for z in y.tabs:
-                    if z not in self.tabs:
-                        self.tabs.append(z)
+
+    async def _check_tab(self, tab : Tab):
+        try:
+            if not await tab.available():
+                return # Tab does not exist, so not worth injecting into it
+
+            # Log(f"Checking if tab {x} is still injected...")
+            if not await self._check_test_element(self, tab.get_name()):
+                Log(f"Tab {tab.get_name()} is not injected, reloading...")
+                await self._inject_test_element(self, tab.get_name())
+                for y in self.injects:
+                    if y.enabled:
+                        (await y.inject(tab)).raise_on_failure()
+
+                    await tab.commit_css_transaction()
+        except Exception as e:
+            Log(f":( {str(e)}")
+            pass
 
     async def _check_tabs(self):
         while True:
             await asyncio.sleep(3)
-            for x in self.tabs:
-                try:
-                    if not await x.available():
-                        continue # Tab does not exist, so not worth injecting into it
 
-                    # Log(f"Checking if tab {x} is still injected...")
-                    if not await self._check_test_element(self, x.get_name()):
-                        Log(f"Tab {x.get_name()} is not injected, reloading...")
-                        await self._inject_test_element(self, x.get_name())
-                        for y in self.injects:
-                            if y.enabled:
-                                (await y.inject(x)).raise_on_failure()
-
-                        await x.commit_css_transaction()
-                except Exception as e:
-                    Log(f":( {str(e)}")
-                    pass
+            if optimize_tabs():
+                Log("Resetting due to duplicate tab instances!")
+                await self.reset(self)
+            else:
+                await asyncio.gather(*[self._check_tab(self, x) for x in get_cached_tabs()])
 
     async def _load(self):
         Log("Loading themes...")
@@ -405,6 +418,9 @@ class Plugin:
         await self._cache_lists(self)
         self.themes.sort(key=lambda d: d.name)
 
+    async def exit(self):
+        sys.exit(0)
+
     async def _main(self):
         global Initialized
         if Initialized:
@@ -419,14 +435,14 @@ class Plugin:
         Log("Initializing css loader...")
         Log(f"Max supported manifest version: {CSS_LOADER_VER}")
         
-        await create_steam_symlink()
+        create_steam_symlink()
         load_tab_mappings()
 
         await self._load(self)
-        await self._inject_test_element(self, "SP", 9999, "test_ui_loaded")
+        #await self._inject_test_element(self, "SP", 9999, "test_ui_loaded")
         await self._load_stage_2(self, False)
 
-        if (os.path.exists(f"{get_theme_path()}/WATCH")):
+        if (store_or_file_config("watch")):
             Log("Observing themes folder for file changes")
             self.observer = Observer()
             self.handler = FileChangeHandler(self, asyncio.get_running_loop())
@@ -435,5 +451,28 @@ class Plugin:
         else:
             Log("Not observing themes folder for file changes")
 
-        Log(f"Initialized css loader. Found {len(self.themes)} themes, which inject into {len(self.tabs)} tabs ({self.tabs}). Total {len(self.injects)} injects, {len([x for x in self.injects if x.enabled])} injected")
+        Log(f"Initialized css loader. Found {len(self.themes)} themes, which inject into {len(get_cached_tabs())} tabs. Total {len(self.injects)} injects, {len([x for x in self.injects if x.enabled])} injected")
+        
+        if (ALWAYS_RUN_SERVER or store_or_file_config("server")):
+            start_server(self)
+
         await self._check_tabs(self)
+
+if __name__ == '__main__':
+    ALWAYS_RUN_SERVER = True
+    import logging
+
+    logging.basicConfig(
+        format='[%(asctime)s][%(levelname)s]: %(message)s',
+        force=True
+    )
+    Logger = logging.getLogger("CSS_LOADER")
+    Logger.setLevel(logging.INFO)
+
+
+    asyncio.set_event_loop(asyncio.new_event_loop())
+    class A:
+        def run(self):
+            asyncio.get_event_loop().run_until_complete(Plugin._main(Plugin))
+
+    A().run()

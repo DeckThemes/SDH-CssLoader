@@ -1,9 +1,6 @@
 import os, re, uuid, asyncio, json
 from css_utils import get_theme_path, Log, Result
 import injector
-from utilities import Utilities
-
-pluginManagerUtils = Utilities(None)
 
 def _match_tab(tab, name_mappings: list = [], url_parts : list = []) -> bool:
     for x in url_parts:
@@ -25,6 +22,7 @@ class Tab:
         self.keywords = extra_keywords
         self.pending_add = {}
         self.pending_remove = []
+        self.primary_instance = None
 
     async def commit_css_transaction(self, retry : int = 3) -> Result:
         pending_add = self.pending_add
@@ -54,6 +52,7 @@ class Tab:
 
                 let style = document.createElement('style');
 	            style.id = x.id;
+                style.classList.add('css-loader-style');
 	            document.head.append(style);
 	            style.textContent = x.css;
             }});
@@ -75,6 +74,27 @@ class Tab:
                 await asyncio.sleep(0.2)
 
         return Result(False, "Css Commit Retry Count Exceeded")
+    
+    async def remove_all_css(self, retry : int = 3) -> Result:
+        js = """
+        (function() {
+            document.querySelectorAll('.css-loader-style').forEach(x => x.remove());
+        })()
+        """
+
+        self.pending_add = {}
+        self.pending_remove = []
+
+        while (retry > 0):
+            retry -= 1
+            res = await self.evaluate_js(js)
+            if res.success:
+                return res
+            else:
+                Log("Transaction failed! retrying in 0.2 seconds")
+                await asyncio.sleep(0.2)
+
+        return Result(False, "Css Commit Retry Count Exceeded")
 
     def compare(self, name : str) -> bool:
         if name in self.tab_names_regex:
@@ -84,6 +104,9 @@ class Tab:
             return True
         
         if name == self.get_name():
+            return True
+        
+        if name in self.tab_url_parts or (name.startswith("~") and name.endswith("~") and name[1:-1] in self.tab_url_parts):
             return True
 
         return False
@@ -123,8 +146,11 @@ class Tab:
         
         return Result(True)
 
+    def is_connected(self) -> bool:
+        return self.tab != None and self.tab.websocket != None and not self.tab.websocket.closed
+
     async def manage_webhook(self) -> Result:
-        if self.tab == None or self.tab.websocket == None or self.tab.websocket.closed:
+        if not self.is_connected():
             return await self.open()
         
         return Result(True)
@@ -234,7 +260,12 @@ def get_tab(tab_name : str) -> list:
             tabs.append(x)
     
     if len(tabs) <= 0:
-        tab = Tab([tab_name])
+        
+        if (tab_name.startswith("~") and tab_name.endswith("~") and len(tab_name) > 2):
+            tab = Tab(url_parts=[tab_name[1:-1]])
+        else:
+            tab = Tab([tab_name])
+
         tabs.append(tab)
         CSS_LOADER_TAB_CACHE.append(tab)
     
@@ -243,7 +274,7 @@ def get_tab(tab_name : str) -> list:
 def get_single_tab(tab_name : str) -> Tab | None:
     tabs = get_tab(tab_name)
 
-    if (len(tabs) != 1):
+    if len(tabs) != 1:
         return None
 
     return tabs[0]
@@ -260,6 +291,38 @@ def get_tabs(tab_names : list):
 def get_cached_tabs():
     return CSS_LOADER_TAB_CACHE
 
+def optimize_tabs() -> bool:
+    global CSS_LOADER_TAB_CACHE
+    changed = False
+    items = [x for x in get_cached_tabs() if x.is_connected() and x.get_name() != None]
+
+    for x in items:
+        for y in items:
+            if x == y or x.primary_instance != None or y.primary_instance != None:
+                continue
+
+            if x.get_name() == y.get_name():
+                x.primary_instance = y
+
+                for tab_name_regex in x.tab_names_regex:
+                    if tab_name_regex not in y.tab_names_regex:
+                        y.tab_names_regex.append(tab_name_regex)
+
+                for tab_url_part in x.tab_url_parts:
+                    if tab_url_part not in y.tab_url_parts:
+                        y.tab_url_parts.append(tab_url_part)
+
+                for keyword in x.keywords:
+                    if keyword not in y.keywords:
+                        y.keywords.append(keyword)
+                
+                CSS_LOADER_TAB_CACHE.remove(x)
+                changed = True
+    
+    return changed
+
 async def commit_all():
-    for x in get_cached_tabs():
-        await x.commit_css_transaction()
+    await asyncio.gather(*[x.commit_css_transaction() for x in get_cached_tabs() if x.is_connected()])
+
+async def remove_all():
+    await asyncio.gather(*[x.remove_all_css() for x in get_cached_tabs() if x.is_connected()])
