@@ -18,6 +18,14 @@ class Theme:
         self.bundled = self.configPath != self.themePath
         self.enabled = False
         self.json = json
+        self.priority_mod = 0
+
+        try:
+            if (os.path.join(themePath, "PRIORITY")):
+                with open(os.path.join(themePath, "PRIORITY")) as fp:
+                    self.priority_mod = int(fp.readline().strip())
+        except:
+            pass
         
         if (json is None):
             if not os.path.exists(os.path.join(themePath, "theme.css")):

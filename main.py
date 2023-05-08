@@ -396,6 +396,8 @@ class Plugin:
     async def _set_theme_score(self, theme : Theme):
         if theme.name not in self.scores:
             self.scores[theme.name] = 0
+
+        self.scores[theme.name] += theme.priority_mod
         
         for x in theme.dependencies:
             dependency = await self._get_theme(self, x)
