@@ -119,6 +119,9 @@ class Tab:
             self.tab = await injector.get_tab_lambda(lambda x : _match_tab(x, self.tab_names_regex, self.tab_url_parts))
             Log(f"Connected to tab {self.get_name()}")
         except Exception as e:
+            if (str(e) == "Tab not found by lambda"):
+                return Result(False, str(e), False)
+
             return Result(False, f"{str(e)} ({self.tab_names_regex})")
 
         return Result(True)
