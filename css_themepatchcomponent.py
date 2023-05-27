@@ -71,7 +71,8 @@ class ThemePatchComponent:
             except Exception as e:
                 return Result(False, str(e))
 
-            self.inject.css = f":root {{ {self.css_variable}: url({join('/themes_custom/', self.value.replace(' ', '%20'))}) }}"
+            path = join('/themes_custom/', self.value.replace(' ', '%20').replace('\\', '/'))
+            self.inject.css = f":root {{ {self.css_variable}: url({path}) }}"
         return Result(True)
 
     async def generate_and_reinject(self) -> Result:
