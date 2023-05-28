@@ -31,11 +31,11 @@ def Log(text : str):
     Logger.info(f"[CSS_Loader] {text}")
 
 class Result:
-    def __init__(self, success : bool, message : str = "Success"):
+    def __init__(self, success : bool, message : str = "Success", log : bool = True):
         self.success = success
         self.message = message
 
-        if not self.success:
+        if log and not self.success:
             Log(f"Result failed! {message}")
     
     def raise_on_failure(self):

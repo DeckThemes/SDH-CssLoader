@@ -15,6 +15,7 @@ from css_tab_mapping import load_tab_mappings, get_single_tab, get_tabs, commit_
 from css_server import start_server
 
 ALWAYS_RUN_SERVER = False
+IS_STANDALONE = False
 
 try:
     if not store_or_file_config("no_redirect_logs"):
@@ -45,6 +46,9 @@ class FileChangeHandler(FileSystemEventHandler):
         
 
 class Plugin:
+    async def is_standalone(self) -> bool:
+        return IS_STANDALONE
+
     async def dummy_function(self) -> bool:
         return True
 
@@ -396,6 +400,8 @@ class Plugin:
     async def _set_theme_score(self, theme : Theme):
         if theme.name not in self.scores:
             self.scores[theme.name] = 0
+
+        self.scores[theme.name] += theme.priority_mod
         
         for x in theme.dependencies:
             dependency = await self._get_theme(self, x)
@@ -460,6 +466,7 @@ class Plugin:
 
 if __name__ == '__main__':
     ALWAYS_RUN_SERVER = True
+    IS_STANDALONE = True
     import logging
 
     logging.basicConfig(
