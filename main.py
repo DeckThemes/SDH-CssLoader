@@ -387,15 +387,9 @@ class Plugin:
         Log("Loading themes...")
         self.themes = []
 
-        themesPath = f"{get_user_home()}/homebrew/themes"
-        defaultThemesPath = f"{get_user_home()}/homebrew/plugins/SDH-CssLoader/themes"
-
-        if (not path.exists(themesPath)):
-            create_dir(themesPath)
+        themesPath = get_theme_path()
 
         await self._parse_themes(self, themesPath)
-        if (path.exists(defaultThemesPath)):
-            await self._parse_themes(self, defaultThemesPath, themesPath)
     
     async def _set_theme_score(self, theme : Theme):
         if theme.name not in self.scores:
