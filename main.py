@@ -393,7 +393,7 @@ class Plugin:
         if (ALWAYS_RUN_SERVER or store_or_file_config("server")):
             start_server(self)
 
-        await continuous_health_check()
+        asyncio.create_task(continuous_health_check())
 
 if __name__ == '__main__':
     ALWAYS_RUN_SERVER = True
@@ -424,3 +424,4 @@ if __name__ == '__main__':
                 count += 1
 
     asyncio.get_event_loop().run_until_complete(A().run())
+    asyncio.get_event_loop().run_forever()

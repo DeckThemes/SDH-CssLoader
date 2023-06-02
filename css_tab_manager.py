@@ -1,44 +1,61 @@
-import os, re, uuid, asyncio, json
+import os, re, uuid, asyncio, json, aiohttp
 from typing import List
 from css_utils import get_theme_path, Log, Result
 import injector
 import css_inject
 
+CSS_TAB_MAPPINGS = {
+    "SP": ["SP|Steam Big Picture Mode", "~Valve Steam Gamepad/default~"],
+    "Steam Big Picture Mode": ["SP|Steam Big Picture Mode", "~Valve Steam Gamepad/default~"],
+    "MainMenu": ["MainMenu.*", "~valve.steam.gamepadui.mainmenu~"],
+    "MainMenu_.*": ["MainMenu.*", "~valve.steam.gamepadui.mainmenu~"],
+    "QuickAccess": ["QuickAccess.*", "~valve.steam.gamepadui.quickaccess~"],
+    "QuickAccess_.*": ["QuickAccess.*", "~valve.steam.gamepadui.quickaccess~"],
+    "Steam": ["SteamLibraryWindow|Steam"],
+    "SteamLibraryWindow": ["SteamLibraryWindow|Steam"],
+    "All": ["SP|Steam Big Picture Mode", "~Valve Steam Gamepad/default~", "MainMenu.*", "~valve.steam.gamepadui.mainmenu~", "QuickAccess.*", "~valve.steam.gamepadui.quickaccess~"]
+}
+
 class CssTab:
-    def __init__(self, tab : injector.Tab) -> None:
+    def __init__(self, tab : injector.Tab, open_websocket : bool = True) -> None:
         self.tab = tab
         self.pending_add = {}
         self.pending_remove = []
-        Log(f"Connected to {tab.title}")
+        if open_websocket:
+            asyncio.create_task(self.connect())
 
     def is_connected(self) -> bool:
         return self.tab.websocket != None and not self.tab.websocket.closed
     
+    async def connect(self):
+        try:
+            await self.tab.open_websocket()
+        except Exception as e:
+            Result(False, str(e))
+            await self.close()
+
+        Log(f"Connected to {self.tab.title}")
+        asyncio.create_task(self.continuous_health_check())
+
     async def close(self):
         if self.is_connected():
             self.tab.close_websocket()
         
-        CONNECTED_TABS.remove(self)
+        if (self in CONNECTED_TABS):
+            Log(f"Disconnected from {self.tab.title}")
+            CONNECTED_TABS.remove(self)
+        
+        self.tab.websocket = None
 
     def compare(self, tab_name : str) -> bool:
         checks = [tab_name]
 
-        # TODO: Clean this up
-        if (tab_name in ["All", "SP", "Steam Big Picture Mode"]):
-            checks.extend(["SP|Steam Big Picture Mode", "~Valve Steam Gamepad/default~"])
-
-        if (tab_name in ["All", "MainMenu", "MainMenu_.*"]):
-            checks.extend(["MainMenu.*", "~valve.steam.gamepadui.mainmenu~"])
-
-        if (tab_name in ["All", "QuickAccess.*", "QuickAccess_.*", "QuickAccess"]):
-            checks.extend(["QuickAccess.*", "~valve.steam.gamepadui.quickaccess~"])
-
-        if (tab_name in ["SteamLibraryWindow|Steam", "Steam", "SteamLibraryWindow", "All"]):
-            checks.extend(["SteamLibraryWindow|Steam"])
+        if (tab_name in CSS_TAB_MAPPINGS):
+            checks.extend(CSS_TAB_MAPPINGS[tab_name])
 
         for tab_check in checks:
             if tab_check.startswith("~") and tab_check.endswith("~") and len(tab_check) > 2:
-                if tab_check[1:-1] in self.tab.ws_url:
+                if tab_check[1:-1] in self.tab.url:
                     return True
             elif re.match(tab_check + "$", self.tab.title):
                 return True
@@ -46,6 +63,9 @@ class CssTab:
         return False
 
     async def force_reinject(self) -> Result:
+        if not self.is_connected():
+            return Result(True)
+
         await self.remove_all_css()
 
         for inject in css_inject.ALL_INJECTS:
@@ -82,6 +102,16 @@ class CssTab:
             return Result(False, str(e))
         
         return Result(True)
+    
+    async def continuous_health_check(self):
+        while self.is_connected():
+            try:
+                await self.health_check()
+            except Exception as e:
+                Result(False, f"[Health Check on {self.tab.title}] {str(e)}")
+            await asyncio.sleep(3)
+        
+        await self.close()
 
     async def evaluate_js(self, js : str, run_async=False) -> Result:
         try:
@@ -133,7 +163,7 @@ class CssTab:
 
         self.pending_add = {}
         self.pending_remove = []
-        Log(f"Committing css transaction on {self.tab.title} +{len(self.pending_add)} -{len(self.pending_remove)}")
+        Log(f"Committing css transaction on {self.tab.title} +{len(pending_add)} -{len(pending_remove)}")
 
         data = {
             "add": [{"id": x, "css": pending_add[x]} for x in pending_add],
@@ -231,39 +261,71 @@ async def commit_all():
 async def remove_all():
     await asyncio.gather(*[x.remove_all_css() for x in CONNECTED_TABS if x.is_connected()])
 
-async def _internal_new_tab(tab : injector.Tab):
-    try:
-        await tab.open_websocket()
-    except Exception as e:
-        Result(False, str(e))
-        return
-
-    CONNECTED_TABS.append(CssTab(tab))
-
 async def continuous_health_check():
     while True:
-        await asyncio.sleep(3)
         try:
-            all_tabs = await injector.get_tabs()
-            new_tabs = []
+            async with aiohttp.ClientSession() as web:
+                res = await web.get(f"{injector.BASE_ADDRESS}/json/version", timeout=3)
+            
+            if (res.status != 200):
+                raise Exception(f"{injector.BASE_ADDRESS}/json/version returned {res.status}")
 
-            for tab in all_tabs:
-                found = False
-                for connected_tab in CONNECTED_TABS:
-                    if connected_tab.tab.id == tab.id:
-                        found = True
+            data = await res.json()
+            url = data["webSocketDebuggerUrl"]
 
-                        if connected_tab.tab.title != tab.title:
-                            await connected_tab.force_reinject()
+            injector_tab = injector.Tab({
+                "id": "Browser",
+                "title": "Browser",
+                "url": "None",
+                "webSocketDebuggerUrl": url
+            })
+
+            await injector_tab.open_websocket()
+            tab = CssTab(injector_tab, False)
+
+            await tab.tab._send_devtools_cmd({
+                "method": "Target.setDiscoverTargets",
+                    "params": {
+                    "discover": True
+                }
+            }, False)
+
+            async for message in tab.tab.listen_for_message():
+                if "method" in message and message["method"] in ["Target.targetDestroyed", "Target.targetInfoChanged", "Target.targetCreated"]:
+                    if message["method"] == "Target.targetInfoChanged" or message["method"] == "Target.targetCreated":
+                        target_info = message["params"]["targetInfo"]
+
+                        if "type" in target_info and target_info["type"] != "page":
+                            continue
+
+                        found = False
+                        for connected_tab in CONNECTED_TABS:
+                            if target_info["targetId"] == connected_tab.tab.id:
+                                if (target_info["title"] != connected_tab.tab.title):
+                                    connected_tab.tab.title = target_info["title"]
+                                    asyncio.create_task(connected_tab.force_reinject())
+                                
+                                found = True
+                                break
+
+                        if found:
+                            continue
                         
-                if not found:
-                    new_tabs.append(tab)
+                        new_tab = injector.Tab({
+                            "title": target_info["title"],
+                            "id": target_info["targetId"],
+                            "url": target_info["url"],
+                            "webSocketDebuggerUrl": injector.BASE_ADDRESS.replace("http://", "ws://") + "/devtools/page/" + target_info["targetId"]
+                        })
 
-            if len(new_tabs) > 0:
-                await asyncio.gather(*[_internal_new_tab(new_tab) for new_tab in new_tabs])
+                        CONNECTED_TABS.append(CssTab(new_tab))
+                    
+                    else:
+                        id = message["params"]["targetId"]
+                        for connected_tab in CONNECTED_TABS:
+                            if connected_tab.tab.id == id:
+                                await connected_tab.close()   
 
-            if len(CONNECTED_TABS) > 0:
-                await asyncio.gather(*[tab.health_check() for tab in CONNECTED_TABS])
-        
         except Exception as e:
-            Result(False, str(e))
+            Result(False, f"[Continuous Health Check] {str(e)}")
+            await asyncio.sleep(3)
