@@ -37,9 +37,9 @@ class Inject:
 
     async def inject(self) -> Result:
         for tab_name in self.tabs:
-            if (len(self.uuids[tab_name]) > 0):
-                await self.remove(tab_name)
-                self.enabled = True # In case the below code fails, it will never be re-injected unless it's still enabled
+            for uuid in self.uuids[tab_name]:
+                Log(f"-{uuid} @ {tab_name}")
+                res = await remove(tab_name, uuid)
 
             if (self.css is None):
                 result = await self.load()
