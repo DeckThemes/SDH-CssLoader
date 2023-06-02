@@ -282,6 +282,7 @@ async def continuous_health_check():
 
             await injector_tab.open_websocket()
             tab = CssTab(injector_tab, False)
+            await asyncio.sleep(3) # Wait a second for good measure
 
             await tab.tab._send_devtools_cmd({
                 "method": "Target.setDiscoverTargets",
