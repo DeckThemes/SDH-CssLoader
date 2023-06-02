@@ -261,7 +261,37 @@ async def commit_all():
 async def remove_all():
     await asyncio.gather(*[x.remove_all_css() for x in CONNECTED_TABS if x.is_connected()])
 
+BROWSER_CONNECTED = False
+
+async def continuous_polling_health_check():
+    global BROWSER_CONNECTED
+
+    while True:
+        try:
+            await asyncio.sleep(20)
+
+            if not BROWSER_CONNECTED:
+                continue
+
+            tabs = await injector.get_tabs()
+
+            for tab in tabs:
+                found = False
+                for connected_tab in CONNECTED_TABS:
+                    if connected_tab.tab.id == tab.id:
+                        found = True
+                        break
+                
+                if not found:
+                    CONNECTED_TABS.append(CssTab(tab))
+
+        except Exception as e:
+           Result(False, f"[Continuous Polling Health Check] {str(e)}")
+           await asyncio.sleep(3)       
+
 async def continuous_health_check():
+    global BROWSER_CONNECTED
+
     while True:
         try:
             async with aiohttp.ClientSession() as web:
@@ -283,6 +313,7 @@ async def continuous_health_check():
             await injector_tab.open_websocket()
             tab = CssTab(injector_tab, False)
             await asyncio.sleep(3) # Wait a second for good measure
+            BROWSER_CONNECTED = True
 
             await tab.tab._send_devtools_cmd({
                 "method": "Target.setDiscoverTargets",
@@ -328,5 +359,6 @@ async def continuous_health_check():
                                 await connected_tab.close()   
 
         except Exception as e:
+            BROWSER_CONNECTED = False
             Result(False, f"[Continuous Health Check] {str(e)}")
             await asyncio.sleep(3)
