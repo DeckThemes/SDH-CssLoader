@@ -39,7 +39,7 @@ class CssTab:
 
     async def close(self):
         if self.is_connected():
-            self.tab.close_websocket()
+            await self.tab.close_websocket()
         
         if (self in CONNECTED_TABS):
             Log(f"Disconnected from {self.tab.title}")
@@ -239,6 +239,9 @@ def get_tabs(tab_name : str) -> List[CssTab]:
     for tab in CONNECTED_TABS:
         if tab.compare(tab_name):
             tabs.append(tab)
+
+    if tabs == []:
+        Log(f"[Warn] get_tabs({tab_name}) returned []. All tabs: {str([x.tab.title for x in CONNECTED_TABS])}")
     
     return tabs
 
@@ -274,6 +277,7 @@ async def continuous_polling_health_check():
                 continue
 
             tabs = await injector.get_tabs()
+            #Log(f"Polling tabs {str([x.title for x in tabs])}")
 
             for tab in tabs:
                 found = False
@@ -283,17 +287,18 @@ async def continuous_polling_health_check():
                         break
                 
                 if not found:
+                    Log(f"Re-registering tab {tab.title}")
                     CONNECTED_TABS.append(CssTab(tab))
 
         except Exception as e:
            Result(False, f"[Continuous Polling Health Check] {str(e)}")
-           await asyncio.sleep(3)       
 
 async def continuous_health_check():
     global BROWSER_CONNECTED
 
     while True:
         try:
+            BROWSER_CONNECTED = False
             async with aiohttp.ClientSession() as web:
                 res = await web.get(f"{injector.BASE_ADDRESS}/json/version", timeout=3)
             
@@ -317,7 +322,7 @@ async def continuous_health_check():
 
             await tab.tab._send_devtools_cmd({
                 "method": "Target.setDiscoverTargets",
-                    "params": {
+                "params": {
                     "discover": True
                 }
             }, False)
@@ -333,8 +338,17 @@ async def continuous_health_check():
                         found = False
                         for connected_tab in CONNECTED_TABS:
                             if target_info["targetId"] == connected_tab.tab.id:
+                                reinject = False
+
                                 if (target_info["title"] != connected_tab.tab.title):
                                     connected_tab.tab.title = target_info["title"]
+                                    reinject = True
+
+                                if (target_info["url"] != connected_tab.tab.url):
+                                    connected_tab.tab.url = target_info["url"]
+                                    reinject = True
+                                
+                                if reinject:
                                     asyncio.create_task(connected_tab.force_reinject())
                                 
                                 found = True
