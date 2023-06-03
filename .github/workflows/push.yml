@@ -24,19 +24,21 @@ jobs:
     - name: Build Frontend
       run: |
         pnpm run build
-    
-    - name: Archive Release
-      uses: thedoctor0/zip-release@0.7.1
-      with:
-        type: 'zip'
-        filename: 'build.zip'
-        exclusions: '*.git* /*node_modules/* /*assets/* /*src/* package-lock.json .prettierrc pnpm-lock.yaml README.md rollup.config.js tsconfig.json'
       
+    - name: Package Release
+      run: |
+        mkdir "SDH-CssLoader"
+        cp *.py "./SDH-CssLoader"
+        cp *.json "./SDH-CssLoader"
+        cp LICENSE "./SDH-CssLoader"
+        cp README.md "./SDH-CssLoader"
+        cp -r dist "./SDH-CssLoader"
+    
     - name: Upload package artifact
       uses: actions/upload-artifact@v3
       with:
         name: SDH-CSSLoader-Decky
-        path: ./build.zip
+        path: ./SDH-CssLoader
     
     - name: Send Zip in discord
       uses: tsickert/discord-webhook@v5.3.0
