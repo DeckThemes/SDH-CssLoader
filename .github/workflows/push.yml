@@ -33,20 +33,14 @@ jobs:
         cp LICENSE "./SDH-CssLoader"
         cp README.md "./SDH-CssLoader"
         cp -r dist "./SDH-CssLoader"
+        mkdir upload
+        mv "./SDH-CssLoader" ./upload
     
     - name: Upload package artifact
       uses: actions/upload-artifact@v3
       with:
         name: SDH-CSSLoader-Decky
-        path: ./SDH-CssLoader
-    
-    - name: Send Zip in discord
-      uses: tsickert/discord-webhook@v5.3.0
-      if: ${{ github.event_name == 'workflow_dispatch' }}
-      with:
-        webhook-url: ${{ secrets.WEBHOOK_URL }}
-        content: ${{ github.event.head_commit.message }}
-        filename: "./build.zip"
+        path: ./upload
   
   build-standalone-win:
     name: Build SDH-CSSLoader Standalone for Windows
