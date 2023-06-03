@@ -284,6 +284,19 @@ async def continuous_polling_health_check():
                 for connected_tab in CONNECTED_TABS:
                     if connected_tab.tab.id == tab.id:
                         found = True
+                        reinject = False
+
+                        if (tab.title != connected_tab.tab.title):
+                            connected_tab.tab.title = tab.title
+                            reinject = True
+
+                        if (tab.url != connected_tab.tab.url):
+                            connected_tab.tab.url = tab.url
+                            reinject = True
+                        
+                        if reinject:
+                            asyncio.create_task(connected_tab.force_reinject())
+
                         break
                 
                 if not found:
