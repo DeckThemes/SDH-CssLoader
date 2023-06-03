@@ -66,8 +66,6 @@ class CssTab:
         if not self.is_connected():
             return Result(True)
 
-        await self.remove_all_css()
-
         for inject in css_inject.ALL_INJECTS:
             if inject.enabled:
                 for x in inject.tabs:
@@ -75,7 +73,7 @@ class CssTab:
                         await inject.inject_with_tab(self)
                         break
 
-        await self.commit_css_transaction()
+        await self.commit_css_transaction(remove_all_first=True)
 
     async def health_check(self) -> Result:
         if not self.is_connected():
@@ -154,7 +152,7 @@ class CssTab:
 
         return Result(True)
 
-    async def commit_css_transaction(self, retry : int = 3) -> Result:
+    async def commit_css_transaction(self, retry : int = 3, remove_all_first : bool = False) -> Result:
         pending_add = self.pending_add
         pending_remove = self.pending_remove
 
@@ -175,9 +173,16 @@ class CssTab:
         except Exception as e:
             Result(False, str(e))
 
+        extra_js = ""
+
+        if remove_all_first:
+            extra_js = "document.querySelectorAll('.css-loader-style').forEach(x => x.remove());"
+
         js = f"""
         (function() {{
             let css_data = {data_str};
+
+            {extra_js}
 
             css_data.add.forEach(x => {{
                 if (document.getElementById(x.id) !== null){{
@@ -197,7 +202,6 @@ class CssTab:
             }});
         }})()
         """
-
 
         while (retry > 0):
             retry -= 1
