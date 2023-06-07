@@ -1,6 +1,6 @@
 from typing import List
 from css_utils import Result, Log
-from css_tab_manager import CssTab, inject, remove
+from css_browserhook import BrowserTabHook as CssTab, inject, remove
 import uuid
 
 ALL_INJECTS = []

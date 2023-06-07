@@ -13,7 +13,7 @@ from css_themepatch import ThemePatch
 from css_remoteinstall import install
 
 from css_server import start_server
-from css_tab_manager import continuous_health_check, remove_all, commit_all, continuous_polling_health_check
+from css_browserhook import initialize, remove_all, commit_all
 
 ALWAYS_RUN_SERVER = False
 IS_STANDALONE = False
@@ -393,8 +393,7 @@ class Plugin:
         if (ALWAYS_RUN_SERVER or store_or_file_config("server")):
             start_server(self)
 
-        asyncio.create_task(continuous_health_check())
-        asyncio.create_task(continuous_polling_health_check())
+        await initialize()
 
 if __name__ == '__main__':
     ALWAYS_RUN_SERVER = True
