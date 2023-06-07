@@ -240,7 +240,7 @@ class BrowserHook:
         return self.current_id
     
     async def open_websocket(self):
-        self.client = ClientSession()
+        self.client = aiohttp.ClientSession()
         self.websocket = await self.client.ws_connect(self.ws_url)
 
     async def close_websocket(self):
