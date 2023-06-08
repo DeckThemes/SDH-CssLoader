@@ -13,6 +13,7 @@ class Theme:
         self.configJsonPath = self.configPath + "/config" + ("_ROOT.json" if USER == "root" else "_USER.json")
         self.patches = []
         self.injects = []
+        self.tab_mappings = {}
         self.flags = []
         self.themePath = themePath
         self.bundled = self.configPath != self.themePath
@@ -46,6 +47,7 @@ class Theme:
         self.author = json["author"] if ("author" in json) else ""
         self.require = int(json["manifest_version"]) if ("manifest_version" in json) else 1
         self.flags = [x.upper() for x in list(json["flags"])] if ("flags" in json) else []
+        self.tab_mappings = json["tabs"] if ("tabs" in json) else {}
 
         if (CSS_LOADER_VER < self.require):
             raise Exception("A newer version of the CssLoader is required to load this theme")
