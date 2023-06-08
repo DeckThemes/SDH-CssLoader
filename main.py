@@ -402,9 +402,13 @@ if __name__ == '__main__':
 
     logging.basicConfig(
         format='[%(asctime)s][%(levelname)s]: %(message)s',
-        force=True
+        force=True,
+        filename=os.path.join(get_theme_path(), "standalone.log"),
+        filemode="w"
     )
+
     Logger = logging.getLogger("CSS_LOADER")
+    Logger.addHandler(logging.StreamHandler())
     Logger.setLevel(logging.INFO)
 
     asyncio.set_event_loop(asyncio.new_event_loop())
