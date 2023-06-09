@@ -1,4 +1,4 @@
-import os, re, uuid, asyncio, json, aiohttp
+import os, re, uuid, asyncio, json, aiohttp, gc, time
 from typing import List
 from css_utils import get_theme_path, Log, Result
 import css_inject
@@ -244,11 +244,11 @@ class BrowserHook:
         self.websocket = await self.client.ws_connect(self.ws_url)
 
     async def close_websocket(self):
+        self.connected_tabs.clear()
         await self.websocket.close()
         await self.client.close() 
         self.websocket = None 
         self.client = None
-        self.connected_tabs.clear()
 
     def is_connected(self) -> bool:
         return self.websocket != None and not self.websocket.closed
@@ -271,11 +271,20 @@ class BrowserHook:
 
             await self.websocket.send_json(data)
 
+            start_time = time.time()
+
             while await_response:
                 result = await queue.get()
 
+                if (start_time + 5) < time.time():
+                    Result(False, f"Request for {method} took more than 5s. Assuming it failed")
+                    return None
+                
                 if "id" in result and result["id"] == id:
                     self.ws_response.remove(queue)
+                    del queue
+                    gc.collect()
+
                     return result          
                 
             return None
@@ -361,7 +370,7 @@ class BrowserHook:
                 except Exception as e:
                     Result(False, f"[Health Check on {tab.title}] {str(e)}")
 
-            await asyncio.sleep(3)       
+            await asyncio.sleep(3)  
 
     async def health_check(self):
         while True:
@@ -387,10 +396,11 @@ class BrowserHook:
 
             except Exception as e:
                 Log(f"[Browser Health Check] {str(e)}")
-                try:
-                    await self.close_websocket()
-                except:
-                    pass
+
+            try:
+                await self.close_websocket()
+            except:
+                pass
 
 HOOK : BrowserHook = None
 
