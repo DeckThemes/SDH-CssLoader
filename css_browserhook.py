@@ -254,7 +254,7 @@ class BrowserHook:
         return self.websocket != None and not self.websocket.closed
 
     async def send_command(self, method : str, params : dict, sessionId : str|None, await_response : bool = True):
-        if self.websocket:
+        if self.is_connected():
             id = self.get_id()
             data = {
                 "id": id,
@@ -278,6 +278,8 @@ class BrowserHook:
 
                 if (start_time + 5) < time.time():
                     Result(False, f"Request for {method} took more than 5s. Assuming it failed")
+                    self.ws_response.remove(queue)
+                    del queue
                     return None
                 
                 if "id" in result and result["id"] == id:
