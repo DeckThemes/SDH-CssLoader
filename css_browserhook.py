@@ -15,6 +15,8 @@ CSS_TAB_MAPPINGS = {
     "All": ["SP|Steam Big Picture Mode", "~Valve Steam Gamepad/default~", "MainMenu.*", "~valve.steam.gamepadui.mainmenu~", "QuickAccess.*", "~valve.steam.gamepadui.quickaccess~"]
 }
 
+MAX_QUEUE_SIZE = 500
+
 class BrowserTabHook:
     def __init__(self, browserHook, sessionId : str, targetInfo : dict):
         self.id = targetInfo["targetId"]
@@ -265,7 +267,7 @@ class BrowserHook:
                 data["sessionId"] = sessionId
 
             if await_response:
-                queue = asyncio.Queue(maxsize=200)
+                queue = asyncio.Queue(maxsize=MAX_QUEUE_SIZE)
                 self.ws_response.append(queue)
 
             await self.websocket.send_json(data)
@@ -292,7 +294,7 @@ class BrowserHook:
         raise RuntimeError("Websocket not opened")   
     
     async def on_new_tab(self):
-        queue = asyncio.Queue(maxsize=200)
+        queue = asyncio.Queue(maxsize=MAX_QUEUE_SIZE)
         self.ws_response.append(queue) 
 
         while True:
@@ -305,7 +307,7 @@ class BrowserHook:
                 await self.send_command("Target.attachToTarget", {"targetId": message["params"]["targetInfo"]["targetId"], "flatten": True}, None, False)
 
     async def on_tab_update(self):
-        queue = asyncio.Queue(maxsize=200)
+        queue = asyncio.Queue(maxsize=MAX_QUEUE_SIZE)
         self.ws_response.append(queue) 
 
         while True:
@@ -333,7 +335,7 @@ class BrowserHook:
                         break
     
     async def on_tab_attach(self):
-        queue = asyncio.Queue(maxsize=200)
+        queue = asyncio.Queue(maxsize=MAX_QUEUE_SIZE)
         self.ws_response.append(queue) 
 
         while True:
@@ -343,7 +345,7 @@ class BrowserHook:
                 self.connected_tabs.append(BrowserTabHook(self, message["params"]["sessionId"], message["params"]["targetInfo"]))
     
     async def on_tab_detach(self):
-        queue = asyncio.Queue(maxsize=200)
+        queue = asyncio.Queue(maxsize=MAX_QUEUE_SIZE)
         self.ws_response.append(queue) 
 
         while True:
