@@ -222,7 +222,6 @@ class BrowserHook:
         self.client = None
         self.websocket = None
         self.current_id = 0
-        self.websocket_queue = asyncio.Queue()
         self.ws_url = None
         self.ws_response : List[asyncio.Queue] = []
         self.connected_tabs : List[BrowserTabHook] = []
@@ -266,7 +265,7 @@ class BrowserHook:
                 data["sessionId"] = sessionId
 
             if await_response:
-                queue = asyncio.Queue()
+                queue = asyncio.Queue(maxsize=200)
                 self.ws_response.append(queue)
 
             await self.websocket.send_json(data)
@@ -293,7 +292,7 @@ class BrowserHook:
         raise RuntimeError("Websocket not opened")   
     
     async def on_new_tab(self):
-        queue = asyncio.Queue()
+        queue = asyncio.Queue(maxsize=200)
         self.ws_response.append(queue) 
 
         while True:
@@ -306,7 +305,7 @@ class BrowserHook:
                 await self.send_command("Target.attachToTarget", {"targetId": message["params"]["targetInfo"]["targetId"], "flatten": True}, None, False)
 
     async def on_tab_update(self):
-        queue = asyncio.Queue()
+        queue = asyncio.Queue(maxsize=200)
         self.ws_response.append(queue) 
 
         while True:
@@ -334,7 +333,7 @@ class BrowserHook:
                         break
     
     async def on_tab_attach(self):
-        queue = asyncio.Queue()
+        queue = asyncio.Queue(maxsize=200)
         self.ws_response.append(queue) 
 
         while True:
@@ -344,7 +343,7 @@ class BrowserHook:
                 self.connected_tabs.append(BrowserTabHook(self, message["params"]["sessionId"], message["params"]["targetInfo"]))
     
     async def on_tab_detach(self):
-        queue = asyncio.Queue()
+        queue = asyncio.Queue(maxsize=200)
         self.ws_response.append(queue) 
 
         while True:
@@ -394,7 +393,8 @@ class BrowserHook:
                 async for message in self.websocket:
                     data = message.json()
                     for x in self.ws_response:
-                        x.put_nowait(data)
+                        if not x.full():
+                            x.put_nowait(data)
 
             except Exception as e:
                 Log(f"[Browser Health Check] {str(e)}")
