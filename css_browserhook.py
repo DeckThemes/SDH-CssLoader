@@ -1,4 +1,4 @@
-import os, re, uuid, asyncio, json, aiohttp, gc, time
+import os, re, uuid, asyncio, json, aiohttp, time
 from typing import List
 from css_utils import get_theme_path, Log, Result
 import css_inject
@@ -286,8 +286,6 @@ class BrowserHook:
                 if "id" in result and result["id"] == id:
                     self.ws_response.remove(queue)
                     del queue
-                    gc.collect()
-
                     return result          
                 
             return None
