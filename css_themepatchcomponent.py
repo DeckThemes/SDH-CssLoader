@@ -2,10 +2,6 @@ from css_inject import Inject
 from css_utils import Result, get_theme_path
 from os.path import join, exists
 
-from css_inject import Inject
-from css_utils import Result, get_theme_path
-from os.path import join, exists
-
 def hex_to_rgb(hex_num : str) -> tuple[float, float, float]:
     vals = hex_num[1:]
 
@@ -112,17 +108,20 @@ class ThemePatchComponent:
             return Result(False, "???")
 
         if self.type == "color-picker":        
-            if self.value[0] == "#":
-                (r, g, b) = hex_to_rgb(self.value)
-            else:
-                hsl_vals = self.value.split(", ")
-                h = hsl_vals[0][5:]
-                s = hsl_vals[1][:len(hsl_vals[1]) - 1]
-                l = hsl_vals[2][:len(hsl_vals[2]) - 1]
+            try:
+                if self.value[0] == "#":
+                    (r, g, b) = hex_to_rgb(self.value)
+                else:
+                    hsl_vals = self.value.split(", ")
+                    h = hsl_vals[0][5:]
+                    s = hsl_vals[1][:len(hsl_vals[1]) - 1]
+                    l = hsl_vals[2][:len(hsl_vals[2]) - 1]
 
-                (r, g, b) = hsl_to_rgb(h, s, l)
- 
-            self.inject.css = f":root {{ {self.css_variable}: {self.value}; {self.css_variable}_r: {r}; {self.css_variable}_g: {g}; {self.css_variable}_b: {b}; {self.css_variable}_rgb: {r}, {g}, {b}; }}"
+                    (r, g, b) = hsl_to_rgb(h, s, l)
+    
+                self.inject.css = f":root {{ {self.css_variable}: {self.value}; {self.css_variable}_r: {r}; {self.css_variable}_g: {g}; {self.css_variable}_b: {b}; {self.css_variable}_rgb: {r}, {g}, {b}; }}"
+            except e:
+                self.inject.css = f":root {{ {self.css_variable}: {self.value}; }}"
         elif self.type == "image-picker":
             try:
                 self.check_path_image_picker(self.value)
