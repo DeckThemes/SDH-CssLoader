@@ -1,6 +1,6 @@
 from typing import List
 from css_utils import Result, Log
-from css_tab_manager import CssTab, inject, remove
+from css_browserhook import BrowserTabHook as CssTab, inject, remove
 import uuid
 
 ALL_INJECTS = []
@@ -102,16 +102,30 @@ class Inject:
         self.enabled = False
         return Result(True)
 
+def extend_tabs(tabs : list, theme) -> list:
+    new_tabs = []
+
+    if len(tabs) <= 0:
+        return theme.tab_mappings["default"] if ("default" in theme.tab_mappings) else []
+
+    for x in tabs:
+        if x in theme.tab_mappings:
+            new_tabs.extend(theme.tab_mappings[x])
+        else:
+            new_tabs.append(x)
+
+    return new_tabs
+
 def to_inject(key : str, tabs : list, basePath : str, theme) -> Inject:
     if key.startswith("--"):
         value = tabs[0]
         if (";" in value or ";" in key):
             raise Exception("Multiple css statements are unsupported in a variable")
         
-        inject = Inject("", tabs[1:], theme)
+        inject = Inject("", extend_tabs(tabs[1:], theme), theme)
         inject.css = f":root {{ {key}: {value}; }}"
     else:
-        inject = Inject(basePath + "/" + key, tabs, theme)
+        inject = Inject(basePath + "/" + key, extend_tabs(tabs, theme), theme)
     
     return inject
 

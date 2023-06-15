@@ -60,17 +60,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install pyinstaller==5.5
         pip install -r requirements.txt
-      
-    - name: Get inject.py dependency from decky-loader
-      run: |
-        git clone --depth=1 https://github.com/SteamDeckHomebrew/decky-loader 
-        copy ./decky-loader/backend/injector.py injector.py
 
     - name: Build Python Backend
-      run: pyinstaller --noconfirm --onefile --name "CssLoader-Standalone" ./main.py ./injector.py
+      run: pyinstaller --noconfirm --onefile --name "CssLoader-Standalone" ./main.py
 
     - name: Build Python Backend Headless
-      run: pyinstaller --noconfirm --noconsole --onefile --name "CssLoader-Standalone-Headless" ./main.py ./injector.py
+      run: pyinstaller --noconfirm --noconsole --onefile --name "CssLoader-Standalone-Headless" ./main.py
 
     - name: Upload package artifact
       uses: actions/upload-artifact@v3
