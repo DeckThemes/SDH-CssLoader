@@ -7,12 +7,13 @@ from watchdog.observers import Observer
 sys.path.append(os.path.dirname(__file__))
 
 from css_utils import Log, create_dir, create_steam_symlink, Result, get_user_home, get_theme_path, store_read as util_store_read, store_write as util_store_write, FLAG_KEEP_DEPENDENCIES, FLAG_PRESET, store_or_file_config
-from css_inject import Inject
+from css_inject import Inject, ALL_INJECTS
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
 from css_remoteinstall import install
-from css_tab_mapping import load_tab_mappings, get_single_tab, get_tabs, commit_all, remove_all, Tab, get_cached_tabs, optimize_tabs
+
 from css_server import start_server
+from css_browserhook import initialize, remove_all, commit_all
 
 ALWAYS_RUN_SERVER = False
 IS_STANDALONE = False
@@ -282,41 +283,6 @@ class Plugin:
         
         return Result(True)
 
-    async def _inject_test_element(self, tab : str, timeout : int = 3, element_name : str = "test_css_loaded") -> Result:
-        attempt = 0
-        while True:
-            if await self._check_test_element(self, tab, element_name):
-                return Result(True)
-            else:
-                try:
-                    found_tab = get_single_tab(tab)
-                    await found_tab.evaluate_js(
-                    f"""
-                    (function() {{
-                        const elem = document.createElement('div');
-                        elem.id = "{element_name}";
-                        document.head.append(elem);
-                    }})()
-                    """)
-                except Exception as e:
-                    Log(str(e))
-                    pass
-
-                attempt += 1
-
-                if (attempt >= timeout):
-                    return Result(False, f"Inject into tab '{tab}' was attempted {timeout} times, stopping")
-
-                await asyncio.sleep(1)
-            
-    
-    async def _check_test_element(self, tab : str, element_name : str = "test_css_loaded") -> bool:
-        try:
-            found_tab = get_single_tab(tab)
-            return await found_tab.has_element(element_name) # I'm aware this will throw an exception if found_tab is None
-        except:
-            return False
-
     async def _parse_themes(self, themesDir : str, configDir : str = None):
         if (configDir is None):
             configDir = themesDir
@@ -349,39 +315,11 @@ class Plugin:
                 Log(f"Exception while parsing a theme: {e}") # Couldn't properly parse everything
 
     async def _cache_lists(self):
-        self.injects = []
+        ALL_INJECTS.clear()
 
         for x in self.themes:
             injects = x.get_all_injects()
-            self.injects.extend(injects)
-
-    async def _check_tab(self, tab : Tab):
-        try:
-            if not await tab.available():
-                return # Tab does not exist, so not worth injecting into it
-
-            # Log(f"Checking if tab {x} is still injected...")
-            if not await self._check_test_element(self, tab.get_name()):
-                Log(f"Tab {tab.get_name()} is not injected, reloading...")
-                await self._inject_test_element(self, tab.get_name())
-                for y in self.injects:
-                    if y.enabled:
-                        (await y.inject(tab)).raise_on_failure()
-
-                    await tab.commit_css_transaction()
-        except Exception as e:
-            Log(f":( {str(e)}")
-            pass
-
-    async def _check_tabs(self):
-        while True:
-            await asyncio.sleep(3)
-
-            if optimize_tabs():
-                Log("Resetting due to duplicate tab instances!")
-                await self.reset(self)
-            else:
-                await asyncio.gather(*[self._check_tab(self, x) for x in get_cached_tabs()])
+            ALL_INJECTS.extend(injects)
 
     async def _load(self):
         Log("Loading themes...")
@@ -436,7 +374,6 @@ class Plugin:
         Log(f"Max supported manifest version: {CSS_LOADER_VER}")
         
         create_steam_symlink()
-        load_tab_mappings()
 
         await self._load(self)
         #await self._inject_test_element(self, "SP", 9999, "test_ui_loaded")
@@ -451,12 +388,12 @@ class Plugin:
         else:
             Log("Not observing themes folder for file changes")
 
-        Log(f"Initialized css loader. Found {len(self.themes)} themes, which inject into {len(get_cached_tabs())} tabs. Total {len(self.injects)} injects, {len([x for x in self.injects if x.enabled])} injected")
+        Log(f"Initialized css loader. Found {len(self.themes)} themes. Total {len(ALL_INJECTS)} injects, {len([x for x in ALL_INJECTS if x.enabled])} injected")
         
         if (ALWAYS_RUN_SERVER or store_or_file_config("server")):
             start_server(self)
 
-        await self._check_tabs(self)
+        await initialize()
 
 if __name__ == '__main__':
     ALWAYS_RUN_SERVER = True
@@ -465,9 +402,13 @@ if __name__ == '__main__':
 
     logging.basicConfig(
         format='[%(asctime)s][%(levelname)s]: %(message)s',
-        force=True
+        force=True,
+        filename=os.path.join(get_theme_path(), "standalone.log"),
+        filemode="w"
     )
+
     Logger = logging.getLogger("CSS_LOADER")
+    Logger.addHandler(logging.StreamHandler())
     Logger.setLevel(logging.INFO)
 
     asyncio.set_event_loop(asyncio.new_event_loop())
@@ -487,3 +428,4 @@ if __name__ == '__main__':
                 count += 1
 
     asyncio.get_event_loop().run_until_complete(A().run())
+    asyncio.get_event_loop().run_forever()

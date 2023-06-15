@@ -1,17 +1,27 @@
 from typing import List
 from css_utils import Result, Log
-from css_tab_mapping import Tab, get_tabs
+from css_browserhook import BrowserTabHook as CssTab, inject, remove
+import uuid
+
+ALL_INJECTS = []
+
+def helper_get_tab_from_list(tab_list : List[str], cssTab : CssTab) -> str|None:
+    for x in tab_list:
+        if cssTab.compare(x):
+            return x
+        
+    return None
 
 class Inject:
     def __init__(self, cssPath : str, tabs : List[str], theme):
         self.css = None
         self.cssPath = cssPath
-        self.tabs = get_tabs(tabs)
+        self.tabs = tabs
         self.uuids = {}
         self.theme = theme
         self.enabled = False
         for x in self.tabs:
-            self.uuids[x.id] = []
+            self.uuids[x] = []
 
     async def load(self) -> Result:
         try:
@@ -25,69 +35,86 @@ class Inject:
         except Exception as e:
             return Result(False, str(e))
 
-    async def inject(self, tab : Tab = None) -> Result:
-        if (tab is None):
-            for x in self.tabs:
-                await self._inject_internal(x)
+    async def inject(self) -> Result:
+        for tab_name in self.tabs:
+            for uuid in self.uuids[tab_name]:
+                Log(f"-{uuid} @ {tab_name}")
+                res = await remove(tab_name, uuid)
 
-            return Result(True)
-        else:
-            return await self._inject_internal(tab)
+            if (self.css is None):
+                result = await self.load()
+                if not result.success:
+                    return result        
 
-    async def _inject_internal(self, tab : Tab) -> Result:
-        if (tab not in self.tabs):
-            return Result(True) # this is kind of cheating but
+            try:
+                res = await inject(tab_name, self.css)
+                if not res.success:
+                    return res
+
+                Log(f"+{str(res.message)} @ {tab_name}")
+                self.uuids[tab_name].append(str(res.message))
+            except Exception as e:
+                return Result(False, str(e))
+
+        self.enabled = True
+        return Result(True)
+    
+    async def inject_with_tab(self, tab : CssTab) -> Result:
+        tab_name = helper_get_tab_from_list(self.tabs, tab)
+
+        if tab_name == None:
+            return
         
-        if (len(self.uuids[tab.id]) > 0):
-            await self.remove(tab)
-            self.enabled = True # In case the below code fails, it will never be re-injected unless it's still enabled
-
         if (self.css is None):
             result = await self.load()
             if not result.success:
-                return result        
+                return result
 
         try:
             res = await tab.inject_css(self.css)
             if not res.success:
                 return res
-            
-            Log(f"+{str(res.message)} @ {tab.get_name()}")
-            self.uuids[tab.id].append(str(res.message))
-        except Exception as e:
-            return Result(False, str(e))
 
-        self.enabled = True
+            Log(f"+{str(res.message)} @ {tab_name}")
+            self.uuids[tab_name].append(str(res.message))
+        except Exception as e:
+            return Result(False, str(e))    
+        
         return Result(True)
 
-    async def remove(self, tab : Tab = None) -> Result:
-        if (tab is None):
-            for x in self.tabs:
-                await self.remove(x)
-
-            return Result(True)
-        else:
-            if (tab not in self.tabs):
+    async def remove(self) -> Result:
+        for tab_name in self.tabs:
+            if (len(self.uuids[tab_name]) <= 0):
                 return Result(True) # this is kind of cheating but
 
-        if (len(self.uuids[tab.id]) <= 0):
-            return Result(True) # this is kind of cheating but
+            try:
+                for x in self.uuids[tab_name]:
+                    Log(f"-{x} @ {tab_name}")
+                    res = await remove(tab_name, x)
+                    #if not res["success"]:
+                    #    return Result(False, res["result"])
+                    # Silently ignore error. If any page gets reloaded, and there was css loaded. this will fail as it will fail to remove the css
 
-        try:
-            for x in self.uuids[tab.id]:
-                Log(f"-{x} @ {tab.get_name()}")
-                res = await tab.remove_css(x)
-                #if not res["success"]:
-                #    return Result(False, res["result"])
-                # Silently ignore error. If any page gets reloaded, and there was css loaded. this will fail as it will fail to remove the css
-
-            self.uuids[tab.id] = []
-        except Exception as e:
-            # TODO: Investigate failure here
-            return Result(False, str(e))
+                self.uuids[tab_name] = []
+            except Exception as e:
+                return Result(False, str(e))
 
         self.enabled = False
         return Result(True)
+
+def extend_tabs(tabs : list, theme) -> list:
+    new_tabs = []
+
+    if len(tabs) <= 0:
+        return theme.tab_mappings["default"] if ("default" in theme.tab_mappings) else []
+
+    for x in tabs:
+        if x in theme.tab_mappings:
+            new_tabs.extend(theme.tab_mappings[x])
+        else:
+            new_tabs.append(x)
+
+    return new_tabs
 
 def to_inject(key : str, tabs : list, basePath : str, theme) -> Inject:
     if key.startswith("--"):
@@ -95,10 +122,10 @@ def to_inject(key : str, tabs : list, basePath : str, theme) -> Inject:
         if (";" in value or ";" in key):
             raise Exception("Multiple css statements are unsupported in a variable")
         
-        inject = Inject("", tabs[1:], theme)
+        inject = Inject("", extend_tabs(tabs[1:], theme), theme)
         inject.css = f":root {{ {key}: {value}; }}"
     else:
-        inject = Inject(basePath + "/" + key, tabs, theme)
+        inject = Inject(basePath + "/" + key, extend_tabs(tabs, theme), theme)
     
     return inject
 
