@@ -63,7 +63,12 @@ def get_user_home() -> str:
     return HOME
 
 def get_theme_path() -> str:
-    return os.path.join(DECKY_HOME, "themes")
+    path = os.path.join(DECKY_HOME, "themes")
+
+    if not os.path.exists(path):
+        create_dir(path)
+
+    return path
 
 def create_symlink(src : str, dst : str) -> Result:
     try:
