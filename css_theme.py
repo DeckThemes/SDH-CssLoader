@@ -4,6 +4,7 @@ from typing import List
 from css_inject import Inject, to_injects
 from css_utils import Result, Log, create_dir, USER
 from css_themepatch import ThemePatch
+from css_sfp_compat import is_folder_sfp_theme, convert_to_css_theme
 
 CSS_LOADER_VER = 7
 
@@ -29,17 +30,21 @@ class Theme:
             pass
         
         if (json is None):
-            if not os.path.exists(os.path.join(themePath, "theme.css")):
+            if os.path.exists(os.path.join(themePath, "theme.css")):
+                self.name = os.path.basename(themePath)
+                self.id = self.name
+                self.version = "v1.0"
+                self.author = ""
+                self.require = 1
+                self.injects = [Inject(os.path.join(themePath, "theme.css"), [".*"], self)]
+                self.dependencies = []
+                return
+            elif is_folder_sfp_theme(themePath):
+                convert_to_css_theme(themePath, self)
+                return
+            else:
                 raise Exception("Folder does not look like a theme?")
 
-            self.name = os.path.basename(themePath)
-            self.id = self.name
-            self.version = "v1.0"
-            self.author = ""
-            self.require = 1
-            self.injects = [Inject(os.path.join(themePath, "theme.css"), ["SP", "QuickAccess", "MainMenu"], self)]
-            self.dependencies = []
-            return
 
         self.name = json["name"]
         self.id = json["id"] if ("id" in json) else self.name

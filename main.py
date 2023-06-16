@@ -294,9 +294,9 @@ class Plugin:
             configPath = configDir + "/" + x
             themeDataPath = themePath + "/theme.json"
 
-            if (not path.exists(themeDataPath)) and (not path.exists(os.path.join(themePath, "theme.css"))):
+            if not os.path.isdir(themePath):
                 continue
-        
+            
             Log(f"Analyzing theme {x}")
             
             try:
