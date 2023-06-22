@@ -1,4 +1,4 @@
-import os, json, shutil
+import os, json, shutil, time
 from os import path
 from typing import List
 from css_inject import Inject, to_injects
@@ -20,6 +20,8 @@ class Theme:
         self.enabled = False
         self.json = json
         self.priority_mod = 0
+        self.created = None
+        self.modified = path.getmtime(self.configJsonPath) if path.exists(self.configJsonPath) else None
 
         try:
             if (os.path.join(themePath, "PRIORITY")):
@@ -40,6 +42,11 @@ class Theme:
             self.injects = [Inject(os.path.join(themePath, "theme.css"), ["SP", "QuickAccess", "MainMenu"], self)]
             self.dependencies = []
             return
+        
+        jsonPath = path.join(self.themePath, "theme.json")
+        
+        if path.exists(jsonPath):
+            self.created = path.getmtime(jsonPath)
 
         self.name = json["name"]
         self.id = json["id"] if ("id" in json) else self.name
@@ -98,6 +105,7 @@ class Theme:
             with open(self.configJsonPath, "w") as fp:
                 json.dump(config, fp)
         
+            self.modified = time.time()
         except Exception as e:
             return Result(False, str(e))
         
@@ -165,5 +173,7 @@ class Theme:
             "bundled": self.bundled,
             "require": self.require,
             "dependencies": [x for x in self.dependencies],
-            "flags": self.flags
+            "flags": self.flags,
+            "created": self.created,
+            "modified": self.modified,
         }
