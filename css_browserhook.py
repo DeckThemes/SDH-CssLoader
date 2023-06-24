@@ -80,7 +80,7 @@ class BrowserTabHook:
             if tab_check.startswith("~") and tab_check.endswith("~") and len(tab_check) > 2:
                 if tab_check[1:-1] in self.url:
                     return True
-            elif re.match(tab_check + "$", self.title):
+            elif re.match(f"({tab_check})$", self.title):
                 return True
         
         return False
