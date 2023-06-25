@@ -1,4 +1,4 @@
-from css_inject import Inject
+from css_inject import Inject, to_inject
 from css_utils import Result, get_theme_path
 from os.path import join, exists
 
@@ -76,7 +76,7 @@ class ThemePatchComponent:
             self.css_variable = f"--{self.css_variable}"
 
         self.tabs = component["tabs"]
-        self.inject = Inject("", self.tabs, self.themePatch.theme)
+        self.inject = to_inject("", self.tabs, "", self.themePatch.theme)
         self.generate()
 
     def check_value_color_picker(self, value : str):
