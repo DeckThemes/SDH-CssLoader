@@ -102,6 +102,25 @@ class Inject:
         self.enabled = False
         return Result(True)
 
+DEFAULT_MAPPINGS = {
+    "desktop": ["^Steam.*", ".*Supernav"],
+    "desktopchat": ["!friendsui-container"],
+    "desktoppopup": ["^OverlayBrowser_Browser", "^SP Overlay:.*", ".*Menu", "^notificationtoasts_.*", "^SteamBrowser_Find", "^OverlayTab\\d+_Find", "!ModalDialogPopup", "!FullModalOverlay"],
+    "desktopoverlay": ["desktoppopup"],
+    "bigpicture": ["~Valve Steam Gamepad/default~"],
+    "bigpictureoverlay": ["QuickAccess", "MainMenu"],
+    "store": ["~https://store.steampowered.com~", "~https://steamcommunity.com~"],
+    "SP": ["bigpicture"],
+    "Steam Big Picture Mode": ["bigpicture"],
+    "MainMenu": ["~valve.steam.gamepadui.mainmenu~"],
+    "MainMenu_.*": ["MainMenu"],
+    "QuickAccess": ["~valve.steam.gamepadui.quickaccess~"],
+    "QuickAccess_.*": ["QuickAccess"],
+    "Steam": ["desktop"],
+    "SteamLibraryWindow": ["desktop"],
+    "All": ["bigpicture", "bigpictureoverlay"]
+}
+
 def extend_tabs(tabs : list, theme) -> list:
     new_tabs = []
 
@@ -110,7 +129,9 @@ def extend_tabs(tabs : list, theme) -> list:
 
     for x in tabs:
         if x in theme.tab_mappings:
-            new_tabs.extend(theme.tab_mappings[x])
+            new_tabs.extend(extend_tabs(theme.tab_mappings[x], theme))
+        elif x in DEFAULT_MAPPINGS:
+            new_tabs.extend(extend_tabs(DEFAULT_MAPPINGS[x], theme))
         else:
             new_tabs.append(x)
 

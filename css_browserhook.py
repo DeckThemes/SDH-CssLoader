@@ -3,18 +3,6 @@ from typing import List
 from css_utils import get_theme_path, Log, Result
 import css_inject
 
-CSS_TAB_MAPPINGS = {
-    "SP": ["SP|Steam Big Picture Mode", "~Valve Steam Gamepad/default~"],
-    "Steam Big Picture Mode": ["SP|Steam Big Picture Mode", "~Valve Steam Gamepad/default~"],
-    "MainMenu": ["MainMenu.*", "~valve.steam.gamepadui.mainmenu~"],
-    "MainMenu_.*": ["MainMenu.*", "~valve.steam.gamepadui.mainmenu~"],
-    "QuickAccess": ["QuickAccess.*", "~valve.steam.gamepadui.quickaccess~"],
-    "QuickAccess_.*": ["QuickAccess.*", "~valve.steam.gamepadui.quickaccess~"],
-    "Steam": ["SteamLibraryWindow|Steam"],
-    "SteamLibraryWindow": ["SteamLibraryWindow|Steam"],
-    "All": ["SP|Steam Big Picture Mode", "~Valve Steam Gamepad/default~", "MainMenu.*", "~valve.steam.gamepadui.mainmenu~", "QuickAccess.*", "~valve.steam.gamepadui.quickaccess~"]
-}
-
 MAX_QUEUE_SIZE = 500
 
 class BrowserTabHook:
@@ -27,9 +15,9 @@ class BrowserTabHook:
         self.hook = browserHook
         self.pending_add = {}
         self.pending_remove = []
-        asyncio.create_task(self._init())
         self.init_done = False
         self.html_classes = []
+        asyncio.create_task(self._init())
 
     async def _init(self):
         res = await self.evaluate_js("(function(){ return {\"title\": document.title, \"classes\": Array.from(document.documentElement.classList)} })()")
@@ -73,20 +61,14 @@ class BrowserTabHook:
         return res if res != None else False
 
     def compare(self, tab_name : str) -> bool:
-        checks = [tab_name]
-
-        if (tab_name in CSS_TAB_MAPPINGS):
-            checks.extend(CSS_TAB_MAPPINGS[tab_name])
-
-        for tab_check in checks:
-            if tab_check.startswith("~") and tab_check.endswith("~") and len(tab_check) > 2:
-                if tab_check[1:-1] in self.url:
-                    return True
-            elif tab_check.startswith("!"):
-                if tab_check[1:] in self.html_classes:
-                    return True
-            elif re.match(f"({tab_check})$", self.title):
+        if tab_name.startswith("~") and tab_name.endswith("~") and len(tab_name) > 2:
+            if tab_name[1:-1] in self.url:
                 return True
+        elif tab_name.startswith("!"):
+            if tab_name[1:] in self.html_classes:
+                return True
+        elif re.match(f"^({tab_name})$", self.title):
+            return True
         
         return False
     

@@ -1,11 +1,11 @@
 import os
-from css_inject import Inject
+from css_inject import Inject, to_inject
 
 SFP_DEFAULT_FILES = {
-    "libraryroot.custom.css": ["^Steam.*", "^OverlayBrowser_Browser", "^SP Overlay:.*", ".*Menu", ".*Supernav", "^notificationtoasts_.*", "^SteamBrowser_Find", "^OverlayTab\\d+_Find", "^Properties.*", "!ModalDialogPopup", "!FullModalOverlay"],
-    "bigpicture.custom.css": ["^QuickAccess_.*", "^MainMenu_.*", "^Steam Big Picture Mode"],
-    "friends.custom.css": ["!friendsui-container"],
-    "webkit.css": ["~https://store.steampowered.com~", "~https://steamcommunity.com~"]
+    "libraryroot.custom.css": ["desktop", "desktopoverlay"],
+    "bigpicture.custom.css": ["bigpicture", "bigpictureoverlay"],
+    "friends.custom.css": ["desktopchat"],
+    "webkit.css": ["store"]
 }
 
 def is_folder_sfp_theme(dir : str) -> bool:
@@ -22,4 +22,4 @@ def convert_to_css_theme(dir : str, theme) -> None:
     theme.author = ""
     theme.require = 1
     theme.dependencies = []
-    theme.injects = [Inject(os.path.join(dir, x), SFP_DEFAULT_FILES[x], theme) for x in SFP_DEFAULT_FILES if os.path.exists(os.path.join(dir, x))]
+    theme.injects = [to_inject(x, SFP_DEFAULT_FILES[x], dir, theme) for x in SFP_DEFAULT_FILES if os.path.exists(os.path.join(dir, x))]

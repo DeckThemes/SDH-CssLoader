@@ -6,7 +6,7 @@ from css_utils import Result, Log, create_dir, USER
 from css_themepatch import ThemePatch
 from css_sfp_compat import is_folder_sfp_theme, convert_to_css_theme
 
-CSS_LOADER_VER = 7
+CSS_LOADER_VER = 8
 
 class Theme:
     def __init__(self, themePath : str, json : dict, configPath : str = None):
