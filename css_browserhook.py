@@ -29,12 +29,14 @@ class BrowserTabHook:
         self.pending_remove = []
         asyncio.create_task(self._init())
         self.init_done = False
+        self.html_classes = []
 
     async def _init(self):
-        res = await self.evaluate_js("(function(){ return {\"title\": document.title} })()")
+        res = await self.evaluate_js("(function(){ return {\"title\": document.title, \"classes\": Array.from(document.documentElement.classList)} })()")
 
         if res != None:
             self.title = res["title"]
+            self.html_classes = res["classes"]
 
         self.init_done = True
         Log(f"Connected to tab: {self.title}")
@@ -79,6 +81,9 @@ class BrowserTabHook:
         for tab_check in checks:
             if tab_check.startswith("~") and tab_check.endswith("~") and len(tab_check) > 2:
                 if tab_check[1:-1] in self.url:
+                    return True
+            elif tab_check.startswith("!"):
+                if tab_check[1:] in self.html_classes:
                     return True
             elif re.match(f"({tab_check})$", self.title):
                 return True
