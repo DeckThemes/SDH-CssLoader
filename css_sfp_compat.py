@@ -2,9 +2,9 @@ import os
 from css_inject import Inject
 
 SFP_DEFAULT_FILES = {
-    "libraryroot.custom.css": ["^Steam", "^OverlayBrowser_Browser", "^SP Overlay:", ".*Menu", ".*Supernav", "^notificationtoasts_.*", "^SteamBrowser_Find", "^OverlayTab\\d+_Find"],
+    "libraryroot.custom.css": ["^Steam.*", "^OverlayBrowser_Browser", "^SP Overlay:.*", ".*Menu", ".*Supernav", "^notificationtoasts_.*", "^SteamBrowser_Find", "^OverlayTab\\d+_Find", "^Properties.*", "!ModalDialogPopup", "!FullModalOverlay"],
     "bigpicture.custom.css": ["^QuickAccess_.*", "^MainMenu_.*", "^Steam Big Picture Mode"],
-    "friends.custom.css": ["~minwidth=226&minheight=400~","~minwidth=400&minheight=400~"],
+    "friends.custom.css": ["!friendsui-container"],
     "webkit.css": ["~https://store.steampowered.com~", "~https://steamcommunity.com~"]
 }
 
