@@ -187,9 +187,24 @@ export function getThemes(
   requiresAuth: boolean = false
 ) {
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
+  // TODO: Refactor, this works now, just jank
+  const prependString =
+    // If the user searches for desktop themes, show desktop themes, otherwise only show BPM themes
+    (searchOpts.filters.includes("Desktop")
+      ? "-Preset"
+      : // If the user searches for presets, show presets, otherwise exclude them
+      searchOpts.filters === "Preset"
+      ? "BPM-CSS"
+      : "BPM-CSS.-Preset") +
+    // If there are other filters after the prepend, add a ".", otherwise don't
+    (searchOpts.filters !== "All" ? "." : "");
+
+  console.log("prepend", prependString);
+  console.log("full", prependString + (searchOpts.filters === "All" ? "" : searchOpts.filters));
+
   const queryStr = generateParamStr(
     searchOpts.filters !== "All" ? searchOpts : { ...searchOpts, filters: "" },
-    "CSS.-Preset."
+    prependString
   );
   genericGET(`${apiPath}${queryStr}`, requiresAuth).then((data: ThemeQueryResponse) => {
     if (data.total > 0) {
