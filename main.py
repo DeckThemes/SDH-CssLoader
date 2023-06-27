@@ -277,26 +277,40 @@ class Plugin:
         return Result(True).to_dict()
 
     async def generate_preset_theme(self, name : str) -> dict:
-        Log("Generating theme preset...")
-
         try:
-            result = await self._generate_preset_theme_internal(self, name)
+            deps = {}
+
+            for x in self.themes:
+                if x.enabled and FLAG_PRESET not in x.flags:
+                    deps[x.name] = {}
+                    for y in x.patches:
+                        deps[x.name][y.name] = y.get_value()
+
+            result = await self._generate_preset_theme_internal(self, name, deps)
             return result.to_dict()
         except Exception as e:
             return Result(False, str(e))
+    
+    async def generate_preset_theme_from_theme_names(self, name : str, themeNames : list) -> dict:
+        try:
+            deps = {}
 
-    async def _generate_preset_theme_internal(self, name : str) -> Result:
+            for x in self.themes:
+                if x.name in themeNames and FLAG_PRESET not in x.flags:
+                    deps[x.name] = {}
+                    for y in x.patches:
+                        deps[x.name][y.name] = y.get_value()
+
+            result = await self._generate_preset_theme_internal(self, name, deps)
+            return result.to_dict()
+        except Exception as e:
+            return Result(False, str(e))    
+
+    async def _generate_preset_theme_internal(self, name : str, deps : dict) -> Result:
+        Log(f"Generating theme preset '{name}'...")
         a = await self._get_theme(self, name)
         if a != None and FLAG_PRESET not in a.flags:
             return Result(False, f"Theme '{name}' already exists")
-        
-        deps = {}
-
-        for x in self.themes:
-            if x.enabled and FLAG_PRESET not in x.flags:
-                deps[x.name] = {}
-                for y in x.patches:
-                    deps[x.name][y.name] = y.get_value()
         
         theme_path = path.join(get_theme_path(), name)
 
