@@ -31,12 +31,12 @@ class FileChangeHandler(FileSystemEventHandler):
         self.plugin = plugin
         self.loop = loop
         self.last = 0
-        self.delay = 5
+        self.delay = 1
 
     def on_modified(self, event):
         #Log(f"FS Event: {event}")
 
-        if (not event.src_path.endswith(".css")) or event.is_directory:
+        if (not (event.src_path.endswith(".css") or event.src_path.endswith("theme.json"))) or event.is_directory:
             #Log("FS Event is not on a CSS file. Ignoring!")
             return
 
@@ -49,6 +49,36 @@ class FileChangeHandler(FileSystemEventHandler):
 class Plugin:
     async def is_standalone(self) -> bool:
         return IS_STANDALONE
+    
+    async def get_watch_state(self) -> bool:
+        return self.observer != None
+    
+    async def get_server_state(self) -> bool:
+        return self.server_loaded
+
+    async def enable_server(self) -> dict:
+        if self.server_loaded:
+            return Result(False, "Nothing to do!").to_dict()
+        
+        start_server(self)
+        self.server_loaded = True
+        return Result(True).to_dict()
+    
+    async def toggle_watch_state(self, enable : bool = True) -> dict:
+        if enable and self.observer == None:
+            Log("Observing themes folder for file changes")
+            self.observer = Observer()
+            self.handler = FileChangeHandler(self, asyncio.get_running_loop())
+            self.observer.schedule(self.handler, get_theme_path(), recursive=True)
+            self.observer.start()
+            return Result(True).to_dict()
+        elif self.observer != None and not enable:
+            Log("Stopping observer")
+            self.observer.stop()
+            self.observer = None
+            return Result(True).to_dict()
+        
+        return Result(False, "Nothing to do!").to_dict()
 
     async def dummy_function(self) -> bool:
         return True
@@ -294,9 +324,9 @@ class Plugin:
             configPath = configDir + "/" + x
             themeDataPath = themePath + "/theme.json"
 
-            if (not path.exists(themeDataPath)) and (not path.exists(os.path.join(themePath, "theme.css"))):
+            if not os.path.isdir(themePath):
                 continue
-        
+            
             Log(f"Analyzing theme {x}")
             
             try:
@@ -365,6 +395,8 @@ class Plugin:
             return
         
         Initialized = True
+        self.observer = None
+        self.server_loaded = False
 
         await asyncio.sleep(1)
 
@@ -380,18 +412,14 @@ class Plugin:
         await self._load_stage_2(self, False)
 
         if (store_or_file_config("watch")):
-            Log("Observing themes folder for file changes")
-            self.observer = Observer()
-            self.handler = FileChangeHandler(self, asyncio.get_running_loop())
-            self.observer.schedule(self.handler, get_theme_path(), recursive=True)
-            self.observer.start()
+            await self.toggle_watch_state(self)
         else:
             Log("Not observing themes folder for file changes")
 
         Log(f"Initialized css loader. Found {len(self.themes)} themes. Total {len(ALL_INJECTS)} injects, {len([x for x in ALL_INJECTS if x.enabled])} injected")
         
         if (ALWAYS_RUN_SERVER or store_or_file_config("server")):
-            start_server(self)
+            await self.enable_server(self)
 
         await initialize()
 
