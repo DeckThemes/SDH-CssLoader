@@ -324,6 +324,11 @@ class Plugin:
                 "flags": [FLAG_PRESET],
                 "dependencies": deps
             }, fp)
+
+        for x in self.themes:
+            if x.name == name: # Hotpatch preset in memory
+                x.dependencies = deps
+                break
         
         return Result(True)
 
