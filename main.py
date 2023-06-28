@@ -327,6 +327,7 @@ class Plugin:
 
         for x in self.themes:
             if x.name == name: # Hotpatch preset in memory
+                Log(f"Updating dependencies for {name}: {deps}")
                 x.dependencies = deps
                 break
         
