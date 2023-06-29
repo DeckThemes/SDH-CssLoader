@@ -140,9 +140,6 @@ def extend_tabs(tabs : list, theme) -> list:
 def to_inject(key : str, tabs : list, basePath : str, theme) -> Inject:
     if key.startswith("--"):
         value = tabs[0]
-        if (";" in value or ";" in key):
-            raise Exception("Multiple css statements are unsupported in a variable")
-        
         inject = Inject("", extend_tabs(tabs[1:], theme), theme)
         inject.css = f":root {{ {key}: {value}; }}"
     else:
