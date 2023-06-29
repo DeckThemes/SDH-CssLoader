@@ -62,10 +62,10 @@ jobs:
         pip install -r requirements.txt
 
     - name: Build Python Backend
-      run: pyinstaller --noconfirm --onefile --name "CssLoader-Standalone" ./main.py
+      run: pyinstaller --noconfirm --onefile --add-data assets/paint-roller-solid.png --name "CssLoader-Standalone" ./main.py ./css_win_tray.py
 
     - name: Build Python Backend Headless
-      run: pyinstaller --noconfirm --noconsole --onefile --name "CssLoader-Standalone-Headless" ./main.py
+      run: pyinstaller --noconfirm --noconsole --onefile --add-data assets/paint-roller-solid.png --name "CssLoader-Standalone-Headless" ./main.py ./css_win_tray.py
 
     - name: Upload package artifact
       uses: actions/upload-artifact@v3

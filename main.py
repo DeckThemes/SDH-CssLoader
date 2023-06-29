@@ -407,6 +407,12 @@ class Plugin:
         self.themes.sort(key=lambda d: d.name)
 
     async def exit(self):
+        try:
+            import css_win_tray
+            css_win_tray.stop_icon()
+        except:
+            pass
+
         sys.exit(0)
 
     async def _main(self):
@@ -476,4 +482,14 @@ if __name__ == '__main__':
                 count += 1
 
     asyncio.get_event_loop().run_until_complete(A().run())
-    asyncio.get_event_loop().run_forever()
+
+    import css_win_tray
+    
+    css_win_tray.start_icon(Plugin, asyncio.get_event_loop())
+
+    try:
+        asyncio.get_event_loop().run_forever()
+    except KeyboardInterrupt:
+        pass
+
+    css_win_tray.stop_icon()
