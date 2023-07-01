@@ -125,7 +125,7 @@ def extend_tabs(tabs : list, theme) -> list:
     new_tabs = []
 
     if len(tabs) <= 0:
-        return theme.tab_mappings["default"] if ("default" in theme.tab_mappings) else []
+        return extend_tabs(theme.tab_mappings["default"], theme) if ("default" in theme.tab_mappings) else []
 
     for x in tabs:
         if x in theme.tab_mappings:
