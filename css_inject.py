@@ -103,10 +103,11 @@ class Inject:
         return Result(True)
 
 DEFAULT_MAPPINGS = {
-    "desktop": ["Steam.*", ".*Supernav"],
+    "desktop": ["Steam.*"],
     "desktopchat": ["!friendsui-container"],
-    "desktoppopup": ["OverlayBrowser_Browser", "SP Overlay:.*", ".*Menu", "notificationtoasts_.*", "SteamBrowser_Find", "OverlayTab\\d+_Find", "!ModalDialogPopup", "!FullModalOverlay"],
+    "desktoppopup": ["OverlayBrowser_Browser", "SP Overlay:.*", "notificationtoasts_.*", "SteamBrowser_Find", "OverlayTab\\d+_Find", "!ModalDialogPopup", "!FullModalOverlay"],
     "desktopoverlay": ["desktoppopup"],
+    "desktopcontextmenu": [".*Menu", ".*Supernav"],
     "bigpicture": ["~Valve Steam Gamepad/default~"],
     "bigpictureoverlay": ["QuickAccess", "MainMenu"],
     "store": ["~https://store.steampowered.com~", "~https://steamcommunity.com~"],

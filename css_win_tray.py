@@ -45,7 +45,7 @@ def start_icon(main, loop):
         pystray.MenuItem(f"CSS Loader v{css_theme.CSS_LOADER_VER}", action=None, enabled=False),
         pystray.MenuItem("Local Images/Fonts: Enabled" if symlink else "Local Images/Fonts: Disabled", action=None, enabled=None),
         pystray.MenuItem("Please enable Windows Developer Mode", action=open_install_docs, visible=not symlink),
-        pystray.MenuItem("Developer Mode", toggle_dev_mode_state, checked=get_dev_mode_state),
+        pystray.MenuItem("Live CSS Editing", toggle_dev_mode_state, checked=get_dev_mode_state),
         pystray.MenuItem("Open Themes Folder", open_theme_dir),
         pystray.MenuItem("Reload Themes", reset),
         pystray.MenuItem("Exit", exit)
