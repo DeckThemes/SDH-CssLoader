@@ -13,7 +13,6 @@ export function TitleView() {
     Router.Navigate("/cssloader/theme-manager");
   };
 
-  console.log("test");
   return (
     <Focusable
       style={{ display: "flex", paddingTop: "3px", paddingRight: "16px" }}

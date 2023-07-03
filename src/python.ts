@@ -132,6 +132,13 @@ export function storeWrite(key: string, value: string) {
   return server!.callPluginMethod("store_write", { key: key, val: value });
 }
 
+export function enableServer() {
+  return server!.callPluginMethod("enable_server", {});
+}
+export function getServerState() {
+  return server!.callPluginMethod<{}, boolean>("get_server_state", {});
+}
+
 export function getBackendVersion(): Promise<any> {
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
   return server!.callPluginMethod<{}, Theme[]>("get_backend_version", {}).then((data) => {

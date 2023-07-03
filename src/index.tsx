@@ -178,7 +178,7 @@ const ThemeManagerRouter: FC = () => {
             id: "InstalledThemes",
           },
           {
-            title: !!apiMeData ? "Account" : "Log In",
+            title: "Settings",
             content: <LogInPage />,
             id: "LogInPage",
           },
@@ -204,14 +204,12 @@ export default definePlugin((serverApi: ServerAPI) => {
       let unpinnedClone = [...unpinnedThemes];
       unpinnedThemes.forEach((e) => {
         if (!allIds.includes(e)) {
-          console.log(e, " manually deleted");
           unpinnedClone = unpinnedClone.filter((id) => id !== e);
         }
       });
 
       state.setGlobalState("unpinnedThemes", unpinnedClone);
       if (JSON.stringify(unpinnedClone) !== unpinnedJsonStr) {
-        console.log("updating store");
         python.storeWrite("unpinnedThemes", JSON.stringify(unpinnedClone));
       }
     });

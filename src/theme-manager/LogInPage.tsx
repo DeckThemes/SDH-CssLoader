@@ -1,12 +1,33 @@
-import { DialogButton, Focusable, TextField } from "decky-frontend-lib";
+import { DialogButton, Focusable, TextField, ToggleField } from "decky-frontend-lib";
 import { SiWebauthn } from "react-icons/si";
-import { useState, VFC } from "react";
+import { useEffect, useState, VFC } from "react";
 import { logInWithShortToken, logOut } from "../api";
 import { useCssLoaderState } from "../state";
+import { enableServer, getServerState, storeRead, storeWrite } from "../python";
 
 export const LogInPage: VFC = () => {
   const { apiShortToken, apiFullToken, apiMeData } = useCssLoaderState();
   const [shortTokenInterimValue, setShortTokenIntValue] = useState<string>(apiShortToken);
+
+  const [serverOn, setServerOn] = useState<boolean>(false);
+
+  useEffect(() => {
+    getServerState().then((res) => {
+      if (res.success) {
+        setServerOn(res.result);
+        return;
+      }
+      setServerOn(false);
+    });
+  }, []);
+
+  async function setServer(enabled: boolean) {
+    if (enabled) await enableServer();
+    const res = await storeWrite("server", enabled ? "1" : "0");
+    if (!res.success) return;
+    const res2 = await getServerState();
+    if (res2.success && res2.result) setServerOn(res2.result);
+  }
 
   return (
     // The outermost div is to push the content down into the visible area
@@ -82,6 +103,16 @@ export const LogInPage: VFC = () => {
           </>
         )}
       </div>
+      <Focusable>
+        <ToggleField
+          checked={serverOn}
+          label="Enable Standalone Backend"
+          description="This needs to be enabled if you are using CSSLoader Desktop on Linux"
+          onChange={(value) => {
+            setServer(value);
+          }}
+        />
+      </Focusable>
       <Focusable>
         <div>
           <h1 style={{ fontWeight: "bold", fontSize: "2em", marginBottom: "0px" }}>
