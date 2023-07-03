@@ -115,9 +115,10 @@ export const LogInPage: VFC = () => {
       </Focusable>
       <Focusable>
         <div>
-          <h1 style={{ fontWeight: "bold", fontSize: "2em", marginBottom: "0px" }}>
+          {/* Removed to ensure the whole page fits without scrolling */}
+          {/* <h1 style={{ fontWeight: "bold", fontSize: "2em", marginBottom: "0px" }}>
             About CSSLoader
-          </h1>
+          </h1> */}
           <div style={{ display: "flex", gap: "4em", fontSize: "0.9em" }}>
             <div>
               <h2 style={{ fontWeight: "bold", fontSize: "1.5em", marginBottom: "0px" }}>
