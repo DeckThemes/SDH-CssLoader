@@ -15,7 +15,15 @@ export function TitleView() {
 
   return (
     <Focusable
-      style={{ display: "flex", paddingTop: "3px", paddingRight: "16px" }}
+      style={{
+        display: "flex",
+        paddingTop: "3px",
+        paddingRight: "0px",
+        paddingLeft: "0px",
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}
       className={staticClasses.Title}
     >
       <div style={{ marginRight: "auto", flex: 0.9 }}>CSS Loader</div>
