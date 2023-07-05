@@ -12,26 +12,56 @@ import * as api from "./api";
 import { RiPaintFill } from "react-icons/ri";
 
 import { ThemeManagerRouter } from "./theme-manager";
-import { CssLoaderContextProvider, CssLoaderState } from "./state";
-import { QAMThemeToggleList, TitleView } from "./components";
+import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "./state";
+import { PresetSelectionDropdown, QAMThemeToggleList, TitleView } from "./components";
 import { ExpandedViewPage } from "./theme-manager/ExpandedView";
-import { Theme } from "./ThemeTypes";
+import { Flags, Theme } from "./ThemeTypes";
+import {
+  changePreset,
+  dummyFunction,
+  generatePresetFromThemeNames,
+  getInstalledThemes,
+  reloadBackend,
+} from "./python";
 
-function Content() {
+function Content({ stateClass }: { stateClass: CssLoaderState }) {
+  const { localThemeList, setGlobalState } = useCssLoaderState();
+
   const [dummyFuncResult, setDummyResult] = useState<boolean>(false);
 
   function dummyFuncTest() {
-    python.resolve(python.dummyFunction(), setDummyResult);
+    dummyFunction().then((res) => {
+      if (res.success) {
+        setDummyResult(res.result);
+        return;
+      }
+      setDummyResult(false);
+    });
   }
 
   function reload() {
-    python.reloadBackend();
+    reloadBackend();
     dummyFuncTest();
   }
 
+  // This will likely only run on a user's first run
+  // todo: potentially there's a way to make this run without an expensive stringify useEffect running always
+  // however, I want to make sure that someone can't delete the folder "Default Profile", as that would be bad
+  useEffect(() => {
+    // This happens before state prefilled
+    if (localThemeList.length === 0) return;
+  }, [JSON.stringify(localThemeList.filter((e) => e.flags.includes(Flags.isPreset)))]);
+
+  useEffect(() => {
+    setGlobalState(
+      "selectedPreset",
+      localThemeList.find((e) => e.flags.includes(Flags.isPreset) && e.enabled)
+    );
+  }, [localThemeList]);
+
   useEffect(() => {
     dummyFuncTest();
-    python.getInstalledThemes();
+    getInstalledThemes();
   }, []);
 
   return (
@@ -49,7 +79,8 @@ function Content() {
               Download Themes
             </ButtonItem>
           </PanelSectionRow>
-          <QAMThemeToggleList />
+          <PresetSelectionDropdown />
+          <QAMThemeToggleList stateClass={stateClass} />
         </>
       ) : (
         <PanelSectionRow>
@@ -76,7 +107,33 @@ export default definePlugin((serverApi: ServerAPI) => {
   api.setServer(serverApi);
   api.setStateClass(state);
 
-  python.resolve(python.getThemes(), (allThemes: Theme[]) => {
+  python.resolve(python.getThemes(), async (allThemes: Theme[]) => {
+    console.log("AllThemes", allThemes);
+
+    // This will likely only ever run on a user's first download of CSSLoader, unless they manually delete Default Profile
+    // If you do not have Default Profile
+    // This creates default profile, and disables other profiles
+    if (!allThemes.find((e) => e.name === "Default Profile")) {
+      await generatePresetFromThemeNames(
+        "Default Profile",
+        allThemes.filter((e) => e.enabled).map((e) => e.name)
+      );
+      python.setThemeState("Default Profile", true);
+      await Promise.all(
+        allThemes
+          .filter((e) => e.flags.includes(Flags.isPreset) && e.name !== "Default Profile")
+          .map((e) => python.setThemeState(e.name, false))
+      );
+      await reloadBackend();
+    }
+
+    // Set selectedPreset
+    state.setGlobalState(
+      "selectedPreset",
+      allThemes.find((e) => e.flags.includes(Flags.isPreset) && e.enabled) || "Default Profile"
+    );
+
+    // If a user has magically deleted a theme in the unpinnedList and the store wasn't updated, this fixes that
     python.resolve(python.storeRead("unpinnedThemes"), (unpinnedJsonStr: string) => {
       const unpinnedThemes: string[] = unpinnedJsonStr ? JSON.parse(unpinnedJsonStr) : [];
       const allIds = allThemes.map((e) => e.id);
@@ -120,7 +177,7 @@ export default definePlugin((serverApi: ServerAPI) => {
     alwaysRender: true,
     content: (
       <CssLoaderContextProvider cssLoaderStateClass={state}>
-        <Content />
+        <Content stateClass={state} />
       </CssLoaderContextProvider>
     ),
     icon: <RiPaintFill />,

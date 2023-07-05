@@ -44,6 +44,16 @@ export function execute(promise: Promise<any>) {
   })();
 }
 
+export async function changePreset(themeName: string, themeList: Theme[]) {
+  return new Promise(async (resolve) => {
+    // Disables all themes before enabling the preset
+    await Promise.all(themeList.filter((e) => e.enabled).map((e) => setThemeState(e.name, false)));
+
+    await setThemeState(themeName, true);
+    resolve(true);
+  });
+}
+
 export function getInstalledThemes(): Promise<void> {
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
   return server!.callPluginMethod<{}, Theme[]>("get_themes", {}).then((data) => {
@@ -60,7 +70,7 @@ export function reloadBackend(): Promise<void> {
   });
 }
 
-export function getThemes(): Promise<any> {
+export function getThemes() {
   return server!.callPluginMethod<{}, Theme[]>("get_themes", {});
 }
 
@@ -149,8 +159,8 @@ export function getBackendVersion(): Promise<any> {
   });
 }
 
-export function dummyFunction(): Promise<any> {
-  return server!.callPluginMethod("dummy_function", {});
+export function dummyFunction() {
+  return server!.callPluginMethod<{}, boolean>("dummy_function", {});
 }
 
 export function genericGET(fetchUrl: string, authToken?: string | undefined) {
@@ -205,4 +215,11 @@ export function pinTheme(id: string) {
 
 export function generatePreset(name: string) {
   return server!.callPluginMethod("generate_preset_theme", { name: name });
+}
+
+export function generatePresetFromThemeNames(name: string, themeNames: string[]) {
+  return server!.callPluginMethod("generate_preset_theme_from_theme_names", {
+    name: name,
+    themeNames: themeNames,
+  });
 }

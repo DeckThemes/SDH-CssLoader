@@ -6,6 +6,7 @@ import * as python from "../python";
 import { ThemePatch } from "./ThemePatch";
 import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
 import { OptionalDepsModalRoot } from "./OptionalDepsModal";
+import { useCssLoaderState } from "../state";
 
 function useRerender(): [boolean, () => void] {
   const [render, setRender] = useState<boolean>(true);
@@ -25,6 +26,7 @@ export const ThemeToggle: VFC<{ data: Theme; collapsible?: boolean }> = ({
   data,
   collapsible = false,
 }) => {
+  const { selectedPreset, localThemeList } = useCssLoaderState();
   const [collapsed, setCollapsed] = useState<boolean>(true);
 
   const [render, rerender] = useRerender();
@@ -47,7 +49,7 @@ export const ThemeToggle: VFC<{ data: Theme; collapsible?: boolean }> = ({
               checked={data.enabled}
               label={data.name}
               description={isPreset ? `Preset` : `${data.version} | ${data.author}`}
-              onChange={(switchValue: boolean) => {
+              onChange={async (switchValue: boolean) => {
                 if (switchValue === true && data.flags.includes(Flags.optionalDeps)) {
                   // @ts-ignore
                   showModal(<OptionalDepsModalRoot themeData={data} />);
@@ -55,14 +57,13 @@ export const ThemeToggle: VFC<{ data: Theme; collapsible?: boolean }> = ({
                   return;
                 }
                 // Actually enabling the theme
-                python.resolve(python.setThemeState(data.name, switchValue), () => {
-                  python.getInstalledThemes();
-                });
+                await python.setThemeState(data.name, switchValue);
+                await python.getInstalledThemes();
                 // Re-collapse menu
                 setCollapsed(true);
                 // Dependency Toast
                 if (data.dependencies.length > 0) {
-                  if (switchValue === true) {
+                  if (switchValue) {
                     python.toast(
                       `${data.name} enabled other themes`,
                       // This lists out the themes by name, but often overflowed off screen
@@ -78,9 +79,8 @@ export const ThemeToggle: VFC<{ data: Theme; collapsible?: boolean }> = ({
                           : `${data.dependencies.length} other themes are required by ${data.name}`
                       }`
                     );
-                    return;
                   }
-                  if (!data.flags.includes(Flags.dontDisableDeps)) {
+                  if (!switchValue && !data.flags.includes(Flags.dontDisableDeps)) {
                     python.toast(
                       `${data.name} disabled other themes`,
                       // @ts-ignore
@@ -90,9 +90,28 @@ export const ThemeToggle: VFC<{ data: Theme; collapsible?: boolean }> = ({
                           : `${data.dependencies.length} themes were originally enabled by ${data.name}`
                       }`
                     );
-                    return;
                   }
                 }
+
+                if (!selectedPreset) return;
+                // This is copied from the desktop codebase
+                // If we refactor the desktop version of this function (which we probably should) this should also be refactored
+                await python.generatePresetFromThemeNames(
+                  selectedPreset.name,
+                  switchValue
+                    ? [
+                        ...localThemeList
+                          .filter((e) => e.enabled && !e.flags.includes(Flags.isPreset))
+                          .map((e) => e.name),
+                        data.name,
+                      ]
+                    : localThemeList
+                        .filter(
+                          (e) =>
+                            e.enabled && !e.flags.includes(Flags.isPreset) && e.name !== data.name
+                        )
+                        .map((e) => e.name)
+                );
               }}
             />
           </PanelSectionRow>

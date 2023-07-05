@@ -8,6 +8,7 @@ import { showModal, ButtonItem, PanelSectionRow } from "decky-frontend-lib";
 import { ColorPickerModal } from "decky-frontend-lib";
 import { ThemePatchComponent } from "../ThemeTypes";
 import { FaFolder } from "react-icons/fa";
+import { useCssLoaderState } from "../state";
 
 export const PatchComponent: VFC<{
   data: ThemePatchComponent;
@@ -16,20 +17,15 @@ export const PatchComponent: VFC<{
   patchName: string;
   bottomSeparatorValue: "standard" | "none";
 }> = ({ data, selectedLabel, themeName, patchName, bottomSeparatorValue }) => {
+  const { selectedPreset } = useCssLoaderState();
   if (selectedLabel === data.on) {
     // The only value that changes from component to component is the value, so this can just be re-used
-    function setComponentAndReload(value: string) {
-      python.resolve(
-        python.setComponentOfThemePatch(
-          themeName,
-          patchName,
-          data.name, // componentName
-          value
-        ),
-        () => {
-          python.getInstalledThemes();
-        }
-      );
+    async function setComponentAndReload(value: string) {
+      await python.setComponentOfThemePatch(themeName, patchName, data.name, value);
+      if (selectedPreset && selectedPreset.dependencies.includes(themeName)) {
+        python.generatePresetFromThemeNames(selectedPreset.name, selectedPreset.dependencies);
+      }
+      python.getInstalledThemes();
     }
     switch (data.type) {
       case "image-picker":
