@@ -3,7 +3,7 @@ import { useCssLoaderState } from "../../state";
 import { Flags } from "../../ThemeTypes";
 import { useMemo } from "react";
 import { changePreset, getInstalledThemes, setThemeState } from "../../python";
-import { CreatePresetModal } from "../AllThemes";
+import { CreatePresetModal } from "../AllThemes/CreatePresetModal";
 import { FiPlusCircle } from "react-icons/fi";
 
 export function PresetSelectionDropdown() {
