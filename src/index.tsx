@@ -108,29 +108,10 @@ export default definePlugin((serverApi: ServerAPI) => {
   api.setStateClass(state);
 
   python.resolve(python.getThemes(), async (allThemes: Theme[]) => {
-    console.log("AllThemes", allThemes);
-
-    // This will likely only ever run on a user's first download of CSSLoader, unless they manually delete Default Profile
-    // If you do not have Default Profile
-    // This creates default profile, and disables other profiles
-    if (!allThemes.find((e) => e.name === "Default Profile")) {
-      await generatePresetFromThemeNames(
-        "Default Profile",
-        allThemes.filter((e) => e.enabled).map((e) => e.name)
-      );
-      python.setThemeState("Default Profile", true);
-      await Promise.all(
-        allThemes
-          .filter((e) => e.flags.includes(Flags.isPreset) && e.name !== "Default Profile")
-          .map((e) => python.setThemeState(e.name, false))
-      );
-      await reloadBackend();
-    }
-
     // Set selectedPreset
     state.setGlobalState(
       "selectedPreset",
-      allThemes.find((e) => e.flags.includes(Flags.isPreset) && e.enabled) || "Default Profile"
+      allThemes.find((e) => e.flags.includes(Flags.isPreset) && e.enabled)
     );
 
     // If a user has magically deleted a theme in the unpinnedList and the store wasn't updated, this fixes that

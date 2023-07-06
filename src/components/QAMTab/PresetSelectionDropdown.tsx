@@ -1,8 +1,10 @@
-import { DropdownItem, PanelSectionRow } from "decky-frontend-lib";
+import { DropdownItem, PanelSectionRow, showModal } from "decky-frontend-lib";
 import { useCssLoaderState } from "../../state";
 import { Flags } from "../../ThemeTypes";
 import { useMemo } from "react";
-import { changePreset, getInstalledThemes } from "../../python";
+import { changePreset, getInstalledThemes, setThemeState } from "../../python";
+import { CreatePresetModal } from "../AllThemes";
+import { FiPlusCircle } from "react-icons/fi";
 
 export function PresetSelectionDropdown() {
   const { localThemeList, selectedPreset } = useCssLoaderState();
@@ -15,13 +17,38 @@ export function PresetSelectionDropdown() {
       <PanelSectionRow>
         <DropdownItem
           label="Selected Profile"
-          selectedOption={selectedPreset?.name || ""}
-          rgOptions={presets.map((e) => ({ label: e.name, data: e.name }))}
+          selectedOption={selectedPreset?.name || "None"}
+          rgOptions={[
+            { data: "None", label: "None" },
+            ...presets.map((e) => ({ label: e.name, data: e.name })),
+            {
+              data: "New Profile",
+              label: (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "start",
+                    gap: "1em",
+                  }}
+                >
+                  <FiPlusCircle />
+                  <span>New Profile</span>
+                </div>
+              ),
+            },
+          ]}
           onChange={async ({ data }) => {
             if (data === "New Profile") {
+              showModal(
+                // @ts-ignore
+                <CreatePresetModal enabledNumber={localThemeList.filter((e) => e.enabled).length} />
+              );
               return;
             }
-            await changePreset(data, localThemeList);
+            data === "None" && selectedPreset
+              ? await setThemeState(selectedPreset.name, false)
+              : await changePreset(data, localThemeList);
             getInstalledThemes();
           }}
         />
