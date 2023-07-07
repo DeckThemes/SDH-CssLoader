@@ -7,20 +7,7 @@ import { ThemePatch } from "./ThemePatch";
 import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
 import { OptionalDepsModalRoot } from "./OptionalDepsModal";
 import { useCssLoaderState } from "../state";
-
-function useRerender(): [boolean, () => void] {
-  const [render, setRender] = useState<boolean>(true);
-  useEffect(() => {
-    if (render === false) {
-      setTimeout(() => setRender(true), 100);
-    }
-  }, [render]);
-  const rerender = () => {
-    setRender(false);
-  };
-
-  return [render, rerender];
-}
+import { useRerender } from "../hooks";
 
 export const ThemeToggle: VFC<{ data: Theme; collapsible?: boolean }> = ({
   data,
