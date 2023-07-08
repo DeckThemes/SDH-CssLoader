@@ -26,6 +26,10 @@ export function PresetSelectionDropdown() {
                 : selectedPreset?.name || "None"
             }
             rgOptions={[
+              ...(localThemeList.filter((e) => e.enabled && e.flags.includes(Flags.isPreset))
+                .length > 1
+                ? [{ data: "Invalid State", label: "Invalid State" }]
+                : []),
               { data: "None", label: "None" },
               ...presets.map((e) => ({ label: e.name, data: e.name })),
               // This is a jank way of only adding it if creatingNewProfile = false
@@ -57,9 +61,9 @@ export function PresetSelectionDropdown() {
                 rerender();
                 return;
               }
-              data === "None" && selectedPreset
-                ? await setThemeState(selectedPreset.name, false)
-                : await changePreset(data, localThemeList);
+              // This is kind of abusing the system because if you select "None" it attempts to enable a theme called "None"
+              // But it works
+              await changePreset(data, localThemeList);
               getInstalledThemes();
             }}
           />
