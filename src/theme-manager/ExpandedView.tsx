@@ -1,4 +1,4 @@
-import { ButtonItem, Navigation, PanelSectionRow } from "decky-frontend-lib";
+import { ButtonItem, Navigation, PanelSectionRow, showModal } from "decky-frontend-lib";
 import { useEffect, useMemo, useRef, useState, VFC } from "react";
 import { ImSpinner5 } from "react-icons/im";
 import { BsStar, BsStarFill } from "react-icons/bs";
@@ -11,6 +11,7 @@ import { useCssLoaderState } from "../state";
 import { Theme } from "../ThemeTypes";
 import { calcButtonColor } from "../logic";
 import { FullCSSThemeInfo, PartialCSSThemeInfo } from "../apiTypes";
+import { ThemeSettingsModalRoot } from "../components";
 
 export const ExpandedViewPage: VFC = () => {
   const {
@@ -128,7 +129,7 @@ export const ExpandedViewPage: VFC = () => {
     let buttonText = "";
     switch (installStatus) {
       case "installed":
-        buttonText = "Installed";
+        buttonText = "Configure";
         break;
       case "outdated":
         buttonText = "Update";
@@ -326,8 +327,22 @@ export const ExpandedViewPage: VFC = () => {
                   >
                     <ButtonItem
                       layout="below"
-                      disabled={installStatus === "installed" || isInstalling}
+                      // disabled={installStatus === "installed" || isInstalling}
                       onClick={() => {
+                        if (
+                          installStatus === "installed" &&
+                          installedThemes.find((e) => e.id === fullThemeData.id)
+                        ) {
+                          showModal(
+                            // @ts-ignore
+                            <ThemeSettingsModalRoot
+                              selectedTheme={
+                                installedThemes.find((e) => e.id === fullThemeData.id)!.id
+                              }
+                            />
+                          );
+                          return;
+                        }
                         installTheme();
                       }}
                     >
