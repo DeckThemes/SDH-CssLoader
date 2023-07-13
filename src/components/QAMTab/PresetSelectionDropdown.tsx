@@ -1,9 +1,9 @@
 import { DropdownItem, PanelSectionRow, showModal } from "decky-frontend-lib";
 import { useCssLoaderState } from "../../state";
 import { Flags } from "../../ThemeTypes";
-import { useMemo, useState } from "react";
-import { changePreset, getInstalledThemes, setThemeState } from "../../python";
-import { CreatePresetModal } from "../AllThemes/CreatePresetModal";
+import { useMemo } from "react";
+import { changePreset, getInstalledThemes } from "../../python";
+import { CreatePresetModalRoot } from "../AllThemes/CreatePresetModal";
 import { FiPlusCircle } from "react-icons/fi";
 import { useRerender } from "../../hooks";
 
@@ -54,9 +54,7 @@ export function PresetSelectionDropdown() {
               if (data === "New Profile") {
                 showModal(
                   // @ts-ignore
-                  <CreatePresetModal
-                    enabledNumber={localThemeList.filter((e) => e.enabled).length}
-                  />
+                  <CreatePresetModalRoot />
                 );
                 rerender();
                 return;

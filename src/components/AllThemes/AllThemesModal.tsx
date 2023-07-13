@@ -12,30 +12,20 @@ import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "../
 import { Flags } from "../../ThemeTypes";
 import { AllThemesSingleEntry } from "./AllThemesSingleEntry";
 import { PresetSelectionDropdown } from "../QAMTab/PresetSelectionDropdown";
+import { globalState } from "../../python";
 
-export function AllThemesModalRoot({
-  stateClass,
-  closeModal,
-}: {
-  stateClass: CssLoaderState;
-  closeModal: any;
-}) {
+export function AllThemesModalRoot({ closeModal }: { closeModal: any }) {
   return (
     <ModalRoot onCancel={closeModal} onEscKeypress={closeModal}>
-      <CssLoaderContextProvider cssLoaderStateClass={stateClass}>
-        <AllThemesModal stateClass={stateClass} closeModal={closeModal} />
+      {/* @ts-ignore */}
+      <CssLoaderContextProvider cssLoaderStateClass={globalState}>
+        <AllThemesModal closeModal={closeModal} />
       </CssLoaderContextProvider>
     </ModalRoot>
   );
 }
 
-export function AllThemesModal({
-  stateClass,
-  closeModal,
-}: {
-  stateClass: CssLoaderState;
-  closeModal: any;
-}) {
+export function AllThemesModal({ closeModal }: { closeModal: any }) {
   const { localThemeList, unpinnedThemes } = useCssLoaderState();
 
   const sortedList = useMemo(() => {
@@ -104,7 +94,7 @@ export function AllThemesModal({
             style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gridGap: "1em" }}
           >
             {sortedList.map((e) => (
-              <AllThemesSingleEntry data={e} stateClass={stateClass} />
+              <AllThemesSingleEntry data={e} />
             ))}
           </Focusable>
         </PanelSection>

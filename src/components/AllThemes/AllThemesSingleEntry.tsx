@@ -4,14 +4,9 @@ import { CssLoaderState, useCssLoaderState } from "../../state";
 import * as python from "../../python";
 import { ImCog } from "react-icons/im";
 import { AiFillEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { ThemeSettingsModalRoot } from "./ThemeSettingsModal";
 
-export function AllThemesSingleEntry({
-  data: e,
-  stateClass,
-}: {
-  data: Theme;
-  stateClass: CssLoaderState;
-}) {
+export function AllThemesSingleEntry({ data: e }: { data: Theme }) {
   const { unpinnedThemes } = useCssLoaderState();
   const isPinned = !unpinnedThemes.includes(e.id);
   return (
@@ -83,7 +78,7 @@ export function AllThemesSingleEntry({
           onClick={() => {
             showModal(
               // @ts-ignore
-              <ThemeSettingsModalRoot stateClass={stateClass} selectedTheme={e.id} />
+              <ThemeSettingsModalRoot selectedTheme={e.id} />
             );
           }}
         >

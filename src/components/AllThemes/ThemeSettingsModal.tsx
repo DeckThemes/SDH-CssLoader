@@ -1,21 +1,21 @@
 import { useState, useEffect } from "react";
 
 import { DialogButton, ModalRoot } from "decky-frontend-lib";
-import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "../../state";
+import { CssLoaderContextProvider, useCssLoaderState } from "../../state";
 import { ThemeToggle } from "../ThemeToggle";
 import { Theme } from "../../ThemeTypes";
+import { globalState } from "../../python";
 export function ThemeSettingsModalRoot({
-  stateClass,
   closeModal,
   selectedTheme,
 }: {
-  stateClass: CssLoaderState;
   closeModal: any;
   selectedTheme: string;
 }) {
   return (
     <ModalRoot onCancel={closeModal} onEscKeypress={closeModal}>
-      <CssLoaderContextProvider cssLoaderStateClass={stateClass}>
+      {/* @ts-ignore */}
+      <CssLoaderContextProvider cssLoaderStateClass={globalState}>
         <ThemeSettingsModal closeModal={closeModal} selectedTheme={selectedTheme} />
       </CssLoaderContextProvider>
     </ModalRoot>
@@ -52,7 +52,7 @@ export function ThemeSettingsModal({
       >
         {themeData ? (
           <div style={{ width: "90%" }}>
-            <ThemeToggle data={themeData} collapsible={false} />
+            <ThemeToggle data={themeData} collapsible={false} showModalButtonPrompt={false} />
           </div>
         ) : (
           <span>No Theme Data</span>

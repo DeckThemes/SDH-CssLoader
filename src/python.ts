@@ -4,7 +4,7 @@ import { CssLoaderState } from "./state";
 import { Theme } from "./ThemeTypes";
 
 var server: ServerAPI | undefined = undefined;
-var globalState: CssLoaderState | undefined = undefined;
+export var globalState: CssLoaderState | undefined = undefined;
 
 export function setServer(s: ServerAPI) {
   server = s;
@@ -66,7 +66,7 @@ export function getInstalledThemes(): Promise<void> {
 
 export function reloadBackend(): Promise<void> {
   return server!.callPluginMethod("reset", {}).then(() => {
-    getInstalledThemes();
+    return getInstalledThemes();
   });
 }
 

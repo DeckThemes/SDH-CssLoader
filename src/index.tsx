@@ -16,15 +16,9 @@ import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "./s
 import { PresetSelectionDropdown, QAMThemeToggleList, TitleView } from "./components";
 import { ExpandedViewPage } from "./theme-manager/ExpandedView";
 import { Flags, Theme } from "./ThemeTypes";
-import {
-  changePreset,
-  dummyFunction,
-  generatePresetFromThemeNames,
-  getInstalledThemes,
-  reloadBackend,
-} from "./python";
+import { dummyFunction, getInstalledThemes, reloadBackend } from "./python";
 
-function Content({ stateClass }: { stateClass: CssLoaderState }) {
+function Content() {
   const { localThemeList, setGlobalState } = useCssLoaderState();
 
   const [dummyFuncResult, setDummyResult] = useState<boolean>(false);
@@ -80,7 +74,7 @@ function Content({ stateClass }: { stateClass: CssLoaderState }) {
             </ButtonItem>
           </PanelSectionRow>
           <PresetSelectionDropdown />
-          <QAMThemeToggleList stateClass={stateClass} />
+          <QAMThemeToggleList />
         </>
       ) : (
         <PanelSectionRow>
@@ -153,12 +147,12 @@ export default definePlugin((serverApi: ServerAPI) => {
   ));
 
   return {
-    titleView: <TitleView />,
+    // titleView: <TitleView />,
     title: <div>CSSLoader</div>,
     alwaysRender: true,
     content: (
       <CssLoaderContextProvider cssLoaderStateClass={state}>
-        <Content stateClass={state} />
+        <Content />
       </CssLoaderContextProvider>
     ),
     icon: <RiPaintFill />,

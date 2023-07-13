@@ -4,7 +4,7 @@ import { ThemeToggle } from "../ThemeToggle";
 import { AllThemesModalRoot } from "../AllThemes";
 import { Flags } from "../../ThemeTypes";
 
-export function QAMThemeToggleList({ stateClass }: { stateClass: CssLoaderState }) {
+export function QAMThemeToggleList() {
   const { localThemeList, unpinnedThemes } = useCssLoaderState();
 
   if (localThemeList.length === 0) {
@@ -44,7 +44,7 @@ export function QAMThemeToggleList({ stateClass }: { stateClass: CssLoaderState 
             {localThemeList
               .filter((e) => !unpinnedThemes.includes(e.id) && !e.flags.includes(Flags.isPreset))
               .map((x) => (
-                <ThemeToggle data={x} collapsible />
+                <ThemeToggle data={x} collapsible showModalButtonPrompt />
               ))}
           </>
         )}
@@ -53,7 +53,7 @@ export function QAMThemeToggleList({ stateClass }: { stateClass: CssLoaderState 
             layout="below"
             onClick={() => {
               // @ts-ignore
-              showModal(<AllThemesModalRoot stateClass={stateClass} />);
+              showModal(<AllThemesModalRoot />);
             }}
           >
             Your Themes
