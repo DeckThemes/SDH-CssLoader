@@ -46,7 +46,7 @@ export const ThemeToggle: VFC<{
   // I extracted these here as doing conditional props inline sucks
   const modalButtonProps = showModalButtonPrompt
     ? {
-        onOptionsActionDescription: "View Expanded Settings",
+        onOptionsActionDescription: "Expand Settings",
         onOptionsButton: () => {
           showModal(
             // @ts-ignore

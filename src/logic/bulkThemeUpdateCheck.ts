@@ -1,6 +1,7 @@
 import { Theme, UpdateStatus } from "../ThemeTypes";
 import { genericGET } from "../api";
 import { MinimalCSSThemeInfo } from "../apiTypes";
+import { globalState } from "../python";
 const apiUrl = "https://api.deckthemes.com";
 
 async function fetchThemeIDS(idsToQuery: string[]): Promise<MinimalCSSThemeInfo[]> {
@@ -16,7 +17,8 @@ async function fetchThemeIDS(idsToQuery: string[]): Promise<MinimalCSSThemeInfo[
     });
 }
 
-export async function bulkThemeUpdateCheck(localThemeList: Theme[] = []) {
+export async function bulkThemeUpdateCheck() {
+  const { localThemeList } = globalState!.getPublicState();
   let idsToQuery: string[] = localThemeList.map((e) => e.id);
 
   if (idsToQuery.length === 0) return [];

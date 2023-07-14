@@ -37,6 +37,8 @@ interface PublicCssLoaderState {
   apiFullToken: string;
   apiTokenExpireDate: Date | number | undefined;
   apiMeData: AccountData | undefined;
+  // This is a unix timestamp
+  nextUpdateCheckTime: number;
 
   updateStatuses: UpdateStatus[];
   selectedPreset: Theme | undefined;
@@ -57,6 +59,7 @@ interface PublicCssLoaderContext extends PublicCssLoaderState {
 // This class creates the getter and setter functions for all of the global state data.
 export class CssLoaderState {
   private currentTab: string = "ThemeBrowser";
+  private nextUpdateCheckTime: number = 0;
 
   private updateStatuses: UpdateStatus[] = [];
   private selectedPreset: Theme | undefined = undefined;
@@ -146,6 +149,7 @@ export class CssLoaderState {
   getPublicState() {
     return {
       currentTab: this.currentTab,
+      nextUpdateCheckTime: this.nextUpdateCheckTime,
       apiUrl: this.apiUrl,
       apiShortToken: this.apiShortToken,
       apiFullToken: this.apiFullToken,

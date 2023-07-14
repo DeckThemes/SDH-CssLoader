@@ -37,7 +37,7 @@ function Content() {
   function reload() {
     reloadBackend();
     dummyFuncTest();
-    bulkThemeUpdateCheck(localThemeList).then((data) => [setGlobalState("updateStatuses", data)]);
+    bulkThemeUpdateCheck().then((data) => [setGlobalState("updateStatuses", data)]);
   }
 
   // This will likely only run on a user's first run
@@ -109,9 +109,10 @@ export default definePlugin((serverApi: ServerAPI) => {
       "selectedPreset",
       allThemes.find((e) => e.flags.includes(Flags.isPreset) && e.enabled)
     );
-    bulkThemeUpdateCheck(allThemes).then((data) => {
-      console.log("data"), state.setGlobalState("updateStatuses", data);
+    bulkThemeUpdateCheck().then((data) => {
+      state.setGlobalState("updateStatuses", data);
     });
+    python.scheduleCheckForUpdates();
 
     // If a user has magically deleted a theme in the unpinnedList and the store wasn't updated, this fixes that
     python.resolve(python.storeRead("unpinnedThemes"), (unpinnedJsonStr: string) => {

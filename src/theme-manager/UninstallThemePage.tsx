@@ -40,7 +40,7 @@ export const UninstallThemePage: VFC = () => {
   }
 
   useEffect(() => {
-    bulkThemeUpdateCheck(localThemeList).then((value) => {
+    bulkThemeUpdateCheck().then((value) => {
       setUpdateStatuses(value);
     });
   }, [localThemeList]);
