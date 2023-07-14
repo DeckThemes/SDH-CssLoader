@@ -1,6 +1,6 @@
 import { ServerAPI } from "decky-frontend-lib";
 import { CssLoaderState } from "./state";
-import { toast, storeWrite } from "./python";
+import { toast, storeWrite, downloadThemeFromUrl, reloadBackend } from "./python";
 import { ThemeQueryRequest } from "./apiTypes";
 import { generateParamStr } from "./logic";
 
@@ -238,4 +238,13 @@ export function toggleStar(themeId: string, isStarred: boolean, authToken: strin
     .catch((err) => {
       console.error(`Error starring theme`, err);
     });
+}
+
+export async function installTheme(themeId: string) {
+  const setGlobalState = globalState!.setGlobalState.bind(globalState);
+  setGlobalState("isInstalling", true);
+  await downloadThemeFromUrl(themeId);
+  await reloadBackend();
+  setGlobalState("isInstalling", false);
+  return;
 }

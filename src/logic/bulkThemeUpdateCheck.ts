@@ -18,12 +18,10 @@ async function fetchThemeIDS(idsToQuery: string[]): Promise<MinimalCSSThemeInfo[
 
 export async function bulkThemeUpdateCheck(localThemeList: Theme[] = []) {
   let idsToQuery: string[] = localThemeList.map((e) => e.id);
-  console.log("idstoquey", idsToQuery);
 
   if (idsToQuery.length === 0) return [];
 
   const themeArr = await fetchThemeIDS(idsToQuery);
-  console.log("themearr", themeArr);
 
   if (themeArr.length === 0) return [];
 
@@ -36,7 +34,6 @@ export async function bulkThemeUpdateCheck(localThemeList: Theme[] = []) {
       return [localEntry.id, "installed", remoteEntry];
     return [localEntry.id, "outdated", remoteEntry];
   });
-  console.log("updatestatusarr", updateStatusArr);
 
   return updateStatusArr;
 }

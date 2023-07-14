@@ -7,7 +7,7 @@ import {
   ThemeQueryRequest,
   ThemeQueryResponse,
 } from "../apiTypes";
-import { Theme } from "../ThemeTypes";
+import { Theme, UpdateStatus } from "../ThemeTypes";
 
 interface PublicCssLoaderState {
   // Browse Page
@@ -38,6 +38,7 @@ interface PublicCssLoaderState {
   apiTokenExpireDate: Date | number | undefined;
   apiMeData: AccountData | undefined;
 
+  updateStatuses: UpdateStatus[];
   selectedPreset: Theme | undefined;
   localThemeList: Theme[];
   currentSettingsPageTheme: string | undefined;
@@ -57,6 +58,7 @@ interface PublicCssLoaderContext extends PublicCssLoaderState {
 export class CssLoaderState {
   private currentTab: string = "ThemeBrowser";
 
+  private updateStatuses: UpdateStatus[] = [];
   private selectedPreset: Theme | undefined = undefined;
   private apiUrl: string = "https://api.deckthemes.com";
   private apiShortToken: string = "";
@@ -149,6 +151,7 @@ export class CssLoaderState {
       apiFullToken: this.apiFullToken,
       apiTokenExpireDate: this.apiTokenExpireDate,
       apiMeData: this.apiMeData,
+      updateStatuses: this.updateStatuses,
       selectedPreset: this.selectedPreset,
       localThemeList: this.localThemeList,
       currentSettingsPageTheme: this.currentSettingsPageTheme,
