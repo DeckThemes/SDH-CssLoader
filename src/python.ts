@@ -55,12 +55,17 @@ export async function scheduleCheckForUpdates() {
         recursiveCheck();
         return;
       }
-      const data = await bulkThemeUpdateCheck();
-      if (data) {
-        // 24hrs from now
-        setGlobalState("updateStatuses", data);
+      // After testing, it appears that, if there is no wifi, bulkThemeUpdateCheck returns an empty array, this is okay, the try catch is just for extra safety
+      try {
+        const data = await bulkThemeUpdateCheck();
+        if (data) {
+          // 24hrs from now
+          setGlobalState("updateStatuses", data);
+        }
+        setGlobalState("nextUpdateCheckTime", new Date().valueOf() + 24 * 60 * 60 * 1000);
+      } catch (err) {
+        console.log("Error Checking For Theme Updates", err);
       }
-      setGlobalState("nextUpdateCheckTime", new Date().valueOf() + 24 * 60 * 60 * 1000);
       recursiveCheck();
     }, 5 * 60 * 1000);
   }
