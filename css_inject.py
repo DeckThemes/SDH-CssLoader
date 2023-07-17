@@ -111,6 +111,8 @@ DEFAULT_MAPPINGS = {
     "bigpicture": ["~Valve Steam Gamepad/default~"],
     "bigpictureoverlay": ["QuickAccess", "MainMenu"],
     "store": ["~https://store.steampowered.com~", "~https://steamcommunity.com~"],
+
+    # Legacy
     "SP": ["bigpicture"],
     "Steam Big Picture Mode": ["bigpicture"],
     "MainMenu": ["MainMenu.*"],

@@ -1,4 +1,4 @@
-import pystray, css_theme, css_utils, os, webbrowser
+import pystray, css_theme, css_utils, os, webbrowser, subprocess
 from PIL import Image, ImageDraw
 
 ICON = None
@@ -30,6 +30,17 @@ def check_if_symlink_exists():
 def open_install_docs():
     webbrowser.open_new_tab("https://docs.deckthemes.com/CSSLoader/Install/#windows")
 
+def get_desktop_install_path() -> str|None:
+    if os.path.exists("C:/Program Files/CSSLoader Desktop/CSSLoader Desktop.exe"):
+        return "C:/Program Files/CSSLoader Desktop/CSSLoader Desktop.exe"
+    
+    return None
+
+def open_desktop():
+    path = get_desktop_install_path()
+    if path != None:
+        subprocess.Popen([path])
+
 def start_icon(main, loop):
     global ICON, MAIN, LOOP, DEV_MODE_STATE
     MAIN = main
@@ -45,6 +56,7 @@ def start_icon(main, loop):
         pystray.MenuItem(f"CSS Loader v{css_theme.CSS_LOADER_VER}", action=None, enabled=False),
         pystray.MenuItem("Local Images/Fonts: Enabled" if symlink else "Local Images/Fonts: Disabled", action=None, enabled=None),
         pystray.MenuItem("Please enable Windows Developer Mode", action=open_install_docs, visible=not symlink),
+        pystray.MenuItem("Open Desktop App", action=open_desktop, enabled=get_desktop_install_path() != None, default=True),
         pystray.MenuItem("Live CSS Editing", toggle_dev_mode_state, checked=get_dev_mode_state),
         pystray.MenuItem("Open Themes Folder", open_theme_dir),
         pystray.MenuItem("Reload Themes", reset),
