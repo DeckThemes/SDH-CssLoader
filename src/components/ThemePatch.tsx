@@ -3,6 +3,7 @@ import * as python from "../python";
 import { useState, VFC } from "react";
 import { Patch } from "../ThemeTypes";
 import { PatchComponent } from "./PatchComponent";
+import { useCssLoaderState } from "../state";
 
 export const ThemePatch: VFC<{
   data: Patch;
@@ -10,11 +11,21 @@ export const ThemePatch: VFC<{
   fullArr: Patch[];
   themeName: string;
 }> = ({ data, index, fullArr, themeName }) => {
+  const { selectedPreset } = useCssLoaderState();
   const [selectedIndex, setIndex] = useState(data.options.indexOf(data.value));
 
   const [selectedLabel, setLabel] = useState(data.value);
 
   const bottomSeparatorValue = fullArr.length - 1 === index ? "standard" : "none";
+
+  async function setPatchValue(value: string) {
+    await python.setPatchOfTheme(themeName, data.name, value);
+    // This was before all currently toggled themes were part of a dependency, this (and probably lots of the other preset code) can be changed to assume that by default
+    if (selectedPreset && selectedPreset.dependencies.includes(themeName)) {
+      return python.generatePresetFromThemeNames(selectedPreset.name, selectedPreset.dependencies);
+    }
+    return;
+  }
 
   function ComponentWrapper() {
     return (
@@ -48,7 +59,7 @@ export const ThemePatch: VFC<{
               max={data.options.length - 1}
               value={selectedIndex}
               onChange={(value) => {
-                python.execute(python.setPatchOfTheme(themeName, data.name, data.options[value]));
+                setPatchValue(data.options[value]);
                 setIndex(value);
                 setLabel(data.options[value]);
                 data.value = data.options[value];
@@ -74,7 +85,7 @@ export const ThemePatch: VFC<{
               checked={data.value === "Yes"}
               onChange={(bool) => {
                 const newValue = bool ? "Yes" : "No";
-                python.execute(python.setPatchOfTheme(themeName, data.name, newValue));
+                setPatchValue(newValue);
                 setLabel(newValue);
                 setIndex(data.options.findIndex((e) => e === newValue));
                 data.value = newValue;
@@ -100,7 +111,7 @@ export const ThemePatch: VFC<{
                 setIndex(index.data);
                 data.value = index.label as string;
                 setLabel(data.value);
-                python.execute(python.setPatchOfTheme(themeName, data.name, data.value));
+                setPatchValue(data.value);
               }}
             />
           </PanelSectionRow>

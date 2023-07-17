@@ -1,63 +1,57 @@
 import { useMemo } from "react";
 import {
   ButtonItem,
-  DialogButton,
   Focusable,
   ModalRoot,
+  PanelSection,
   PanelSectionRow,
+  gamepadDialogClasses,
   showModal,
-  ToggleField,
 } from "decky-frontend-lib";
 import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "../../state";
-import { ThemeSettingsModalRoot } from "./ThemeSettingsModal";
-import * as python from "../../python";
 import { Flags } from "../../ThemeTypes";
-import { ImCog } from "react-icons/im";
-import { CreatePresetModal } from "./CreatePresetModal";
-import { AiFillEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { AllThemesSingleEntry } from "./AllThemesSingleEntry";
+import { PresetSelectionDropdown } from "../QAMTab/PresetSelectionDropdown";
+import { globalState } from "../../python";
 
-export function AllThemesModalRoot({
-  stateClass,
-  closeModal,
-}: {
-  stateClass: CssLoaderState;
-  closeModal: any;
-}) {
+export function AllThemesModalRoot({ closeModal }: { closeModal: any }) {
   return (
     <ModalRoot onCancel={closeModal} onEscKeypress={closeModal}>
-      <CssLoaderContextProvider cssLoaderStateClass={stateClass}>
-        <AllThemesModal stateClass={stateClass} closeModal={closeModal} />
+      {/* @ts-ignore */}
+      <CssLoaderContextProvider cssLoaderStateClass={globalState}>
+        <AllThemesModal closeModal={closeModal} />
       </CssLoaderContextProvider>
     </ModalRoot>
   );
 }
 
-export function AllThemesModal({
-  stateClass,
-  closeModal,
-}: {
-  stateClass: CssLoaderState;
-  closeModal: any;
-}) {
+export function AllThemesModal({ closeModal }: { closeModal: any }) {
   const { localThemeList, unpinnedThemes } = useCssLoaderState();
 
   const sortedList = useMemo(() => {
-    return localThemeList.sort((a, b) => {
-      const aPinned = !unpinnedThemes.includes(a.id);
-      const bPinned = !unpinnedThemes.includes(b.id);
-      // This sorts the pinned themes alphabetically, then the non-pinned alphabetically
-      if (aPinned === bPinned) {
-        return a.name.localeCompare(b.name);
-      }
-      return Number(bPinned) - Number(aPinned);
-    });
+    return localThemeList
+      .filter((e) => !e.flags.includes(Flags.isPreset))
+      .sort((a, b) => {
+        const aPinned = !unpinnedThemes.includes(a.id);
+        const bPinned = !unpinnedThemes.includes(b.id);
+        // This sorts the pinned themes alphabetically, then the non-pinned alphabetically
+        if (aPinned === bPinned) {
+          return a.name.localeCompare(b.name);
+        }
+        return Number(bPinned) - Number(aPinned);
+      });
   }, [localThemeList.length]);
 
   return (
     <>
-      <h1 style={{ marginBlockEnd: "10px", marginBlockStart: "0px" }}>Your Themes</h1>
+      {/* <h1 style={{ marginBlockEnd: "10px", marginBlockStart: "0px" }}>Your Themes</h1> */}
       <style>
         {`
+          .CSSLoader_PanelSection_NoPadding_Parent > .quickaccesscontrols_PanelSection_2C0g0 {
+            padding-left: 0;
+            padding-right: 0;
+          }
+
           .CSSLoader_FullTheme_ToggleContainer > div {
             background: #23262e;
             border-radius: 2px;
@@ -94,103 +88,20 @@ export function AllThemesModal({
           }
         `}
       </style>
-      <Focusable style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gridGap: "1em" }}>
-        {sortedList.map((e) => {
-          const isPinned = !unpinnedThemes.includes(e.id);
-          return (
-            <>
-              <div className="CSSLoader_FullTheme_EntryContainer">
-                <div className="CSSLoader_FullTheme_ToggleContainer">
-                  <ToggleField
-                    bottomSeparator="none"
-                    label={<span className="CSSLoader_FullTheme_ThemeLabel">{e.name}</span>}
-                    checked={e.enabled}
-                    onChange={(switchValue: boolean) => {
-                      // Actually enabling the theme
-                      python.resolve(python.setThemeState(e.name, switchValue), () => {
-                        python.getInstalledThemes();
-                      });
-                      // Dependency Toast
-                      if (e.dependencies.length > 0) {
-                        if (switchValue === true) {
-                          python.toast(
-                            `${e.name} enabled other themes`,
-                            // This lists out the themes by name, but often overflowed off screen
-                            // @ts-ignore
-                            // `${new Intl.ListFormat().format(data.dependencies)} ${
-                            //   data.dependencies.length > 1 ? "are" : "is"
-                            // } required for this theme`
-                            // This just gives the number of themes
-                            `${
-                              e.dependencies.length === 1
-                                ? `1 other theme is required by ${e.name}`
-                                : `${e.dependencies.length} other themes are required by ${e.name}`
-                            }`
-                          );
-                          return;
-                        }
-                        if (!e.flags.includes(Flags.dontDisableDeps)) {
-                          python.toast(
-                            `${e.name} disabled other themes`,
-                            // @ts-ignore
-                            `${
-                              e.dependencies.length === 1
-                                ? `1 theme was originally enabled by ${e.name}`
-                                : `${e.dependencies.length} themes were originally enabled by ${e.name}`
-                            }`
-                          );
-                          return;
-                        }
-                      }
-                    }}
-                  />
-                </div>
-                <DialogButton
-                  className="CSSLoader_FullTheme_DialogButton"
-                  onClick={() => {
-                    if (isPinned) {
-                      python.unpinTheme(e.id);
-                    } else {
-                      python.pinTheme(e.id);
-                    }
-                  }}
-                >
-                  {isPinned ? (
-                    <AiFillEye className="CSSLoader_FullTheme_IconTranslate" />
-                  ) : (
-                    <AiOutlineEyeInvisible className="CSSLoader_FullTheme_IconTranslate" />
-                  )}
-                </DialogButton>
-                <DialogButton
-                  className="CSSLoader_FullTheme_DialogButton"
-                  onClick={() => {
-                    showModal(
-                      // @ts-ignore
-                      <ThemeSettingsModalRoot stateClass={stateClass} selectedTheme={e.id} />
-                    );
-                  }}
-                >
-                  <ImCog className="CSSLoader_FullTheme_IconTranslate" />
-                </DialogButton>
-              </div>
-            </>
-          );
-        })}
-      </Focusable>
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          bottomSeparator="standard"
-          onClick={() => {
-            showModal(
-              // @ts-ignore
-              <CreatePresetModal enabledNumber={localThemeList.filter((e) => e.enabled).length} />
-            );
-          }}
-        >
-          Create Preset
-        </ButtonItem>
-      </PanelSectionRow>
+      <div className="CSSLoader_PanelSection_NoPadding_Parent">
+        <PanelSection title="Your Themes">
+          <Focusable
+            style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gridGap: "1em" }}
+          >
+            {sortedList.map((e) => (
+              <AllThemesSingleEntry data={e} />
+            ))}
+          </Focusable>
+        </PanelSection>
+        <PanelSection title="Profiles">
+          <PresetSelectionDropdown />
+        </PanelSection>
+      </div>
       <PanelSectionRow>
         <ButtonItem
           layout="below"

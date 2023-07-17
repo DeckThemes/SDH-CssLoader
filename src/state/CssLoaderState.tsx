@@ -38,6 +38,7 @@ interface PublicCssLoaderState {
   apiTokenExpireDate: Date | number | undefined;
   apiMeData: AccountData | undefined;
 
+  selectedPreset: Theme | undefined;
   localThemeList: Theme[];
   currentSettingsPageTheme: string | undefined;
   unpinnedThemes: string[];
@@ -56,6 +57,7 @@ interface PublicCssLoaderContext extends PublicCssLoaderState {
 export class CssLoaderState {
   private currentTab: string = "ThemeBrowser";
 
+  private selectedPreset: Theme | undefined = undefined;
   private apiUrl: string = "https://api.deckthemes.com";
   private apiShortToken: string = "";
   private apiFullToken: string = "";
@@ -147,6 +149,7 @@ export class CssLoaderState {
       apiFullToken: this.apiFullToken,
       apiTokenExpireDate: this.apiTokenExpireDate,
       apiMeData: this.apiMeData,
+      selectedPreset: this.selectedPreset,
       localThemeList: this.localThemeList,
       currentSettingsPageTheme: this.currentSettingsPageTheme,
       unpinnedThemes: this.unpinnedThemes,

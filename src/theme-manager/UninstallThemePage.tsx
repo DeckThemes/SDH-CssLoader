@@ -5,7 +5,7 @@ import { AiOutlineDownload } from "react-icons/ai";
 import * as python from "../python";
 
 import { useCssLoaderState } from "../state";
-import { Theme } from "../ThemeTypes";
+import { Flags, Theme } from "../ThemeTypes";
 import { MinimalCSSThemeInfo, PartialCSSThemeInfo } from "../apiTypes";
 import { genericGET } from "../api";
 
@@ -126,13 +126,14 @@ export const UninstallThemePage: VFC = () => {
                   }}
                 >
                   <span>{e.name}</span>
+                  {/* Only show the version for themes that aren't presets */}
                   <span
                     style={{
                       color: "#dcdedf55",
                       marginLeft: "8px",
                     }}
                   >
-                    {e.version}
+                    {e.flags.includes(Flags.isPreset) ? "Profile" : e.version}
                   </span>
                   <Focusable
                     style={{
@@ -159,7 +160,8 @@ export const UninstallThemePage: VFC = () => {
                         <AiOutlineDownload />
                       </DialogButton>
                     )}
-                    {updateStatus === "local" && (
+                    {/* This shows when a theme is local, but not a preset */}
+                    {updateStatus === "local" && !e.flags.includes(Flags.isPreset) && (
                       <span
                         style={{
                           position: "absolute",

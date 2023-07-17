@@ -199,9 +199,6 @@ export function getThemes(
     // If there are other filters after the prepend, add a ".", otherwise don't
     (searchOpts.filters !== "All" ? "." : "");
 
-  console.log("prepend", prependString);
-  console.log("full", prependString + (searchOpts.filters === "All" ? "" : searchOpts.filters));
-
   const queryStr = generateParamStr(
     searchOpts.filters !== "All" ? searchOpts : { ...searchOpts, filters: "" },
     prependString
