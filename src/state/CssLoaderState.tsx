@@ -39,6 +39,7 @@ interface PublicCssLoaderState {
   apiMeData: AccountData | undefined;
   // This is a unix timestamp
   nextUpdateCheckTime: number;
+  updateCheckTimeout: NodeJS.Timeout | undefined;
 
   updateStatuses: UpdateStatus[];
   selectedPreset: Theme | undefined;
@@ -60,6 +61,7 @@ interface PublicCssLoaderContext extends PublicCssLoaderState {
 export class CssLoaderState {
   private currentTab: string = "ThemeBrowser";
   private nextUpdateCheckTime: number = 0;
+  private updateCheckTimeout: NodeJS.Timeout | undefined = undefined;
 
   private updateStatuses: UpdateStatus[] = [];
   private selectedPreset: Theme | undefined = undefined;
@@ -150,6 +152,7 @@ export class CssLoaderState {
     return {
       currentTab: this.currentTab,
       nextUpdateCheckTime: this.nextUpdateCheckTime,
+      updateCheckTimeout: this.updateCheckTimeout,
       apiUrl: this.apiUrl,
       apiShortToken: this.apiShortToken,
       apiFullToken: this.apiFullToken,

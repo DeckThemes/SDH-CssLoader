@@ -48,7 +48,7 @@ export function execute(promise: Promise<any>) {
 export async function scheduleCheckForUpdates() {
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
   function recursiveCheck() {
-    setTimeout(async () => {
+    const timeout = setTimeout(async () => {
       // Putting this in the function as im not sure the value would update otherwise
       const { nextUpdateCheckTime } = globalState!.getPublicState();
       if (!(new Date().valueOf() > nextUpdateCheckTime)) {
@@ -68,6 +68,7 @@ export async function scheduleCheckForUpdates() {
       }
       recursiveCheck();
     }, 5 * 60 * 1000);
+    setGlobalState("updateCheckTimeout", timeout);
   }
   // Initially setting it
   // 24hrs from now

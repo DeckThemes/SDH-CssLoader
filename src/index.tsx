@@ -162,5 +162,9 @@ export default definePlugin((serverApi: ServerAPI) => {
       </CssLoaderContextProvider>
     ),
     icon: <RiPaintFill />,
+    onDismount: () => {
+      const { updateCheckTimeout } = state.getPublicState();
+      if (updateCheckTimeout) clearTimeout(updateCheckTimeout);
+    },
   };
 });
