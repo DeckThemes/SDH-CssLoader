@@ -109,7 +109,7 @@ export default definePlugin((serverApi: ServerAPI) => {
       "selectedPreset",
       allThemes.find((e) => e.flags.includes(Flags.isPreset) && e.enabled)
     );
-    bulkThemeUpdateCheck().then((data) => {
+    bulkThemeUpdateCheck(allThemes).then((data) => {
       state.setGlobalState("updateStatuses", data);
     });
     python.scheduleCheckForUpdates();

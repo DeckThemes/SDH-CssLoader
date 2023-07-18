@@ -17,8 +17,8 @@ async function fetchThemeIDS(idsToQuery: string[]): Promise<MinimalCSSThemeInfo[
     });
 }
 
-export async function bulkThemeUpdateCheck() {
-  const { localThemeList } = globalState!.getPublicState();
+export async function bulkThemeUpdateCheck(customThemeArr?: Theme[]) {
+  const localThemeList = customThemeArr || globalState!.getPublicState().localThemeList;
   let idsToQuery: string[] = localThemeList.map((e) => e.id);
 
   if (idsToQuery.length === 0) return [];
