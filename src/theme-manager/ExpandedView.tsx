@@ -5,7 +5,7 @@ import { BsStar, BsStarFill } from "react-icons/bs";
 import { FiArrowLeft, FiArrowRight, FiDownload } from "react-icons/fi";
 
 import * as python from "../python";
-import { genericGET, refreshToken, toggleStar as apiToggleStar } from "../api";
+import { genericGET, refreshToken, toggleStar as apiToggleStar, installTheme } from "../api";
 
 import { useCssLoaderState } from "../state";
 import { Theme } from "../ThemeTypes";
@@ -93,19 +93,6 @@ export const ExpandedViewPage: VFC = () => {
       }
     } else {
       python.toast("Not Logged In!", "You can only star themes if logged in.");
-    }
-  }
-
-  function installTheme() {
-    if (fullThemeData?.id) {
-      setGlobalState("isInstalling", true);
-      python.resolve(python.downloadThemeFromUrl(fullThemeData.id), () => {
-        python.reloadBackend().then(() => {
-          setGlobalState("isInstalling", false);
-        });
-      });
-    } else {
-      python.toast("Error Downloading!", "Can't find theme ID");
     }
   }
 
@@ -327,7 +314,7 @@ export const ExpandedViewPage: VFC = () => {
                   >
                     <ButtonItem
                       layout="below"
-                      // disabled={installStatus === "installed" || isInstalling}
+                      disabled={isInstalling}
                       onClick={() => {
                         if (
                           installStatus === "installed" &&
@@ -343,7 +330,7 @@ export const ExpandedViewPage: VFC = () => {
                           );
                           return;
                         }
-                        installTheme();
+                        installTheme(fullThemeData.id);
                       }}
                     >
                       <span className="CssLoader_ThemeBrowser_ExpandedView_InstallText">

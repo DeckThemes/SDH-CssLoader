@@ -1,7 +1,7 @@
 import { ServerAPI } from "decky-frontend-lib";
 import { CssLoaderState } from "./state";
-import { toast, storeWrite } from "./python";
-import { ThemeQueryRequest, ThemeQueryResponse } from "./apiTypes";
+import { toast, storeWrite, downloadThemeFromUrl, reloadBackend } from "./python";
+import { ThemeQueryRequest } from "./apiTypes";
 import { generateParamStr } from "./logic";
 
 var server: ServerAPI | undefined = undefined;
@@ -84,6 +84,7 @@ export function refreshToken(): Promise<string | undefined> {
   if (apiTokenExpireDate === undefined) {
     return Promise.resolve(apiFullToken);
   }
+  // @ts-ignore
   if (new Date().valueOf() < apiTokenExpireDate) {
     return Promise.resolve(apiFullToken);
   }
@@ -203,7 +204,7 @@ export function getThemes(
     searchOpts.filters !== "All" ? searchOpts : { ...searchOpts, filters: "" },
     prependString
   );
-  genericGET(`${apiPath}${queryStr}`, requiresAuth).then((data: ThemeQueryResponse) => {
+  genericGET(`${apiPath}${queryStr}`, requiresAuth).then((data) => {
     if (data.total > 0) {
       setGlobalState(globalStateVarName, data);
     } else {
@@ -237,4 +238,13 @@ export function toggleStar(themeId: string, isStarred: boolean, authToken: strin
     .catch((err) => {
       console.error(`Error starring theme`, err);
     });
+}
+
+export async function installTheme(themeId: string) {
+  const setGlobalState = globalState!.setGlobalState.bind(globalState);
+  setGlobalState("isInstalling", true);
+  await downloadThemeFromUrl(themeId);
+  await reloadBackend();
+  setGlobalState("isInstalling", false);
+  return;
 }

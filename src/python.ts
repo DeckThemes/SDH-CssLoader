@@ -2,6 +2,7 @@
 import { ServerAPI } from "decky-frontend-lib";
 import { CssLoaderState } from "./state";
 import { Theme } from "./ThemeTypes";
+import { bulkThemeUpdateCheck } from "./logic/bulkThemeUpdateCheck";
 
 var server: ServerAPI | undefined = undefined;
 export var globalState: CssLoaderState | undefined = undefined;
@@ -42,6 +43,37 @@ export function execute(promise: Promise<any>) {
       console.warn("Execute failed:", data, "promise", promise);
     }
   })();
+}
+
+export async function scheduleCheckForUpdates() {
+  const setGlobalState = globalState!.setGlobalState.bind(globalState);
+  function recursiveCheck() {
+    const timeout = setTimeout(async () => {
+      // Putting this in the function as im not sure the value would update otherwise
+      const { nextUpdateCheckTime } = globalState!.getPublicState();
+      if (!(new Date().valueOf() > nextUpdateCheckTime)) {
+        recursiveCheck();
+        return;
+      }
+      // After testing, it appears that, if there is no wifi, bulkThemeUpdateCheck returns an empty array, this is okay, the try catch is just for extra safety
+      try {
+        const data = await bulkThemeUpdateCheck();
+        if (data) {
+          // 24hrs from now
+          setGlobalState("updateStatuses", data);
+        }
+        setGlobalState("nextUpdateCheckTime", new Date().valueOf() + 24 * 60 * 60 * 1000);
+      } catch (err) {
+        console.log("Error Checking For Theme Updates", err);
+      }
+      recursiveCheck();
+    }, 5 * 60 * 1000);
+    setGlobalState("updateCheckTimeout", timeout);
+  }
+  // Initially setting it
+  // 24hrs from now
+  setGlobalState("nextUpdateCheckTime", new Date().valueOf() + 24 * 60 * 60 * 1000);
+  recursiveCheck();
 }
 
 export async function changePreset(themeName: string, themeList: Theme[]) {

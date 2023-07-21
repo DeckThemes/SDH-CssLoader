@@ -1,3 +1,5 @@
+import { MinimalCSSThemeInfo } from "./apiTypes";
+
 export interface Theme {
   id: string;
   enabled: boolean; // used to be called checked
@@ -32,3 +34,6 @@ export enum Flags {
   "dontDisableDeps" = "KEEP_DEPENDENCIES",
   "optionalDeps" = "OPTIONAL_DEPENDENCIES",
 }
+
+export type LocalThemeStatus = "installed" | "outdated" | "local";
+export type UpdateStatus = [string, LocalThemeStatus, false | MinimalCSSThemeInfo];

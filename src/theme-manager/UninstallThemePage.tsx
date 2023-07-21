@@ -5,20 +5,15 @@ import { AiOutlineDownload } from "react-icons/ai";
 import * as python from "../python";
 
 import { useCssLoaderState } from "../state";
-import { Flags, Theme } from "../ThemeTypes";
-import { MinimalCSSThemeInfo, PartialCSSThemeInfo } from "../apiTypes";
-import { genericGET } from "../api";
-
-export type LocalThemeStatus = "installed" | "outdated" | "local";
+import { Flags, Theme, UpdateStatus } from "../ThemeTypes";
+import { MinimalCSSThemeInfo } from "../apiTypes";
+import { bulkThemeUpdateCheck } from "../logic/bulkThemeUpdateCheck";
 
 export const UninstallThemePage: VFC = () => {
-  const { localThemeList, browseThemeList, unpinnedThemes } = useCssLoaderState();
-
+  const { localThemeList, unpinnedThemes } = useCssLoaderState();
   const [isUninstalling, setUninstalling] = useState(false);
 
-  const [updateStatuses, setUpdateStatuses] = useState<
-    [string, LocalThemeStatus, false | MinimalCSSThemeInfo][]
-  >([]);
+  const [updateStatuses, setUpdateStatuses] = useState<UpdateStatus[]>([]);
 
   function handleUninstall(listEntry: Theme) {
     setUninstalling(true);
@@ -44,54 +39,10 @@ export const UninstallThemePage: VFC = () => {
     }
   }
 
-  // This gets the update status of all installed themes by querying them all.
   useEffect(() => {
-    if (localThemeList.length > 0) {
-      let themeArr: MinimalCSSThemeInfo[] = [];
-      let idsToQuery: string[] = [];
-      localThemeList.forEach((e) => {
-        const entryInBrowseList: PartialCSSThemeInfo | undefined = browseThemeList.items.find(
-          (f) => e.id === f.id || e.id === f.name
-        );
-        if (entryInBrowseList) {
-          themeArr.push(entryInBrowseList);
-          return;
-        }
-        idsToQuery.push(e.id);
-      });
-      if (idsToQuery.length > 0) {
-        const queryStr = "?ids=" + idsToQuery.join(".");
-        genericGET(`/themes/ids${queryStr}`).then((data: MinimalCSSThemeInfo[]) => {
-          if (data) {
-            themeArr.push(...data);
-          }
-          formatData();
-        });
-      } else {
-        formatData();
-      }
-      function formatData() {
-        if (themeArr.length > 0) {
-          let updateStatusArr: [string, LocalThemeStatus, false | MinimalCSSThemeInfo][] = [];
-          localThemeList.forEach((localEntry) => {
-            const remoteEntry = themeArr.find(
-              (remote) => remote.id === localEntry.id || remote.name === localEntry.id
-            );
-            if (remoteEntry) {
-              if (remoteEntry.version === localEntry.version) {
-                updateStatusArr.push([localEntry.id, "installed", remoteEntry]);
-                return;
-              }
-              updateStatusArr.push([localEntry.id, "outdated", remoteEntry]);
-              return;
-            }
-            updateStatusArr.push([localEntry.id, "local", false]);
-            return;
-          });
-          setUpdateStatuses(updateStatusArr);
-        }
-      }
-    }
+    bulkThemeUpdateCheck().then((value) => {
+      setUpdateStatuses(value);
+    });
   }, [localThemeList]);
 
   if (localThemeList.filter((e) => !e.bundled).length === 0) {

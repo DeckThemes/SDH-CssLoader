@@ -17,6 +17,7 @@ import { PresetSelectionDropdown, QAMThemeToggleList, TitleView } from "./compon
 import { ExpandedViewPage } from "./theme-manager/ExpandedView";
 import { Flags, Theme } from "./ThemeTypes";
 import { dummyFunction, getInstalledThemes, reloadBackend } from "./python";
+import { bulkThemeUpdateCheck } from "./logic/bulkThemeUpdateCheck";
 
 function Content() {
   const { localThemeList, setGlobalState } = useCssLoaderState();
@@ -36,6 +37,7 @@ function Content() {
   function reload() {
     reloadBackend();
     dummyFuncTest();
+    bulkThemeUpdateCheck().then((data) => [setGlobalState("updateStatuses", data)]);
   }
 
   // This will likely only run on a user's first run
@@ -107,6 +109,10 @@ export default definePlugin((serverApi: ServerAPI) => {
       "selectedPreset",
       allThemes.find((e) => e.flags.includes(Flags.isPreset) && e.enabled)
     );
+    bulkThemeUpdateCheck(allThemes).then((data) => {
+      state.setGlobalState("updateStatuses", data);
+    });
+    python.scheduleCheckForUpdates();
 
     // If a user has magically deleted a theme in the unpinnedList and the store wasn't updated, this fixes that
     python.resolve(python.storeRead("unpinnedThemes"), (unpinnedJsonStr: string) => {
@@ -156,5 +162,9 @@ export default definePlugin((serverApi: ServerAPI) => {
       </CssLoaderContextProvider>
     ),
     icon: <RiPaintFill />,
+    onDismount: () => {
+      const { updateCheckTimeout } = state.getPublicState();
+      if (updateCheckTimeout) clearTimeout(updateCheckTimeout);
+    },
   };
 });
