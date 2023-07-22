@@ -2,9 +2,10 @@
 import { ServerAPI } from "decky-frontend-lib";
 import { CssLoaderState } from "./state";
 import { Theme } from "./ThemeTypes";
+import { bulkThemeUpdateCheck } from "./logic/bulkThemeUpdateCheck";
 
 var server: ServerAPI | undefined = undefined;
-var globalState: CssLoaderState | undefined = undefined;
+export var globalState: CssLoaderState | undefined = undefined;
 
 export function setServer(s: ServerAPI) {
   server = s;
@@ -44,6 +45,47 @@ export function execute(promise: Promise<any>) {
   })();
 }
 
+export async function scheduleCheckForUpdates() {
+  const setGlobalState = globalState!.setGlobalState.bind(globalState);
+  function recursiveCheck() {
+    const timeout = setTimeout(async () => {
+      // Putting this in the function as im not sure the value would update otherwise
+      const { nextUpdateCheckTime } = globalState!.getPublicState();
+      if (!(new Date().valueOf() > nextUpdateCheckTime)) {
+        recursiveCheck();
+        return;
+      }
+      // After testing, it appears that, if there is no wifi, bulkThemeUpdateCheck returns an empty array, this is okay, the try catch is just for extra safety
+      try {
+        const data = await bulkThemeUpdateCheck();
+        if (data) {
+          // 24hrs from now
+          setGlobalState("updateStatuses", data);
+        }
+        setGlobalState("nextUpdateCheckTime", new Date().valueOf() + 24 * 60 * 60 * 1000);
+      } catch (err) {
+        console.log("Error Checking For Theme Updates", err);
+      }
+      recursiveCheck();
+    }, 5 * 60 * 1000);
+    setGlobalState("updateCheckTimeout", timeout);
+  }
+  // Initially setting it
+  // 24hrs from now
+  setGlobalState("nextUpdateCheckTime", new Date().valueOf() + 24 * 60 * 60 * 1000);
+  recursiveCheck();
+}
+
+export async function changePreset(themeName: string, themeList: Theme[]) {
+  return new Promise(async (resolve) => {
+    // Disables all themes before enabling the preset
+    await Promise.all(themeList.filter((e) => e.enabled).map((e) => setThemeState(e.name, false)));
+
+    await setThemeState(themeName, true);
+    resolve(true);
+  });
+}
+
 export function getInstalledThemes(): Promise<void> {
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
   return server!.callPluginMethod<{}, Theme[]>("get_themes", {}).then((data) => {
@@ -56,11 +98,11 @@ export function getInstalledThemes(): Promise<void> {
 
 export function reloadBackend(): Promise<void> {
   return server!.callPluginMethod("reset", {}).then(() => {
-    getInstalledThemes();
+    return getInstalledThemes();
   });
 }
 
-export function getThemes(): Promise<any> {
+export function getThemes() {
   return server!.callPluginMethod<{}, Theme[]>("get_themes", {});
 }
 
@@ -132,6 +174,13 @@ export function storeWrite(key: string, value: string) {
   return server!.callPluginMethod("store_write", { key: key, val: value });
 }
 
+export function enableServer() {
+  return server!.callPluginMethod("enable_server", {});
+}
+export function getServerState() {
+  return server!.callPluginMethod<{}, boolean>("get_server_state", {});
+}
+
 export function getBackendVersion(): Promise<any> {
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
   return server!.callPluginMethod<{}, Theme[]>("get_backend_version", {}).then((data) => {
@@ -142,8 +191,8 @@ export function getBackendVersion(): Promise<any> {
   });
 }
 
-export function dummyFunction(): Promise<any> {
-  return server!.callPluginMethod("dummy_function", {});
+export function dummyFunction() {
+  return server!.callPluginMethod<{}, boolean>("dummy_function", {});
 }
 
 export function genericGET(fetchUrl: string, authToken?: string | undefined) {
@@ -198,4 +247,11 @@ export function pinTheme(id: string) {
 
 export function generatePreset(name: string) {
   return server!.callPluginMethod("generate_preset_theme", { name: name });
+}
+
+export function generatePresetFromThemeNames(name: string, themeNames: string[]) {
+  return server!.callPluginMethod("generate_preset_theme_from_theme_names", {
+    name: name,
+    themeNames: themeNames,
+  });
 }

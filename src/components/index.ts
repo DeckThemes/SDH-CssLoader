@@ -5,3 +5,4 @@ export * from "./TitleView";
 export * from "./ThemeManager";
 export * from "./AllThemes";
 export * from "./OptionalDepsModal";
+export * from "./QAMTab";

@@ -103,13 +103,16 @@ class Inject:
         return Result(True)
 
 DEFAULT_MAPPINGS = {
-    "desktop": ["Steam.*", ".*Supernav"],
+    "desktop": ["Steam.*"],
     "desktopchat": ["!friendsui-container"],
-    "desktoppopup": ["OverlayBrowser_Browser", "SP Overlay:.*", ".*Menu", "notificationtoasts_.*", "SteamBrowser_Find", "OverlayTab\\d+_Find", "!ModalDialogPopup", "!FullModalOverlay"],
+    "desktoppopup": ["OverlayBrowser_Browser", "SP Overlay:.*", "notificationtoasts_.*", "SteamBrowser_Find", "OverlayTab\\d+_Find", "!ModalDialogPopup", "!FullModalOverlay"],
     "desktopoverlay": ["desktoppopup"],
+    "desktopcontextmenu": [".*Menu", ".*Supernav"],
     "bigpicture": ["~Valve Steam Gamepad/default~"],
     "bigpictureoverlay": ["QuickAccess", "MainMenu"],
     "store": ["~https://store.steampowered.com~", "~https://steamcommunity.com~"],
+
+    # Legacy
     "SP": ["bigpicture"],
     "Steam Big Picture Mode": ["bigpicture"],
     "MainMenu": ["MainMenu.*"],
@@ -125,7 +128,7 @@ def extend_tabs(tabs : list, theme) -> list:
     new_tabs = []
 
     if len(tabs) <= 0:
-        return theme.tab_mappings["default"] if ("default" in theme.tab_mappings) else []
+        return extend_tabs(theme.tab_mappings["default"], theme) if ("default" in theme.tab_mappings) else []
 
     for x in tabs:
         if x in theme.tab_mappings:
@@ -140,9 +143,6 @@ def extend_tabs(tabs : list, theme) -> list:
 def to_inject(key : str, tabs : list, basePath : str, theme) -> Inject:
     if key.startswith("--"):
         value = tabs[0]
-        if (";" in value or ";" in key):
-            raise Exception("Multiple css statements are unsupported in a variable")
-        
         inject = Inject("", extend_tabs(tabs[1:], theme), theme)
         inject.css = f":root {{ {key}: {value}; }}"
     else:

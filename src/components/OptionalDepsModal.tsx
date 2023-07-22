@@ -41,7 +41,7 @@ export function OptionalDepsModal({
         configured and or enabled/disabled anytime via the Quick Access Menu.
       </span>
       <span style={{ marginBottom: "10px" }}>
-        <b>Enable without configuratiton</b> will enable optional themes but not overwrite their
+        <b>Enable without configuration</b> will enable optional themes but not overwrite their
         configuration, and <b>Enable only this theme</b> will not enable any optional themes.
       </span>
 

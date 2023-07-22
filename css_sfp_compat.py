@@ -2,7 +2,7 @@ import os
 from css_inject import Inject, to_inject
 
 SFP_DEFAULT_FILES = {
-    "libraryroot.custom.css": ["desktop", "desktopoverlay"],
+    "libraryroot.custom.css": ["desktop", "desktopoverlay", "desktopcontextmenu"],
     "bigpicture.custom.css": ["bigpicture", "bigpictureoverlay"],
     "friends.custom.css": ["desktopchat"],
     "webkit.css": ["store"]

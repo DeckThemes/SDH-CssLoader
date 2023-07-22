@@ -1,16 +1,17 @@
-import { ButtonItem, Navigation, PanelSectionRow } from "decky-frontend-lib";
+import { ButtonItem, Navigation, PanelSectionRow, showModal } from "decky-frontend-lib";
 import { useEffect, useMemo, useRef, useState, VFC } from "react";
 import { ImSpinner5 } from "react-icons/im";
 import { BsStar, BsStarFill } from "react-icons/bs";
 import { FiArrowLeft, FiArrowRight, FiDownload } from "react-icons/fi";
 
 import * as python from "../python";
-import { genericGET, refreshToken, toggleStar as apiToggleStar } from "../api";
+import { genericGET, refreshToken, toggleStar as apiToggleStar, installTheme } from "../api";
 
 import { useCssLoaderState } from "../state";
 import { Theme } from "../ThemeTypes";
 import { calcButtonColor } from "../logic";
 import { FullCSSThemeInfo, PartialCSSThemeInfo } from "../apiTypes";
+import { ThemeSettingsModalRoot } from "../components";
 
 export const ExpandedViewPage: VFC = () => {
   const {
@@ -95,19 +96,6 @@ export const ExpandedViewPage: VFC = () => {
     }
   }
 
-  function installTheme() {
-    if (fullThemeData?.id) {
-      setGlobalState("isInstalling", true);
-      python.resolve(python.downloadThemeFromUrl(fullThemeData.id), () => {
-        python.reloadBackend().then(() => {
-          setGlobalState("isInstalling", false);
-        });
-      });
-    } else {
-      python.toast("Error Downloading!", "Can't find theme ID");
-    }
-  }
-
   function checkIfThemeInstalled(themeObj: PartialCSSThemeInfo) {
     const filteredArr: Theme[] = installedThemes.filter(
       (e: Theme) => e.name === themeObj.name && e.author === themeObj.specifiedAuthor
@@ -128,7 +116,7 @@ export const ExpandedViewPage: VFC = () => {
     let buttonText = "";
     switch (installStatus) {
       case "installed":
-        buttonText = "Installed";
+        buttonText = "Configure";
         break;
       case "outdated":
         buttonText = "Update";
@@ -326,9 +314,23 @@ export const ExpandedViewPage: VFC = () => {
                   >
                     <ButtonItem
                       layout="below"
-                      disabled={installStatus === "installed" || isInstalling}
+                      disabled={isInstalling}
                       onClick={() => {
-                        installTheme();
+                        if (
+                          installStatus === "installed" &&
+                          installedThemes.find((e) => e.id === fullThemeData.id)
+                        ) {
+                          showModal(
+                            // @ts-ignore
+                            <ThemeSettingsModalRoot
+                              selectedTheme={
+                                installedThemes.find((e) => e.id === fullThemeData.id)!.id
+                              }
+                            />
+                          );
+                          return;
+                        }
+                        installTheme(fullThemeData.id);
                       }}
                     >
                       <span className="CssLoader_ThemeBrowser_ExpandedView_InstallText">

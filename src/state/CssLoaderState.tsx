@@ -7,7 +7,7 @@ import {
   ThemeQueryRequest,
   ThemeQueryResponse,
 } from "../apiTypes";
-import { Theme } from "../ThemeTypes";
+import { Theme, UpdateStatus } from "../ThemeTypes";
 
 interface PublicCssLoaderState {
   // Browse Page
@@ -37,7 +37,12 @@ interface PublicCssLoaderState {
   apiFullToken: string;
   apiTokenExpireDate: Date | number | undefined;
   apiMeData: AccountData | undefined;
+  // This is a unix timestamp
+  nextUpdateCheckTime: number;
+  updateCheckTimeout: NodeJS.Timeout | undefined;
 
+  updateStatuses: UpdateStatus[];
+  selectedPreset: Theme | undefined;
   localThemeList: Theme[];
   currentSettingsPageTheme: string | undefined;
   unpinnedThemes: string[];
@@ -55,7 +60,11 @@ interface PublicCssLoaderContext extends PublicCssLoaderState {
 // This class creates the getter and setter functions for all of the global state data.
 export class CssLoaderState {
   private currentTab: string = "ThemeBrowser";
+  private nextUpdateCheckTime: number = 0;
+  private updateCheckTimeout: NodeJS.Timeout | undefined = undefined;
 
+  private updateStatuses: UpdateStatus[] = [];
+  private selectedPreset: Theme | undefined = undefined;
   private apiUrl: string = "https://api.deckthemes.com";
   private apiShortToken: string = "";
   private apiFullToken: string = "";
@@ -142,11 +151,15 @@ export class CssLoaderState {
   getPublicState() {
     return {
       currentTab: this.currentTab,
+      nextUpdateCheckTime: this.nextUpdateCheckTime,
+      updateCheckTimeout: this.updateCheckTimeout,
       apiUrl: this.apiUrl,
       apiShortToken: this.apiShortToken,
       apiFullToken: this.apiFullToken,
       apiTokenExpireDate: this.apiTokenExpireDate,
       apiMeData: this.apiMeData,
+      updateStatuses: this.updateStatuses,
+      selectedPreset: this.selectedPreset,
       localThemeList: this.localThemeList,
       currentSettingsPageTheme: this.currentSettingsPageTheme,
       unpinnedThemes: this.unpinnedThemes,

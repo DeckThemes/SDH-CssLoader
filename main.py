@@ -277,26 +277,40 @@ class Plugin:
         return Result(True).to_dict()
 
     async def generate_preset_theme(self, name : str) -> dict:
-        Log("Generating theme preset...")
-
         try:
-            result = await self._generate_preset_theme_internal(self, name)
+            deps = {}
+
+            for x in self.themes:
+                if x.enabled and FLAG_PRESET not in x.flags:
+                    deps[x.name] = {}
+                    for y in x.patches:
+                        deps[x.name][y.name] = y.get_value()
+
+            result = await self._generate_preset_theme_internal(self, name, deps)
             return result.to_dict()
         except Exception as e:
             return Result(False, str(e))
+    
+    async def generate_preset_theme_from_theme_names(self, name : str, themeNames : list) -> dict:
+        try:
+            deps = {}
 
-    async def _generate_preset_theme_internal(self, name : str) -> Result:
+            for x in self.themes:
+                if x.name in themeNames and FLAG_PRESET not in x.flags:
+                    deps[x.name] = {}
+                    for y in x.patches:
+                        deps[x.name][y.name] = y.get_value()
+
+            result = await self._generate_preset_theme_internal(self, name, deps)
+            return result.to_dict()
+        except Exception as e:
+            return Result(False, str(e))    
+
+    async def _generate_preset_theme_internal(self, name : str, deps : dict) -> Result:
+        Log(f"Generating theme preset '{name}'...")
         a = await self._get_theme(self, name)
         if a != None and FLAG_PRESET not in a.flags:
             return Result(False, f"Theme '{name}' already exists")
-        
-        deps = {}
-
-        for x in self.themes:
-            if x.enabled and FLAG_PRESET not in x.flags:
-                deps[x.name] = {}
-                for y in x.patches:
-                    deps[x.name][y.name] = y.get_value()
         
         theme_path = path.join(get_theme_path(), name)
 
@@ -310,6 +324,12 @@ class Plugin:
                 "flags": [FLAG_PRESET],
                 "dependencies": deps
             }, fp)
+
+        for x in self.themes:
+            if x.name == name: # Hotpatch preset in memory
+                Log(f"Updating dependencies for {name}: {deps}")
+                x.dependencies = deps
+                break
         
         return Result(True)
 
@@ -387,6 +407,12 @@ class Plugin:
         self.themes.sort(key=lambda d: d.name)
 
     async def exit(self):
+        try:
+            import css_win_tray
+            css_win_tray.stop_icon()
+        except:
+            pass
+
         sys.exit(0)
 
     async def _main(self):
@@ -456,4 +482,14 @@ if __name__ == '__main__':
                 count += 1
 
     asyncio.get_event_loop().run_until_complete(A().run())
-    asyncio.get_event_loop().run_forever()
+
+    import css_win_tray
+    
+    css_win_tray.start_icon(Plugin, asyncio.get_event_loop())
+
+    try:
+        asyncio.get_event_loop().run_forever()
+    except KeyboardInterrupt:
+        pass
+
+    css_win_tray.stop_icon()
