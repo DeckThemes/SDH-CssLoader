@@ -107,12 +107,28 @@ class Plugin:
         except Exception as e:
             return Result(False, str(e))
     
-    async def _enable_theme(self, theme : Theme, set_deps : bool = True, set_deps_value : bool = True) -> Result:
+    async def _enable_theme(self, theme : Theme, set_deps : bool = True, set_deps_value : bool = True, ignore_dependencies : list = []) -> Result:
         if theme is None:
             return Result(False)
         
         if set_deps:
-            for dependency_name in theme.dependencies:
+            theme_dependencies = [x for x in theme.dependencies]
+            # Make the top level control all dependencies it defines
+            ignore_dependencies_next = ignore_dependencies.copy()
+            ignore_dependencies_next.extend(theme_dependencies)
+
+            # Disallow dependencies of a preset to override anything
+            if (FLAG_PRESET in theme.flags):
+                set_deps = False
+
+            # Make sure higher priority themes are sorted right
+            theme_dependencies.sort(key=lambda d: self.scores[d] if d in self.scores else 0)
+
+            for dependency_name in theme_dependencies:
+                # Skip any themes that the previous iteration has control over
+                if (dependency_name in ignore_dependencies):
+                    continue
+
                 dependency = await self._get_theme(self, dependency_name)
                 if dependency == None:
                     continue
@@ -127,8 +143,7 @@ class Plugin:
                             if dependency_patch.name == dependency_patch_name:
                                 dependency_patch.set_value(dependency_patch_value)
 
-
-                await self._enable_theme(self, dependency)
+                await self._enable_theme(self, dependency, set_deps, set_deps_value, ignore_dependencies_next)
         
         result = await theme.inject()
         return result
