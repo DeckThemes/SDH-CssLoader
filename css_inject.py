@@ -103,7 +103,7 @@ class Inject:
         return Result(True)
 
 DEFAULT_MAPPINGS = {
-    "desktop": ["Steam.*"],
+    "desktop": ["Steam|SteamLibraryWindow"],
     "desktopchat": ["!friendsui-container"],
     "desktoppopup": ["OverlayBrowser_Browser", "SP Overlay:.*", "notificationtoasts_.*", "SteamBrowser_Find", "OverlayTab\\d+_Find", "!ModalDialogPopup", "!FullModalOverlay"],
     "desktopoverlay": ["desktoppopup"],
