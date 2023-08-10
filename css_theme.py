@@ -6,11 +6,12 @@ from css_utils import Result, Log, create_dir, USER
 from css_themepatch import ThemePatch
 from css_sfp_compat import is_folder_sfp_theme, convert_to_css_theme
 
-CSS_LOADER_VER = 8
+CSS_LOADER_VER = 9
 
 class Theme:
     def __init__(self, themePath : str, json : dict, configPath : str = None):
         self.configPath = configPath if (configPath is not None) else themePath
+        self.displayName = None
         self.configJsonPath = self.configPath + "/config" + ("_ROOT.json" if USER == "root" else "_USER.json")
         self.patches = []
         self.injects = []
@@ -54,6 +55,7 @@ class Theme:
             self.created = path.getmtime(jsonPath)
 
         self.name = json["name"]
+        self.displayName = json["display_name"] if ("display_name" in json) else None
         self.id = json["id"] if ("id" in json) else self.name
         self.version = json["version"] if ("version" in json) else "v1.0"
         self.author = json["author"] if ("author" in json) else ""
@@ -171,6 +173,7 @@ class Theme:
         return {
             "id": self.id,
             "name": self.name,
+            "display_name": self.displayName,
             "version": self.version,
             "author": self.author,
             "enabled": self.enabled,
