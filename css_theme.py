@@ -173,7 +173,7 @@ class Theme:
         return {
             "id": self.id,
             "name": self.name,
-            "display_name": self.displayName,
+            "display_name": self.displayName if (self.displayName is not None) else self.name,
             "version": self.version,
             "author": self.author,
             "enabled": self.enabled,
