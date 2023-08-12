@@ -26,7 +26,7 @@ class Theme:
         self.modified = path.getmtime(self.configJsonPath) if path.exists(self.configJsonPath) else None
 
         try:
-            if (os.path.join(themePath, "PRIORITY")):
+            if os.path.exists(os.path.join(themePath, "PRIORITY")):
                 with open(os.path.join(themePath, "PRIORITY")) as fp:
                     self.priority_mod = int(fp.readline().strip())
         except:
