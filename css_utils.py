@@ -94,7 +94,7 @@ def get_steam_path() -> str:
         except Exception as e:
             return "C:\\Program Files (x86)\\Steam" # Taking a guess here
     else:
-        return f"{get_user_home()}/.local/share/Steam"
+        return f"{get_user_home()}/.steam/steam"
 
 def create_steam_symlink() -> Result:
     return create_symlink(get_theme_path(), os.path.join(get_steam_path(), "steamui", "themes_custom"))
