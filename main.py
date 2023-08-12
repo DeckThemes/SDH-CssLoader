@@ -259,11 +259,14 @@ class Plugin:
         self.busy = True
 
         await remove_all()
-        await self._load(self)
+        fails = await self._load(self)
         await self._load_stage_2(self)
         await commit_all()
         self.busy = False
-        return Result(True).to_dict()
+        
+        return {
+            "fails": fails
+        }
 
     async def delete_theme(self, themeName : str) -> dict:
         theme = None
@@ -348,11 +351,12 @@ class Plugin:
         
         return Result(True)
 
-    async def _parse_themes(self, themesDir : str, configDir : str = None):
+    async def _parse_themes(self, themesDir : str, configDir : str = None) -> list[tuple[str, str]]:
         if (configDir is None):
             configDir = themesDir
 
         possibleThemeDirs = [str(x) for x in os.listdir(themesDir)]
+        fails = []
 
         for x in possibleThemeDirs:
             themePath = themesDir + "/" + x
@@ -378,6 +382,9 @@ class Plugin:
 
             except Exception as e:
                 Log(f"Exception while parsing a theme: {e}") # Couldn't properly parse everything
+                fails.append((x, str(e)))
+
+        return fails
 
     async def _cache_lists(self):
         ALL_INJECTS.clear()
@@ -386,13 +393,13 @@ class Plugin:
             injects = x.get_all_injects()
             ALL_INJECTS.extend(injects)
 
-    async def _load(self):
+    async def _load(self) -> list[tuple[str, str]]:
         Log("Loading themes...")
         self.themes = []
 
         themesPath = get_theme_path()
 
-        await self._parse_themes(self, themesPath)
+        return await self._parse_themes(self, themesPath)
     
     async def _set_theme_score(self, theme : Theme):
         if theme.name not in self.scores:
