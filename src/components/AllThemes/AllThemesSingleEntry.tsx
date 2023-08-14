@@ -15,7 +15,7 @@ export function AllThemesSingleEntry({ data: e }: { data: Theme }) {
         <div className="CSSLoader_FullTheme_ToggleContainer">
           <ToggleField
             bottomSeparator="none"
-            label={<span className="CSSLoader_FullTheme_ThemeLabel">{e.name}</span>}
+            label={<span className="CSSLoader_FullTheme_ThemeLabel">{e.display_name}</span>}
             checked={e.enabled}
             onChange={(switchValue: boolean) => {
               // Actually enabling the theme
@@ -26,7 +26,7 @@ export function AllThemesSingleEntry({ data: e }: { data: Theme }) {
               if (e.dependencies.length > 0) {
                 if (switchValue === true) {
                   python.toast(
-                    `${e.name} enabled other themes`,
+                    `${e.display_name} enabled other themes`,
                     // This lists out the themes by name, but often overflowed off screen
                     // @ts-ignore
                     // `${new Intl.ListFormat().format(data.dependencies)} ${
@@ -35,20 +35,20 @@ export function AllThemesSingleEntry({ data: e }: { data: Theme }) {
                     // This just gives the number of themes
                     `${
                       e.dependencies.length === 1
-                        ? `1 other theme is required by ${e.name}`
-                        : `${e.dependencies.length} other themes are required by ${e.name}`
+                        ? `1 other theme is required by ${e.display_name}`
+                        : `${e.dependencies.length} other themes are required by ${e.display_name}`
                     }`
                   );
                   return;
                 }
                 if (!e.flags.includes(Flags.dontDisableDeps)) {
                   python.toast(
-                    `${e.name} disabled other themes`,
+                    `${e.display_name} disabled other themes`,
                     // @ts-ignore
                     `${
                       e.dependencies.length === 1
-                        ? `1 theme was originally enabled by ${e.name}`
-                        : `${e.dependencies.length} themes were originally enabled by ${e.name}`
+                        ? `1 theme was originally enabled by ${e.display_name}`
+                        : `${e.dependencies.length} themes were originally enabled by ${e.display_name}`
                     }`
                   );
                   return;

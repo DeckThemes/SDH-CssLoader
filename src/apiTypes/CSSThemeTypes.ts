@@ -10,6 +10,7 @@ export interface UserInfo {
 export interface MinimalCSSThemeInfo {
   id: string;
   name: string;
+  display_name: string;
   version: string;
   target: string;
   manifestVersion: number;

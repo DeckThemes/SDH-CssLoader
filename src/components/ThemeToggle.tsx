@@ -11,7 +11,6 @@ import { useRerender } from "../hooks";
 // This has to be a direct import to avoid the circular dependency
 import { ThemeSettingsModalRoot } from "./AllThemes/ThemeSettingsModal";
 import { MinimalCSSThemeInfo } from "../apiTypes";
-import { AiOutlineDownload } from "react-icons/ai";
 import { installTheme } from "../api";
 
 export const ThemeToggle: VFC<{
@@ -102,7 +101,7 @@ export const ThemeToggle: VFC<{
                 disabled={isInstalling}
                 bottomSeparator={data.enabled && data?.patches?.length > 0 ? "none" : "standard"}
                 checked={data.enabled}
-                label={data.name}
+                label={data.display_name}
                 description={
                   isPreset
                     ? `Preset`
@@ -126,7 +125,7 @@ export const ThemeToggle: VFC<{
                   if (data.dependencies.length > 0) {
                     if (switchValue) {
                       python.toast(
-                        `${data.name} enabled other themes`,
+                        `${data.display_name} enabled other themes`,
                         // This lists out the themes by name, but often overflowed off screen
                         // @ts-ignore
                         // `${new Intl.ListFormat().format(data.dependencies)} ${
@@ -135,19 +134,19 @@ export const ThemeToggle: VFC<{
                         // This just gives the number of themes
                         `${
                           data.dependencies.length === 1
-                            ? `1 other theme is required by ${data.name}`
-                            : `${data.dependencies.length} other themes are required by ${data.name}`
+                            ? `1 other theme is required by ${data.display_name}`
+                            : `${data.dependencies.length} other themes are required by ${data.display_name}`
                         }`
                       );
                     }
                     if (!switchValue && !data.flags.includes(Flags.dontDisableDeps)) {
                       python.toast(
-                        `${data.name} disabled other themes`,
+                        `${data.display_name} disabled other themes`,
                         // @ts-ignore
                         `${
                           data.dependencies.length === 1
-                            ? `1 theme was originally enabled by ${data.name}`
-                            : `${data.dependencies.length} themes were originally enabled by ${data.name}`
+                            ? `1 theme was originally enabled by ${data.display_name}`
+                            : `${data.dependencies.length} themes were originally enabled by ${data.display_name}`
                         }`
                       );
                     }

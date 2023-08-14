@@ -172,7 +172,7 @@ export const VariableSizeCard: FC<{
                 width: "90%",
               }}
             >
-              {e.name}
+              {e.display_name}
             </span>
             {showTarget && (
               <span

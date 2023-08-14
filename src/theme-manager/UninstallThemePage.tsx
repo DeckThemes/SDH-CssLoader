@@ -76,7 +76,7 @@ export const UninstallThemePage: VFC = () => {
                     width: "96%",
                   }}
                 >
-                  <span>{e.name}</span>
+                  <span>{e.display_name}</span>
                   {/* Only show the version for themes that aren't presets */}
                   <span
                     style={{
