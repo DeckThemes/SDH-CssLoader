@@ -1,4 +1,4 @@
-import { SingleDropdownOption } from "decky-frontend-lib";
+import { Patch, SingleDropdownOption } from "decky-frontend-lib";
 import { createContext, FC, useContext, useEffect, useState } from "react";
 import {
   AccountData,
@@ -41,6 +41,7 @@ interface PublicCssLoaderState {
   nextUpdateCheckTime: number;
   updateCheckTimeout: NodeJS.Timeout | undefined;
 
+  navPatchInstance: Patch | undefined;
   updateStatuses: UpdateStatus[];
   selectedPreset: Theme | undefined;
   localThemeList: Theme[];
@@ -62,6 +63,7 @@ export class CssLoaderState {
   private currentTab: string = "ThemeBrowser";
   private nextUpdateCheckTime: number = 0;
   private updateCheckTimeout: NodeJS.Timeout | undefined = undefined;
+  private navPatchInstance: Patch | undefined = undefined;
 
   private updateStatuses: UpdateStatus[] = [];
   private selectedPreset: Theme | undefined = undefined;
@@ -165,6 +167,7 @@ export class CssLoaderState {
       unpinnedThemes: this.unpinnedThemes,
       isInstalling: this.isInstalling,
 
+      navPatchInstance: this.navPatchInstance,
       selectedRepo: this.selectedRepo,
       currentExpandedTheme: this.currentExpandedTheme,
       browserCardSize: this.browserCardSize,

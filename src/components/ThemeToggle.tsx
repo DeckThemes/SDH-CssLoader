@@ -17,8 +17,7 @@ export const ThemeToggle: VFC<{
   collapsible?: boolean;
   showModalButtonPrompt?: boolean;
 }> = ({ data, collapsible = false, showModalButtonPrompt = false }) => {
-  const { selectedPreset, localThemeList, updateStatuses, setGlobalState, isInstalling } =
-    useCssLoaderState();
+  const { updateStatuses, setGlobalState, isInstalling } = useCssLoaderState();
   const [collapsed, setCollapsed] = useState<boolean>(true);
 
   const [render, rerender] = useRerender();
@@ -31,14 +30,10 @@ export const ThemeToggle: VFC<{
     // This might not actually memoize it as data.flags is an array, so idk if it deep checks the values here
   }, [data.flags]);
 
-  let [updateStatus, remoteEntry]: [LocalThemeStatus, false | MinimalCSSThemeInfo] = [
-    "installed",
-    false,
-  ];
+  let [updateStatus]: [LocalThemeStatus] = ["installed"];
   const themeArrPlace = updateStatuses.find((f) => f[0] === data.id);
   if (themeArrPlace) {
     updateStatus = themeArrPlace[1];
-    remoteEntry = themeArrPlace[2];
   }
 
   // I extracted these here as doing conditional props inline sucks

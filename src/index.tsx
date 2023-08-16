@@ -18,6 +18,7 @@ import { ExpandedViewPage } from "./theme-manager/ExpandedView";
 import { Flags, Theme } from "./ThemeTypes";
 import { dummyFunction, getInstalledThemes, reloadBackend } from "./python";
 import { bulkThemeUpdateCheck } from "./logic/bulkThemeUpdateCheck";
+import { disableNavPatch, enableNavPatch } from "./deckyPatches/NavPatch";
 
 function Content() {
   const { localThemeList, setGlobalState } = useCssLoaderState();
@@ -109,6 +110,8 @@ export default definePlugin((serverApi: ServerAPI) => {
       "selectedPreset",
       allThemes.find((e) => e.flags.includes(Flags.isPreset) && e.enabled)
     );
+
+    // Check for updates, and schedule a check 24 hours from now
     bulkThemeUpdateCheck(allThemes).then((data) => {
       state.setGlobalState("updateStatuses", data);
     });
@@ -134,9 +137,17 @@ export default definePlugin((serverApi: ServerAPI) => {
     });
   });
 
+  // Api Token
   python.resolve(python.storeRead("shortToken"), (token: string) => {
     if (token) {
       state.setGlobalState("apiShortToken", token);
+    }
+  });
+
+  // Nav Patch
+  python.resolve(python.storeRead("enableNavPatch"), (value: string) => {
+    if (value === "true") {
+      enableNavPatch();
     }
   });
 
@@ -165,6 +176,7 @@ export default definePlugin((serverApi: ServerAPI) => {
     onDismount: () => {
       const { updateCheckTimeout } = state.getPublicState();
       if (updateCheckTimeout) clearTimeout(updateCheckTimeout);
+      disableNavPatch();
     },
   };
 });

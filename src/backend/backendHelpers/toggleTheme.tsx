@@ -3,6 +3,7 @@ import { Flags, Theme } from "../../ThemeTypes";
 import * as python from "../../python";
 import { OptionalDepsModalRoot } from "../../components";
 import { showModal } from "decky-frontend-lib";
+import { enableNavPatch } from "../../deckyPatches/NavPatch";
 
 // rerender and setCollapsed only apply to the QAM list version of the ThemeToggle, not the one in the fullscreen 'Your Themes' modal
 export async function toggleTheme(
@@ -12,16 +13,20 @@ export async function toggleTheme(
   setCollapsed?: Dispatch<SetStateAction<boolean>>
 ) {
   const { selectedPreset, localThemeList } = python.globalState!.getPublicState();
+  // Optional Deps Themes
   if (enabled && data.flags.includes(Flags.optionalDeps)) {
     showModal(<OptionalDepsModalRoot themeData={data} />);
     rerender && rerender();
     return;
   }
+
   // Actually enabling the theme
   await python.setThemeState(data.name, enabled);
   await python.getInstalledThemes();
+
   // Re-collapse menu
   setCollapsed && setCollapsed(true);
+
   // Dependency Toast
   if (data.dependencies.length > 0) {
     if (enabled) {
@@ -51,6 +56,14 @@ export async function toggleTheme(
       );
     }
   }
+
+  // Nav Patch
+  if (data.flags.includes(Flags.navPatch)) {
+    python.toast("This theme needs the nav patch", "hi sims");
+    enableNavPatch();
+  }
+
+  // Preset Upating
   if (!selectedPreset) return;
   // This is copied from the desktop codebase
   // If we refactor the desktop version of this function (which we probably should) this should also be refactored

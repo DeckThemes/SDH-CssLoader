@@ -1,15 +1,23 @@
 import { DialogButton, Focusable, TextField, ToggleField } from "decky-frontend-lib";
 import { SiWebauthn } from "react-icons/si";
-import { useEffect, useState, VFC } from "react";
+import { useEffect, useMemo, useState, VFC } from "react";
 import { logInWithShortToken, logOut } from "../api";
 import { useCssLoaderState } from "../state";
-import { enableServer, getServerState, storeRead, storeWrite } from "../python";
+import { enableServer, getServerState, storeWrite } from "../python";
+import { disableNavPatch, enableNavPatch } from "../deckyPatches/NavPatch";
 
 export const LogInPage: VFC = () => {
-  const { apiShortToken, apiFullToken, apiMeData } = useCssLoaderState();
+  const { apiShortToken, apiFullToken, apiMeData, navPatchInstance } = useCssLoaderState();
   const [shortTokenInterimValue, setShortTokenIntValue] = useState<string>(apiShortToken);
 
   const [serverOn, setServerOn] = useState<boolean>(false);
+
+  const navPatchEnabled = useMemo(() => !!navPatchInstance, [navPatchInstance]);
+
+  function setNavPatch(value: boolean) {
+    value ? enableNavPatch() : disableNavPatch();
+    storeWrite("enableNavPatch", value + "");
+  }
 
   useEffect(() => {
     getServerState().then((res) => {
@@ -111,6 +119,14 @@ export const LogInPage: VFC = () => {
           onChange={(value) => {
             setServer(value);
           }}
+        />
+      </Focusable>
+      <Focusable>
+        <ToggleField
+          checked={navPatchEnabled}
+          label="Enable Nav Patch"
+          description="This fixes issues with themes that attempt to hide elements of the UI"
+          onChange={setNavPatch}
         />
       </Focusable>
       <Focusable>

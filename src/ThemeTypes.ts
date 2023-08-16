@@ -34,6 +34,7 @@ export enum Flags {
   "isPreset" = "PRESET",
   "dontDisableDeps" = "KEEP_DEPENDENCIES",
   "optionalDeps" = "OPTIONAL_DEPENDENCIES",
+  "navPatch" = "REQUIRE_NAV_PATCH",
 }
 
 export type LocalThemeStatus = "installed" | "outdated" | "local";
