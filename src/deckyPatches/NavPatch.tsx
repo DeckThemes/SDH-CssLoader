@@ -25,7 +25,7 @@ export function enableNavPatch() {
     }
   );
   setGlobalState("navPatchInstance", patch);
-  toast("Nav Patch Enabled", "");
+  toast("CSSLoader", "Nav Patch Enabled");
   return;
 }
 
@@ -37,6 +37,6 @@ export function disableNavPatch() {
   if (!navPatchInstance) return;
   navPatchInstance.unpatch();
   setGlobalState("navPatchInstance", undefined);
-  toast("Nav Patch Disabled", "");
+  toast("CSSLoader", "Nav Patch Disabled");
   return;
 }

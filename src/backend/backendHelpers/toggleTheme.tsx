@@ -4,6 +4,7 @@ import * as python from "../../python";
 import { OptionalDepsModalRoot } from "../../components";
 import { showModal } from "decky-frontend-lib";
 import { enableNavPatch } from "../../deckyPatches/NavPatch";
+import { NavPatchInfoModalRoot } from "../../deckyPatches/NavPatchInfoModal";
 
 // rerender and setCollapsed only apply to the QAM list version of the ThemeToggle, not the one in the fullscreen 'Your Themes' modal
 export async function toggleTheme(
@@ -58,12 +59,11 @@ export async function toggleTheme(
   }
 
   // Nav Patch
-  if (data.flags.includes(Flags.navPatch)) {
-    python.toast("This theme needs the nav patch", "hi sims");
-    enableNavPatch();
+  if (enabled && data.flags.includes(Flags.navPatch)) {
+    showModal(<NavPatchInfoModalRoot themeData={data} />);
   }
 
-  // Preset Upating
+  // Preset Updating
   if (!selectedPreset) return;
   // This is copied from the desktop codebase
   // If we refactor the desktop version of this function (which we probably should) this should also be refactored
