@@ -13,7 +13,7 @@ export async function toggleTheme(
   rerender?: () => void,
   setCollapsed?: Dispatch<SetStateAction<boolean>>
 ) {
-  const { selectedPreset, localThemeList } = python.globalState!.getPublicState();
+  const { selectedPreset, localThemeList, navPatchInstance } = python.globalState!.getPublicState();
   // Optional Deps Themes
   if (enabled && data.flags.includes(Flags.optionalDeps)) {
     showModal(<OptionalDepsModalRoot themeData={data} />);
@@ -59,7 +59,7 @@ export async function toggleTheme(
   }
 
   // Nav Patch
-  if (enabled && data.flags.includes(Flags.navPatch)) {
+  if (enabled && data.flags.includes(Flags.navPatch) && !navPatchInstance) {
     showModal(<NavPatchInfoModalRoot themeData={data} />);
   }
 
