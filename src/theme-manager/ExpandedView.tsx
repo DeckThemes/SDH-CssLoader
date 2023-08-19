@@ -245,7 +245,7 @@ export const ExpandedViewPage: VFC = () => {
                     fontSize: "1.25em",
                   }}
                 >
-                  {fullThemeData.display_name}
+                  {fullThemeData.displayName}
                 </span>
                 <span>{fullThemeData.specifiedAuthor}</span>
                 <span>{fullThemeData.target}</span>

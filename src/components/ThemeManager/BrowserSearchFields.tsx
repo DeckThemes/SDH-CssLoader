@@ -182,14 +182,25 @@ export function BrowserSearchFields({
           </div>
           <style>
             {`
+              /* PRE Aug. 18th Beta*/
               /* call me the css selector god */
               /* these scale the slider to the correct size regardless of display resolution */
               .CssLoader_ThemeBrowser_ScaleSlider > div > .${gamepadDialogClasses.FieldChildren} {
                 min-width: 100% !important;
               }
 
-              .CssLoader_ThemeBrowser_ScaleSlider > div > div > .${gamepadSliderClasses.SliderControlWithIcon}.Panel.Focusable {
+              .CssLoader_ThemeBrowser_ScaleSlider > div > div > .${
+                gamepadSliderClasses.SliderControlWithIcon
+              }.Panel.Focusable {
                 width: 100%;
+              }
+
+              /* POST Aug. 18th Beta */
+              .CssLoader_ThemeBrowser_ScaleSlider > div > div > .${
+                // @ts-ignore
+                gamepadDialogClasses.FieldChildrenInner
+              } {
+                min-width: 100% !important;
               }
             `}
           </style>

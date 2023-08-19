@@ -82,7 +82,7 @@ export const ThemeToggle: VFC<{
                     position: "absolute",
                     top: "0",
                     right: "-1em",
-                    // This creates the traiangle effect
+                    // This creates the triangle effect
                     background: "linear-gradient(45deg, transparent 49%, #fca904 50%)",
                     // The focusRing has a z index of 10000, so this is just to be cheeky
                     zIndex: "10001",
