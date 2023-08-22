@@ -6,7 +6,7 @@ import { useCssLoaderState } from "../state";
 import { enableServer, getServerState, storeWrite } from "../python";
 import { disableNavPatch, enableNavPatch } from "../deckyPatches/NavPatch";
 
-export const LogInPage: VFC = () => {
+export const SettingsPage: VFC = () => {
   const { apiShortToken, apiFullToken, apiMeData, navPatchInstance } = useCssLoaderState();
   const [shortTokenInterimValue, setShortTokenIntValue] = useState<string>(apiShortToken);
 

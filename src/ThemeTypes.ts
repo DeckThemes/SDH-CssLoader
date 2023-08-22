@@ -39,3 +39,7 @@ export enum Flags {
 
 export type LocalThemeStatus = "installed" | "outdated" | "local";
 export type UpdateStatus = [string, LocalThemeStatus, false | MinimalCSSThemeInfo];
+
+type ThemeErrorTitle = string;
+type ThemeErrorDescription = string;
+export type ThemeError = [ThemeErrorTitle, ThemeErrorDescription];

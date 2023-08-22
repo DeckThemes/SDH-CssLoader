@@ -1,7 +1,7 @@
 import { Tabs } from "decky-frontend-lib";
 import { Permissions } from "../apiTypes";
 import { useCssLoaderState } from "../state";
-import { LogInPage } from "./LogInPage";
+import { SettingsPage } from "./SettingsPage";
 import { StarredThemesPage } from "./StarredThemesPage";
 import { SubmissionsPage } from "./SubmissionBrowserPage";
 import { ThemeBrowserPage } from "./ThemeBrowserPage";
@@ -53,8 +53,8 @@ export function ThemeManagerRouter() {
           },
           {
             title: "Settings",
-            content: <LogInPage />,
-            id: "LogInPage",
+            content: <SettingsPage />,
+            id: "SettingsPage",
           },
         ]}
       />

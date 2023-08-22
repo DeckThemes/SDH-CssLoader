@@ -7,7 +7,7 @@ import {
   ThemeQueryRequest,
   ThemeQueryResponse,
 } from "../apiTypes";
-import { Theme, UpdateStatus } from "../ThemeTypes";
+import { Theme, ThemeError, UpdateStatus } from "../ThemeTypes";
 
 interface PublicCssLoaderState {
   // Browse Page
@@ -45,6 +45,7 @@ interface PublicCssLoaderState {
   updateStatuses: UpdateStatus[];
   selectedPreset: Theme | undefined;
   localThemeList: Theme[];
+  themeErrors: ThemeError[];
   currentSettingsPageTheme: string | undefined;
   unpinnedThemes: string[];
   isInstalling: boolean;
@@ -73,6 +74,7 @@ export class CssLoaderState {
   private apiTokenExpireDate: Date | number | undefined = undefined;
   private apiMeData: AccountData | undefined = undefined;
   private localThemeList: Theme[] = [];
+  private themeErrors: ThemeError[] = [];
   private selectedRepo: SingleDropdownOption = {
     data: 1,
     label: "All",
@@ -163,6 +165,7 @@ export class CssLoaderState {
       updateStatuses: this.updateStatuses,
       selectedPreset: this.selectedPreset,
       localThemeList: this.localThemeList,
+      themeErrors: this.themeErrors,
       currentSettingsPageTheme: this.currentSettingsPageTheme,
       unpinnedThemes: this.unpinnedThemes,
       isInstalling: this.isInstalling,

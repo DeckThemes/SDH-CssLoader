@@ -9,10 +9,12 @@ import { useCssLoaderState } from "../../state";
 import { ThemeToggle } from "../ThemeToggle";
 import { AllThemesModalRoot } from "../AllThemes";
 import { Flags } from "../../ThemeTypes";
+import { ThemeErrorCard } from "../ThemeErrorCard";
 
 export function QAMThemeToggleList() {
-  const { localThemeList, unpinnedThemes } = useCssLoaderState();
+  const { localThemeList, unpinnedThemes, themeErrors } = useCssLoaderState();
 
+  console.log("theerrroos", themeErrors);
   if (localThemeList.length === 0) {
     return (
       <>
@@ -59,6 +61,9 @@ export function QAMThemeToggleList() {
               ))}
           </>
         )}
+        {themeErrors.map((e) => {
+          return <ThemeErrorCard errorData={e} />;
+        })}
         <PanelSectionRow>
           <ButtonItem
             layout="below"

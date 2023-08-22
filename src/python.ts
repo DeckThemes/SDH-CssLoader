@@ -1,7 +1,7 @@
 // Code from https://github.com/NGnius/PowerTools/blob/dev/src/python.ts
 import { ServerAPI } from "decky-frontend-lib";
 import { CssLoaderState } from "./state";
-import { Theme } from "./ThemeTypes";
+import { Theme, ThemeError } from "./ThemeTypes";
 import { bulkThemeUpdateCheck } from "./logic/bulkThemeUpdateCheck";
 
 var server: ServerAPI | undefined = undefined;
@@ -98,8 +98,14 @@ export function getInstalledThemes(): Promise<void> {
   });
 }
 
-export function reloadBackend(): Promise<void> {
-  return server!.callPluginMethod("reset", {}).then(() => {
+export async function reloadBackend(): Promise<void> {
+  console.log("test test");
+  const setGlobalState = globalState!.setGlobalState.bind(globalState);
+  return server!.callPluginMethod<{}, { fails: ThemeError[] }>("reset", {}).then((res) => {
+    console.log(res, res?.result?.fails);
+    if (res.success && res.result?.fails.length > 0) {
+      setGlobalState("themeErrors", res.result.fails);
+    }
     return getInstalledThemes();
   });
 }
