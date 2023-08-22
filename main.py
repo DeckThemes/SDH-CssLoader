@@ -398,8 +398,8 @@ class Plugin:
         self.themes = []
 
         themesPath = get_theme_path()
-
-        return await self._parse_themes(self, themesPath)
+        self.last_load_errors = await self._parse_themes(self, themesPath)
+        return self.last_load_errors
     
     async def _set_theme_score(self, theme : Theme):
         if theme.name not in self.scores:
@@ -435,6 +435,11 @@ class Plugin:
             pass
 
         sys.exit(0)
+    
+    async def get_last_load_errors(self):
+        return {
+            "fails": self.last_load_errors
+        }
 
     async def _main(self):
         global Initialized
@@ -449,6 +454,7 @@ class Plugin:
 
         self.busy = False
         self.themes = []
+        self.last_load_errors = []
         Log("Initializing css loader...")
         Log(f"Max supported manifest version: {CSS_LOADER_VER}")
         
