@@ -4,21 +4,25 @@ import {
   PanelSection,
   PanelSectionRow,
   ServerAPI,
-  Router,
+  DialogButton,
+  Focusable,
+  Navigation,
 } from "decky-frontend-lib";
 import { useEffect, useState, FC } from "react";
 import * as python from "./python";
 import * as api from "./api";
 import { RiPaintFill } from "react-icons/ri";
 
-import { ThemeManagerRouter } from "./theme-manager";
+import { ThemeManagerRouter } from "./pages/theme-manager";
 import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "./state";
 import { PresetSelectionDropdown, QAMThemeToggleList, TitleView } from "./components";
-import { ExpandedViewPage } from "./theme-manager/ExpandedView";
+import { ExpandedViewPage } from "./pages/theme-manager/ExpandedView";
 import { Flags, Theme } from "./ThemeTypes";
 import { dummyFunction, getInstalledThemes, reloadBackend } from "./python";
 import { bulkThemeUpdateCheck } from "./logic/bulkThemeUpdateCheck";
 import { disableNavPatch, enableNavPatch } from "./deckyPatches/NavPatch";
+import { FaCog, FaStore } from "react-icons/fa";
+import { SettingsPageRouter } from "./pages/settings/SettingsPageRouter";
 
 function Content() {
   const { localThemeList, setGlobalState } = useCssLoaderState();
@@ -38,16 +42,8 @@ function Content() {
   function reload() {
     reloadBackend();
     dummyFuncTest();
-    bulkThemeUpdateCheck().then((data) => [setGlobalState("updateStatuses", data)]);
+    bulkThemeUpdateCheck().then((data) => setGlobalState("updateStatuses", data));
   }
-
-  // This will likely only run on a user's first run
-  // todo: potentially there's a way to make this run without an expensive stringify useEffect running always
-  // however, I want to make sure that someone can't delete the folder "Default Profile", as that would be bad
-  useEffect(() => {
-    // This happens before state prefilled
-    if (localThemeList.length === 0) return;
-  }, [JSON.stringify(localThemeList.filter((e) => e.flags.includes(Flags.isPreset)))]);
 
   useEffect(() => {
     setGlobalState(
@@ -65,16 +61,53 @@ function Content() {
     <PanelSection title="Themes">
       {dummyFuncResult ? (
         <>
+          <style>
+            {`
+              .CSSLoader_QAMTab_NavButton {
+                height: 2em !important;
+                width: 1.5em !important;
+                min-width: 1.5em !important;
+                position: relative !important;
+                border-radius: 10% !important;
+              }
+              .CSSLoader_QAMTab_NavContainer {
+                display: flex;
+                align-items: center;
+                justify-content: start;
+                gap: 0.5em;
+                padding: 0.5em 0 !important;
+              }
+              .CSSLoader_QAMTab_NavButtonIcon {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%); 
+              }
+            `}
+          </style>
           <PanelSectionRow>
-            <ButtonItem
-              layout="below"
-              onClick={() => {
-                Router.CloseSideMenus();
-                Router.Navigate("/cssloader/theme-manager");
-              }}
-            >
-              Download Themes
-            </ButtonItem>
+            <Focusable className="CSSLoader_QAMTab_NavContainer">
+              <DialogButton
+                className="CSSLoader_QAMTab_NavButton"
+                onOKActionDescription="Download Themes"
+                onClick={() => {
+                  Navigation.CloseSideMenus();
+                  Navigation.Navigate("/cssloader/theme-manager");
+                }}
+              >
+                <FaStore className="CSSLoader_QAMTab_NavButtonIcon" />
+              </DialogButton>
+              <DialogButton
+                className="CSSLoader_QAMTab_NavButton"
+                onOKActionDescription="Settings"
+                onClick={() => {
+                  Navigation.CloseSideMenus();
+                  Navigation.Navigate("/cssloader/settings");
+                }}
+              >
+                <FaCog className="CSSLoader_QAMTab_NavButtonIcon" />
+              </DialogButton>
+            </Focusable>
           </PanelSectionRow>
           <PresetSelectionDropdown />
           <QAMThemeToggleList />
@@ -154,6 +187,12 @@ export default definePlugin((serverApi: ServerAPI) => {
   serverApi.routerHook.addRoute("/cssloader/theme-manager", () => (
     <CssLoaderContextProvider cssLoaderStateClass={state}>
       <ThemeManagerRouter />
+    </CssLoaderContextProvider>
+  ));
+
+  serverApi.routerHook.addRoute("/cssloader/settings", () => (
+    <CssLoaderContextProvider cssLoaderStateClass={state}>
+      <SettingsPageRouter />
     </CssLoaderContextProvider>
   ));
 

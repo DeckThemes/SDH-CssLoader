@@ -88,24 +88,24 @@ export async function changePreset(themeName: string, themeList: Theme[]) {
   });
 }
 
-export function getInstalledThemes(): Promise<void> {
+export async function getInstalledThemes(): Promise<void> {
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
-  return server!.callPluginMethod<{}, Theme[]>("get_themes", {}).then((data) => {
-    if (data.success) {
-      setGlobalState("localThemeList", data.result);
-    }
-    return;
-  });
+  const errorRes = await server!.callPluginMethod<{}, { fails: ThemeError[] }>(
+    "get_last_load_errors",
+    {}
+  );
+  if (errorRes.success) {
+    setGlobalState("themeErrors", errorRes.result.fails);
+  }
+  const themeRes = await server!.callPluginMethod<{}, Theme[]>("get_themes", {});
+  if (themeRes.success) {
+    setGlobalState("localThemeList", themeRes.result);
+  }
+  return;
 }
 
 export async function reloadBackend(): Promise<void> {
-  console.log("test test");
-  const setGlobalState = globalState!.setGlobalState.bind(globalState);
   return server!.callPluginMethod<{}, { fails: ThemeError[] }>("reset", {}).then((res) => {
-    console.log(res, res?.result?.fails);
-    if (res.success && res.result?.fails.length > 0) {
-      setGlobalState("themeErrors", res.result.fails);
-    }
     return getInstalledThemes();
   });
 }

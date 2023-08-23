@@ -7,8 +7,7 @@ import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
 import { useCssLoaderState } from "../state";
 import { useRerender } from "../hooks";
 // This has to be a direct import to avoid the circular dependency
-import { ThemeSettingsModalRoot } from "./AllThemes/ThemeSettingsModal";
-import { MinimalCSSThemeInfo } from "../apiTypes";
+import { ThemeSettingsModalRoot } from "./Modals/ThemeSettingsModal";
 import { installTheme } from "../api";
 import { toggleTheme } from "../backend/backendHelpers/toggleTheme";
 

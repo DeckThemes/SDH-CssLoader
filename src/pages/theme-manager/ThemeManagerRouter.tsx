@@ -1,12 +1,10 @@
 import { Tabs } from "decky-frontend-lib";
-import { Permissions } from "../apiTypes";
-import { useCssLoaderState } from "../state";
-import { SettingsPage } from "./SettingsPage";
+import { Permissions } from "../../apiTypes";
+import { useCssLoaderState } from "../../state";
+import { LogInPage } from "./LogInPage";
 import { StarredThemesPage } from "./StarredThemesPage";
 import { SubmissionsPage } from "./SubmissionBrowserPage";
 import { ThemeBrowserPage } from "./ThemeBrowserPage";
-import { UninstallThemePage } from "./UninstallThemePage";
-
 export function ThemeManagerRouter() {
   const { apiMeData, currentTab, setGlobalState } = useCssLoaderState();
   return (
@@ -47,14 +45,9 @@ export function ThemeManagerRouter() {
               ]
             : []),
           {
-            title: "Installed Themes",
-            content: <UninstallThemePage />,
-            id: "InstalledThemes",
-          },
-          {
-            title: "Settings",
-            content: <SettingsPage />,
-            id: "SettingsPage",
+            title: "DeckThemes Account",
+            content: <LogInPage />,
+            id: "LogInPage",
           },
         ]}
       />

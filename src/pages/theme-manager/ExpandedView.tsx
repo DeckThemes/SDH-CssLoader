@@ -4,14 +4,14 @@ import { ImSpinner5 } from "react-icons/im";
 import { BsStar, BsStarFill } from "react-icons/bs";
 import { FiArrowLeft, FiArrowRight, FiDownload } from "react-icons/fi";
 
-import * as python from "../python";
-import { genericGET, refreshToken, toggleStar as apiToggleStar, installTheme } from "../api";
+import * as python from "../../python";
+import { genericGET, refreshToken, toggleStar as apiToggleStar, installTheme } from "../../api";
 
-import { useCssLoaderState } from "../state";
-import { Theme } from "../ThemeTypes";
-import { calcButtonColor } from "../logic";
-import { FullCSSThemeInfo, PartialCSSThemeInfo } from "../apiTypes";
-import { ThemeSettingsModalRoot } from "../components";
+import { useCssLoaderState } from "../../state";
+import { Theme } from "../../ThemeTypes";
+import { calcButtonColor } from "../../logic";
+import { FullCSSThemeInfo, PartialCSSThemeInfo } from "../../apiTypes";
+import { ThemeSettingsModalRoot } from "../../components/Modals/ThemeSettingsModal";
 
 export const ExpandedViewPage: VFC = () => {
   const {

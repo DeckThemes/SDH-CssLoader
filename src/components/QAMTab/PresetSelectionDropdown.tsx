@@ -3,7 +3,7 @@ import { useCssLoaderState } from "../../state";
 import { Flags } from "../../ThemeTypes";
 import { useMemo } from "react";
 import { changePreset, getInstalledThemes } from "../../python";
-import { CreatePresetModalRoot } from "../AllThemes/CreatePresetModal";
+import { CreatePresetModalRoot } from "../Modals/CreatePresetModal";
 import { FiPlusCircle } from "react-icons/fi";
 import { useRerender } from "../../hooks";
 

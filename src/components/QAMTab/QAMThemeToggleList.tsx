@@ -1,20 +1,12 @@
-import {
-  ButtonItem,
-  Focusable,
-  PanelSectionRow,
-  gamepadDialogClasses,
-  showModal,
-} from "decky-frontend-lib";
+import { Focusable } from "decky-frontend-lib";
 import { useCssLoaderState } from "../../state";
 import { ThemeToggle } from "../ThemeToggle";
-import { AllThemesModalRoot } from "../AllThemes";
 import { Flags } from "../../ThemeTypes";
 import { ThemeErrorCard } from "../ThemeErrorCard";
 
 export function QAMThemeToggleList() {
-  const { localThemeList, unpinnedThemes, themeErrors } = useCssLoaderState();
+  const { localThemeList, unpinnedThemes } = useCssLoaderState();
 
-  console.log("theerrroos", themeErrors);
   if (localThemeList.length === 0) {
     return (
       <>
@@ -61,20 +53,6 @@ export function QAMThemeToggleList() {
               ))}
           </>
         )}
-        {themeErrors.map((e) => {
-          return <ThemeErrorCard errorData={e} />;
-        })}
-        <PanelSectionRow>
-          <ButtonItem
-            layout="below"
-            onClick={() => {
-              // @ts-ignore
-              showModal(<AllThemesModalRoot />);
-            }}
-          >
-            Your Themes
-          </ButtonItem>
-        </PanelSectionRow>
       </Focusable>
     </>
   );

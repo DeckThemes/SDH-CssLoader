@@ -9,7 +9,7 @@ export function ThemeSettingsModalRoot({
   closeModal,
   selectedTheme,
 }: {
-  closeModal: any;
+  closeModal?: any;
   selectedTheme: string;
 }) {
   return (
