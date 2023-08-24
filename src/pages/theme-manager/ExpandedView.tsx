@@ -1,4 +1,12 @@
-import { ButtonItem, Navigation, PanelSectionRow, showModal } from "decky-frontend-lib";
+import {
+  ButtonItem,
+  Carousel,
+  DialogButton,
+  Focusable,
+  Navigation,
+  PanelSectionRow,
+  showModal,
+} from "decky-frontend-lib";
 import { useEffect, useMemo, useRef, useState, VFC } from "react";
 import { ImSpinner5 } from "react-icons/im";
 import { BsStar, BsStarFill } from "react-icons/bs";
@@ -188,207 +196,185 @@ export const ExpandedViewPage: VFC = () => {
     // This returns 'installed', 'outdated', or 'uninstalled'
     const installStatus = checkIfThemeInstalled(fullThemeData);
     return (
-      // The outermost div is to push the content down into the visible area
-      <div
-        style={{
-          marginTop: "40px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            margin: "20px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              marginBottom: "8px",
-            }}
-          >
-            <div
-              style={{
-                backgroundImage: `${currentImg}`,
-                backgroundSize: "contain",
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "center",
-                width: "60%",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              {fullThemeData.images.length > 1 && (
-                <>
-                  <FiArrowLeft size={36} onClick={decrementImg} style={{ padding: "4px" }} />
-                  <FiArrowRight size={36} onClick={incrementImg} style={{ padding: "4px" }} />
-                </>
-              )}
+      <>
+        <style>
+          {`
+          .flex {
+            display: flex;
+          }
+          .flex-col {
+            flex-direction: column;
+          }
+          .justify-center {
+            justify-content: center;
+          }
+          .align-center {
+            align-items: center;
+          }
+          .justify-between {
+            justify-content: space-between;
+          }
+          .bold {
+            font-weight: bold;
+          }
+          .text-lg {
+            font-size: 1.25em;
+          }
+          .text-xl {
+            font-size: 2em;
+          }
+          .top-offset {
+            margin-top: 40px;
+            height: calc(100% - 90px);
+          }
+          .padding-1 {
+            padding: 1em;
+          }
+          .w-screen {
+            width: 100vw;
+          }
+          .h-screen {
+            height: 100vh;
+          }
+          .w-full {
+            width: 100%;
+          }
+          .h-full {
+            height: 100%;
+          }
+          .bg-steamBg {
+            background: #0e141b;
+          }
+          .title-container {
+            flex: 0.8;
+          }
+          .gap-1\/4 {
+            gap: 0.25em;
+          }
+          .pb-1 {
+            padding-bottom: 1em;
+          }
+          .flex-1 {
+            flex: 1;
+          }
+          `}
+        </style>
+        <div className="w-screen h-screen bg-steamBg">
+          <div className="top-offset padding-1 flex flex-col">
+            {/* Title container */}
+            <div className="flex flex-col">
+              <span className="bold text-xl">{fullThemeData.displayName}</span>
+              <span className="text-lg">{fullThemeData.specifiedAuthor}</span>
+              <span>{fullThemeData.description}</span>
             </div>
-            <div
-              style={{
-                width: "40%",
-                marginLeft: "16px",
-              }}
-            >
-              <div
-                style={{
-                  marginBottom: "8px",
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                <span
-                  style={{
-                    fontWeight: "bold",
-                    fontSize: "1.25em",
-                  }}
-                >
-                  {fullThemeData.displayName}
-                </span>
-                <span>{fullThemeData.specifiedAuthor}</span>
-                <span>{fullThemeData.target}</span>
-                <span>{fullThemeData.version}</span>
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  {!apiFullToken && (
-                    <>
-                      <div style={{ display: "flex", alignItems: "center", fontSize: "1em" }}>
-                        <BsStarFill />
-                        <span>{fullThemeData.starCount}</span>
-                      </div>
-                    </>
-                  )}
-
-                  <div style={{ display: "flex", alignItems: "center", fontSize: "1em" }}>
-                    <FiDownload />
-                    <span>{fullThemeData.download.downloadCount}</span>
-                  </div>
-                </div>
-              </div>
-              <div>
-                {!!apiFullToken && (
-                  <>
-                    <PanelSectionRow>
-                      <div
-                        className="CssLoader_ThemeBrowser_ExpandedView_StarButton"
+            {/* Img + Details */}
+            <div className="flex w-full justify-between">
+              {/* Imgs */}
+              <Focusable className="flex-1">
+                <Carousel
+                  fnGetId={(id) => id}
+                  nHeight={266}
+                  nItemHeight={266}
+                  nItemMarginX={20}
+                  initialColumn={0}
+                  autoFocus
+                  nNumItems={fullThemeData.images.length}
+                  fnGetColumnWidth={() => 426}
+                  fnItemRenderer={(id) => {
+                    return (
+                      <Focusable
+                        focusWithinClassName="gpfocuswithin"
+                        onActivate={() => {
+                          console.log("test");
+                        }}
                         style={{
-                          // This padding here overrides the default padding put on PanelSectionRow's by Valve
-                          // Before this, I was using negative margin to "shrink" the element, but this is a much better solution
-                          paddingTop: "0px",
-                          paddingBottom: "0px",
+                          width: "426px",
+                          height: "266px",
+                          background: "#f00a",
+                          position: "relative",
                         }}
                       >
-                        <ButtonItem layout="below" onClick={toggleStar} disabled={blurStarButton}>
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              gap: "0.25em",
-                            }}
-                          >
-                            {isStarred ? (
-                              <BsStarFill style={{ height: "1.25em", width: "1.25em" }} />
-                            ) : (
-                              <BsStar style={{ height: "1.25em", width: "1.25em" }} />
-                            )}{" "}
-                            <span>{fullThemeData.starCount}</span>
-                          </div>
-                        </ButtonItem>
-                      </div>
-                    </PanelSectionRow>
-                  </>
+                        <img
+                          width={426}
+                          height={266}
+                          style={{ objectFit: "contain" }}
+                          src={`https://api.deckthemes.com/blobs/${fullThemeData.images[id].id}`}
+                        />
+                      </Focusable>
+                    );
+                  }}
+                />
+              </Focusable>
+              {/* Details */}
+              <div className="flex flex-col padding-1">
+                <div className="flex flex-col">
+                  <span className="bold">Category</span>
+                  <span>{fullThemeData.target}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="bold">Version</span>
+                  <span>{fullThemeData.version}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="bold">Published</span>
+                  <span>{new Date(fullThemeData.submitted).toLocaleDateString()}</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="bold">Updates</span>
+                  <span>{new Date(fullThemeData.updated).toLocaleDateString()}</span>
+                </div>
+                {!apiFullToken && (
+                  <div className="flex flex-col">
+                    <span className="bold">Stars</span>
+                    <span>
+                      {fullThemeData.starCount} Star{fullThemeData.starCount === 1 ? "" : "s"}
+                    </span>
+                  </div>
                 )}
-                <PanelSectionRow>
-                  <div
-                    className="CssLoader_ThemeBrowser_ExpandedView_InstallButtonColorFilter"
-                    style={{
-                      // This padding here overrides the default padding put on PanelSectionRow's by Valve
-                      // Before this, I was using negative margin to "shrink" the element, but this is a much better solution
-                      paddingTop: "0px",
-                      paddingBottom: "0px",
-                      // Filter is used to color the button blue for update
-                      filter: calcButtonColor(installStatus),
-                    }}
-                  >
-                    <ButtonItem
-                      layout="below"
-                      disabled={isInstalling}
-                      onClick={() => {
-                        if (
-                          installStatus === "installed" &&
-                          installedThemes.find((e) => e.id === fullThemeData.id)
-                        ) {
-                          showModal(
-                            // @ts-ignore
-                            <ThemeSettingsModalRoot
-                              selectedTheme={
-                                installedThemes.find((e) => e.id === fullThemeData.id)!.id
-                              }
-                            />
-                          );
-                          return;
-                        }
-                        installTheme(fullThemeData.id);
-                      }}
-                    >
-                      <span className="CssLoader_ThemeBrowser_ExpandedView_InstallText">
-                        {calcButtonText(installStatus)}
-                      </span>
-                    </ButtonItem>
-                  </div>
-                </PanelSectionRow>
-                <PanelSectionRow>
-                  <div
-                    className="CssLoader_ThemeBrowser_ExpandedView_BackButtonContainer"
-                    style={{
-                      // This padding here overrides the default padding put on PanelSectionRow's by Valve
-                      paddingTop: "0px",
-                      paddingBottom: "0px",
-                    }}
-                  >
-                    <ButtonItem
-                      // They forgot to add the ref property to the buttons interface, so I'm just tsignoring the warning
-                      // @ts-ignore
-                      ref={backButtonRef}
-                      bottomSeparator="none"
-                      layout="below"
-                      onClick={() => {
-                        setGlobalState("currentExpandedTheme", undefined);
-                        setFullData(undefined);
-                        setLoaded(false);
-                        // Wow amazing navigation interface I wonder who coded it
-                        Navigation.NavigateBack();
-                      }}
-                    >
-                      <span className="CssLoader_ThemeBrowser_ExpandedView_BackText">Back</span>
-                    </ButtonItem>
-                  </div>
-                </PanelSectionRow>
               </div>
             </div>
-          </div>
-          <div
-            style={{
-              flex: "1 1 0%",
-              flexGrow: "1",
-            }}
-          >
-            <span>
-              {fullThemeData?.description || (
-                <i
-                  style={{
-                    color: "#666",
-                  }}
-                >
-                  No description provided.
-                </i>
+            {/* Buttons */}
+            <div className="flex flex-col gap-1/4" style={{ width: "300px" }}>
+              {!!apiFullToken && (
+                <>
+                  <DialogButton onClick={toggleStar} disabled={blurStarButton}>
+                    <div className="flex items-center justify-center gap-1/4">
+                      {isStarred ? (
+                        <BsStarFill style={{ height: "1.25em", width: "1.25em" }} />
+                      ) : (
+                        <BsStar style={{ height: "1.25em", width: "1.25em" }} />
+                      )}{" "}
+                      <span>{fullThemeData.starCount}</span>
+                    </div>
+                  </DialogButton>
+                </>
               )}
-            </span>
+              <DialogButton
+                disabled={isInstalling}
+                onClick={() => {
+                  if (
+                    installStatus === "installed" &&
+                    installedThemes.find((e) => e.id === fullThemeData.id)
+                  ) {
+                    showModal(
+                      <ThemeSettingsModalRoot
+                        selectedTheme={installedThemes.find((e) => e.id === fullThemeData.id)!.id}
+                      />
+                    );
+                    return;
+                  }
+                  installTheme(fullThemeData.id);
+                }}
+                style={{ filter: calcButtonColor(installStatus) }}
+              >
+                <span className="CssLoader_ThemeBrowser_ExpandedView_InstallText">
+                  {calcButtonText(installStatus)}
+                </span>
+              </DialogButton>
+            </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
   return (
@@ -401,6 +387,7 @@ export const ExpandedViewPage: VFC = () => {
           alignItems: "center",
           justifyContent: "center",
           flex: "1",
+          background: "#0e141b",
         }}
       >
         <span>Error fetching selected theme, please go back and retry.</span>

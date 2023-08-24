@@ -12,7 +12,7 @@ export function ThemeManagerRouter() {
       style={{
         marginTop: "40px",
         height: "calc(100% - 40px)",
-        background: "#0005",
+        background: "#0e141b",
       }}
     >
       <Tabs
