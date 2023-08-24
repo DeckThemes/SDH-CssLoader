@@ -115,7 +115,7 @@ export const ExpandedViewPage: VFC = () => {
     if (backButtonRef?.current) {
       backButtonRef.current.focus();
     }
-  }, []);
+  }, [backButtonRef]);
 
   useEffect(() => {
     if (currentExpandedTheme?.id) {
