@@ -10,7 +10,7 @@ import {
 import { useEffect, useMemo, useRef, useState, VFC } from "react";
 import { ImSpinner5 } from "react-icons/im";
 import { BsStar, BsStarFill } from "react-icons/bs";
-import { FiArrowLeft, FiArrowRight, FiDownload } from "react-icons/fi";
+import { FiDownload } from "react-icons/fi";
 
 import * as python from "../../python";
 import { genericGET, refreshToken, toggleStar as apiToggleStar, installTheme } from "../../api";
@@ -35,33 +35,7 @@ export const ExpandedViewPage: VFC = () => {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [isStarred, setStarred] = useState<boolean>(false);
   const [blurStarButton, setBlurStar] = useState<boolean>(false);
-  const [selectedImage, setSelected] = useState<number>(0);
 
-  const currentImg = useMemo(() => {
-    if (
-      fullThemeData?.images[selectedImage]?.id &&
-      fullThemeData.images[selectedImage].id !== "MISSING"
-    ) {
-      return `url(https://api.deckthemes.com/blobs/${fullThemeData?.images[selectedImage].id})`;
-    } else {
-      return `url(https://share.deckthemes.com/${fullThemeData?.type.toLowerCase()}placeholder.png)`;
-    }
-  }, [selectedImage, fullThemeData]);
-
-  function incrementImg() {
-    if (selectedImage < fullThemeData!.images.length - 1) {
-      setSelected(selectedImage + 1);
-      return;
-    }
-    setSelected(0);
-  }
-  function decrementImg() {
-    if (selectedImage === 0) {
-      setSelected(fullThemeData!.images.length - 1);
-      return;
-    }
-    setSelected(selectedImage - 1);
-  }
   async function getStarredStatus() {
     if (fullThemeData) {
       genericGET(`/users/me/stars/${fullThemeData.id}`, true).then((data) => {
@@ -208,7 +182,7 @@ export const ExpandedViewPage: VFC = () => {
           .justify-center {
             justify-content: center;
           }
-          .align-center {
+          .items-center {
             align-items: center;
           }
           .justify-between {
@@ -245,10 +219,10 @@ export const ExpandedViewPage: VFC = () => {
           .bg-steamBg {
             background: #0e141b;
           }
-          .title-container {
-            flex: 0.8;
+          .gap-1 {
+            gap: 1em;
           }
-          .gap-1\/4 {
+          .gap-1\\/4 {
             gap: 0.25em;
           }
           .pb-1 {
@@ -257,46 +231,43 @@ export const ExpandedViewPage: VFC = () => {
           .flex-1 {
             flex: 1;
           }
+          .image-container {
+            width: 70%;
+          }
+          .title-container {
+            width: 30%;
+          }
           `}
         </style>
+
         <div className="w-screen h-screen bg-steamBg">
-          <div className="top-offset padding-1 flex flex-col">
-            {/* Title container */}
-            <div className="flex flex-col">
-              <span className="bold text-xl">{fullThemeData.displayName}</span>
-              <span className="text-lg">{fullThemeData.specifiedAuthor}</span>
-              <span>{fullThemeData.description}</span>
-            </div>
-            {/* Img + Details */}
-            <div className="flex w-full justify-between">
-              {/* Imgs */}
-              <Focusable className="flex-1">
+          <Focusable className="top-offset padding-1 flex flex-col">
+            {/* Img + Info */}
+            <Focusable className="flex gap-1">
+              <Focusable className="image-container">
                 <Carousel
                   fnGetId={(id) => id}
-                  nHeight={266}
-                  nItemHeight={266}
+                  nHeight={fullThemeData.images.length === 1 ? 525 : 400}
+                  nItemHeight={fullThemeData.images.length === 1 ? 525 : 400}
                   nItemMarginX={20}
                   initialColumn={0}
                   autoFocus
                   nNumItems={fullThemeData.images.length}
-                  fnGetColumnWidth={() => 426}
+                  fnGetColumnWidth={() => (fullThemeData.images.length === 1 ? 840 : 640)}
                   fnItemRenderer={(id) => {
                     return (
                       <Focusable
                         focusWithinClassName="gpfocuswithin"
-                        onActivate={() => {
-                          console.log("test");
-                        }}
+                        onActivate={() => {}}
                         style={{
-                          width: "426px",
-                          height: "266px",
-                          background: "#f00a",
+                          width: `${fullThemeData.images.length === 1 ? 840 : 640}px`,
+                          height: `${fullThemeData.images.length === 1 ? 525 : 400}px`,
                           position: "relative",
                         }}
                       >
                         <img
-                          width={426}
-                          height={266}
+                          width={fullThemeData.images.length === 1 ? 840 : 640}
+                          height={fullThemeData.images.length === 1 ? 525 : 400}
                           style={{ objectFit: "contain" }}
                           src={`https://api.deckthemes.com/blobs/${fullThemeData.images[id].id}`}
                         />
@@ -305,74 +276,87 @@ export const ExpandedViewPage: VFC = () => {
                   }}
                 />
               </Focusable>
-              {/* Details */}
-              <div className="flex flex-col padding-1">
-                <div className="flex flex-col">
-                  <span className="bold">Category</span>
-                  <span>{fullThemeData.target}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="bold">Version</span>
-                  <span>{fullThemeData.version}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="bold">Published</span>
-                  <span>{new Date(fullThemeData.submitted).toLocaleDateString()}</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="bold">Updates</span>
-                  <span>{new Date(fullThemeData.updated).toLocaleDateString()}</span>
-                </div>
+              <Focusable className="flex flex-col gap-1/4 title-container">
+                <span className="bold text-xl">{fullThemeData.displayName}</span>
+                <span className="text-lg">By {fullThemeData.specifiedAuthor}</span>
+                <span>{fullThemeData.version}</span>
                 {!apiFullToken && (
-                  <div className="flex flex-col">
-                    <span className="bold">Stars</span>
-                    <span>
-                      {fullThemeData.starCount} Star{fullThemeData.starCount === 1 ? "" : "s"}
-                    </span>
+                  <div style={{ display: "flex", alignItems: "center", fontSize: "1em" }}>
+                    <BsStarFill />
+                    <span>{fullThemeData.starCount}</span>
                   </div>
                 )}
-              </div>
-            </div>
-            {/* Buttons */}
-            <div className="flex flex-col gap-1/4" style={{ width: "300px" }}>
-              {!!apiFullToken && (
-                <>
-                  <DialogButton onClick={toggleStar} disabled={blurStarButton}>
-                    <div className="flex items-center justify-center gap-1/4">
-                      {isStarred ? (
-                        <BsStarFill style={{ height: "1.25em", width: "1.25em" }} />
-                      ) : (
-                        <BsStar style={{ height: "1.25em", width: "1.25em" }} />
-                      )}{" "}
-                      <span>{fullThemeData.starCount}</span>
-                    </div>
+                <div className="flex items-center">
+                  <FiDownload />
+                  <span>{fullThemeData.download.downloadCount}</span>
+                </div>
+                <div className="flex flex-col gap-1/4">
+                  {!!apiFullToken && (
+                    <>
+                      <DialogButton onClick={toggleStar} disabled={blurStarButton}>
+                        <div className="flex items-center justify-center gap-1/4">
+                          {isStarred ? (
+                            <BsStarFill style={{ height: "1.25em", width: "1.25em" }} />
+                          ) : (
+                            <BsStar style={{ height: "1.25em", width: "1.25em" }} />
+                          )}{" "}
+                          <span>{fullThemeData.starCount}</span>
+                        </div>
+                      </DialogButton>
+                    </>
+                  )}
+                  <DialogButton
+                    disabled={isInstalling}
+                    onClick={() => {
+                      if (
+                        installStatus === "installed" &&
+                        installedThemes.find((e) => e.id === fullThemeData.id)
+                      ) {
+                        showModal(
+                          <ThemeSettingsModalRoot
+                            selectedTheme={
+                              installedThemes.find((e) => e.id === fullThemeData.id)!.id
+                            }
+                          />
+                        );
+                        return;
+                      }
+                      installTheme(fullThemeData.id);
+                    }}
+                    style={{ filter: calcButtonColor(installStatus) }}
+                  >
+                    <span className="CssLoader_ThemeBrowser_ExpandedView_InstallText">
+                      {calcButtonText(installStatus)}
+                    </span>
                   </DialogButton>
-                </>
+                  <DialogButton
+                    // @ts-ignore
+                    ref={backButtonRef}
+                    onClick={() => {
+                      setGlobalState("currentExpandedTheme", undefined);
+                      setFullData(undefined);
+                      setLoaded(false);
+                      Navigation.NavigateBack();
+                    }}
+                  >
+                    Back
+                  </DialogButton>
+                </div>
+              </Focusable>
+            </Focusable>
+            {/* Description */}
+            <span>
+              {fullThemeData?.description || (
+                <i
+                  style={{
+                    color: "#666",
+                  }}
+                >
+                  No description provided.
+                </i>
               )}
-              <DialogButton
-                disabled={isInstalling}
-                onClick={() => {
-                  if (
-                    installStatus === "installed" &&
-                    installedThemes.find((e) => e.id === fullThemeData.id)
-                  ) {
-                    showModal(
-                      <ThemeSettingsModalRoot
-                        selectedTheme={installedThemes.find((e) => e.id === fullThemeData.id)!.id}
-                      />
-                    );
-                    return;
-                  }
-                  installTheme(fullThemeData.id);
-                }}
-                style={{ filter: calcButtonColor(installStatus) }}
-              >
-                <span className="CssLoader_ThemeBrowser_ExpandedView_InstallText">
-                  {calcButtonText(installStatus)}
-                </span>
-              </DialogButton>
-            </div>
-          </div>
+            </span>
+          </Focusable>
         </div>
       </>
     );
