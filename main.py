@@ -325,11 +325,19 @@ class Plugin:
             return Result(False, str(e))    
 
     async def _generate_preset_theme_internal(self, name : str, deps : dict) -> Result:
-        Log(f"Generating theme preset '{name}'...")
-        a = await self._get_theme(self, name)
-        if a != None and FLAG_PRESET not in a.flags:
+        display_name = name
+        name = f"{name}.profile"
+        Log(f"Generating theme preset '{display_name}'...")
+
+        existing_theme = await self._get_theme(self, name)
+        if existing_theme is not None and FLAG_PRESET not in existing_theme.flags:
             return Result(False, f"Theme '{name}' already exists")
         
+        if existing_theme is None:
+            existing_theme = await self._get_theme(self, display_name)
+            if existing_theme is not None and FLAG_PRESET in existing_theme.flags:
+                name = existing_theme.name
+                
         theme_path = path.join(get_theme_path(), name)
 
         if not path.exists(theme_path):
@@ -337,6 +345,7 @@ class Plugin:
         
         with open(path.join(theme_path, "theme.json"), "w") as fp:
             json.dump({
+                "display_name": display_name,
                 "name": name,
                 "manifest_version": CSS_LOADER_VER,
                 "flags": [FLAG_PRESET],
