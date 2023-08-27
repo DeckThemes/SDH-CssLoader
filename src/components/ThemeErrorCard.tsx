@@ -3,12 +3,13 @@ import { ThemeError } from "../ThemeTypes";
 
 export function ThemeErrorCard({ errorData }: { errorData: ThemeError }) {
   return (
-    <div
+    <Focusable
+      focusWithinClassName="gpfocuswithin"
+      onActivate={() => {}}
       style={{
         width: "100%",
         margin: 0,
         padding: 0,
-        height: "3em",
       }}
     >
       <div
@@ -24,6 +25,6 @@ export function ThemeErrorCard({ errorData }: { errorData: ThemeError }) {
         </span>
         <span>{errorData[1]}</span>
       </div>
-    </div>
+    </Focusable>
   );
 }

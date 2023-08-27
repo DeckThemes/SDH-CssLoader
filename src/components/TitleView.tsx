@@ -1,16 +1,16 @@
-import { DialogButton, Router, staticClasses, Focusable } from "decky-frontend-lib";
+import { DialogButton, Navigation, staticClasses, Focusable } from "decky-frontend-lib";
 import { BsGearFill } from "react-icons/bs";
-import { FaStore } from "react-icons/fa";
+import { FaInfo, FaStore } from "react-icons/fa";
 
-export function TitleView() {
-  //   const onSettingsClick = () => {
-  //     Router.CloseSideMenus();
-  //     Router.Navigate("/decky/settings");
-  //   };
+export function TitleView({ onDocsClick }: { onDocsClick?: () => {} }) {
+  const onSettingsClick = () => {
+    Navigation.CloseSideMenus();
+    Navigation.Navigate("/cssloader/settings");
+  };
 
   const onStoreClick = () => {
-    Router.CloseSideMenus();
-    Router.Navigate("/cssloader/theme-manager");
+    Navigation.CloseSideMenus();
+    Navigation.Navigate("/cssloader/theme-manager");
   };
 
   return (
@@ -26,19 +26,25 @@ export function TitleView() {
       }}
       className={staticClasses.Title}
     >
-      <div style={{ marginRight: "auto", flex: 0.9 }}>CSS Loader</div>
+      <div style={{ marginRight: "auto", flex: 0.9 }}>CUSTOM TITLE</div>
       <DialogButton
         style={{ height: "28px", width: "40px", minWidth: 0, padding: "10px 12px" }}
         onClick={onStoreClick}
       >
         <FaStore style={{ marginTop: "-4px", display: "block" }} />
       </DialogButton>
-      {/* <DialogButton
+      <DialogButton
         style={{ height: "28px", width: "40px", minWidth: 0, padding: "10px 12px" }}
         onClick={onSettingsClick}
       >
         <BsGearFill style={{ marginTop: "-4px", display: "block" }} />
-      </DialogButton> */}
+      </DialogButton>
+      <DialogButton
+        style={{ height: "28px", width: "40px", minWidth: 0, padding: "10px 12px" }}
+        onClick={onDocsClick}
+      >
+        <FaInfo style={{ marginTop: "-4px", display: "block" }} />
+      </DialogButton>
     </Focusable>
   );
 }

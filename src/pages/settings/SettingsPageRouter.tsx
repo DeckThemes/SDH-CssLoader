@@ -17,7 +17,11 @@ export function SettingsPageRouter() {
             padding-left: 0;
             padding-right: 0;
           }
-
+          .CSSLoader_FullTheme_ToggleContainer {
+            flex-grow: 1;
+            position: relative;
+          }
+          /* The actual element of the ToggleContainer with the BG */
           .CSSLoader_FullTheme_ToggleContainer > div {
             background: #23262e;
             border-radius: 2px;
@@ -25,10 +29,11 @@ export function SettingsPageRouter() {
             padding-right: 5px;
             margin-left: 0;
             margin-right: 0;
+            height: 1.25em !important;
           }
-          .CSSLoader_FullTheme_ToggleContainer {
-            flex-grow: 1;
-            position: relative;
+          /* Since we manually force the height of the container, we have to adjust the text and ToggleSwitch */
+          .CSSLoader_FullTheme_ToggleContainer > div > div > div {
+            transform: translate(0, -1px);
           }
           .CSSLoader_FullTheme_EntryContainer {
             display: flex;
@@ -49,7 +54,7 @@ export function SettingsPageRouter() {
           }
           .CSSLoader_FullTheme_ThemeLabel {
             white-space: nowrap;
-            max-width: 150px;
+            max-width: 300px;
             overflow: hidden;
             text-overflow: ellipsis;
           }

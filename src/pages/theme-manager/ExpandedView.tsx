@@ -4,6 +4,7 @@ import {
   DialogButton,
   Focusable,
   Navigation,
+  PanelSection,
   PanelSectionRow,
   showModal,
 } from "decky-frontend-lib";
@@ -110,12 +111,15 @@ export const ExpandedViewPage: VFC = () => {
     return buttonText;
   }
 
+  // For some reason, setting the ref as the useEffect dependency didn't work...
   const backButtonRef = useRef<HTMLElement>(null);
+  const [hasBeenFocused, setHasFocused] = useState<boolean>(false);
   useEffect(() => {
-    if (backButtonRef?.current) {
+    if (backButtonRef?.current && !hasBeenFocused) {
       backButtonRef.current.focus();
+      setHasFocused(true);
     }
-  }, [backButtonRef]);
+  });
 
   useEffect(() => {
     if (currentExpandedTheme?.id) {
@@ -191,11 +195,11 @@ export const ExpandedViewPage: VFC = () => {
           .bold {
             font-weight: bold;
           }
-          .text-lg {
-            font-size: 1.25em;
+          .text-sm {
+            font-size: 0.75em;
           }
           .text-xl {
-            font-size: 2em;
+            font-size: 1.5em;
           }
           .top-offset {
             margin-top: 40px;
@@ -244,52 +248,24 @@ export const ExpandedViewPage: VFC = () => {
           <Focusable className="top-offset padding-1 flex flex-col">
             {/* Img + Info */}
             <Focusable className="flex gap-1">
-              <Focusable className="image-container">
-                <Carousel
-                  fnGetId={(id) => id}
-                  nHeight={fullThemeData.images.length === 1 ? 525 : 400}
-                  nItemHeight={fullThemeData.images.length === 1 ? 525 : 400}
-                  nItemMarginX={20}
-                  initialColumn={0}
-                  autoFocus
-                  nNumItems={fullThemeData.images.length}
-                  fnGetColumnWidth={() => (fullThemeData.images.length === 1 ? 840 : 640)}
-                  fnItemRenderer={(id) => {
-                    return (
-                      <Focusable
-                        focusWithinClassName="gpfocuswithin"
-                        onActivate={() => {}}
-                        style={{
-                          width: `${fullThemeData.images.length === 1 ? 840 : 640}px`,
-                          height: `${fullThemeData.images.length === 1 ? 525 : 400}px`,
-                          position: "relative",
-                        }}
-                      >
-                        <img
-                          width={fullThemeData.images.length === 1 ? 840 : 640}
-                          height={fullThemeData.images.length === 1 ? 525 : 400}
-                          style={{ objectFit: "contain" }}
-                          src={`https://api.deckthemes.com/blobs/${fullThemeData.images[id].id}`}
-                        />
-                      </Focusable>
-                    );
-                  }}
-                />
-              </Focusable>
-              <Focusable className="flex flex-col gap-1/4 title-container">
-                <span className="bold text-xl">{fullThemeData.displayName}</span>
-                <span className="text-lg">By {fullThemeData.specifiedAuthor}</span>
-                <span>{fullThemeData.version}</span>
-                {!apiFullToken && (
-                  <div style={{ display: "flex", alignItems: "center", fontSize: "1em" }}>
-                    <BsStarFill />
-                    <span>{fullThemeData.starCount}</span>
+              <Focusable className="flex flex-col gap-1/4 title-container justify-between">
+                {/* Info */}
+                <div className="flex flex-col gap-1/4">
+                  <span className="bold text-xl">{fullThemeData.displayName}</span>
+                  <span>By {fullThemeData.specifiedAuthor}</span>
+                  <span>{fullThemeData.version}</span>
+                  {!apiFullToken && (
+                    <div style={{ display: "flex", alignItems: "center", fontSize: "1em" }}>
+                      <BsStarFill />
+                      <span>{fullThemeData.starCount}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center">
+                    <FiDownload />
+                    <span>{fullThemeData.download.downloadCount}</span>
                   </div>
-                )}
-                <div className="flex items-center">
-                  <FiDownload />
-                  <span>{fullThemeData.download.downloadCount}</span>
                 </div>
+                {/* Buttons */}
                 <div className="flex flex-col gap-1/4">
                   {!!apiFullToken && (
                     <>
@@ -343,19 +319,56 @@ export const ExpandedViewPage: VFC = () => {
                   </DialogButton>
                 </div>
               </Focusable>
+              {/* Images */}
+              <Focusable className="image-container">
+                <Carousel
+                  fnGetId={(id) => id}
+                  nHeight={fullThemeData.images.length === 1 ? 328 : 328}
+                  nItemHeight={fullThemeData.images.length === 1 ? 328 : 328}
+                  nItemMarginX={20}
+                  initialColumn={0}
+                  autoFocus={false}
+                  nNumItems={fullThemeData.images.length}
+                  fnGetColumnWidth={() => (fullThemeData.images.length === 1 ? 526 : 526)}
+                  fnItemRenderer={(id) => {
+                    return (
+                      <Focusable
+                        focusWithinClassName="gpfocuswithin"
+                        onActivate={() => {}}
+                        style={{
+                          width: `${fullThemeData.images.length === 1 ? 526 : 526}px`,
+                          height: `${fullThemeData.images.length === 1 ? 328 : 328}px`,
+                          position: "relative",
+                        }}
+                      >
+                        <img
+                          width={fullThemeData.images.length === 1 ? 526 : 526}
+                          height={fullThemeData.images.length === 1 ? 328 : 328}
+                          style={{ objectFit: "contain" }}
+                          src={`https://api.deckthemes.com/blobs/${fullThemeData.images[id].id}`}
+                        />
+                      </Focusable>
+                    );
+                  }}
+                />
+              </Focusable>
             </Focusable>
             {/* Description */}
-            <span>
-              {fullThemeData?.description || (
-                <i
-                  style={{
-                    color: "#666",
-                  }}
-                >
-                  No description provided.
-                </i>
-              )}
-            </span>
+            <Focusable focusWithinClassName="gpfocuswihtin" onActivate={() => {}}>
+              <PanelSection title="Description">
+                <span className={fullThemeData?.description?.length > 400 ? "text-sm" : ""}>
+                  {fullThemeData?.description || (
+                    <i
+                      style={{
+                        color: "#666",
+                      }}
+                    >
+                      No description provided.
+                    </i>
+                  )}
+                </span>
+              </PanelSection>
+            </Focusable>
           </Focusable>
         </div>
       </>

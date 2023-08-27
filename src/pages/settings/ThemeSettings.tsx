@@ -52,9 +52,7 @@ export function ThemeSettings() {
   return (
     <div className="CSSLoader_PanelSection_NoPadding_Parent">
       <PanelSection title="Installed Themes">
-        <Focusable
-          style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gridGap: "1em" }}
-        >
+        <Focusable style={{ display: "grid", gridTemplateColumns: "1fr", gridGap: "0.25em" }}>
           {sortedList.map((e) => (
             <FullscreenSingleThemeEntry
               data={e}

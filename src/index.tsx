@@ -203,7 +203,7 @@ export default definePlugin((serverApi: ServerAPI) => {
   ));
 
   return {
-    // titleView: <TitleView />,
+    titleView: <TitleView />,
     title: <div>CSSLoader</div>,
     alwaysRender: true,
     content: (
