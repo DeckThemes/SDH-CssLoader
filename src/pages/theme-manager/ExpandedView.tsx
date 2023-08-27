@@ -7,6 +7,8 @@ import {
   PanelSection,
   PanelSectionRow,
   showModal,
+  ScrollPanelGroup,
+  Panel,
 } from "decky-frontend-lib";
 import { useEffect, useMemo, useRef, useState, VFC } from "react";
 import { ImSpinner5 } from "react-icons/im";
@@ -236,89 +238,33 @@ export const ExpandedViewPage: VFC = () => {
             flex: 1;
           }
           .image-container {
-            width: 70%;
           }
           .title-container {
-            width: 30%;
+            padding: 1em;
+          }
+          .justify-end {
+            justify-content: flex-end;
+          }
+          .overflow-y-auto {
+            overflow-y: auto;
+          }
+          .buttons-container {
+            height: 403px;
+            position: sticky;
+          }
+          .theme-data-container {
+            height: max-content;
+            background: #212734;
+            width: 526px;
           }
           `}
         </style>
 
-        <div className="w-screen h-screen bg-steamBg">
-          <Focusable className="top-offset padding-1 flex flex-col">
+        <Focusable className="top-offset padding-1 flex bg-steamBg">
+          {/* @ts-ignore */}
+          <ScrollPanelGroup focusable={false} style={{ width: "526px", display: "flex" }}>
             {/* Img + Info */}
-            <Focusable className="flex gap-1">
-              <Focusable className="flex flex-col gap-1/4 title-container justify-between">
-                {/* Info */}
-                <div className="flex flex-col gap-1/4">
-                  <span className="bold text-xl">{fullThemeData.displayName}</span>
-                  <span>By {fullThemeData.specifiedAuthor}</span>
-                  <span>{fullThemeData.version}</span>
-                  {!apiFullToken && (
-                    <div style={{ display: "flex", alignItems: "center", fontSize: "1em" }}>
-                      <BsStarFill />
-                      <span>{fullThemeData.starCount}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center">
-                    <FiDownload />
-                    <span>{fullThemeData.download.downloadCount}</span>
-                  </div>
-                </div>
-                {/* Buttons */}
-                <div className="flex flex-col gap-1/4">
-                  {!!apiFullToken && (
-                    <>
-                      <DialogButton onClick={toggleStar} disabled={blurStarButton}>
-                        <div className="flex items-center justify-center gap-1/4">
-                          {isStarred ? (
-                            <BsStarFill style={{ height: "1.25em", width: "1.25em" }} />
-                          ) : (
-                            <BsStar style={{ height: "1.25em", width: "1.25em" }} />
-                          )}{" "}
-                          <span>{fullThemeData.starCount}</span>
-                        </div>
-                      </DialogButton>
-                    </>
-                  )}
-                  <DialogButton
-                    disabled={isInstalling}
-                    onClick={() => {
-                      if (
-                        installStatus === "installed" &&
-                        installedThemes.find((e) => e.id === fullThemeData.id)
-                      ) {
-                        showModal(
-                          <ThemeSettingsModalRoot
-                            selectedTheme={
-                              installedThemes.find((e) => e.id === fullThemeData.id)!.id
-                            }
-                          />
-                        );
-                        return;
-                      }
-                      installTheme(fullThemeData.id);
-                    }}
-                    style={{ filter: calcButtonColor(installStatus) }}
-                  >
-                    <span className="CssLoader_ThemeBrowser_ExpandedView_InstallText">
-                      {calcButtonText(installStatus)}
-                    </span>
-                  </DialogButton>
-                  <DialogButton
-                    // @ts-ignore
-                    ref={backButtonRef}
-                    onClick={() => {
-                      setGlobalState("currentExpandedTheme", undefined);
-                      setFullData(undefined);
-                      setLoaded(false);
-                      Navigation.NavigateBack();
-                    }}
-                  >
-                    Back
-                  </DialogButton>
-                </div>
-              </Focusable>
+            <Focusable className="flex flex-col gap-1 theme-data-container">
               {/* Images */}
               <Focusable className="image-container">
                 <Carousel
@@ -352,25 +298,96 @@ export const ExpandedViewPage: VFC = () => {
                   }}
                 />
               </Focusable>
-            </Focusable>
-            {/* Description */}
-            <Focusable focusWithinClassName="gpfocuswihtin" onActivate={() => {}}>
-              <PanelSection title="Description">
-                <span className={fullThemeData?.description?.length > 400 ? "text-sm" : ""}>
-                  {fullThemeData?.description || (
-                    <i
-                      style={{
-                        color: "#666",
-                      }}
-                    >
-                      No description provided.
-                    </i>
+              <Focusable className="flex flex-col gap-1/4 title-container justify-between">
+                {/* Info */}
+                <div className="flex flex-col gap-1/4">
+                  <span className="bold text-xl">{fullThemeData.displayName}</span>
+                  <div className="flex gap-1/4">
+                    <span>By {fullThemeData.specifiedAuthor}</span>
+                    <span>{fullThemeData.version}</span>
+                  </div>
+                  {!apiFullToken && (
+                    <div style={{ display: "flex", alignItems: "center", fontSize: "1em" }}>
+                      <BsStarFill />
+                      <span>{fullThemeData.starCount}</span>
+                    </div>
                   )}
-                </span>
-              </PanelSection>
+                  <div className="flex items-center">
+                    <FiDownload />
+                    <span>{fullThemeData.download.downloadCount}</span>
+                  </div>
+                </div>
+                {/* Description */}
+                <Focusable focusWithinClassName="gpfocuswihtin" onActivate={() => {}}>
+                  <PanelSection title="Description">
+                    <span className={fullThemeData?.description?.length > 400 ? "text-sm" : ""}>
+                      {fullThemeData?.description || (
+                        <i
+                          style={{
+                            color: "#666",
+                          }}
+                        >
+                          No description provided.
+                        </i>
+                      )}
+                    </span>
+                  </PanelSection>
+                </Focusable>
+              </Focusable>
             </Focusable>
+          </ScrollPanelGroup>
+          {/* Buttons */}
+          <Focusable className="flex flex-col gap-1/4 justify-end buttons-container">
+            {!!apiFullToken && (
+              <>
+                <DialogButton onClick={toggleStar} disabled={blurStarButton}>
+                  <div className="flex items-center justify-center gap-1/4">
+                    {isStarred ? (
+                      <BsStarFill style={{ height: "1.25em", width: "1.25em" }} />
+                    ) : (
+                      <BsStar style={{ height: "1.25em", width: "1.25em" }} />
+                    )}{" "}
+                    <span>{fullThemeData.starCount}</span>
+                  </div>
+                </DialogButton>
+              </>
+            )}
+            <DialogButton
+              disabled={isInstalling}
+              onClick={() => {
+                if (
+                  installStatus === "installed" &&
+                  installedThemes.find((e) => e.id === fullThemeData.id)
+                ) {
+                  showModal(
+                    <ThemeSettingsModalRoot
+                      selectedTheme={installedThemes.find((e) => e.id === fullThemeData.id)!.id}
+                    />
+                  );
+                  return;
+                }
+                installTheme(fullThemeData.id);
+              }}
+              style={{ filter: calcButtonColor(installStatus) }}
+            >
+              <span className="CssLoader_ThemeBrowser_ExpandedView_InstallText">
+                {calcButtonText(installStatus)}
+              </span>
+            </DialogButton>
+            <DialogButton
+              // @ts-ignore
+              ref={backButtonRef}
+              onClick={() => {
+                setGlobalState("currentExpandedTheme", undefined);
+                setFullData(undefined);
+                setLoaded(false);
+                Navigation.NavigateBack();
+              }}
+            >
+              Back
+            </DialogButton>
           </Focusable>
-        </div>
+        </Focusable>
       </>
     );
   }
