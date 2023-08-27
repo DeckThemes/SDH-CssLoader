@@ -340,6 +340,19 @@ export const ExpandedViewPage: VFC = () => {
             bottom: 1em;
             right: 1em;
           }
+          .install-text {
+            width: 200px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+          }
+          .name-text {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            font-size: 1.5em;
+            font-weight: bold;
+          }
           `}
         </style>
 
@@ -405,7 +418,7 @@ export const ExpandedViewPage: VFC = () => {
                 {/* Info */}
                 <div className="flex flex-col gap-1/4">
                   <div className="flex gap-1/2 items-center">
-                    <span className="bold text-xl">{fullThemeData.displayName}</span>
+                    <span className="name-text">{fullThemeData.displayName}</span>
                     <span className="bold text-lg">{fullThemeData.version}</span>
                   </div>
                   <div className="flex gap-1/4 gray-text font-sm">
@@ -437,7 +450,8 @@ export const ExpandedViewPage: VFC = () => {
             <div className="button-bg flex justify-between items-center">
               <div className="flex gap-1/4 items-center">
                 {isStarred ? <BsStarFill /> : <BsStar />}
-                <span>
+                {/* Need to make the text size smaller or else it wraps */}
+                <span style={{ fontSize: fullThemeData.starCount >= 100 ? "0.75em" : "1em" }}>
                   {fullThemeData.starCount} Star{fullThemeData.starCount === 1 ? "" : "s"}
                 </span>
               </div>
@@ -454,7 +468,7 @@ export const ExpandedViewPage: VFC = () => {
               </DialogButton>
             </div>
             <div className="flex flex-col gap-1/4 button-bg">
-              <span>Install {fullThemeData.displayName}</span>
+              <span className="install-text">Install {fullThemeData.displayName}</span>
               <span className="bold">
                 {fullThemeData.download.downloadCount} Download
                 {fullThemeData.download.downloadCount === 1 ? "" : "s"}
