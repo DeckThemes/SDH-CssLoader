@@ -353,6 +353,12 @@ export const ExpandedViewPage: VFC = () => {
             font-size: 1.5em;
             font-weight: bold;
           }
+          .target-text {
+            background: rgba(59, 90, 114, 0.5);
+            color: rgb(26, 159, 255);
+            padding: 8px 12px;
+            border-radius: 2px;
+          }
           `}
         </style>
 
@@ -360,7 +366,7 @@ export const ExpandedViewPage: VFC = () => {
           {/* @ts-ignore */}
           <ScrollPanelGroup focusable={false} className="flex">
             {/* Img + Info */}
-            <Focusable className="flex-col gap-1 theme-data-container">
+            <Focusable className="flex-col theme-data-container">
               {/* Images */}
               <Focusable className="flex image-area-container">
                 {/* Vertical Image Carousel */}
@@ -429,7 +435,12 @@ export const ExpandedViewPage: VFC = () => {
                   </div>
                 </div>
                 {/* Description */}
-                <Focusable focusWithinClassName="gpfocuswihtin" onActivate={() => {}}>
+                <Focusable
+                  focusWithinClassName="gpfocuswihtin"
+                  className="flex-col gap-1/4"
+                  onActivate={() => {}}
+                >
+                  <span className="bold">Description</span>
                   <span className={fullThemeData?.description?.length > 400 ? "text-sm" : ""}>
                     {fullThemeData?.description || (
                       <i
@@ -441,6 +452,19 @@ export const ExpandedViewPage: VFC = () => {
                       </i>
                     )}
                   </span>
+                </Focusable>
+                {/* Targets */}
+                <Focusable
+                  focusWithinClassName="gpfocuswihtin"
+                  className="flex-col gap-1/4"
+                  onActivate={() => {}}
+                >
+                  <span className="bold">Targets</span>
+                  <div className="flex gap-1/4">
+                    {fullThemeData.targets.map((e) => (
+                      <span className="target-text">{e}</span>
+                    ))}
+                  </div>
                 </Focusable>
               </Focusable>
             </Focusable>

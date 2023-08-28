@@ -13,6 +13,7 @@ export interface MinimalCSSThemeInfo {
   displayName: string;
   version: string;
   target: string;
+  targets: string[];
   manifestVersion: number;
   specifiedAuthor: string;
   type: "Css" | "Audio";
