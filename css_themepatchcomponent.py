@@ -30,12 +30,12 @@ def get_value_from_masks(m1 : float, m2 : float, hue : float) -> int:
 def hsl_to_rgb(hue : int, saturation : int, lightness : int) -> tuple[int, int, int]:
     ONE_THIRD = 1.0/3.0
 
-    h = float(hue) / 255.0
-    l = float(lightness) / 255.0
-    s = float(saturation) / 255.0
+    h = float(hue) / 360.0
+    l = float(lightness) / 100.0
+    s = float(saturation) / 100.0
 
     if s == 0.0:
-        return (int(l * 255.0), int(l * 255.0), int(l * 255.0))
+        return (int(l * 100.0), int(l * 100.0), int(l * 100.0))
     
     m2 = l * (1.0 + s) if l <= 0.5 else l + s - (l * s)
     m1 = 2.0 * l - m2
