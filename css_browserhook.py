@@ -384,7 +384,7 @@ class BrowserHook:
                             x.put_nowait(data)
 
             except Exception as e:
-                Log(f"[Browser Health Check] {str(e)}")
+                Result(False, f"[Health Check] {str(e)}")
 
             try:
                 await self.close_websocket()
@@ -404,8 +404,8 @@ def get_tabs(tab_name : str) -> List[BrowserTabHook]:
         if tab.compare(tab_name):
             tabs.append(tab)
 
-    if tabs == []:
-        Log(f"[Warn] get_tabs({tab_name}) returned []. All tabs: {str([x.title for x in HOOK.connected_tabs])}")
+    #if tabs == []:
+    #    Log(f"[Warn] get_tabs({tab_name}) returned []. All tabs: {str([x.title for x in HOOK.connected_tabs])}")
     
     return tabs
 

@@ -38,7 +38,6 @@ class Inject:
     async def inject(self) -> Result:
         for tab_name in self.tabs:
             for uuid in self.uuids[tab_name]:
-                Log(f"-{uuid} @ {tab_name}")
                 res = await remove(tab_name, uuid)
 
             if (self.css is None):
@@ -89,7 +88,6 @@ class Inject:
 
             try:
                 for x in self.uuids[tab_name]:
-                    Log(f"-{x} @ {tab_name}")
                     res = await remove(tab_name, x)
                     #if not res["success"]:
                     #    return Result(False, res["result"])

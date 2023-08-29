@@ -1,5 +1,5 @@
 from logging import getLogger
-import os, platform
+import os, platform, traceback
 
 HOME = os.getenv("HOME")
 
@@ -35,8 +35,11 @@ class Result:
         self.success = success
         self.message = message
 
+        stack = traceback.extract_stack()
+        function_above = stack[-2]
+
         if log and not self.success:
-            Log(f"Result failed! {message}")
+            Log(f"[FAIL] [{os.path.basename(function_above.filename)}:{function_above.lineno}] {message}")
     
     def raise_on_failure(self):
         if not self.success:
