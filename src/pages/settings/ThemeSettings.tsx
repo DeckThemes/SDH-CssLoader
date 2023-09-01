@@ -1,4 +1,4 @@
-import { Focusable, PanelSection } from "decky-frontend-lib";
+import { DialogButton, DialogCheckbox, Focusable, PanelSection } from "decky-frontend-lib";
 import { useCssLoaderState } from "../../state";
 import { useMemo, useState } from "react";
 import { Flags, Theme } from "../../ThemeTypes";
@@ -6,12 +6,14 @@ import { FullscreenSingleThemeEntry } from "../../components/ThemeSettings/Fulls
 import { ThemeErrorCard } from "../../components/ThemeErrorCard";
 import { installTheme } from "../../api";
 import * as python from "../../python";
+import { DeleteMenu } from "../../components/ThemeSettings/DeleteMenu";
 
 export function ThemeSettings() {
   const { localThemeList, unpinnedThemes, themeErrors, setGlobalState, updateStatuses } =
     useCssLoaderState();
 
   const [isInstalling, setInstalling] = useState(false);
+  const [mode, setMode] = useState<"view" | "delete">("view");
 
   const sortedList = useMemo(() => {
     return localThemeList
@@ -51,15 +53,44 @@ export function ThemeSettings() {
 
   return (
     <div className="CSSLoader_PanelSection_NoPadding_Parent">
+      <style>
+        {`
+          .CSSLoader_InstalledThemes_Container {
+            display: flex;
+            flex-direction: column;
+          }
+          .CSSLoader_InstalledThemes_ModeButton {
+            margin-bottom: 1em !important;
+          }
+          .CSSLoader_DeleteThemes_DeleteButton {
+            margin-top: 1em !important;
+          }
+        `}
+      </style>
       <PanelSection title="Installed Themes">
-        <Focusable style={{ display: "grid", gridTemplateColumns: "1fr", gridGap: "0.25em" }}>
-          {sortedList.map((e) => (
-            <FullscreenSingleThemeEntry
-              data={e}
-              showModalButtonPrompt
-              {...{ handleUpdate, handleUninstall, isInstalling }}
-            />
-          ))}
+        <Focusable className="CSSLoader_InstalledThemes_Container">
+          <DialogButton
+            className="CSSLoader_InstalledThemes_ModeButton"
+            onClick={() => (mode === "delete" ? setMode("view") : setMode("delete"))}
+          >
+            {mode === "delete" ? "Go Back" : "Delete Themes"}
+          </DialogButton>
+          {mode === "view" && (
+            <>
+              <Focusable style={{ display: "grid", gridTemplateColumns: "1fr", gridGap: "0.25em" }}>
+                {sortedList.map((e) => (
+                  <FullscreenSingleThemeEntry
+                    data={e}
+                    showModalButtonPrompt
+                    {...{ handleUpdate, handleUninstall, isInstalling }}
+                  />
+                ))}
+              </Focusable>
+            </>
+          )}
+          {mode === "delete" && (
+            <DeleteMenu leaveDeleteMode={() => setMode("view")} themeList={sortedList} />
+          )}
         </Focusable>
       </PanelSection>
       {themeErrors.length > 0 && (

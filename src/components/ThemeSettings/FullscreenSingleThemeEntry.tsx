@@ -35,10 +35,7 @@ export function FullscreenSingleThemeEntry({
     ? {
         onOptionsActionDescription: "Expand Settings",
         onOptionsButton: () => {
-          showModal(
-            // @ts-ignore
-            <ThemeSettingsModalRoot selectedTheme={data.id} />
-          );
+          showModal(<ThemeSettingsModalRoot selectedTheme={e.id} />);
         },
       }
     : {};
@@ -56,6 +53,20 @@ export function FullscreenSingleThemeEntry({
   return (
     <>
       <div className="CSSLoader_FullTheme_EntryContainer">
+        {updateStatus === "outdated" && (
+          <div
+            style={{
+              position: "absolute",
+              left: "-1em",
+              top: "50%",
+              transform: "translate(0,-50%)",
+              width: "0.5em",
+              height: "0.5em",
+              backgroundColor: "#fca904",
+              borderRadius: "100%",
+            }}
+          ></div>
+        )}
         <Focusable
           {...modalButtonProps}
           {...updateButtonProps}
@@ -96,15 +107,6 @@ export function FullscreenSingleThemeEntry({
           }}
         >
           <ImCog className="CSSLoader_FullTheme_IconTranslate" />
-        </DialogButton>
-        <DialogButton
-          disabled={isInstalling}
-          className="CSSLoader_FullTheme_DialogButton"
-          onClick={() => {
-            handleUninstall(e);
-          }}
-        >
-          <FaTrash className="CSSLoader_FullTheme_IconTranslate" />
         </DialogButton>
       </div>
     </>
