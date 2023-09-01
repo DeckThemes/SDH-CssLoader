@@ -22,7 +22,7 @@ export function ThemeSettingsModalRoot({
   );
 }
 
-export function ThemeSettingsModal({
+function ThemeSettingsModal({
   closeModal,
   selectedTheme,
 }: {
@@ -52,7 +52,12 @@ export function ThemeSettingsModal({
       >
         {themeData ? (
           <div style={{ width: "90%" }}>
-            <ThemeToggle data={themeData} collapsible={false} showModalButtonPrompt={false} />
+            <ThemeToggle
+              isFullscreen
+              data={themeData}
+              collapsible={false}
+              showModalButtonPrompt={false}
+            />
           </div>
         ) : (
           <span>No Theme Data</span>
