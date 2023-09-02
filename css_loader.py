@@ -47,7 +47,7 @@ class Loader:
 
     async def set_theme_state(self, name : str, state : bool, set_deps : bool = True, set_deps_value : bool = True) -> Result:
         Log(f"Setting state for {name} to {state}")
-        theme = await self._get_theme(self, name)
+        theme = await self._get_theme(name)
 
         if theme == None:
             return Result(False, f"Did not find theme {name}")

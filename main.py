@@ -105,7 +105,7 @@ class Plugin:
         return (await self.loader.set_component_of_theme_patch(themeName, patchName, componentName, value)).to_dict()
     
     async def reset(self) -> dict:
-        return (await self.loader.reset()).to_dict()
+        return (await self.loader.reset())
 
     async def delete_theme(self, themeName : str) -> dict:
         return (await self.loader.delete_theme(themeName)).to_dict()
