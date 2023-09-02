@@ -278,6 +278,10 @@ class BrowserHook:
             return None
         raise RuntimeError("Websocket not opened")   
     
+    async def _tab_exists(self, tab_id : str):
+        result = await self.send_command("Target.getTargets", {}, None)
+        return tab_id in [x["targetId"] for x in result["result"]["targetInfos"] if x["type"] == "page"]
+
     async def on_new_tab(self):
         queue = asyncio.Queue(maxsize=MAX_QUEUE_SIZE)
         self.ws_response.append(queue) 
@@ -287,6 +291,9 @@ class BrowserHook:
             
             if "method" in message and message["method"] == "Target.targetCreated":
                 if message["params"]["targetInfo"]["type"] != "page":
+                    continue
+
+                if not await self._tab_exists(message["params"]["targetInfo"]["targetId"]):
                     continue
 
                 await self.send_command("Target.attachToTarget", {"targetId": message["params"]["targetInfo"]["targetId"], "flatten": True}, None, False)
@@ -300,6 +307,9 @@ class BrowserHook:
 
             if "method" in message and message["method"] == "Target.targetInfoChanged":
                 target_info = message["params"]["targetInfo"]
+
+                if not await self._tab_exists(message["params"]["targetInfo"]["targetId"]):
+                    continue
 
                 for connected_tab in self.connected_tabs:
                     if target_info["targetId"] == connected_tab.id:

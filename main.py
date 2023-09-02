@@ -99,7 +99,7 @@ class Plugin:
         return CSS_LOADER_VER
 
     async def set_patch_of_theme(self, themeName : str, patchName : str, value : str) -> dict:
-        return (await self.loader.set_component_of_theme_patch(themeName, patchName, value)).to_dict()
+        return (await self.loader.set_patch_of_theme(themeName, patchName, value)).to_dict()
     
     async def set_component_of_theme_patch(self, themeName : str, patchName : str, componentName : str, value : str) -> dict:
         return (await self.loader.set_component_of_theme_patch(themeName, patchName, componentName, value)).to_dict()
@@ -109,6 +109,12 @@ class Plugin:
 
     async def delete_theme(self, themeName : str) -> dict:
         return (await self.loader.delete_theme(themeName)).to_dict()
+    
+    async def generate_preset_theme(self, name : str) -> Result:
+        return (await self.loader.generate_preset_theme(name)).to_dict()
+
+    async def generate_preset_theme_from_theme_names(self, name : str, themeNames : list) -> Result:
+        return (await self.loader.generate_preset_theme_from_theme_names(name, themeNames)).to_dict()
 
     async def store_read(self, key : str) -> str:
         return util_store_read(key)

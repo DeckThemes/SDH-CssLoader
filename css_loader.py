@@ -259,7 +259,7 @@ class Loader:
         return None
     
     async def _get_patch_of_theme(self, themeName : str, patchName : str) -> ThemePatch:
-        theme = self._get_theme(themeName)
+        theme = await self._get_theme(themeName)
         
         if theme is None:
             raise Exception(f"Did not find theme '{themeName}'")
