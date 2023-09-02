@@ -18,12 +18,11 @@ export async function toggleTheme(
   if (enabled && data.flags.includes(Flags.optionalDeps)) {
     showModal(<OptionalDepsModalRoot themeData={data} />);
     rerender && rerender();
-    return;
+  } else {
+    // Actually enabling the theme
+    await python.setThemeState(data.name, enabled);
+    await python.getInstalledThemes();
   }
-
-  // Actually enabling the theme
-  await python.setThemeState(data.name, enabled);
-  await python.getInstalledThemes();
 
   // Re-collapse menu
   setCollapsed && setCollapsed(true);
