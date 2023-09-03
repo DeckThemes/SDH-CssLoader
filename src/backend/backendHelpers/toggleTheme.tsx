@@ -10,8 +10,8 @@ import { NavPatchInfoModalRoot } from "../../deckyPatches/NavPatchInfoModal";
 export async function toggleTheme(
   data: Theme,
   enabled: boolean,
-  rerender?: () => void,
-  setCollapsed?: Dispatch<SetStateAction<boolean>>
+  rerender: () => void = () => {},
+  setCollapsed: Dispatch<SetStateAction<boolean>> = () => {}
 ) {
   const { selectedPreset, localThemeList, navPatchInstance } = python.globalState!.getPublicState();
   // Optional Deps Themes

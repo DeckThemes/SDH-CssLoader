@@ -9,14 +9,14 @@ export function DeleteConfirmationModalRoot({
 }: {
   themesToBeDeleted: string[];
   closeModal?: any;
-  leaveDeleteMode: () => void;
+  leaveDeleteMode?: () => void;
 }) {
   async function deleteThemes() {
     for (let i = 0; i < themesToBeDeleted.length; i++) {
       await python.deleteTheme(themesToBeDeleted[i]);
     }
     await python.getInstalledThemes();
-    leaveDeleteMode();
+    leaveDeleteMode && leaveDeleteMode();
     closeModal();
   }
 
