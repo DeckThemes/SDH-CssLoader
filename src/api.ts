@@ -23,12 +23,14 @@ export function logOut(): void {
   storeWrite("shortToken", "");
 }
 
-export function logInWithShortToken(shortTokenInterimValue?: string | undefined): void {
+export async function logInWithShortToken(
+  shortTokenInterimValue?: string | undefined
+): Promise<void> {
   const { apiUrl, apiShortToken } = globalState!.getPublicState();
   const shortTokenValue = shortTokenInterimValue ? shortTokenInterimValue : apiShortToken;
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
   if (shortTokenValue.length === 12) {
-    server!
+    return server!
       .fetchNoCors(`${apiUrl}/auth/authenticate_token`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -75,7 +77,7 @@ export function logInWithShortToken(shortTokenInterimValue?: string | undefined)
 }
 
 // This returns the token that is intended to be used in whatever call
-export function refreshToken(): Promise<string | undefined> {
+export function refreshToken(onError: () => void = () => {}): Promise<string | undefined> {
   const { apiFullToken, apiTokenExpireDate, apiUrl } = globalState!.getPublicState();
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
   if (!apiFullToken) {
@@ -121,13 +123,15 @@ export function refreshToken(): Promise<string | undefined> {
     })
     .catch((err) => {
       console.error(`Error Refreshing Token!`, err);
+      onError();
     });
 }
 
 export async function genericGET(
   fetchPath: string,
   requiresAuth: boolean = false,
-  customAuthToken: string | undefined = undefined
+  customAuthToken: string | undefined = undefined,
+  onError: () => void = () => {}
 ) {
   const { apiUrl } = globalState!.getPublicState();
   function doTheFetching(authToken: string | undefined = undefined) {
@@ -161,13 +165,14 @@ export async function genericGET(
       })
       .catch((err) => {
         console.error(`Error fetching ${fetchPath}`, err);
+        onError();
       });
   }
   if (requiresAuth) {
     if (customAuthToken) {
       return doTheFetching(customAuthToken);
     }
-    return refreshToken().then((token) => {
+    return refreshToken(onError).then((token) => {
       if (token) {
         return doTheFetching(token);
       } else {
@@ -214,7 +219,8 @@ export function getThemes(
   });
 }
 
-export function toggleStar(themeId: string, isStarred: boolean, authToken: string, apiUrl: string) {
+export function toggleStar(themeId: string, isStarred: boolean, authToken: string) {
+  const { apiUrl } = globalState!.getPublicState();
   return server!
     .fetchNoCors<Response>(`${apiUrl}/users/me/stars/${themeId}`, {
       method: isStarred ? "DELETE" : "POST",

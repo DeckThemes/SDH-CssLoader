@@ -16,6 +16,7 @@ export default defineConfig({
     nodeResolve(),
     typescript(),
     json(),
+    styles(),
     replace({
       preventAssignment: false,
       "process.env.NODE_ENV": JSON.stringify("production"),
@@ -23,7 +24,6 @@ export default defineConfig({
     importAssets({
       publicPath: `http://127.0.0.1:1337/plugins/${name}/`,
     }),
-    styles(),
   ],
   context: "window",
   external: ["react", "react-dom"],

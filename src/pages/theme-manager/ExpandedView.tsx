@@ -10,10 +10,9 @@ import {
   ScrollPanelGroup,
   Panel,
 } from "decky-frontend-lib";
-import { useEffect, useMemo, useRef, useState, VFC } from "react";
+import { useEffect, useRef, useState, VFC } from "react";
 import { ImSpinner5 } from "react-icons/im";
 import { BsStar, BsStarFill } from "react-icons/bs";
-import { FiDownload } from "react-icons/fi";
 
 import * as python from "../../python";
 import { genericGET, refreshToken, toggleStar as apiToggleStar, installTheme } from "../../api";
@@ -60,7 +59,7 @@ export const ExpandedViewPage: VFC = () => {
       setBlurStar(true);
       const newToken = await refreshToken();
       if (fullThemeData && newToken) {
-        apiToggleStar(fullThemeData.id, isStarred, newToken, apiUrl).then((bool) => {
+        apiToggleStar(fullThemeData.id, isStarred, newToken).then((bool) => {
           if (bool) {
             setFullData({
               ...fullThemeData,
