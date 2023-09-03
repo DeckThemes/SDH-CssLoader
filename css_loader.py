@@ -310,7 +310,11 @@ class Loader:
     
     async def _generate_preset_theme_internal(self, name : str, deps : dict) -> Result:
         display_name = name
-        name = f"{name}.profile"
+
+        if (display_name.endswith(".profile")):
+            display_name = display_name[:-8]
+
+        name = f"{display_name}.profile"
         Log(f"Generating theme preset '{display_name}'...")
 
         existing_theme = await self._get_theme(name)
@@ -319,8 +323,11 @@ class Loader:
         
         if existing_theme is None:
             existing_theme = await self._get_theme(display_name)
-            if existing_theme is not None and FLAG_PRESET in existing_theme.flags:
-                name = existing_theme.name
+            if existing_theme is not None:
+                if FLAG_PRESET in existing_theme.flags:
+                    name = existing_theme.name
+                else:
+                    return Result(False, f"Theme '{display_name}' already exists")
                 
         theme_path = path.join(get_theme_path(), name)
 
