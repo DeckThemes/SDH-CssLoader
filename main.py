@@ -142,7 +142,7 @@ class Plugin:
     
     async def get_last_load_errors(self):
         return {
-            "fails": self.last_load_errors
+            "fails": self.loader.last_load_errors
         }
 
     async def _main(self):
