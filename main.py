@@ -63,18 +63,26 @@ class Plugin:
         self.server_loaded = True
         return Result(True).to_dict()
     
-    async def toggle_watch_state(self, enable : bool = True) -> dict:
+    async def toggle_watch_state(self, enable : bool = True, only_this_session : bool = False) -> dict:
         if enable and self.observer == None:
             Log("Observing themes folder for file changes")
             self.observer = Observer()
             self.handler = FileChangeHandler(self.loader, asyncio.get_running_loop())
             self.observer.schedule(self.handler, get_theme_path(), recursive=True)
             self.observer.start()
+
+            if not only_this_session:
+                util_store_write("watch", "1")
+
             return Result(True).to_dict()
         elif self.observer != None and not enable:
             Log("Stopping observer")
             self.observer.stop()
             self.observer = None
+
+            if not only_this_session:
+                util_store_write("watch", "0")
+
             return Result(True).to_dict()
         
         return Result(False, "Nothing to do!").to_dict()
