@@ -362,8 +362,19 @@ export const ExpandedViewPage: VFC = () => {
         </style>
 
         <Focusable className="top-offset padding-horiz-1 gap-1 flex bg-storeBg justify-between">
-          {/* @ts-ignore */}
-          <ScrollPanelGroup focusable={false} className="flex">
+          <ScrollPanelGroup
+            // @ts-ignore
+            focusable={false}
+            className="flex"
+            // onCancelButton doesn't work here
+            onCancelActionDescription="Back"
+            onButtonDown={(evt: any) => {
+              if (!evt?.detail?.button) return;
+              if (evt.detail.button === 2) {
+                Navigation.NavigateBack();
+              }
+            }}
+          >
             {/* Img + Info */}
             <Focusable className="flex-col theme-data-container">
               {/* Images */}

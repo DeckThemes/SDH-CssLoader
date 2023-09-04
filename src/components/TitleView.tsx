@@ -17,16 +17,15 @@ export function TitleView({ onDocsClick }: { onDocsClick?: () => {} }) {
     <Focusable
       style={{
         display: "flex",
-        paddingTop: "3px",
-        paddingRight: "0px",
-        paddingLeft: "0px",
+        padding: "0",
         width: "100%",
+        boxShadow: "none",
         alignItems: "center",
         justifyContent: "space-between",
       }}
       className={staticClasses.Title}
     >
-      <div style={{ marginRight: "auto", flex: 0.9 }}>CUSTOM TITLE</div>
+      <div style={{ marginRight: "auto" }}>CSS Loader</div>
       <DialogButton
         style={{ height: "28px", width: "40px", minWidth: 0, padding: "10px 12px" }}
         onClick={onStoreClick}
@@ -38,12 +37,6 @@ export function TitleView({ onDocsClick }: { onDocsClick?: () => {} }) {
         onClick={onSettingsClick}
       >
         <BsGearFill style={{ marginTop: "-4px", display: "block" }} />
-      </DialogButton>
-      <DialogButton
-        style={{ height: "28px", width: "40px", minWidth: 0, padding: "10px 12px" }}
-        onClick={onDocsClick}
-      >
-        <FaInfo style={{ marginTop: "-4px", display: "block" }} />
       </DialogButton>
     </Focusable>
   );

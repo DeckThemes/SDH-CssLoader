@@ -85,30 +85,6 @@ function Content() {
               }
             `}
           </style>
-          <PanelSectionRow>
-            <Focusable className="CSSLoader_QAMTab_NavContainer">
-              <DialogButton
-                className="CSSLoader_QAMTab_NavButton"
-                onOKActionDescription="Download Themes"
-                onClick={() => {
-                  Navigation.CloseSideMenus();
-                  Navigation.Navigate("/cssloader/theme-manager");
-                }}
-              >
-                <FaStore className="CSSLoader_QAMTab_NavButtonIcon" />
-              </DialogButton>
-              <DialogButton
-                className="CSSLoader_QAMTab_NavButton"
-                onOKActionDescription="Settings"
-                onClick={() => {
-                  Navigation.CloseSideMenus();
-                  Navigation.Navigate("/cssloader/settings");
-                }}
-              >
-                <FaCog className="CSSLoader_QAMTab_NavButtonIcon" />
-              </DialogButton>
-            </Focusable>
-          </PanelSectionRow>
           <PresetSelectionDropdown />
           <QAMThemeToggleList />
         </>

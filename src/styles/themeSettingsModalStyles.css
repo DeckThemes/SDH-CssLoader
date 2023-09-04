@@ -7,6 +7,10 @@
   font-size: 2em;
 }
 
+.CSSLoader_ThemeSettingsModal_Subtitle {
+  font-size: 0.75em;
+}
+
 .CSSLoader_ThemeSettingsModal_Container {
   display: flex;
   flex-direction: column;
@@ -15,8 +19,9 @@
   width: 100%;
 }
 
-.CSSLoader_ThemeSettingsModal_Header {
+.CSSLoader_ThemeSettingsModal_ButtonsContainer {
   display: flex;
+  gap: 0.25em;
 }
 
 .CSSLoader_ThemeSettingsModalHeader_DialogButton {
@@ -28,4 +33,38 @@
 
 .CSSLoader_ThemeSettingsModal_IconTranslate {
   transform: translate(0px, 2px);
+}
+
+.CSSLoader_ThemeSettingsModal_Footer {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.CSSLoader_ThemeSettingsModal_TitleContainer {
+  display: flex;
+  max-width: 80%;
+  flex-direction: column;
+}
+
+.CSSLoader_ThemeSettingsModal_Header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.CSSLoader_ThemeSettingsModal_PatchContainer {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+}
+
+.CSSLoader_ThemeSettingsModal_UpdateButton {
+  display: flex !important;
+  gap: 0.25em;
+}
+
+.CSSLoader_ThemeSettingsModal_UpdateText {
+  font-size: 0.75em;
 }

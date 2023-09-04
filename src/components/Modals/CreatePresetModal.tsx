@@ -36,7 +36,7 @@ function CreatePresetModal({ closeModal }: { closeModal: () => void }) {
         if (selectedPreset) {
           await python.setThemeState(selectedPreset?.name, false);
         }
-        await python.setThemeState(presetName, true);
+        await python.setThemeState(presetName + ".profile", true);
         await python.getInstalledThemes();
         closeModal();
       }}

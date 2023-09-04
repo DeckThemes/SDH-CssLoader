@@ -1,12 +1,19 @@
 import { Focusable, ToggleField } from "decky-frontend-lib";
 import { useMemo, useState, useEffect } from "react";
 import { useCssLoaderState } from "../../state";
-import { enableServer, getServerState, storeWrite } from "../../python";
+import { storeWrite } from "../../python";
 import { disableNavPatch, enableNavPatch } from "../../deckyPatches/NavPatch";
+import {
+  getWatchState,
+  getServerState,
+  enableServer,
+  toggleWatchState,
+} from "../../backend/pythonMethods/pluginSettingsMethods";
 
 export function PluginSettings() {
   const { navPatchInstance } = useCssLoaderState();
   const [serverOn, setServerOn] = useState<boolean>(false);
+  const [watchOn, setWatchOn] = useState<boolean>(false);
 
   const navPatchEnabled = useMemo(() => !!navPatchInstance, [navPatchInstance]);
 
@@ -23,7 +30,23 @@ export function PluginSettings() {
       }
       setServerOn(false);
     });
+    getWatchState().then((res) => {
+      if (res.success) {
+        setWatchOn(res.result);
+        return;
+      }
+      setWatchOn(false);
+    });
   }, []);
+
+  async function setWatch(enabled: boolean) {
+    console.log("VALUE", enabled);
+    await toggleWatchState(enabled, false);
+    console.log("TOGGLED");
+    const res = await getWatchState();
+    console.log("RES FETCHED", res);
+    if (res.success && res.result) setWatchOn(res.result);
+  }
 
   async function setServer(enabled: boolean) {
     if (enabled) await enableServer();
@@ -51,6 +74,14 @@ export function PluginSettings() {
           label="Enable Nav Patch"
           description="This fixes issues with themes that attempt to hide elements of the UI"
           onChange={setNavPatch}
+        />
+      </Focusable>
+      <Focusable>
+        <ToggleField
+          checked={watchOn}
+          label="Live CSS Editing"
+          description="CSS Loader will watch ~/homebrew/themes for any changes and will automatically re-inject CSS."
+          onChange={setWatch}
         />
       </Focusable>
     </div>

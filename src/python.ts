@@ -4,7 +4,7 @@ import { CssLoaderState } from "./state";
 import { Theme, ThemeError } from "./ThemeTypes";
 import { bulkThemeUpdateCheck } from "./logic/bulkThemeUpdateCheck";
 
-var server: ServerAPI | undefined = undefined;
+export var server: ServerAPI | undefined = undefined;
 export var globalState: CssLoaderState | undefined = undefined;
 
 export function setServer(s: ServerAPI) {

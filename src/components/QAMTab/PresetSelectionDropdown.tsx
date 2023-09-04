@@ -31,7 +31,7 @@ export function PresetSelectionDropdown() {
                 ? [{ data: "Invalid State", label: "Invalid State" }]
                 : []),
               { data: "None", label: "None" },
-              ...presets.map((e) => ({ label: e.name, data: e.name })),
+              ...presets.map((e) => ({ label: e.display_name, data: e.name })),
               // This is a jank way of only adding it if creatingNewProfile = false
               {
                 data: "New Profile",
@@ -59,8 +59,6 @@ export function PresetSelectionDropdown() {
                 rerender();
                 return;
               }
-              // This is kind of abusing the system because if you select "None" it attempts to enable a theme called "None"
-              // But it works
               await changePreset(data, localThemeList);
               getInstalledThemes();
             }}
