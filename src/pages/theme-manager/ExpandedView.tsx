@@ -1,14 +1,9 @@
 import {
-  ButtonItem,
-  Carousel,
   DialogButton,
   Focusable,
   Navigation,
-  PanelSection,
-  PanelSectionRow,
   showModal,
   ScrollPanelGroup,
-  Panel,
 } from "decky-frontend-lib";
 import { useEffect, useRef, useState, VFC } from "react";
 import { ImSpinner5 } from "react-icons/im";
@@ -28,7 +23,6 @@ export const ExpandedViewPage: VFC = () => {
     localThemeList: installedThemes,
     currentExpandedTheme,
     isInstalling,
-    apiUrl,
     apiFullToken,
     setGlobalState,
   } = useCssLoaderState();
