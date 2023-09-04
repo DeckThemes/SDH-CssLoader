@@ -7,6 +7,7 @@ import { ThemeErrorCard } from "../../components/ThemeErrorCard";
 import { installTheme } from "../../api";
 import * as python from "../../python";
 import { DeleteMenu } from "../../components/ThemeSettings/DeleteMenu";
+import { UpdateAllThemesButton } from "../../components/ThemeSettings/UpdateAllThemesButton";
 
 export function ThemeSettings() {
   const { localThemeList, unpinnedThemes, themeErrors, setGlobalState, updateStatuses } =
@@ -60,21 +61,33 @@ export function ThemeSettings() {
             flex-direction: column;
           }
           .CSSLoader_InstalledThemes_ModeButton {
-            margin-bottom: 1em !important;
           }
           .CSSLoader_DeleteThemes_DeleteButton {
-            margin-top: 1em !important;
+          }
+          .CSSLoader_InstalledThemes_UpdateAllButton {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25em;
+          }
+          .CSSLoader_InstalledThemes_ButtonsContainer {
+            margin-bottom: 1em;
+            display: flex;
+            gap: 1em;
           }
         `}
       </style>
       <PanelSection title="Installed Themes">
         <Focusable className="CSSLoader_InstalledThemes_Container">
-          <DialogButton
-            className="CSSLoader_InstalledThemes_ModeButton"
-            onClick={() => (mode === "delete" ? setMode("view") : setMode("delete"))}
-          >
-            {mode === "delete" ? "Go Back" : "Delete Themes"}
-          </DialogButton>
+          <Focusable className="CSSLoader_InstalledThemes_ButtonsContainer">
+            <DialogButton
+              className="CSSLoader_InstalledThemes_ModeButton"
+              onClick={() => (mode === "delete" ? setMode("view") : setMode("delete"))}
+            >
+              {mode === "delete" ? "Go Back" : "Delete Themes"}
+            </DialogButton>
+            <UpdateAllThemesButton handleUpdate={handleUpdate} />
+          </Focusable>
           {mode === "view" && (
             <>
               <Focusable style={{ display: "grid", gridTemplateColumns: "1fr", gridGap: "0.25em" }}>

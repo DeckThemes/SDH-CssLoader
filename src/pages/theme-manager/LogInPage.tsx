@@ -18,8 +18,7 @@ export const LogInPage: VFC = () => {
           <h1 style={{ fontWeight: "bold", fontSize: "2em" }}>Your Account</h1>
         ) : (
           <h1 style={{ fontSize: "1em", fontWeight: "normal" }}>
-            <span style={{ fontWeight: "bold", fontSize: "2em" }}>Log In</span> - Create an account
-            on deckthemes.com and generate an account key on your profile page.
+            <span style={{ fontWeight: "bold", fontSize: "2em" }}>Log In</span>
           </h1>
         )}
         {apiFullToken ? (
@@ -83,6 +82,12 @@ export const LogInPage: VFC = () => {
             </Focusable>
           </>
         )}
+        <p>
+          Create an account on deckthemes.com and generate an account key on your profile page.
+          <br />
+          Logging in gives you access to star themes, saving them to their own page where you can
+          quickly find them.
+        </p>
       </div>
     </div>
   );
