@@ -83,10 +83,11 @@ export const LogInPage: VFC = () => {
           </>
         )}
         <p>
-          Create an account on deckthemes.com and generate an account key on your profile page.
-          <br />
           Logging in gives you access to star themes, saving them to their own page where you can
           quickly find them.
+          <br />
+          Create an account on deckthemes.com and generate an account key on your profile page.
+          <br />
         </p>
       </div>
     </div>

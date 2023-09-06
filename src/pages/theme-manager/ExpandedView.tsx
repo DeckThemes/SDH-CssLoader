@@ -6,7 +6,7 @@ import {
   ScrollPanelGroup,
 } from "decky-frontend-lib";
 import { useEffect, useRef, useState, VFC } from "react";
-import { ImSpinner5 } from "react-icons/im";
+import { ImCog, ImSpinner5 } from "react-icons/im";
 import { BsStar, BsStarFill } from "react-icons/bs";
 
 import * as python from "../../python";
@@ -94,7 +94,7 @@ export const ExpandedViewPage: VFC = () => {
     let buttonText = "";
     switch (installStatus) {
       case "installed":
-        buttonText = "Configure";
+        buttonText = "Reinstall";
         break;
       case "outdated":
         buttonText = "Update";
@@ -352,6 +352,21 @@ export const ExpandedViewPage: VFC = () => {
             padding: 8px 12px;
             border-radius: 2px;
           }
+          .install-button-container {
+            display: flex;
+            gap: 0.25em;
+          }
+          .configure-button {
+            width: 1em !important;
+            min-width: 1em !important;
+            position: relative;
+          }
+          .absolute-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+          }
           `}
         </style>
 
@@ -501,29 +516,37 @@ export const ExpandedViewPage: VFC = () => {
                 {fullThemeData.download.downloadCount} Download
                 {fullThemeData.download.downloadCount === 1 ? "" : "s"}
               </span>
-              <DialogButton
-                className="blue-button"
-                disabled={isInstalling}
-                onClick={() => {
-                  if (
-                    installStatus === "installed" &&
-                    installedThemes.find((e) => e.id === fullThemeData.id)
-                  ) {
-                    showModal(
-                      <ThemeSettingsModalRoot
-                        selectedTheme={installedThemes.find((e) => e.id === fullThemeData.id)!.id}
-                      />
-                    );
-                    return;
-                  }
-                  installTheme(fullThemeData.id);
-                }}
-                style={{ filter: calcButtonColor(installStatus) }}
-              >
-                <span className="CssLoader_ThemeBrowser_ExpandedView_InstallText">
-                  {calcButtonText(installStatus)}
-                </span>
-              </DialogButton>
+              <Focusable className="install-button-container">
+                <DialogButton
+                  className="blue-button"
+                  disabled={isInstalling}
+                  onClick={() => {
+                    installTheme(fullThemeData.id);
+                  }}
+                >
+                  <span className="CssLoader_ThemeBrowser_ExpandedView_InstallText">
+                    {calcButtonText(installStatus)}
+                  </span>
+                </DialogButton>
+                {installStatus === "installed" && (
+                  <DialogButton
+                    onClick={() => {
+                      showModal(
+                        <ThemeSettingsModalRoot
+                          selectedTheme={
+                            installedThemes.find((e) => e.id === fullThemeData.id)?.id ||
+                            // using name here because in submissions id is different
+                            installedThemes.find((e) => e.name === fullThemeData.name)!.id
+                          }
+                        />
+                      );
+                    }}
+                    className="configure-button"
+                  >
+                    <ImCog className="absolute-center" />
+                  </DialogButton>
+                )}
+              </Focusable>
             </div>
             <DialogButton
               className="back-button"
