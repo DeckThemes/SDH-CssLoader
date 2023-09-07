@@ -5,7 +5,9 @@ import { ThemeSettings } from "./ThemeSettings";
 import { PresetSettings } from "./PresetSettings";
 import { PluginSettings } from "./PluginSettings";
 import { Credits } from "./Credits";
-import { AiFillGithub } from "react-icons/ai";
+import { AiFillGithub, AiFillHeart } from "react-icons/ai";
+import { DonateIcon } from "../../components/DonatePage/DonateIcon";
+import { DonatePage } from "./DonatePage";
 
 export function SettingsPageRouter() {
   return (
@@ -65,6 +67,7 @@ export function SettingsPageRouter() {
           { title: "Themes", icon: <RiPaintFill />, content: <ThemeSettings /> },
           { title: "Profiles", icon: <BsFolder />, content: <PresetSettings /> },
           { title: "Settings", icon: <RiSettings2Fill />, content: <PluginSettings /> },
+          { title: "Donate", icon: <AiFillHeart />, content: <DonatePage /> },
           { title: "Credits", icon: <AiFillGithub />, content: <Credits /> },
         ]}
       ></SidebarNavigation>
