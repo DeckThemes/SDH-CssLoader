@@ -6,7 +6,6 @@ import { PresetSettings } from "./PresetSettings";
 import { PluginSettings } from "./PluginSettings";
 import { Credits } from "./Credits";
 import { AiFillGithub, AiFillHeart } from "react-icons/ai";
-import { DonateIcon } from "../../components/DonatePage/DonateIcon";
 import { DonatePage } from "./DonatePage";
 
 export function SettingsPageRouter() {

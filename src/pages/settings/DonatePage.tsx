@@ -7,16 +7,7 @@ export function DonatePage() {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [supporters, setSupporters] = useState<string>("");
   function fetchSupData() {
-    server!
-      .fetchNoCors<Response>(
-        "https://gist.githubusercontent.com/suchmememanyskill/5ee4ad408b08ee03ac370a4d6120510f/raw"
-      )
-      .then((res) => {
-        if (res.success) {
-          return res.result;
-        }
-        throw new Error("Unsuccessful");
-      })
+    fetch("https://api.deckthemes.com/patrons")
       .then((res) => {
         console.log(res);
         if (res.ok) {
