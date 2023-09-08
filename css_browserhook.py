@@ -375,7 +375,7 @@ class BrowserHook:
             await asyncio.sleep(3)
             try:
                 async with aiohttp.ClientSession() as web:
-                    res = await web.get(f"http://localhost:8080/json/version", timeout=3)
+                    res = await web.get(f"http://127.0.0.1:8080/json/version", timeout=3)
 
                 if (res.status != 200):
                     raise Exception(f"/json/version returned {res.status}")
