@@ -1,4 +1,4 @@
-import { Focusable } from "decky-frontend-lib";
+import { Focusable, PanelSection } from "decky-frontend-lib";
 import { useEffect, useState } from "react";
 import { SiKofi, SiPatreon } from "react-icons/si";
 import { server } from "../../python";
@@ -7,11 +7,17 @@ export function DonatePage() {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [supporters, setSupporters] = useState<string>("");
   function fetchSupData() {
-    fetch("https://api.deckthemes.com/patrons")
+    server!
+      .fetchNoCors<any>("https://api.deckthemes.com/patrons", { method: "GET" })
+      .then((deckyRes) => {
+        if (deckyRes.success) {
+          return deckyRes.result;
+        }
+        throw new Error("unsuccessful");
+      })
       .then((res) => {
-        console.log(res);
-        if (res.ok) {
-          return res.text();
+        if (res.status === 200) {
+          return res.body;
         }
         throw new Error("Res not OK");
       })
@@ -66,6 +72,13 @@ export function DonatePage() {
           display: flex;
           gap: 1em;
         }
+        .supporter-list-container {
+          margin-top: 1em;
+        }
+        .supporter-list {
+          white-space: pre-line;
+          margin: 0;
+        }
         `}
       </style>
       <p className="donation-spiel">
@@ -117,9 +130,13 @@ export function DonatePage() {
         </Focusable>
       </Focusable>
       {loaded ? (
-        <Focusable onActivate={() => {}} focusWithinClassName="gpfocuswithin">
-          <p>{supporters}</p>
-        </Focusable>
+        <div className="CSSLoader_PanelSection_NoPadding_Parent supporter-list-container">
+          <PanelSection title="Patreon Supporters">
+            <Focusable onActivate={() => {}} focusWithinClassName="gpfocuswithin">
+              <p className="supporter-list">{supporters}</p>
+            </Focusable>
+          </PanelSection>
+        </div>
       ) : null}
     </div>
   );
