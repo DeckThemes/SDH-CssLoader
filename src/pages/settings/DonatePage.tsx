@@ -65,6 +65,10 @@ export function DonatePage() {
         .perks-header {
           font-size: 1.125em;
         }
+        .link-header {
+          font-size: 1.125em;
+          margin-bottom: 0.5em;
+        }
         .patreon-or-kofi-container ul {
           margin: 0;
           padding-left: 20px;
@@ -97,7 +101,7 @@ export function DonatePage() {
             <span className="method-title">Patreon</span>
           </div>
           <span className="method-subtitle">Recurring Donation</span>
-          <span className="perks-header">patreon.com/deckthemes</span>
+          <span className="link-header">patreon.com/deckthemes</span>
           <span className="perks-header">Perks: </span>
           <ul>
             <li>
@@ -121,7 +125,7 @@ export function DonatePage() {
             <span className="method-title">Ko-Fi</span>
           </div>     
           <span className="method-subtitle">One-time Donation</span>
-          <span className="perks-header">ko-fi.com/suchmememanyskill</span>
+          <span className="link-header">ko-fi.com/suchmememanyskill</span>
         </Focusable>
       </Focusable>
       {loaded ? (
