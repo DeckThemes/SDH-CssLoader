@@ -96,8 +96,8 @@ export function DonatePage() {
             <SiPatreon />
             <span className="method-title">Patreon</span>
           </div>
-          <span className="perks-header">patreon.com/deckthemes</span>
           <span className="method-subtitle">Recurring Donation</span>
+          <span className="perks-header">patreon.com/deckthemes</span>
           <span className="perks-header">Perks: </span>
           <ul>
             <li>
@@ -107,7 +107,7 @@ export function DonatePage() {
             <li>Patreon badge on deckthemes.com</li>
             <li>
               {/* Could also impl. this on deck store to make it more meaningful */}
-              Colored name + VIP channel on the DeckThemes Discord
+              Colored name + VIP channel in the DeckThemes Discord
             </li>
           </ul>
         </Focusable>
@@ -119,9 +119,9 @@ export function DonatePage() {
           <div className="method-title-container">
             <SiKofi />
             <span className="method-title">Ko-Fi</span>
-          </div>
-          <span className="perks-header">ko-fi.com/suchmememanyskill</span>
+          </div>     
           <span className="method-subtitle">One-time Donation</span>
+          <span className="perks-header">ko-fi.com/suchmememanyskill</span>
         </Focusable>
       </Focusable>
       {loaded ? (
