@@ -1,11 +1,29 @@
-import { DialogButton, Focusable, Navigation, PanelSection } from "decky-frontend-lib";
-import { useEffect, useState } from "react";
+import {
+  DialogButton,
+  Focusable,
+  Navigation,
+  Panel,
+  PanelSection,
+  ScrollPanelGroup,
+} from "decky-frontend-lib";
+import { useEffect, useMemo, useState } from "react";
 import { SiKofi, SiPatreon } from "react-icons/si";
 import { server } from "../../python";
 
 export function DonatePage() {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [supporters, setSupporters] = useState<string>("");
+
+  const formattedSupporters = useMemo(() => {
+    const numOfNamesPerPage = 10;
+    const supportersArr = supporters.split("\n");
+    const newArr = [];
+    for (let i = 0; i < supportersArr.length; i += numOfNamesPerPage) {
+      newArr.push(supportersArr.slice(i, i + numOfNamesPerPage).join("\n"));
+    }
+    return newArr;
+  }, [supporters]);
+
   function fetchSupData() {
     server!
       .fetchNoCors<any>("https://api.deckthemes.com/patrons", { method: "GET" })
@@ -123,7 +141,7 @@ export function DonatePage() {
           <div className="method-title-container">
             <SiKofi />
             <span className="method-title">Ko-Fi</span>
-          </div>     
+          </div>
           <span className="method-subtitle">One-time Donation</span>
           <span className="link-header">ko-fi.com/suchmememanyskill</span>
         </Focusable>
@@ -131,9 +149,13 @@ export function DonatePage() {
       {loaded ? (
         <div className="CSSLoader_PanelSection_NoPadding_Parent supporter-list-container">
           <PanelSection title="Patreon Supporters">
-            <Focusable onActivate={() => {}} focusWithinClassName="gpfocuswithin">
-              <p className="supporter-list">{supporters}</p>
-            </Focusable>
+            {formattedSupporters.map((e) => {
+              return (
+                <Focusable onActivate={() => {}} focusWithinClassName="gpfocuswithin">
+                  <p className="supporter-list">{e}</p>
+                </Focusable>
+              );
+            })}
           </PanelSection>
         </div>
       ) : null}
