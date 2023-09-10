@@ -1,4 +1,4 @@
-import { Focusable, PanelSection } from "decky-frontend-lib";
+import { DialogButton, Focusable, Navigation, PanelSection } from "decky-frontend-lib";
 import { useEffect, useState } from "react";
 import { SiKofi, SiPatreon } from "react-icons/si";
 import { server } from "../../python";
@@ -84,8 +84,6 @@ export function DonatePage() {
       <p className="donation-spiel">
         Donations help to cover the costs of hosting the store, as well as funding development for
         CSS Loader and it's related projects.
-        <br />
-        We take donations through our Patreon and Ko-fi pages
       </p>
       <Focusable className="support-methods-container">
         <Focusable
@@ -104,13 +102,17 @@ export function DonatePage() {
               {/* Potentially could expand this to add it to deckthemes and audioloader */}
               Your name in CSS Loader.
             </li>
-            <li>Patreon badge in the DeckThemes Discord server.</li>
+            <li>Patreon badge on deckthemes.com</li>
             <li>
               {/* Could also impl. this on deck store to make it more meaningful */}
-              Colored name on deckthemes.com
+              Colored name + VIP channel on the DeckThemes Discord server. 
             </li>
-            <li>Access to VIP support chats with the DeckThemes team.</li>
           </ul>
+          <DialogButton onClick={() => Navigation.NavigateToExternalWeb("https://patreon.com/deckthemes")}>
+            <span>
+              patreon.com/deckthemes
+            </span>
+          </DialogButton>
         </Focusable>
         <Focusable
           onActivate={() => {}}
@@ -122,11 +124,11 @@ export function DonatePage() {
             <span className="method-title">Ko-Fi</span>
           </div>
           <span className="method-subtitle">One-time Donation</span>
-          <span className="perks-header">Perks: </span>
-          <li>
-            {/* we should somehow clarify that it lasts 6 months, maybe through an asterisk */}
-            Your name in CSS Loader.
-          </li>
+          <DialogButton onClick={() => Navigation.NavigateToExternalWeb("https://ko-fi.com/suchmememanyskill")}>
+            <span>
+              ko-fi.com/suchmememanyskill
+            </span>
+          </DialogButton>
         </Focusable>
       </Focusable>
       {loaded ? (
