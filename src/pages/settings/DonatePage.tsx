@@ -67,6 +67,7 @@ export function DonatePage() {
         }
         .patreon-or-kofi-container ul {
           margin: 0;
+          padding-left: 20px;
         }
         .support-methods-container {
           display: flex;
@@ -101,12 +102,12 @@ export function DonatePage() {
           <ul>
             <li>
               {/* Potentially could expand this to add it to deckthemes and audioloader */}
-              Your name in CSS Loader.
+              Your name in CSS Loader
             </li>
             <li>Patreon badge on deckthemes.com</li>
             <li>
               {/* Could also impl. this on deck store to make it more meaningful */}
-              Colored name + VIP channel on the DeckThemes Discord server. 
+              Colored name + VIP channel on the DeckThemes Discord
             </li>
           </ul>
         </Focusable>
