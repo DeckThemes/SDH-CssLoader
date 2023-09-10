@@ -87,7 +87,7 @@ export function DonatePage() {
       </p>
       <Focusable className="support-methods-container">
         <Focusable
-          onActivate={() => {}}
+          onActivate={() => Navigation.NavigateToExternalWeb("https://patreon.com/deckthemes")}
           focusWithinClassName="gpfocuswithin"
           className="patreon-or-kofi-container patreon"
         >
@@ -95,6 +95,7 @@ export function DonatePage() {
             <SiPatreon />
             <span className="method-title">Patreon</span>
           </div>
+          <span className="perks-header">patreon.com/deckthemes</span>
           <span className="method-subtitle">Recurring Donation</span>
           <span className="perks-header">Perks: </span>
           <ul>
@@ -108,14 +109,9 @@ export function DonatePage() {
               Colored name + VIP channel on the DeckThemes Discord server. 
             </li>
           </ul>
-          <DialogButton onClick={() => Navigation.NavigateToExternalWeb("https://patreon.com/deckthemes")}>
-            <span>
-              patreon.com/deckthemes
-            </span>
-          </DialogButton>
         </Focusable>
         <Focusable
-          onActivate={() => {}}
+          onActivate={() => Navigation.NavigateToExternalWeb("https://ko-fi.com/suchmememanyskill")}
           focusWithinClassName="gpfocuswithin"
           className="patreon-or-kofi-container"
         >
@@ -123,12 +119,8 @@ export function DonatePage() {
             <SiKofi />
             <span className="method-title">Ko-Fi</span>
           </div>
+          <span className="perks-header">ko-fi.com/suchmememanyskill</span>
           <span className="method-subtitle">One-time Donation</span>
-          <DialogButton onClick={() => Navigation.NavigateToExternalWeb("https://ko-fi.com/suchmememanyskill")}>
-            <span>
-              ko-fi.com/suchmememanyskill
-            </span>
-          </DialogButton>
         </Focusable>
       </Focusable>
       {loaded ? (
