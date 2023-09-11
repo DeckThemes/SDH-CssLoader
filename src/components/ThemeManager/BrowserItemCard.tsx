@@ -7,64 +7,10 @@ import { PartialCSSThemeInfo, ThemeQueryRequest } from "../../apiTypes";
 import { BsCloudDownload, BsStar } from "react-icons/bs";
 import { FiTarget } from "react-icons/fi";
 
-const topMargin = {
-  5: "2px",
-  4: "3px",
-  3: "5px",
-};
-
-const bottomMargin = {
-  5: "4px",
-  4: "6px",
-  3: "8px",
-};
-
 const cardWidth = {
-  5: "152px",
-  4: "195px",
-  3: "260px",
-};
-
-const imgWidth = {
-  5: "140.2px",
-  4: "180px",
-  3: "240px",
-};
-
-const imgHeight = {
-  5: "87.6px",
-  4: "112.5px",
-  3: "150px",
-};
-
-const targetHeight = {
-  5: "12px",
-  4: "18px",
-  3: "25px",
-};
-
-const bubbleOffset = {
-  5: "-5px",
-  4: "-7.5px",
-  3: "-10px",
-};
-
-const bubblePadding = {
-  5: "4px 5px 2.5px",
-  4: "4px 6px 2px",
-  3: "5px 8px 2.5px 8px",
-};
-
-const bigText = {
-  5: "0.75em",
-  4: "1em",
-  3: "1.25em",
-};
-
-const smallText = {
-  5: "0.5em",
-  4: "0.75em",
-  3: "1em",
+  5: 152,
+  4: 195,
+  3: 260,
 };
 
 export const VariableSizeCard: FC<{
@@ -111,26 +57,12 @@ export const VariableSizeCard: FC<{
     <>
       <div style={{ position: "relative" }}>
         {installStatus === "outdated" && (
-          <div
-            className="CssLoader_ThemeBrowser_SingleItem_NotifBubble"
-            style={{
-              position: "absolute",
-              top: bubbleOffset[size],
-              left: bubbleOffset[size],
-              padding: bubblePadding[size],
-              fontSize: smallText[size],
-              background: "linear-gradient(135deg, #3a9bed, #235ecf)",
-              borderRadius: "50%",
-              // The focusRing has a z index of 10000, so this is just to be cheeky
-              zIndex: "10001",
-              boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
-            }}
-          >
-            <AiOutlineDownload />
+          <div className="CSSLoader_ThemeCard_NotifBubble">
+            <AiOutlineDownload className="CSSLoader_ThemeCard_BubbleIcon" />
           </div>
         )}
         <Focusable
-          className="CSSLoader_ThemeCard_Container"
+          className={`CSSLoader_ThemeCard_Container`}
           ref={refPassthrough}
           focusWithinClassName="gpfocuswithin"
           onActivate={() => {
@@ -139,12 +71,12 @@ export const VariableSizeCard: FC<{
             Router.Navigate("/cssloader/expanded-view");
           }}
         >
-          <div className="CSSLoader_ThemeCard_ImageContainer">
+          <div className={`CSSLoader_ThemeCard_ImageContainer`}>
             <img
               className="CSSLoader_ThemeCard_Image"
               src={imageURLCreator().slice(4, -1)}
-              width={260}
-              height={(260 / 16) * 10}
+              width={cardWidth[size]}
+              height={(cardWidth[size] / 16) * 10}
             />
             <div className="CSSLoader_ThemeCard_ImageDarkener" />
             <div className="CSSLoader_ThemeCard_SupInfoContainer">

@@ -6,7 +6,7 @@ import { StarredThemesPage } from "./StarredThemesPage";
 import { SubmissionsPage } from "./SubmissionBrowserPage";
 import { ThemeBrowserPage } from "./ThemeBrowserPage";
 export function ThemeManagerRouter() {
-  const { apiMeData, currentTab, setGlobalState } = useCssLoaderState();
+  const { apiMeData, currentTab, setGlobalState, browserCardSize } = useCssLoaderState();
   return (
     <div
       style={{
@@ -17,12 +17,44 @@ export function ThemeManagerRouter() {
     >
       <style>
         {`
+          :root {
+            --cssloader-themecard-width: ${
+              browserCardSize === 3 ? "260px" : browserCardSize === 4 ? "195px" : "152px"
+            };
+            --cssloader-themecard-imgheight: ${
+              browserCardSize === 3
+                ? (260 / 16) * 10 + "px"
+                : browserCardSize === 4
+                ? (195 / 16) * 10 + "px"
+                : (152 / 16) * 10 + "px"
+            };
+            --cssloader-themecard-fontsize: ${
+              browserCardSize === 3 ? "1em" : browserCardSize === 4 ? "0.75em" : "0.5em"
+            };
+            --cssloader-themecard-bubblesize: ${
+              browserCardSize === 3 ? "40px" : browserCardSize === 4 ? "30px" : "20px"
+            };
+          }
+          .CSSLoader_ThemeCard_NotifBubble {
+            position: absolute;
+            background: linear-gradient(135deg, #fca904 50%, transparent 51%);
+            z-index: 10001;
+            left: 0;
+            top: 0;
+            color: black;
+            font-size: var(--cssloader-themecard-fontsize);
+            width: var(--cssloader-themecard-bubblesize);
+            height: var(--cssloader-themecard-bubblesize);
+          }
+          .CSSLoader_ThemeCard_BubbleIcon {
+            padding: 0.25em;
+          }
           .CSSLoader_ThemeCard_Container {
-            width: ${260}px;
             display: flex;
             flex-direction: column;
             background-color: #ACB2C924;
             overflow: hidden;
+            width: var(--cssloader-themecard-width);
           }
           .gpfocuswithin.CSSLoader_ThemeCard_Container {
             background-color: #ACB2C947;
@@ -30,8 +62,8 @@ export function ThemeManagerRouter() {
           .CSSLoader_ThemeCard_ImageContainer {
             overflow: hidden;
             position: relative;
-            width: ${260}px;
-            height: ${(260 / 16) * 10}px;
+            width: var(--cssloader-themecard-width);
+            height: var(--cssloader-themecard-imgheight);
           }
           .CSSLoader_ThemeCard_SupInfoContainer {
             display: flex;
@@ -46,6 +78,7 @@ export function ThemeManagerRouter() {
             transition-property: transform,opacity;
             transition-timing-function: cubic-bezier(0.17, 0.45, 0.14, 0.83);
             transition-duration: 0.15s;
+            font-size: var(--cssloader-themecard-fontsize);
           }
           .gpfocuswithin > div > .CSSLoader_ThemeCard_SupInfoContainer {
             transform: translateY(0);
@@ -56,6 +89,7 @@ export function ThemeManagerRouter() {
             display: flex;
             flex-direction: column;
             padding: 0.5em;
+            font-size: var(--cssloader-themecard-fontsize);
           }
           .CSSLoader_ThemeCard_Image {
             object-fit: cover;
@@ -72,14 +106,14 @@ export function ThemeManagerRouter() {
             position: absolute;
             top: 0;
             left: 0;
-            width: ${260}px;
-            height: ${(260 / 16) * 10}px;
             opacity: 0;
             transition-property: opacity;
             transition-duration: 0.65s;
             transition-timing-function: cubic-bezier(0.17, 0.45, 0.14, 0.83);
             background-color: #0056d6;
             mix-blend-mode: multiply;
+            width: var(--cssloader-themecard-width);
+            height: var(--cssloader-themecard-imgheight);
           }
           .gpfocuswithin > div > .CSSLoader_ThemeCard_ImageDarkener {
             opacity: 1;
