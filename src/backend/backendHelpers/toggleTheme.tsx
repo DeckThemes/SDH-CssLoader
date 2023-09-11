@@ -13,7 +13,8 @@ export async function toggleTheme(
   rerender: () => void = () => {},
   setCollapsed: Dispatch<SetStateAction<boolean>> = () => {}
 ) {
-  const { selectedPreset, localThemeList, navPatchInstance } = python.globalState!.getPublicState();
+  const { selectedPreset, navPatchInstance } = python.globalState!.getPublicState();
+
   // Optional Deps Themes
   if (enabled && data.flags.includes(Flags.optionalDeps)) {
     showModal(<OptionalDepsModalRoot themeData={data} />);
@@ -64,19 +65,13 @@ export async function toggleTheme(
 
   // Preset Updating
   if (!selectedPreset) return;
+  // Fetch this here so that the data is up to date
+  const { localThemeList } = python.globalState!.getPublicState();
+
   // This is copied from the desktop codebase
   // If we refactor the desktop version of this function (which we probably should) this should also be refactored
   await python.generatePresetFromThemeNames(
     selectedPreset.name,
-    enabled
-      ? [
-          ...localThemeList
-            .filter((e) => e.enabled && !e.flags.includes(Flags.isPreset))
-            .map((e) => e.name),
-          data.name,
-        ]
-      : localThemeList
-          .filter((e) => e.enabled && !e.flags.includes(Flags.isPreset) && e.name !== data.name)
-          .map((e) => e.name)
+    localThemeList.filter((e) => e.enabled && !e.flags.includes(Flags.isPreset)).map((e) => e.name)
   );
 }
