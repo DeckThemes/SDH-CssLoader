@@ -1,5 +1,5 @@
 import { SidebarNavigation } from "decky-frontend-lib";
-import { BsFolder } from "react-icons/bs";
+import { BsFolderFill } from "react-icons/bs";
 import { RiPaintFill, RiSettings2Fill } from "react-icons/ri";
 import { ThemeSettings } from "./ThemeSettings";
 import { PresetSettings } from "./PresetSettings";
@@ -64,7 +64,7 @@ export function SettingsPageRouter() {
       <SidebarNavigation
         pages={[
           { title: "Themes", icon: <RiPaintFill />, content: <ThemeSettings /> },
-          { title: "Profiles", icon: <BsFolder />, content: <PresetSettings /> },
+          { title: "Profiles", icon: <BsFolderFill />, content: <PresetSettings /> },
           { title: "Settings", icon: <RiSettings2Fill />, content: <PluginSettings /> },
           { title: "Donate", icon: <AiFillHeart />, content: <DonatePage /> },
           { title: "Credits", icon: <AiFillGithub />, content: <Credits /> },

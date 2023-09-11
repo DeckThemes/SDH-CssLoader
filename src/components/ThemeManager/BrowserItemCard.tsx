@@ -4,6 +4,8 @@ import { Theme } from "../../ThemeTypes";
 import { Focusable, Router } from "decky-frontend-lib";
 import { AiOutlineDownload } from "react-icons/ai";
 import { PartialCSSThemeInfo, ThemeQueryRequest } from "../../apiTypes";
+import { BsCloudDownload, BsStar } from "react-icons/bs";
+import { FiTarget } from "react-icons/fi";
 
 const topMargin = {
   5: "2px",
@@ -104,8 +106,8 @@ export const VariableSizeCard: FC<{
   }
 
   const installStatus = checkIfThemeInstalled(e);
+
   return (
-    // The outer 2 most divs are the background darkened/blurred image, and everything inside is the text/image/buttons
     <>
       <div style={{ position: "relative" }}>
         {installStatus === "outdated" && (
@@ -128,6 +130,7 @@ export const VariableSizeCard: FC<{
           </div>
         )}
         <Focusable
+          className="CSSLoader_ThemeCard_Container"
           ref={refPassthrough}
           focusWithinClassName="gpfocuswithin"
           onActivate={() => {
@@ -135,109 +138,36 @@ export const VariableSizeCard: FC<{
             setGlobalState("currentExpandedTheme", e);
             Router.Navigate("/cssloader/expanded-view");
           }}
-          className="CssLoader_ThemeBrowser_SingleItem_BgImage"
-          style={{
-            backgroundImage: imageURLCreator(),
-            backgroundSize: "cover",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-            width: cardWidth[size],
-            borderRadius: "5px",
-          }}
         >
-          <div
-            className="CssLoader_ThemeBrowser_SingleItem_BgOverlay"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              background: "RGBA(0,0,0,0.8)",
-              backdropFilter: "blur(5px)",
-              width: "100%",
-              height: "100%",
-              borderRadius: "3px",
-            }}
-          >
-            <span
-              className="CssLoader_ThemeBrowser_SingleItem_ThemeName"
-              style={{
-                textAlign: "center",
-                marginTop: topMargin[size],
-                fontSize: bigText[size],
-                fontWeight: "bold",
-                // This stuff here truncates it if it's too long
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                width: "90%",
-              }}
-            >
-              {e.displayName || e.name}
-            </span>
-            {showTarget && (
-              <span
-                className="CssLoader_ThemeBrowser_SingleItem_ThemeTarget"
-                style={{
-                  marginTop: "-6px",
-                  fontSize: smallText[size],
-                  height: targetHeight[size],
-                  textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                }}
-              >
-                {e.target}
-              </span>
-            )}
-            <div
-              className="CssLoader_ThemeBrowser_SingleItem_PreviewImage"
-              style={{
-                width: imgWidth[size],
-                backgroundImage: imageURLCreator(),
-                backgroundSize: "cover",
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "center",
-                height: imgHeight[size],
-                display: "flex",
-                position: "relative",
-                flexDirection: "column",
-                alignItems: "center",
-              }}
+          <div className="CSSLoader_ThemeCard_ImageContainer">
+            <img
+              className="CSSLoader_ThemeCard_Image"
+              src={imageURLCreator().slice(4, -1)}
+              width={260}
+              height={(260 / 16) * 10}
             />
-            <div
-              className="CssLoader_ThemeBrowser_SingleItem_AuthorVersionContainer"
-              style={{
-                width: imgWidth[size],
-                textAlign: "center",
-                display: "flex",
-                paddingBottom: bottomMargin[size],
-                fontSize: smallText[size],
-              }}
-            >
-              <span
-                className="CssLoader_ThemeBrowser_SingleItem_AuthorText"
-                style={{
-                  marginRight: "auto",
-                  marginLeft: "2px",
-                  textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  width: "80%",
-                  textAlign: "start",
-                }}
-              >
-                {e.specifiedAuthor}
-              </span>
-              <span
-                className="CssLoader_ThemeBrowser_SingleItem_VersionText"
-                style={{
-                  marginLeft: "auto",
-                  marginRight: "2px",
-                  textShadow: "rgb(48, 48, 48) 0px 0 10px",
-                }}
-              >
-                {e.version}
-              </span>
+            <div className="CSSLoader_ThemeCard_ImageDarkener" />
+            <div className="CSSLoader_ThemeCard_SupInfoContainer">
+              <div className="CSSLoader_ThemeCard_IconInfoContainer">
+                <BsCloudDownload />
+                <span>{e.download.downloadCount}</span>
+              </div>
+              <div className="CSSLoader_ThemeCard_IconInfoContainer">
+                <BsStar />
+                <span>{e.starCount}</span>
+              </div>
+              <div className="CSSLoader_ThemeCard_IconInfoContainer">
+                <FiTarget />
+                <span>{e.target}</span>
+              </div>
             </div>
+          </div>
+          <div className="CSSLoader_ThemeCard_MainInfoContainer">
+            <span className="CSSLoader_ThemeCard_Title">{e.displayName}</span>
+            <span className="CSSLoader_ThemeCard_SubTitle">
+              {e.version} - Last Updated {new Date(e.updated).toLocaleDateString()}
+            </span>
+            <span className="CSSLoader_ThemeCard_SubTitle">By {e.specifiedAuthor}</span>
           </div>
         </Focusable>
       </div>
