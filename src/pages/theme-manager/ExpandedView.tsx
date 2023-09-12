@@ -24,6 +24,7 @@ export const ExpandedViewPage: VFC = () => {
     currentExpandedTheme,
     isInstalling,
     apiFullToken,
+    themeSearchOpts,
     setGlobalState,
   } = useCssLoaderState();
 
@@ -347,10 +348,14 @@ export const ExpandedViewPage: VFC = () => {
             font-weight: bold;
           }
           .target-text {
-            background: rgba(59, 90, 114, 0.5);
-            color: rgb(26, 159, 255);
-            padding: 8px 12px;
-            border-radius: 2px;
+            background: rgba(59, 90, 114, 0.5) !important;
+            color: rgb(26, 159, 255) !important;
+            padding: 8px 12px !important;
+            width: fit-content !important;
+          }
+          .target-text.gpfocuswithin {
+            background: white !important;
+            color: black !important;
           }
           .install-button-container {
             display: flex;
@@ -473,17 +478,24 @@ export const ExpandedViewPage: VFC = () => {
                   </span>
                 </Focusable>
                 {/* Targets */}
-                <Focusable
-                  focusWithinClassName="gpfocuswihtin"
-                  className="flex-col gap-1/4"
-                  onActivate={() => {}}
-                >
+                <Focusable className="flex-col gap-1/4">
                   <span className="bold">Targets</span>
-                  <div className="flex gap-1/4">
+                  <Focusable className="flex gap-1/4">
                     {fullThemeData.targets.map((e) => (
-                      <span className="target-text">{e}</span>
+                      <DialogButton
+                        onOKActionDescription={`View Other "${e}" Themes`}
+                        onClick={() => {
+                          setGlobalState("themeSearchOpts", { ...themeSearchOpts, filters: e });
+                          setGlobalState("currentTab", "ThemeBrowser");
+                          setGlobalState("forceScrollBackUp", true);
+                          Navigation.NavigateBack();
+                        }}
+                        className="target-text"
+                      >
+                        {e}
+                      </DialogButton>
                     ))}
-                  </div>
+                  </Focusable>
                 </Focusable>
               </Focusable>
             </Focusable>

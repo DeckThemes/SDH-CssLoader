@@ -19,6 +19,8 @@ export const ThemeBrowserPage: FC = () => {
     browserCardSize = 3,
     prevSearchOpts,
     backendVersion,
+    forceScrollBackUp,
+    setGlobalState,
   } = useCssLoaderState();
 
   function reloadThemes() {
@@ -43,6 +45,17 @@ export const ThemeBrowserPage: FC = () => {
   }, []);
 
   const endOfPageRef = useRef<HTMLElement>();
+  const firstCardRef = useRef<HTMLElement>();
+  useLayoutEffect(() => {
+    if (forceScrollBackUp) {
+      // Valve would RE FOCUS THE ONE YOU LAST CLICKED ON after this ran, so i had to add a delay
+      setTimeout(() => {
+        firstCardRef?.current && firstCardRef.current?.focus();
+        setGlobalState("forceScrollBackUp", false);
+      }, 100);
+    }
+  }, []);
+
   const [indexToSnapTo, setSnapIndex] = useState<number>(-1);
   useEffect(() => {
     if (endOfPageRef?.current) {
@@ -77,7 +90,9 @@ export const ThemeBrowserPage: FC = () => {
           .filter((e) => e.manifestVersion <= backendVersion)
           .map((e, i) => (
             <VariableSizeCard
-              refPassthrough={i === indexToSnapTo ? endOfPageRef : undefined}
+              refPassthrough={
+                i === indexToSnapTo ? endOfPageRef : i === 0 ? firstCardRef : undefined
+              }
               data={e}
               cols={browserCardSize}
               showTarget={true}

@@ -29,6 +29,7 @@ interface PublicCssLoaderState {
   submissionThemeList: ThemeQueryResponse;
 
   currentTab: string;
+  forceScrollBackUp: boolean;
 
   // Api
   selectedRepo: SingleDropdownOption;
@@ -62,6 +63,7 @@ interface PublicCssLoaderContext extends PublicCssLoaderState {
 // This class creates the getter and setter functions for all of the global state data.
 export class CssLoaderState {
   private currentTab: string = "ThemeBrowser";
+  private forceScrollBackUp: boolean = false;
   private nextUpdateCheckTime: number = 0;
   private updateCheckTimeout: NodeJS.Timeout | undefined = undefined;
   private navPatchInstance: Patch | undefined = undefined;
@@ -155,6 +157,7 @@ export class CssLoaderState {
   getPublicState() {
     return {
       currentTab: this.currentTab,
+      forceScrollBackUp: this.forceScrollBackUp,
       nextUpdateCheckTime: this.nextUpdateCheckTime,
       updateCheckTimeout: this.updateCheckTimeout,
       apiUrl: this.apiUrl,
