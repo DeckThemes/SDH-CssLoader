@@ -5,6 +5,7 @@ export interface UserInfo {
   id: string;
   username: string;
   avatar: string;
+  premiumTier: string;
 }
 
 export interface MinimalCSSThemeInfo {

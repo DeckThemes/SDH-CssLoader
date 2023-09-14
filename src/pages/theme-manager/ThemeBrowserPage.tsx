@@ -95,7 +95,6 @@ export const ThemeBrowserPage: FC = () => {
               }
               data={e}
               cols={browserCardSize}
-              showTarget={true}
               searchOpts={searchOpts}
               prevSearchOptsVarName="prevSearchOpts"
             />

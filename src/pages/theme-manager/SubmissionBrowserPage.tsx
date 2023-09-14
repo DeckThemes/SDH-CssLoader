@@ -83,7 +83,6 @@ export function SubmissionsPage() {
               refPassthrough={i === indexToSnapTo ? endOfPageRef : undefined}
               data={e}
               cols={browserCardSize}
-              showTarget={true}
               searchOpts={searchOpts}
               prevSearchOptsVarName="setPrevSubSearchOpts"
             />
