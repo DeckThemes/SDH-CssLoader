@@ -56,7 +56,6 @@ function AuthorViewModal({
   }, []);
 
   useEffect(() => {
-    console.log("TEST", firstThemeRef?.current);
     if (firstThemeRef?.current) {
       setTimeout(() => {
         firstThemeRef?.current?.focus();

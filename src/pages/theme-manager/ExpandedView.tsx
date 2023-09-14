@@ -14,7 +14,6 @@ import { genericGET, refreshToken, toggleStar as apiToggleStar, installTheme } f
 
 import { useCssLoaderState } from "../../state";
 import { Theme } from "../../ThemeTypes";
-import { calcButtonColor } from "../../logic";
 import { FullCSSThemeInfo, PartialCSSThemeInfo } from "../../apiTypes";
 import { ThemeSettingsModalRoot } from "../../components/Modals/ThemeSettingsModal";
 import { AuthorViewModalRoot } from "../../components/Modals/AuthorViewModal";
@@ -122,6 +121,7 @@ export const ExpandedViewPage: VFC = () => {
   useEffect(() => {
     if (currentExpandedTheme?.id) {
       setLoaded(false);
+      setFocusedImage(0);
       genericGET(`/themes/${currentExpandedTheme.id}`).then((data) => {
         setFullData(data);
         setLoaded(true);
@@ -175,7 +175,7 @@ export const ExpandedViewPage: VFC = () => {
     const imageAreaPadding = 16;
     const gapBetweenCarouselAndImage = 8;
     const selectedImageWidth =
-      fullThemeData.images.length > 1 ? 406 : imageAreaWidth - imageAreaPadding * 2;
+      fullThemeData.images.length > 1 ? 434.8 : imageAreaWidth - imageAreaPadding * 2;
     const selectedImageHeight = (selectedImageWidth / 16) * 10;
     const imageCarouselEntryWidth =
       imageAreaWidth - imageAreaPadding * 2 - selectedImageWidth - gapBetweenCarouselAndImage;
