@@ -106,7 +106,7 @@ export function DonatePage() {
       </style>
       <p className="donation-spiel">
         Donations help to cover the costs of hosting the store, as well as funding development for
-        CSS Loader and it's related projects.
+        CSS Loader and its related projects.
       </p>
       <Focusable className="support-methods-container">
         <Focusable
