@@ -11,7 +11,7 @@ CSS_LOADER_VER = 9
 class Theme:
     def __init__(self, themePath : str, json : dict, configPath : str = None):
         self.configPath = configPath if (configPath is not None) else themePath
-        self.displayName = None
+        self.display_name = None
         self.configJsonPath = self.configPath + "/config" + ("_ROOT.json" if USER == "root" else "_USER.json")
         self.patches = []
         self.injects = []
@@ -55,7 +55,7 @@ class Theme:
             self.created = path.getmtime(jsonPath)
 
         self.name = json["name"]
-        self.displayName = json["display_name"] if ("display_name" in json) else None
+        self.display_name = json["display_name"] if ("display_name" in json) else None
         self.id = json["id"] if ("id" in json) else self.name
         self.version = json["version"] if ("version" in json) else "v1.0"
         self.author = json["author"] if ("author" in json) else ""
@@ -173,7 +173,7 @@ class Theme:
         return {
             "id": self.id,
             "name": self.name,
-            "display_name": self.displayName if (self.displayName is not None) else self.name,
+            "display_name": self.get_display_name(),
             "version": self.version,
             "author": self.author,
             "enabled": self.enabled,
@@ -185,3 +185,6 @@ class Theme:
             "created": self.created,
             "modified": self.modified,
         }
+    
+    def get_display_name(self) -> str:
+        return self.display_name if (self.display_name is not None) else self.name

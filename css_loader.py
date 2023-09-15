@@ -26,7 +26,7 @@ class Loader:
 
     async def load(self, inject_now : bool = True):
         Log("Loading themes...")
-        self.themes = []
+        self.themes : list[Theme] = []
 
         themesPath = get_theme_path()
         self.last_load_errors = await self._parse_themes(themesPath)
@@ -43,7 +43,7 @@ class Loader:
             await x.load(inject_now)
         
         await self._cache_lists()
-        self.themes.sort(key=lambda d: d.name)
+        self.themes.sort(key=lambda d: d.get_display_name())
 
     async def set_theme_state(self, name : str, state : bool, set_deps : bool = True, set_deps_value : bool = True) -> Result:
         Log(f"Setting state for {name} to {state}")
