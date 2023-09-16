@@ -188,3 +188,9 @@ class Theme:
     
     def get_display_name(self) -> str:
         return self.display_name if (self.display_name is not None) else self.name
+    
+    def add_prefix(self, id : int):
+        if self.display_name is None:
+            self.display_name = self.name
+        
+        self.name += f"_{id}"

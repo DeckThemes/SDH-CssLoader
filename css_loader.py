@@ -298,7 +298,15 @@ class Loader:
                     
                 themeData = Theme(themePath, theme, configPath)
 
-                if (themeData.name not in [x.name for x in self.themes]):
+                theme_names = [x.name for x in self.themes]
+                if (themeData.name in theme_names):
+                    for x in range(5):
+                        new_name =  themeData.name + f"_{x}"
+                        if (new_name not in theme_names):
+                            themeData.add_prefix(x)
+                            break
+
+                if (themeData.name not in theme_names):
                     self.themes.append(themeData)
                     Log(f"Found theme {themeData.name}")
 
