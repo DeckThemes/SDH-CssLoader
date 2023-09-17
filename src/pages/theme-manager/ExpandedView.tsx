@@ -109,11 +109,11 @@ export const ExpandedViewPage: VFC = () => {
   }
 
   // For some reason, setting the ref as the useEffect dependency didn't work...
-  const backButtonRef = useRef<HTMLElement>(null);
+  const downloadButtonRef = useRef<HTMLElement>(null);
   const [hasBeenFocused, setHasFocused] = useState<boolean>(false);
   useEffect(() => {
-    if (backButtonRef?.current && !hasBeenFocused) {
-      backButtonRef.current.focus();
+    if (downloadButtonRef?.current && !hasBeenFocused) {
+      downloadButtonRef.current.focus();
       setHasFocused(true);
     }
   });
@@ -357,6 +357,8 @@ export const ExpandedViewPage: VFC = () => {
               </span>
               <Focusable className="install-button-container">
                 <DialogButton
+                  // @ts-ignore
+                  ref={downloadButtonRef}
                   className="blue-button"
                   disabled={isInstalling}
                   onClick={() => {
@@ -387,19 +389,6 @@ export const ExpandedViewPage: VFC = () => {
                 )}
               </Focusable>
             </div>
-            <DialogButton
-              className="back-button"
-              // @ts-ignore
-              ref={backButtonRef}
-              onClick={() => {
-                setGlobalState("currentExpandedTheme", undefined);
-                setFullData(undefined);
-                setLoaded(false);
-                Navigation.NavigateBack();
-              }}
-            >
-              <span>Back</span>
-            </DialogButton>
           </Focusable>
         </Focusable>
       </>
