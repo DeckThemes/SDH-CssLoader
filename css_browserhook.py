@@ -25,6 +25,10 @@ class BrowserTabHook:
         if res != None:
             self.title = res["title"]
             self.html_classes = res["classes"]
+        else:
+            Log(f"Failed to connect to tab with id {self.id}")
+            self.hook.connected_tabs.remove(self)
+            return
 
         self.init_done = True
         Log(f"Connected to tab: {self.title}")
@@ -221,6 +225,7 @@ class BrowserHook:
         asyncio.create_task(self.on_tab_detach())
         asyncio.create_task(self.health_check())
         asyncio.create_task(self.css_health_check())
+        asyncio.create_task(self.sanity_check_tabs())
 
     def get_id(self) -> int:
         self.current_id += 1
@@ -264,7 +269,7 @@ class BrowserHook:
                 result = await queue.get()
 
                 if (start_time + 5) < time.time():
-                    Result(False, f"Request for {method} took more than 5s. Assuming it failed")
+                    Result(False, f"Request for {method} took more than 5s. Assuming it failed ({len(self.connected_tabs)})")
                     self.ws_response.remove(queue)
                     del queue
                     return None
@@ -358,6 +363,42 @@ class BrowserHook:
                 if tab != None:
                     Log(f"Disconnected from tab: {tab.title}")
                     self.connected_tabs.remove(tab)
+
+    async def sanity_check_tabs(self):
+        while True:
+            try:
+                result = await self.send_command("Target.getTargets", {}, None, True)
+                target_infos = result["result"]["targetInfos"]
+                target_ids = [x["targetId"] for x in target_infos if x["type"] == "page"]
+                for x in self.connected_tabs: # Remove tabs that are no longer connected
+                    if x.id not in target_ids:
+                        Log(f"Disconnected from tab: {x.title}")
+                        self.connected_tabs.remove(x)
+                
+                connected_ids = [x.id for x in self.connected_tabs]
+                for x in target_infos:
+                    if x["targetId"] not in connected_ids: # Attach tabs that are not connected
+                        await self.send_command("Target.attachToTarget", {"targetId": x["targetId"], "flatten": True}, None, False)
+                    else:
+                        for connected_tab in self.connected_tabs: # Update info on tabs that are connected
+                            if connected_tab.id == x["targetId"]:
+                                reinject = False
+                                if (x["title"] != connected_tab.title):
+                                    connected_tab.title = x["title"]
+                                    reinject = True
+
+                                if (x["url"] != connected_tab.url):
+                                    connected_tab.url = x["url"]
+                                    reinject = True
+
+                                if reinject:
+                                    asyncio.create_task(connected_tab.force_reinject())
+
+                                break
+            except:
+                pass
+            
+            await asyncio.sleep(5)
 
     async def css_health_check(self):
         while True:
