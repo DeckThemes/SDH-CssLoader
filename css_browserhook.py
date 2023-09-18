@@ -214,7 +214,6 @@ class BrowserHook:
         self.ws_url = None
         self.ws_response : List[asyncio.Queue] = []
         self.connected_tabs : List[BrowserTabHook] = []
-        self.tab_names = {}
 
         asyncio.create_task(self.on_new_tab())
         asyncio.create_task(self.on_tab_update())

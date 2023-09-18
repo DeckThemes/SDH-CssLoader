@@ -50,7 +50,7 @@ class Inject:
                 if not res.success:
                     return res
 
-                Log(f"+{str(res.message)} @ {tab_name}")
+                # Log(f"+{str(res.message)} @ {tab_name}")
                 self.uuids[tab_name].append(str(res.message))
             except Exception as e:
                 return Result(False, str(e))
@@ -74,7 +74,7 @@ class Inject:
             if not res.success:
                 return res
 
-            Log(f"+{str(res.message)} @ {tab_name}")
+            # Log(f"+{str(res.message)} @ {tab_name}")
             self.uuids[tab_name].append(str(res.message))
         except Exception as e:
             return Result(False, str(e))    

@@ -114,6 +114,7 @@ class Loader:
             await self.load()
             await commit_all()
         except Exception as e:
+            await self.unlock()
             Result(False, str(e))
 
         await self.unlock()
