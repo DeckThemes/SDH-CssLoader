@@ -14,7 +14,7 @@ export function CreatePresetModalRoot({ closeModal }: { closeModal: any }) {
   );
 }
 
-export function CreatePresetModal({ closeModal }: { closeModal: () => void }) {
+function CreatePresetModal({ closeModal }: { closeModal: () => void }) {
   const { localThemeList, selectedPreset } = useCssLoaderState();
   const [presetName, setPresetName] = useState<string>("");
   const enabledNumber = localThemeList.filter((e) => e.enabled).length;
@@ -35,11 +35,10 @@ export function CreatePresetModal({ closeModal }: { closeModal: () => void }) {
         await python.reloadBackend();
         if (selectedPreset) {
           await python.setThemeState(selectedPreset?.name, false);
-
-          await python.setThemeState(presetName, true);
-          await python.getInstalledThemes();
-          closeModal();
         }
+        await python.setThemeState(presetName + ".profile", true);
+        await python.getInstalledThemes();
+        closeModal();
       }}
     >
       <div style={{ marginBottom: "20px" }} />

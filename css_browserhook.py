@@ -25,6 +25,10 @@ class BrowserTabHook:
         if res != None:
             self.title = res["title"]
             self.html_classes = res["classes"]
+        else:
+            Log(f"Failed to connect to tab with id {self.id}")
+            self.hook.connected_tabs.remove(self)
+            return
 
         self.init_done = True
         Log(f"Connected to tab: {self.title}")
@@ -214,7 +218,6 @@ class BrowserHook:
         self.ws_url = None
         self.ws_response : List[asyncio.Queue] = []
         self.connected_tabs : List[BrowserTabHook] = []
-        self.tab_names = {}
 
         asyncio.create_task(self.on_new_tab())
         asyncio.create_task(self.on_tab_update())
@@ -222,6 +225,7 @@ class BrowserHook:
         asyncio.create_task(self.on_tab_detach())
         asyncio.create_task(self.health_check())
         asyncio.create_task(self.css_health_check())
+        asyncio.create_task(self.sanity_check_tabs())
 
     def get_id(self) -> int:
         self.current_id += 1
@@ -265,7 +269,7 @@ class BrowserHook:
                 result = await queue.get()
 
                 if (start_time + 5) < time.time():
-                    Result(False, f"Request for {method} took more than 5s. Assuming it failed")
+                    Result(False, f"Request for {method} took more than 5s. Assuming it failed ({len(self.connected_tabs)})")
                     self.ws_response.remove(queue)
                     del queue
                     return None
@@ -278,6 +282,10 @@ class BrowserHook:
             return None
         raise RuntimeError("Websocket not opened")   
     
+    async def _tab_exists(self, tab_id : str):
+        result = await self.send_command("Target.getTargets", {}, None)
+        return tab_id in [x["targetId"] for x in result["result"]["targetInfos"] if x["type"] == "page"]
+
     async def on_new_tab(self):
         queue = asyncio.Queue(maxsize=MAX_QUEUE_SIZE)
         self.ws_response.append(queue) 
@@ -287,6 +295,9 @@ class BrowserHook:
             
             if "method" in message and message["method"] == "Target.targetCreated":
                 if message["params"]["targetInfo"]["type"] != "page":
+                    continue
+
+                if not await self._tab_exists(message["params"]["targetInfo"]["targetId"]):
                     continue
 
                 await self.send_command("Target.attachToTarget", {"targetId": message["params"]["targetInfo"]["targetId"], "flatten": True}, None, False)
@@ -300,6 +311,9 @@ class BrowserHook:
 
             if "method" in message and message["method"] == "Target.targetInfoChanged":
                 target_info = message["params"]["targetInfo"]
+
+                if not await self._tab_exists(message["params"]["targetInfo"]["targetId"]):
+                    continue
 
                 for connected_tab in self.connected_tabs:
                     if target_info["targetId"] == connected_tab.id:
@@ -350,6 +364,42 @@ class BrowserHook:
                     Log(f"Disconnected from tab: {tab.title}")
                     self.connected_tabs.remove(tab)
 
+    async def sanity_check_tabs(self):
+        while True:
+            try:
+                result = await self.send_command("Target.getTargets", {}, None, True)
+                target_infos = result["result"]["targetInfos"]
+                target_ids = [x["targetId"] for x in target_infos if x["type"] == "page"]
+                for x in self.connected_tabs: # Remove tabs that are no longer connected
+                    if x.id not in target_ids:
+                        Log(f"Disconnected from tab: {x.title}")
+                        self.connected_tabs.remove(x)
+                
+                connected_ids = [x.id for x in self.connected_tabs]
+                for x in target_infos:
+                    if x["targetId"] not in connected_ids: # Attach tabs that are not connected
+                        await self.send_command("Target.attachToTarget", {"targetId": x["targetId"], "flatten": True}, None, False)
+                    else:
+                        for connected_tab in self.connected_tabs: # Update info on tabs that are connected
+                            if connected_tab.id == x["targetId"]:
+                                reinject = False
+                                if (x["title"] != connected_tab.title):
+                                    connected_tab.title = x["title"]
+                                    reinject = True
+
+                                if (x["url"] != connected_tab.url):
+                                    connected_tab.url = x["url"]
+                                    reinject = True
+
+                                if reinject:
+                                    asyncio.create_task(connected_tab.force_reinject())
+
+                                break
+            except:
+                pass
+            
+            await asyncio.sleep(5)
+
     async def css_health_check(self):
         while True:
             for tab in self.connected_tabs:
@@ -365,7 +415,7 @@ class BrowserHook:
             await asyncio.sleep(3)
             try:
                 async with aiohttp.ClientSession() as web:
-                    res = await web.get(f"http://localhost:8080/json/version", timeout=3)
+                    res = await web.get(f"http://127.0.0.1:8080/json/version", timeout=3)
 
                 if (res.status != 200):
                     raise Exception(f"/json/version returned {res.status}")
@@ -384,7 +434,7 @@ class BrowserHook:
                             x.put_nowait(data)
 
             except Exception as e:
-                Log(f"[Browser Health Check] {str(e)}")
+                Result(False, f"[Health Check] {str(e)}")
 
             try:
                 await self.close_websocket()
@@ -404,8 +454,8 @@ def get_tabs(tab_name : str) -> List[BrowserTabHook]:
         if tab.compare(tab_name):
             tabs.append(tab)
 
-    if tabs == []:
-        Log(f"[Warn] get_tabs({tab_name}) returned []. All tabs: {str([x.title for x in HOOK.connected_tabs])}")
+    #if tabs == []:
+    #    Log(f"[Warn] get_tabs({tab_name}) returned []. All tabs: {str([x.title for x in HOOK.connected_tabs])}")
     
     return tabs
 

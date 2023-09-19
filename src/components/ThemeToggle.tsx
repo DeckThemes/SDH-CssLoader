@@ -2,25 +2,22 @@ import { ButtonItem, Focusable, PanelSectionRow, ToggleField, showModal } from "
 import { VFC, useState, useMemo } from "react";
 import { Flags, LocalThemeStatus, Theme, UpdateStatus } from "../ThemeTypes";
 
-import * as python from "../python";
 import { ThemePatch } from "./ThemePatch";
 import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
-import { OptionalDepsModalRoot } from "./OptionalDepsModal";
 import { useCssLoaderState } from "../state";
 import { useRerender } from "../hooks";
 // This has to be a direct import to avoid the circular dependency
-import { ThemeSettingsModalRoot } from "./AllThemes/ThemeSettingsModal";
-import { MinimalCSSThemeInfo } from "../apiTypes";
-import { AiOutlineDownload } from "react-icons/ai";
+import { ThemeSettingsModalRoot } from "./Modals/ThemeSettingsModal";
 import { installTheme } from "../api";
+import { toggleTheme } from "../backend/backendHelpers/toggleTheme";
 
 export const ThemeToggle: VFC<{
   data: Theme;
   collapsible?: boolean;
   showModalButtonPrompt?: boolean;
-}> = ({ data, collapsible = false, showModalButtonPrompt = false }) => {
-  const { selectedPreset, localThemeList, updateStatuses, setGlobalState, isInstalling } =
-    useCssLoaderState();
+  isFullscreen?: boolean;
+}> = ({ data, collapsible = false, showModalButtonPrompt = false, isFullscreen = false }) => {
+  const { updateStatuses, setGlobalState, isInstalling } = useCssLoaderState();
   const [collapsed, setCollapsed] = useState<boolean>(true);
 
   const [render, rerender] = useRerender();
@@ -33,14 +30,10 @@ export const ThemeToggle: VFC<{
     // This might not actually memoize it as data.flags is an array, so idk if it deep checks the values here
   }, [data.flags]);
 
-  let [updateStatus, remoteEntry]: [LocalThemeStatus, false | MinimalCSSThemeInfo] = [
-    "installed",
-    false,
-  ];
+  let [updateStatus]: [LocalThemeStatus] = ["installed"];
   const themeArrPlace = updateStatuses.find((f) => f[0] === data.id);
   if (themeArrPlace) {
     updateStatus = themeArrPlace[1];
-    remoteEntry = themeArrPlace[2];
   }
 
   // I extracted these here as doing conditional props inline sucks
@@ -88,8 +81,8 @@ export const ThemeToggle: VFC<{
                   style={{
                     position: "absolute",
                     top: "0",
-                    right: "-1em",
-                    // This creates the traiangle effect
+                    right: isFullscreen ? "-1.5em" : "-1em",
+                    // This creates the triangle effect
                     background: "linear-gradient(45deg, transparent 49%, #fca904 50%)",
                     // The focusRing has a z index of 10000, so this is just to be cheeky
                     zIndex: "10001",
@@ -102,7 +95,7 @@ export const ThemeToggle: VFC<{
                 disabled={isInstalling}
                 bottomSeparator={data.enabled && data?.patches?.length > 0 ? "none" : "standard"}
                 checked={data.enabled}
-                label={data.name}
+                label={data.display_name}
                 description={
                   isPreset
                     ? `Preset`
@@ -111,66 +104,7 @@ export const ThemeToggle: VFC<{
                       }`
                 }
                 onChange={async (switchValue: boolean) => {
-                  if (switchValue === true && data.flags.includes(Flags.optionalDeps)) {
-                    // @ts-ignore
-                    showModal(<OptionalDepsModalRoot themeData={data} />);
-                    rerender();
-                    return;
-                  }
-                  // Actually enabling the theme
-                  await python.setThemeState(data.name, switchValue);
-                  await python.getInstalledThemes();
-                  // Re-collapse menu
-                  setCollapsed(true);
-                  // Dependency Toast
-                  if (data.dependencies.length > 0) {
-                    if (switchValue) {
-                      python.toast(
-                        `${data.name} enabled other themes`,
-                        // This lists out the themes by name, but often overflowed off screen
-                        // @ts-ignore
-                        // `${new Intl.ListFormat().format(data.dependencies)} ${
-                        //   data.dependencies.length > 1 ? "are" : "is"
-                        // } required for this theme`
-                        // This just gives the number of themes
-                        `${
-                          data.dependencies.length === 1
-                            ? `1 other theme is required by ${data.name}`
-                            : `${data.dependencies.length} other themes are required by ${data.name}`
-                        }`
-                      );
-                    }
-                    if (!switchValue && !data.flags.includes(Flags.dontDisableDeps)) {
-                      python.toast(
-                        `${data.name} disabled other themes`,
-                        // @ts-ignore
-                        `${
-                          data.dependencies.length === 1
-                            ? `1 theme was originally enabled by ${data.name}`
-                            : `${data.dependencies.length} themes were originally enabled by ${data.name}`
-                        }`
-                      );
-                    }
-                  }
-                  if (!selectedPreset) return;
-                  // This is copied from the desktop codebase
-                  // If we refactor the desktop version of this function (which we probably should) this should also be refactored
-                  await python.generatePresetFromThemeNames(
-                    selectedPreset.name,
-                    switchValue
-                      ? [
-                          ...localThemeList
-                            .filter((e) => e.enabled && !e.flags.includes(Flags.isPreset))
-                            .map((e) => e.name),
-                          data.name,
-                        ]
-                      : localThemeList
-                          .filter(
-                            (e) =>
-                              e.enabled && !e.flags.includes(Flags.isPreset) && e.name !== data.name
-                          )
-                          .map((e) => e.name)
-                  );
+                  toggleTheme(data, switchValue, rerender, setCollapsed);
                 }}
               />
             </Focusable>

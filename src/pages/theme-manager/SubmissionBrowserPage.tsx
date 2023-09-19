@@ -1,31 +1,31 @@
 import { Focusable } from "decky-frontend-lib";
-import { useCssLoaderState } from "../state";
-import * as python from "../python";
-import { BrowserSearchFields, LoadMoreButton, VariableSizeCard } from "../components";
+import { useCssLoaderState } from "../../state";
+import * as python from "../../python";
+import { BrowserSearchFields, LoadMoreButton, VariableSizeCard } from "../../components";
 import { useEffect, useRef, useState } from "react";
 import { isEqual } from "lodash";
-import { getThemes } from "../api";
+import { getThemes } from "../../api";
 
-export function StarredThemesPage() {
+export function SubmissionsPage() {
   const {
     apiFullToken,
-    apiMeData,
-    starredSearchOpts: searchOpts,
-    starredServerFilters: serverFilters,
-    starredThemeList: themeArr,
+    submissionSearchOpts: searchOpts,
+    submissionServerFilters: serverFilters,
+    submissionThemeList: themeArr,
     browserCardSize,
-    prevStarSearchOpts: prevSearchOpts,
+    prevSubSearchOpts: prevSearchOpts,
+    apiMeData,
     backendVersion,
   } = useCssLoaderState();
 
   function reloadThemes() {
-    getThemes(searchOpts, "/users/me/stars", "starredThemeList", setSnapIndex, true);
+    getThemes(searchOpts, "/themes/awaiting_approval", "submissionThemeList", setSnapIndex, true);
     python.reloadBackend();
   }
 
   useEffect(() => {
     if (!isEqual(prevSearchOpts, searchOpts) || themeArr.total === 0) {
-      getThemes(searchOpts, "/users/me/stars", "starredThemeList", setSnapIndex, true);
+      getThemes(searchOpts, "/themes/awaiting_approval", "submissionThemeList", setSnapIndex, true);
     }
   }, [searchOpts, prevSearchOpts, apiMeData]);
 
@@ -59,11 +59,11 @@ export function StarredThemesPage() {
     <>
       <BrowserSearchFields
         searchOpts={searchOpts}
-        searchOptsVarName="starredSearchOpts"
-        prevSearchOptsVarName="prevStarSearchOpts"
+        searchOptsVarName="submissionSearchOpts"
+        prevSearchOptsVarName="prevSubSearchOpts"
         unformattedFilters={serverFilters}
-        unformattedFiltersVarName="starredServerFilters"
-        getTargetsPath="/users/me/stars/filters?type=CSS"
+        unformattedFiltersVarName="submissionServerFilters"
+        getTargetsPath="/themes/awaiting_approval/filters?type=CSS"
         requiresAuth
         onReload={reloadThemes}
       />
@@ -83,9 +83,8 @@ export function StarredThemesPage() {
               refPassthrough={i === indexToSnapTo ? endOfPageRef : undefined}
               data={e}
               cols={browserCardSize}
-              showTarget={true}
               searchOpts={searchOpts}
-              prevSearchOptsVarName="prevStarSearchOpts"
+              prevSearchOptsVarName="setPrevSubSearchOpts"
             />
           ))}
       </Focusable>
@@ -101,10 +100,10 @@ export function StarredThemesPage() {
         <div style={{ maxWidth: "50%" }}>
           <LoadMoreButton
             themeArr={themeArr}
-            themeArrVarName="starredThemeList"
+            themeArrVarName="submissionThemeList"
             origSearchOpts={searchOpts}
             paramStrFilterPrepend="CSS."
-            fetchPath="/users/me/stars"
+            fetchPath="/themes/awaiting_approval"
             setSnapIndex={setSnapIndex}
           />
         </div>

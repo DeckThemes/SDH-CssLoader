@@ -5,13 +5,16 @@ export interface UserInfo {
   id: string;
   username: string;
   avatar: string;
+  premiumTier: string;
 }
 
 export interface MinimalCSSThemeInfo {
   id: string;
   name: string;
+  displayName: string;
   version: string;
   target: string;
+  targets: string[];
   manifestVersion: number;
   specifiedAuthor: string;
   type: "Css" | "Audio";

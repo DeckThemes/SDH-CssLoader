@@ -6,7 +6,7 @@ export function OptionalDepsModalRoot({
   closeModal,
 }: {
   themeData: Theme;
-  closeModal: any;
+  closeModal?: any;
 }) {
   return (
     <ModalRoot onCancel={closeModal} onEscKeypress={closeModal}>

@@ -30,12 +30,12 @@ def get_value_from_masks(m1 : float, m2 : float, hue : float) -> int:
 def hsl_to_rgb(hue : int, saturation : int, lightness : int) -> tuple[int, int, int]:
     ONE_THIRD = 1.0/3.0
 
-    h = float(hue) / 255.0
-    l = float(lightness) / 255.0
-    s = float(saturation) / 255.0
+    h = float(hue) / 360.0
+    l = float(lightness) / 100.0
+    s = float(saturation) / 100.0
 
     if s == 0.0:
-        return (int(l * 255.0), int(l * 255.0), int(l * 255.0))
+        return (int(l * 100.0), int(l * 100.0), int(l * 100.0))
     
     m2 = l * (1.0 + s) if l <= 0.5 else l + s - (l * s)
     m1 = 2.0 * l - m2
@@ -109,18 +109,32 @@ class ThemePatchComponent:
 
         if self.type == "color-picker":        
             try:
-                if self.value[0] == "#":
+                if self.value[0] == "#": # Try to parse as hex value
                     (r, g, b) = hex_to_rgb(self.value)
-                else:
-                    hsl_vals = self.value.split(", ")
-                    h = hsl_vals[0][5:]
-                    s = hsl_vals[1][:len(hsl_vals[1]) - 1]
-                    l = hsl_vals[2][:len(hsl_vals[2]) - 1]
+                elif (self.value.startswith("hsla(") or self.value.startswith("hsl(")) and self.value.endswith(")"): # Try to parse as hsl(a) value
+                    hsl_vals = self.value[self.value.find("(") + 1:-1].split(",")
+                    # Start: hsla(39, 100%, 50%, 1)
+                    # .find: Removes hsla(. Result: '39, 100%, 50%, 1)'
+                    # -1: Removes ). Result: '39, 100%, 50%, 1'
+                    # Split Result: '39', ' 100%', ' 50%', ' 1'
+
+                    h = hsl_vals[0].strip()
+                    # .strip: Removes any whitespace, just in case
+
+                    s = hsl_vals[1].strip()[:-1]
+                    # .strip: Removes any whitespace (' 100%' -> '100%')
+                    # -1: Removes % ('100%' -> '100')
+
+                    l = hsl_vals[2].strip()[:-1]
+                    # .strip: Removes any whitespace (' 50%' -> '50%')
+                    # -1: Removes % ('50%' -> '50')
 
                     (r, g, b) = hsl_to_rgb(h, s, l)
+                else:
+                    raise Exception(f"Unable to parse color-picker value '{self.value}'")
     
                 self.inject.css = f":root {{ {self.css_variable}: {self.value}; {self.css_variable}_r: {r}; {self.css_variable}_g: {g}; {self.css_variable}_b: {b}; {self.css_variable}_rgb: {r}, {g}, {b}; }}"
-            except e:
+            except Exception as e:
                 self.inject.css = f":root {{ {self.css_variable}: {self.value}; }}"
         elif self.type == "image-picker":
             try:

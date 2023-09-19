@@ -38,7 +38,6 @@ class Inject:
     async def inject(self) -> Result:
         for tab_name in self.tabs:
             for uuid in self.uuids[tab_name]:
-                Log(f"-{uuid} @ {tab_name}")
                 res = await remove(tab_name, uuid)
 
             if (self.css is None):
@@ -51,7 +50,7 @@ class Inject:
                 if not res.success:
                     return res
 
-                Log(f"+{str(res.message)} @ {tab_name}")
+                # Log(f"+{str(res.message)} @ {tab_name}")
                 self.uuids[tab_name].append(str(res.message))
             except Exception as e:
                 return Result(False, str(e))
@@ -75,7 +74,7 @@ class Inject:
             if not res.success:
                 return res
 
-            Log(f"+{str(res.message)} @ {tab_name}")
+            # Log(f"+{str(res.message)} @ {tab_name}")
             self.uuids[tab_name].append(str(res.message))
         except Exception as e:
             return Result(False, str(e))    
@@ -89,7 +88,6 @@ class Inject:
 
             try:
                 for x in self.uuids[tab_name]:
-                    Log(f"-{x} @ {tab_name}")
                     res = await remove(tab_name, x)
                     #if not res["success"]:
                     #    return Result(False, res["result"])
@@ -103,7 +101,7 @@ class Inject:
         return Result(True)
 
 DEFAULT_MAPPINGS = {
-    "desktop": ["Steam.*"],
+    "desktop": ["Steam|SteamLibraryWindow"],
     "desktopchat": ["!friendsui-container"],
     "desktoppopup": ["OverlayBrowser_Browser", "SP Overlay:.*", "notificationtoasts_.*", "SteamBrowser_Find", "OverlayTab\\d+_Find", "!ModalDialogPopup", "!FullModalOverlay"],
     "desktopoverlay": ["desktoppopup"],

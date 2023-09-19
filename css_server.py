@@ -21,7 +21,12 @@ def start_server(plugin):
 
     PLUGIN_CLASS = plugin
     loop = asyncio.get_running_loop()
-    create_cef_flag()
+    
+    try:
+        create_cef_flag()
+    except Exception as e:
+        Log(f"Failed to create steam cef flag. {str(e)}")
+
     app = aiohttp.web.Application(loop=loop)
     app.router.add_route('POST', '/req', handle)
     loop.create_task(aiohttp.web._run_app(app, host="127.0.0.1", port=35821))

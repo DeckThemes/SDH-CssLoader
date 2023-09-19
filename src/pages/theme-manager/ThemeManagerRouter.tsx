@@ -1,22 +1,22 @@
 import { Tabs } from "decky-frontend-lib";
-import { Permissions } from "../apiTypes";
-import { useCssLoaderState } from "../state";
+import { Permissions } from "../../apiTypes";
+import { useCssLoaderState } from "../../state";
 import { LogInPage } from "./LogInPage";
 import { StarredThemesPage } from "./StarredThemesPage";
 import { SubmissionsPage } from "./SubmissionBrowserPage";
 import { ThemeBrowserPage } from "./ThemeBrowserPage";
-import { UninstallThemePage } from "./UninstallThemePage";
-
+import { ThemeBrowserCardStyles } from "../../components/Styles";
 export function ThemeManagerRouter() {
-  const { apiMeData, currentTab, setGlobalState } = useCssLoaderState();
+  const { apiMeData, currentTab, setGlobalState, browserCardSize } = useCssLoaderState();
   return (
     <div
       style={{
         marginTop: "40px",
         height: "calc(100% - 40px)",
-        background: "#0005",
+        background: "#0e141b",
       }}
     >
+      <ThemeBrowserCardStyles />
       <Tabs
         activeTab={currentTab}
         onShowTab={(tabID: string) => {
@@ -47,12 +47,7 @@ export function ThemeManagerRouter() {
               ]
             : []),
           {
-            title: "Installed Themes",
-            content: <UninstallThemePage />,
-            id: "InstalledThemes",
-          },
-          {
-            title: "Settings",
+            title: "DeckThemes Account",
             content: <LogInPage />,
             id: "LogInPage",
           },

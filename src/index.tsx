@@ -4,20 +4,25 @@ import {
   PanelSection,
   PanelSectionRow,
   ServerAPI,
-  Router,
+  DialogButton,
+  Focusable,
+  Navigation,
 } from "decky-frontend-lib";
 import { useEffect, useState, FC } from "react";
 import * as python from "./python";
 import * as api from "./api";
 import { RiPaintFill } from "react-icons/ri";
 
-import { ThemeManagerRouter } from "./theme-manager";
+import { ThemeManagerRouter } from "./pages/theme-manager";
 import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "./state";
 import { PresetSelectionDropdown, QAMThemeToggleList, TitleView } from "./components";
-import { ExpandedViewPage } from "./theme-manager/ExpandedView";
+import { ExpandedViewPage } from "./pages/theme-manager/ExpandedView";
 import { Flags, Theme } from "./ThemeTypes";
 import { dummyFunction, getInstalledThemes, reloadBackend } from "./python";
 import { bulkThemeUpdateCheck } from "./logic/bulkThemeUpdateCheck";
+import { disableNavPatch, enableNavPatch } from "./deckyPatches/NavPatch";
+import { FaCog, FaStore } from "react-icons/fa";
+import { SettingsPageRouter } from "./pages/settings/SettingsPageRouter";
 
 function Content() {
   const { localThemeList, setGlobalState } = useCssLoaderState();
@@ -37,16 +42,8 @@ function Content() {
   function reload() {
     reloadBackend();
     dummyFuncTest();
-    bulkThemeUpdateCheck().then((data) => [setGlobalState("updateStatuses", data)]);
+    bulkThemeUpdateCheck().then((data) => setGlobalState("updateStatuses", data));
   }
-
-  // This will likely only run on a user's first run
-  // todo: potentially there's a way to make this run without an expensive stringify useEffect running always
-  // however, I want to make sure that someone can't delete the folder "Default Profile", as that would be bad
-  useEffect(() => {
-    // This happens before state prefilled
-    if (localThemeList.length === 0) return;
-  }, [JSON.stringify(localThemeList.filter((e) => e.flags.includes(Flags.isPreset)))]);
 
   useEffect(() => {
     setGlobalState(
@@ -64,17 +61,30 @@ function Content() {
     <PanelSection title="Themes">
       {dummyFuncResult ? (
         <>
-          <PanelSectionRow>
-            <ButtonItem
-              layout="below"
-              onClick={() => {
-                Router.CloseSideMenus();
-                Router.Navigate("/cssloader/theme-manager");
-              }}
-            >
-              Download Themes
-            </ButtonItem>
-          </PanelSectionRow>
+          <style>
+            {`
+              .CSSLoader_QAMTab_NavButton {
+                height: 2em !important;
+                width: 1.5em !important;
+                min-width: 1.5em !important;
+                position: relative !important;
+                border-radius: 10% !important;
+              }
+              .CSSLoader_QAMTab_NavContainer {
+                display: flex;
+                align-items: center;
+                justify-content: start;
+                gap: 0.5em;
+                padding: 0.5em 0 !important;
+              }
+              .CSSLoader_QAMTab_NavButtonIcon {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%); 
+              }
+            `}
+          </style>
           <PresetSelectionDropdown />
           <QAMThemeToggleList />
         </>
@@ -109,6 +119,8 @@ export default definePlugin((serverApi: ServerAPI) => {
       "selectedPreset",
       allThemes.find((e) => e.flags.includes(Flags.isPreset) && e.enabled)
     );
+
+    // Check for updates, and schedule a check 24 hours from now
     bulkThemeUpdateCheck(allThemes).then((data) => {
       state.setGlobalState("updateStatuses", data);
     });
@@ -134,15 +146,29 @@ export default definePlugin((serverApi: ServerAPI) => {
     });
   });
 
+  // Api Token
   python.resolve(python.storeRead("shortToken"), (token: string) => {
     if (token) {
       state.setGlobalState("apiShortToken", token);
     }
   });
 
+  // Nav Patch
+  python.resolve(python.storeRead("enableNavPatch"), (value: string) => {
+    if (value === "true") {
+      enableNavPatch();
+    }
+  });
+
   serverApi.routerHook.addRoute("/cssloader/theme-manager", () => (
     <CssLoaderContextProvider cssLoaderStateClass={state}>
       <ThemeManagerRouter />
+    </CssLoaderContextProvider>
+  ));
+
+  serverApi.routerHook.addRoute("/cssloader/settings", () => (
+    <CssLoaderContextProvider cssLoaderStateClass={state}>
+      <SettingsPageRouter />
     </CssLoaderContextProvider>
   ));
 
@@ -153,7 +179,7 @@ export default definePlugin((serverApi: ServerAPI) => {
   ));
 
   return {
-    // titleView: <TitleView />,
+    titleView: <TitleView />,
     title: <div>CSSLoader</div>,
     alwaysRender: true,
     content: (
@@ -165,6 +191,7 @@ export default definePlugin((serverApi: ServerAPI) => {
     onDismount: () => {
       const { updateCheckTimeout } = state.getPublicState();
       if (updateCheckTimeout) clearTimeout(updateCheckTimeout);
+      disableNavPatch();
     },
   };
 });

@@ -1,8 +1,8 @@
-import { ButtonItem, Focusable, PanelSectionRow, showModal } from "decky-frontend-lib";
-import { CssLoaderState, useCssLoaderState } from "../../state";
+import { Focusable } from "decky-frontend-lib";
+import { useCssLoaderState } from "../../state";
 import { ThemeToggle } from "../ThemeToggle";
-import { AllThemesModalRoot } from "../AllThemes";
 import { Flags } from "../../ThemeTypes";
+import { ThemeErrorCard } from "../ThemeErrorCard";
 
 export function QAMThemeToggleList() {
   const { localThemeList, unpinnedThemes } = useCssLoaderState();
@@ -26,7 +26,12 @@ export function QAMThemeToggleList() {
           align-items: stretch;
           width: 100%;
         }
+        /* PRE Aug 18th Beta */
         .CSSLoader_QAM_CollapseButton_Container > div > div > div > button {
+          height: 10px !important;
+        }
+        /* POST Aug 18th Beta */
+        .CSSLoader_QAM_CollapseButton_Container > div > div > div > div > button {
           height: 10px !important;
         }
         `}
@@ -48,17 +53,6 @@ export function QAMThemeToggleList() {
               ))}
           </>
         )}
-        <PanelSectionRow>
-          <ButtonItem
-            layout="below"
-            onClick={() => {
-              // @ts-ignore
-              showModal(<AllThemesModalRoot />);
-            }}
-          >
-            Your Themes
-          </ButtonItem>
-        </PanelSectionRow>
       </Focusable>
     </>
   );

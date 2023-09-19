@@ -1,10 +1,10 @@
 // Code from https://github.com/NGnius/PowerTools/blob/dev/src/python.ts
 import { ServerAPI } from "decky-frontend-lib";
 import { CssLoaderState } from "./state";
-import { Theme } from "./ThemeTypes";
+import { Theme, ThemeError } from "./ThemeTypes";
 import { bulkThemeUpdateCheck } from "./logic/bulkThemeUpdateCheck";
 
-var server: ServerAPI | undefined = undefined;
+export var server: ServerAPI | undefined = undefined;
 export var globalState: CssLoaderState | undefined = undefined;
 
 export function setServer(s: ServerAPI) {
@@ -81,23 +81,31 @@ export async function changePreset(themeName: string, themeList: Theme[]) {
     // Disables all themes before enabling the preset
     await Promise.all(themeList.filter((e) => e.enabled).map((e) => setThemeState(e.name, false)));
 
-    await setThemeState(themeName, true);
+    if (themeName !== "None") {
+      await setThemeState(themeName, true);
+    }
     resolve(true);
   });
 }
 
-export function getInstalledThemes(): Promise<void> {
+export async function getInstalledThemes(): Promise<any> {
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
-  return server!.callPluginMethod<{}, Theme[]>("get_themes", {}).then((data) => {
-    if (data.success) {
-      setGlobalState("localThemeList", data.result);
-    }
-    return;
-  });
+  const errorRes = await server!.callPluginMethod<{}, { fails: ThemeError[] }>(
+    "get_last_load_errors",
+    {}
+  );
+  if (errorRes.success) {
+    setGlobalState("themeErrors", errorRes.result.fails);
+  }
+  const themeRes = await server!.callPluginMethod<{}, Theme[]>("get_themes", {});
+  if (themeRes.success) {
+    setGlobalState("localThemeList", themeRes.result);
+    return themeRes.result;
+  }
 }
 
-export function reloadBackend(): Promise<void> {
-  return server!.callPluginMethod("reset", {}).then(() => {
+export async function reloadBackend(): Promise<void> {
+  return server!.callPluginMethod<{}, { fails: ThemeError[] }>("reset", {}).then((res) => {
     return getInstalledThemes();
   });
 }

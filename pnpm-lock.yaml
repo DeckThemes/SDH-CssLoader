@@ -5,8 +5,8 @@ dependencies:
     specifier: ^4.2.3
     version: 4.2.3
   decky-frontend-lib:
-    specifier: ^3.20.7
-    version: 3.20.7
+    specifier: ^3.22.0
+    version: 3.22.0
   lodash:
     specifier: ^4.17.21
     version: 4.17.21
@@ -702,8 +702,8 @@ packages:
     resolution: {integrity: sha512-uX1KG+x9h5hIJsaKR9xHUeUraxf8IODOwq9JLNPq6BwB04a/xgpq3rcx47l5BZu5zBPlgD342tdke3Hom/nJRA==}
     dev: true
 
-  /decky-frontend-lib@3.20.7:
-    resolution: {integrity: sha512-Zwwbo50cqpTbCfSCZaqITgTRvWs7pK9KO1A+Oo2sCC/DqOfyUtEH5niNPid4Qxu+yh4lsbEjTurJk1nCfd+nZw==}
+  /decky-frontend-lib@3.22.0:
+    resolution: {integrity: sha512-MJ0y0bhNMHJyMVxHht3O0L0GxdT9sckUmh35HG7/ERqyZQsfKpDqOeW6pC1R07SnuWwgbl4fY3tzjlrb7qUeoA==}
     dev: false
 
   /decode-uri-component@0.2.2:
