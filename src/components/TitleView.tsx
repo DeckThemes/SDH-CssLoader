@@ -13,8 +13,6 @@ export function TitleView({ onDocsClick }: { onDocsClick?: () => {} }) {
     Navigation.Navigate("/cssloader/theme-manager");
   };
 
-  console.log("HEELO WUMPUS", onDocsClick);
-
   return (
     <Focusable
       style={{

@@ -40,11 +40,8 @@ export function PluginSettings() {
   }, []);
 
   async function setWatch(enabled: boolean) {
-    console.log("VALUE", enabled);
     await toggleWatchState(enabled, false);
-    console.log("TOGGLED");
     const res = await getWatchState();
-    console.log("RES FETCHED", res);
     if (res.success && res.result) setWatchOn(res.result);
   }
 
