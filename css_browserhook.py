@@ -472,8 +472,8 @@ async def remove(tab_name : str, css_id : str) -> Result:
     
     return Result(True)
 
-async def commit_all():
-    await asyncio.gather(*[x.commit_css_transaction() for x in HOOK.connected_tabs])
+async def commit_all(remove_all_first : bool = False):
+    await asyncio.gather(*[x.commit_css_transaction(remove_all_first=remove_all_first) for x in HOOK.connected_tabs])
 
 async def remove_all():
     await asyncio.gather(*[x.remove_all_css() for x in HOOK.connected_tabs])

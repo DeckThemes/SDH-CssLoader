@@ -107,12 +107,16 @@ class Loader:
         await commit_all()
         return Result(True)
 
-    async def reset(self) -> dict:
+    async def reset(self, silent : bool = False) -> dict:
         await self.lock()
         try:
-            await remove_all()
-            await self.load()
-            await commit_all()
+            if silent:
+                await self.load()
+                await commit_all(remove_all_first=True)
+            else:
+                await remove_all()
+                await self.load()
+                await commit_all()
         except Exception as e:
             await self.unlock()
             Result(False, str(e))
