@@ -20,7 +20,7 @@ class BrowserTabHook:
         asyncio.create_task(self._init())
 
     async def _init(self):
-        res = await self.evaluate_js("(function(){ return {\"title\": document.title, \"classes\": Array.from(document.documentElement.classList)} })()")
+        res = await self.evaluate_js("(function(){ return {\"title\": document.title, \"classes\": Array.from(document.documentElement.classList).concat(Array.from(document.body.classList)).concat(Array.from(document.head.classList))} })()")
 
         if res != None:
             self.title = res["title"]
