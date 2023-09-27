@@ -41,7 +41,7 @@ export function disableNavPatch() {
   return;
 }
 
-function setNavPatch(value: boolean) {
+export function setNavPatch(value: boolean) {
   value ? enableNavPatch() : disableNavPatch();
   storeWrite("enableNavPatch", value + "");
 }
