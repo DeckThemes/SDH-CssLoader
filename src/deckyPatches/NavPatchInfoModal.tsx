@@ -1,6 +1,6 @@
 import { DialogButton, Focusable, ConfirmModal } from "decky-frontend-lib";
 import { Theme } from "../ThemeTypes";
-import { disableNavPatch, enableNavPatch } from "./NavPatch";
+import { setNavPatch } from "./NavPatch";
 export function NavPatchInfoModalRoot({
   themeData,
   closeModal,
@@ -9,7 +9,7 @@ export function NavPatchInfoModalRoot({
   closeModal?: any;
 }) {
   function onButtonClick() {
-    enableNavPatch();
+    setNavPatch(true);
     closeModal();
   }
   return (
