@@ -1,6 +1,6 @@
 import { replacePatch } from "decky-frontend-lib";
 import { NavController } from "./NavControllerFinder";
-import { globalState, toast } from "../python";
+import { globalState, toast, storeWrite } from "../python";
 
 export function enableNavPatch() {
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
@@ -39,4 +39,9 @@ export function disableNavPatch() {
   setGlobalState("navPatchInstance", undefined);
   toast("CSS Loader", "Nav Patch Disabled");
   return;
+}
+
+function setNavPatch(value: boolean) {
+  value ? enableNavPatch() : disableNavPatch();
+  storeWrite("enableNavPatch", value + "");
 }
