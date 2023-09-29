@@ -64,7 +64,6 @@ export function ThemeSettingsModalButtons({
         starred: boolean;
       };
       if (data) {
-        console.log("DATA", data);
         setStarFetchLoaded(true);
         setStarred(data.starred);
       }

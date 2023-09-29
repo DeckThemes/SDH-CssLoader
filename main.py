@@ -42,7 +42,7 @@ class FileChangeHandler(FileSystemEventHandler):
         if ((self.last + self.delay) < time.time() and not self.loader.busy):
             self.last = time.time()
             Log("Reloading themes due to FS event")
-            self.loop.create_task(self.loader.reset())
+            self.loop.create_task(self.loader.reset(silent=True))
         
 
 class Plugin:

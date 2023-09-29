@@ -2,7 +2,7 @@ import { Focusable, ToggleField } from "decky-frontend-lib";
 import { useMemo, useState, useEffect } from "react";
 import { useCssLoaderState } from "../../state";
 import { storeWrite } from "../../python";
-import { disableNavPatch, enableNavPatch } from "../../deckyPatches/NavPatch";
+import { setNavPatch } from "../../deckyPatches/NavPatch";
 import {
   getWatchState,
   getServerState,
@@ -16,11 +16,6 @@ export function PluginSettings() {
   const [watchOn, setWatchOn] = useState<boolean>(false);
 
   const navPatchEnabled = useMemo(() => !!navPatchInstance, [navPatchInstance]);
-
-  function setNavPatch(value: boolean) {
-    value ? enableNavPatch() : disableNavPatch();
-    storeWrite("enableNavPatch", value + "");
-  }
 
   useEffect(() => {
     getServerState().then((res) => {
@@ -40,11 +35,8 @@ export function PluginSettings() {
   }, []);
 
   async function setWatch(enabled: boolean) {
-    console.log("VALUE", enabled);
     await toggleWatchState(enabled, false);
-    console.log("TOGGLED");
     const res = await getWatchState();
-    console.log("RES FETCHED", res);
     if (res.success && res.result) setWatchOn(res.result);
   }
 
