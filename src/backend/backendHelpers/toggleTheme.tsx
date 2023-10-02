@@ -69,9 +69,10 @@ export async function toggleTheme(
   const { localThemeList } = python.globalState!.getPublicState();
 
   // This is copied from the desktop codebase
-  // If we refactor the desktop version of this function (which we probably should) this should also be refactored
   await python.generatePresetFromThemeNames(
     selectedPreset.name,
     localThemeList.filter((e) => e.enabled && !e.flags.includes(Flags.isPreset)).map((e) => e.name)
   );
+  // Getting the new data for the preset
+  await python.getInstalledThemes();
 }
