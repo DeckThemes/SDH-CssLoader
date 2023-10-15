@@ -65,7 +65,7 @@ export function PluginSettings() {
           checked={navPatchEnabled}
           label="Enable Nav Patch"
           description="This fixes issues with themes that attempt to hide elements of the UI"
-          onChange={setNavPatch}
+          onChange={(value) => setNavPatch(value, true)}
         />
       </Focusable>
       <Focusable>

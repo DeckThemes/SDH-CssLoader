@@ -2,7 +2,7 @@ import { replacePatch } from "decky-frontend-lib";
 import { NavController } from "./NavControllerFinder";
 import { globalState, toast, storeWrite } from "../python";
 
-export function enableNavPatch() {
+export function enableNavPatch(shouldToast: boolean = false) {
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
   const { navPatchInstance } = globalState!.getPublicState();
   // Don't patch twice
@@ -25,11 +25,11 @@ export function enableNavPatch() {
     }
   );
   setGlobalState("navPatchInstance", patch);
-  toast("CSS Loader", "Nav Patch Enabled");
+  shouldToast && toast("CSS Loader", "Nav Patch Enabled");
   return;
 }
 
-export function disableNavPatch() {
+export function disableNavPatch(shouldToast: boolean = false) {
   const setGlobalState = globalState!.setGlobalState.bind(globalState);
   const { navPatchInstance } = globalState!.getPublicState();
   // Don't unpatch something that doesn't exist
@@ -37,11 +37,11 @@ export function disableNavPatch() {
   if (!navPatchInstance) return;
   navPatchInstance.unpatch();
   setGlobalState("navPatchInstance", undefined);
-  toast("CSS Loader", "Nav Patch Disabled");
+  shouldToast && toast("CSS Loader", "Nav Patch Disabled");
   return;
 }
 
-export function setNavPatch(value: boolean) {
-  value ? enableNavPatch() : disableNavPatch();
+export function setNavPatch(value: boolean, shouldToast: boolean = false) {
+  value ? enableNavPatch(shouldToast) : disableNavPatch(shouldToast);
   storeWrite("enableNavPatch", value + "");
 }
