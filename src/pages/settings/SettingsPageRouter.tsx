@@ -63,11 +63,40 @@ export function SettingsPageRouter() {
       </style>
       <SidebarNavigation
         pages={[
-          { title: "Themes", icon: <RiPaintFill />, content: <ThemeSettings /> },
-          { title: "Profiles", icon: <BsFolderFill />, content: <PresetSettings /> },
-          { title: "Settings", icon: <RiSettings2Fill />, content: <PluginSettings /> },
-          { title: "Donate", icon: <AiFillHeart />, content: <DonatePage /> },
-          { title: "Credits", icon: <AiFillGithub />, content: <Credits /> },
+          {
+            title: "Themes",
+            icon: <RiPaintFill />,
+            route: "/cssloader/settings/themes",
+            content: <ThemeSettings />,
+          },
+          {
+            title: "Profiles",
+            icon: <BsFolderFill />,
+            route: "/cssloader/settings/profiles",
+
+            content: <PresetSettings />,
+          },
+          {
+            title: "Settings",
+            icon: <RiSettings2Fill />,
+            route: "/cssloader/settings/plugin",
+
+            content: <PluginSettings />,
+          },
+          {
+            title: "Donate",
+            icon: <AiFillHeart />,
+            route: "/cssloader/settings/donate",
+
+            content: <DonatePage />,
+          },
+          {
+            title: "Credits",
+            icon: <AiFillGithub />,
+            route: "/cssloader/settings/credits",
+
+            content: <Credits />,
+          },
         ]}
       ></SidebarNavigation>
     </>
