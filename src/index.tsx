@@ -85,7 +85,7 @@ function Content() {
               }
             `}
           </style>
-          <PresetSelectionDropdown />
+          {localThemeList.length > 0 && <PresetSelectionDropdown />}
           <QAMThemeToggleList />
         </>
       ) : (

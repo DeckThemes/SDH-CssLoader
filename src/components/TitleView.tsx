@@ -1,6 +1,7 @@
 import { DialogButton, Navigation, staticClasses, Focusable } from "decky-frontend-lib";
 import { BsGearFill } from "react-icons/bs";
-import { FaInfo, FaStore } from "react-icons/fa";
+import { BiDownload } from "react-icons/bi";
+import { FaDownload } from "react-icons/fa";
 
 export function TitleView({ onDocsClick }: { onDocsClick?: () => {} }) {
   const onSettingsClick = () => {
@@ -30,7 +31,7 @@ export function TitleView({ onDocsClick }: { onDocsClick?: () => {} }) {
         style={{ height: "28px", width: "40px", minWidth: 0, padding: "10px 12px" }}
         onClick={onStoreClick}
       >
-        <FaStore style={{ marginTop: "-4px", display: "block" }} />
+        <FaDownload style={{ marginTop: "-4px", display: "block" }} />
       </DialogButton>
       <DialogButton
         style={{ height: "28px", width: "40px", minWidth: 0, padding: "10px 12px" }}

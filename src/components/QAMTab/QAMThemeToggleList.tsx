@@ -3,6 +3,7 @@ import { useCssLoaderState } from "../../state";
 import { ThemeToggle } from "../ThemeToggle";
 import { Flags } from "../../ThemeTypes";
 import { ThemeErrorCard } from "../ThemeErrorCard";
+import { BsArrowDown } from "react-icons/bs";
 
 export function QAMThemeToggleList() {
   const { localThemeList, unpinnedThemes } = useCssLoaderState();
@@ -10,7 +11,14 @@ export function QAMThemeToggleList() {
   if (localThemeList.length === 0) {
     return (
       <>
-        <span>You have no themes currently, click on "Download Themes" to download some!</span>
+        <BsArrowDown
+          style={{
+            position: "absolute",
+            right: "4.85em",
+            transform: "rotate(180deg) scale(2) translateY(13px)",
+          }}
+        />
+        <span>You have no themes currently, get started by clicking the download icon above!</span>
       </>
     );
   }
