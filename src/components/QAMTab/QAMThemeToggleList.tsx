@@ -11,13 +11,6 @@ export function QAMThemeToggleList() {
   if (localThemeList.length === 0) {
     return (
       <>
-        <BsArrowDown
-          style={{
-            position: "absolute",
-            right: "4.85em",
-            transform: "rotate(180deg) scale(2) translateY(13px)",
-          }}
-        />
         <span>You have no themes currently, get started by clicking the download icon above!</span>
       </>
     );

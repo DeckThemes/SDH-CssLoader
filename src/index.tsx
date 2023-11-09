@@ -179,7 +179,11 @@ export default definePlugin((serverApi: ServerAPI) => {
   ));
 
   return {
-    titleView: <TitleView />,
+    titleView: (
+      <CssLoaderContextProvider cssLoaderStateClass={state}>
+        <TitleView />
+      </CssLoaderContextProvider>
+    ),
     title: <div>CSSLoader</div>,
     alwaysRender: true,
     content: (
