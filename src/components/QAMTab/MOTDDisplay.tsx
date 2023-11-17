@@ -13,16 +13,22 @@ export function MOTDDisplay() {
     getMotd();
   }, []);
 
-  function getColors() {
-    switch (motd?.severity) {
-      case "High":
-        return { bg: "#c3010155", border: "#560d0d", text: "#fff" };
-      case "Medium":
-        return { bg: "rgba(255, 255, 0, 0.067)", border: "rgba(255, 255, 0, 0.467)", text: "#fff" };
-      default:
-        return { bg: "#3e72b055", border: "#6680a8", text: "#fff" };
-    }
-  }
+  const SEVERITIES = {
+    High: {
+      color: "#bb1414",
+      text: "#fff",
+    },
+    Medium: {
+      color: "#bbbb14",
+      text: "#fff",
+    },
+    Low: {
+      color: "#1488bb",
+      text: "#fff",
+    },
+  };
+
+  const severity = SEVERITIES[motd?.severity || "Low"];
 
   if (motd && motd?.name) {
     return (
@@ -30,12 +36,13 @@ export function MOTDDisplay() {
         <Focusable
           onActivate={() => {}}
           style={{
-            backgroundColor: getColors().bg,
-            color: getColors().text,
-            borderColor: getColors().border,
-            borderWidth: "0.25em",
+            // Transparency is 20% of the color
+            backgroundColor: `${severity.color}33`,
+            color: severity.text,
+            borderColor: severity.color,
+            borderWidth: "2px",
             borderStyle: "solid",
-            padding: "0.25em",
+            padding: "0.75em",
             display: "flex",
             flexDirection: "column",
           }}
