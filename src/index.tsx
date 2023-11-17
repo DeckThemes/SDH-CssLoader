@@ -15,7 +15,7 @@ import { RiPaintFill } from "react-icons/ri";
 
 import { ThemeManagerRouter } from "./pages/theme-manager";
 import { CssLoaderContextProvider, CssLoaderState, useCssLoaderState } from "./state";
-import { PresetSelectionDropdown, QAMThemeToggleList, TitleView } from "./components";
+import { MOTDDisplay, PresetSelectionDropdown, QAMThemeToggleList, TitleView } from "./components";
 import { ExpandedViewPage } from "./pages/theme-manager/ExpandedView";
 import { Flags, Theme } from "./ThemeTypes";
 import { dummyFunction, getInstalledThemes, reloadBackend } from "./python";
@@ -58,11 +58,13 @@ function Content() {
   }, []);
 
   return (
-    <PanelSection title="Themes">
-      {dummyFuncResult ? (
-        <>
-          <style>
-            {`
+    <>
+      <MOTDDisplay />
+      <PanelSection title="Themes">
+        {dummyFuncResult ? (
+          <>
+            <style>
+              {`
               .CSSLoader_QAMTab_NavButton {
                 height: 2em !important;
                 width: 1.5em !important;
@@ -84,25 +86,26 @@ function Content() {
                 transform: translate(-50%, -50%); 
               }
             `}
-          </style>
-          {localThemeList.length > 0 && <PresetSelectionDropdown />}
-          <QAMThemeToggleList />
-        </>
-      ) : (
-        <PanelSectionRow>
-          <span>
-            CssLoader failed to initialize, try reloading, and if that doesn't work, try restarting
-            your deck.
-          </span>
-        </PanelSectionRow>
-      )}
+            </style>
+            {localThemeList.length > 0 && <PresetSelectionDropdown />}
+            <QAMThemeToggleList />
+          </>
+        ) : (
+          <PanelSectionRow>
+            <span>
+              CssLoader failed to initialize, try reloading, and if that doesn't work, try
+              restarting your deck.
+            </span>
+          </PanelSectionRow>
+        )}
 
-      <PanelSectionRow>
-        <ButtonItem layout="below" onClick={() => reload()}>
-          Refresh
-        </ButtonItem>
-      </PanelSectionRow>
-    </PanelSection>
+        <PanelSectionRow>
+          <ButtonItem layout="below" onClick={() => reload()}>
+            Refresh
+          </ButtonItem>
+        </PanelSectionRow>
+      </PanelSection>
+    </>
   );
 }
 

@@ -131,7 +131,8 @@ export async function genericGET(
   fetchPath: string,
   requiresAuth: boolean = false,
   customAuthToken: string | undefined = undefined,
-  onError: () => void = () => {}
+  onError: () => void = () => {},
+  failSilently: boolean = false
 ) {
   const { apiUrl } = globalState!.getPublicState();
   function doTheFetching(authToken: string | undefined = undefined) {
