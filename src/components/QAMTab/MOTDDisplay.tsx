@@ -1,10 +1,14 @@
-import { Focusable, PanelSection } from "decky-frontend-lib";
-import { useEffect, useState } from "react";
+import { DialogButton, Focusable, PanelSection } from "decky-frontend-lib";
+import { useEffect, useState, useMemo } from "react";
 import { Motd } from "../../apiTypes/Motd";
 import { genericGET } from "../../api";
+import { FaTimes } from "react-icons/fa";
+import { useCssLoaderState } from "../../state";
+import { getHiddenMotd, setHiddenMotd } from "../../backend/pythonMethods/pluginSettingsMethods";
 
 export function MOTDDisplay() {
   const [motd, setMotd] = useState<Motd | undefined>();
+  const { hiddenMotd, setGlobalState } = useCssLoaderState();
   useEffect(() => {
     async function getMotd() {
       const res = await genericGET("/motd", false);
@@ -12,6 +16,15 @@ export function MOTDDisplay() {
     }
     getMotd();
   }, []);
+  async function dismiss() {
+    if (motd) {
+      await setHiddenMotd(motd.id);
+      const res = await getHiddenMotd();
+      if (res.success) {
+        setGlobalState("hiddenMotd", res.result);
+      }
+    }
+  }
 
   const SEVERITIES = {
     High: {
@@ -28,13 +41,16 @@ export function MOTDDisplay() {
     },
   };
 
+  const hidden = useMemo(() => {
+    return hiddenMotd === motd?.id;
+  }, [hiddenMotd, motd]);
+
   const severity = SEVERITIES[motd?.severity || "Low"];
 
-  if (motd && motd?.name) {
+  if (motd && motd?.name && !hidden) {
     return (
       <PanelSection>
         <Focusable
-          onActivate={() => {}}
           style={{
             // Transparency is 20% of the color
             backgroundColor: `${severity.color}33`,
@@ -46,9 +62,24 @@ export function MOTDDisplay() {
             display: "flex",
             flexDirection: "column",
           }}
-          focusWithinClassName="gpfocuswithin"
         >
-          <span style={{ fontWeight: "bold" }}>{motd?.name}</span>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span style={{ fontWeight: "bold" }}>{motd?.name}</span>
+            <DialogButton
+              style={{
+                width: "20px",
+                minWidth: "20px",
+                height: "20px",
+                padding: "0",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onClick={dismiss}
+            >
+              <FaTimes />
+            </DialogButton>
+          </div>
           <span style={{ fontSize: "0.75em" }}>{motd?.description}</span>
         </Focusable>
       </PanelSection>

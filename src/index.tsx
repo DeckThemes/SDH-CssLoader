@@ -156,6 +156,13 @@ export default definePlugin((serverApi: ServerAPI) => {
     }
   });
 
+  // Hidden MOTD
+  python.resolve(python.storeRead("hiddenMotd"), (id: string) => {
+    if (id) {
+      state.setGlobalState("hiddenMotd", id);
+    }
+  });
+
   // Nav Patch
   python.resolve(python.storeRead("enableNavPatch"), (value: string) => {
     if (value === "true") {
