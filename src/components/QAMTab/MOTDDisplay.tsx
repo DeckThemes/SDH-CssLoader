@@ -80,7 +80,7 @@ export function MOTDDisplay() {
               <FaTimes />
             </DialogButton>
           </div>
-          <span style={{ fontSize: "0.75em" }}>{motd?.description}</span>
+          <p style={{ fontSize: "0.75em" }}>{motd?.description}</p>
         </Focusable>
       </PanelSection>
     );
