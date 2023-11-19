@@ -10,7 +10,8 @@ export const ThemePatch: VFC<{
   index: number;
   fullArr: Patch[];
   themeName: string;
-}> = ({ data, index, fullArr, themeName }) => {
+  modal?: boolean;
+}> = ({ data, index, fullArr, themeName, modal = false }) => {
   const { selectedPreset } = useCssLoaderState();
   const [selectedIndex, setIndex] = useState(data.options.indexOf(data.value));
 
@@ -54,7 +55,7 @@ export const ThemePatch: VFC<{
           <PanelSectionRow>
             <SliderField
               bottomSeparator={bottomSeparatorValue}
-              label={<PatchLabel name={data.name} />}
+              label={modal ? data.name : <PatchLabel name={data.name} />}
               min={0}
               max={data.options.length - 1}
               value={selectedIndex}
@@ -81,7 +82,7 @@ export const ThemePatch: VFC<{
           <PanelSectionRow>
             <ToggleField
               bottomSeparator={bottomSeparatorValue}
-              label={<PatchLabel name={data.name} />}
+              label={modal ? data.name : <PatchLabel name={data.name} />}
               checked={data.value === "Yes"}
               onChange={(bool) => {
                 const newValue = bool ? "Yes" : "No";
@@ -101,7 +102,7 @@ export const ThemePatch: VFC<{
           <PanelSectionRow>
             <DropdownItem
               bottomSeparator={bottomSeparatorValue}
-              label={<PatchLabel name={data.name} />}
+              label={modal ? data.name : <PatchLabel name={data.name} />}
               menuLabel={`${data.name}`}
               rgOptions={data.options.map((x, i) => {
                 return { data: i, label: x };
@@ -122,7 +123,11 @@ export const ThemePatch: VFC<{
       return (
         <>
           <PanelSectionRow>
-            <PatchLabel name={data.name} />
+            {modal ? (
+              <span style={{ color: "#dcdedf" }}>{data.name}</span>
+            ) : (
+              <PatchLabel name={data.name} />
+            )}
           </PanelSectionRow>
           <ComponentWrapper />
         </>
