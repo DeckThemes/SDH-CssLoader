@@ -18,6 +18,8 @@ import { FullCSSThemeInfo, PartialCSSThemeInfo } from "../../apiTypes";
 import { ThemeSettingsModalRoot } from "../../components/Modals/ThemeSettingsModal";
 import { AuthorViewModalRoot } from "../../components/Modals/AuthorViewModal";
 import { ExpandedViewStyles } from "../../components/Styles";
+import { shortenNumber } from "../../logic/numbers";
+import { FaRegStar, FaStar } from "react-icons/fa";
 
 export const ExpandedViewPage: VFC = () => {
   const {
@@ -331,10 +333,11 @@ export const ExpandedViewPage: VFC = () => {
           <Focusable className="flex flex-col gap-1 buttons-container">
             <div className="button-bg flex justify-between items-center">
               <div className="flex gap-1/4 items-center">
-                {isStarred ? <BsStarFill /> : <BsStar />}
+                {isStarred ? <FaStar /> : <FaRegStar />}
                 {/* Need to make the text size smaller or else it wraps */}
                 <span style={{ fontSize: fullThemeData.starCount >= 100 ? "0.75em" : "1em" }}>
-                  {fullThemeData.starCount} Star{fullThemeData.starCount === 1 ? "" : "s"}
+                  {shortenNumber(fullThemeData.starCount) ?? fullThemeData.starCount} Star
+                  {fullThemeData.starCount === 1 ? "" : "s"}
                 </span>
               </div>
               <DialogButton
@@ -352,7 +355,9 @@ export const ExpandedViewPage: VFC = () => {
             <div className="flex flex-col gap-1/4 button-bg">
               <span className="install-text">Install {fullThemeData.displayName}</span>
               <span className="bold">
-                {fullThemeData.download.downloadCount} Download
+                {shortenNumber(fullThemeData.download.downloadCount) ??
+                  fullThemeData.download.downloadCount}{" "}
+                Download
                 {fullThemeData.download.downloadCount === 1 ? "" : "s"}
               </span>
               <Focusable className="install-button-container">

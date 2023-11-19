@@ -4,8 +4,8 @@ import { Theme } from "../../ThemeTypes";
 import { Focusable, Navigation } from "decky-frontend-lib";
 import { AiOutlineDownload } from "react-icons/ai";
 import { PartialCSSThemeInfo, ThemeQueryRequest } from "../../apiTypes";
-import { BsCloudDownload, BsStar } from "react-icons/bs";
-import { FiTarget } from "react-icons/fi";
+import { FaBullseye, FaDownload, FaStar } from "react-icons/fa";
+import { shortenNumber } from "../../logic/numbers";
 
 const cardWidth = {
   5: 152,
@@ -87,15 +87,15 @@ export const VariableSizeCard: FC<{
             <div className="CSSLoader_ThemeCard_ImageDarkener" />
             <div className="CSSLoader_ThemeCard_SupInfoContainer">
               <div className="CSSLoader_ThemeCard_IconInfoContainer">
-                <BsCloudDownload />
-                <span>{e.download.downloadCount}</span>
+                <FaDownload />
+                <span>{shortenNumber(e.download.downloadCount) ?? e.download.downloadCount}</span>
               </div>
               <div className="CSSLoader_ThemeCard_IconInfoContainer">
-                <BsStar />
-                <span>{e.starCount}</span>
+                <FaStar />
+                <span>{shortenNumber(e.starCount) ?? e.starCount}</span>
               </div>
               <div className="CSSLoader_ThemeCard_IconInfoContainer">
-                <FiTarget />
+                <FaBullseye />
                 <span>{e.target}</span>
               </div>
             </div>

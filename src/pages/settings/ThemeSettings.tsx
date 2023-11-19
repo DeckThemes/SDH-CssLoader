@@ -32,12 +32,15 @@ export function ThemeSettings() {
 
   async function handleUpdate(e: Theme) {
     setInstalling(true);
+    const unpinned = unpinnedThemes.includes(e.id);
     await installTheme(e.id);
     // This just updates the updateStatuses arr to know that this theme now is up to date, no need to re-fetch the API to know that
     setGlobalState(
       "updateStatuses",
       updateStatuses.map((f) => (f[0] === e.id ? [e.id, "installed", false] : e))
     );
+    // Remove duplicate theme from unpinned list.
+    if (unpinned) python.pinTheme(e.id);
     setInstalling(false);
   }
 
@@ -68,7 +71,7 @@ export function ThemeSettings() {
             display: flex !important;
             align-items: center;
             justify-content: center;
-            gap: 0.25em;
+            gap: 0.5em;
           }
           .CSSLoader_InstalledThemes_ButtonsContainer {
             margin-bottom: 1em;

@@ -4,6 +4,7 @@ import { ThemeToggle } from "../ThemeToggle";
 import { Flags } from "../../ThemeTypes";
 import { ThemeErrorCard } from "../ThemeErrorCard";
 import { BsArrowDown } from "react-icons/bs";
+import { FaEyeSlash } from "react-icons/fa";
 
 export function QAMThemeToggleList() {
   const { localThemeList, unpinnedThemes } = useCssLoaderState();
@@ -11,7 +12,7 @@ export function QAMThemeToggleList() {
   if (localThemeList.length === 0) {
     return (
       <>
-        <span>You have no themes currently, get started by clicking the download icon above!</span>
+        <span>You have no themes installed. Get started by selecting the download icon above!</span>
       </>
     );
   }
@@ -38,23 +39,30 @@ export function QAMThemeToggleList() {
         `}
       </style>
       <Focusable className="CSSLoader_ThemeListContainer">
-        {unpinnedThemes.length === localThemeList.length ? (
-          <>
-            <span>
-              You have no pinned themes currently, themes that you pin from the "Your Themes" popup
-              will show up here
-            </span>
-          </>
-        ) : (
-          <>
-            {localThemeList
-              .filter((e) => !unpinnedThemes.includes(e.id) && !e.flags.includes(Flags.isPreset))
-              .map((x) => (
-                <ThemeToggle data={x} collapsible showModalButtonPrompt />
-              ))}
-          </>
-        )}
+        <>
+          {localThemeList
+            .filter((e) => !unpinnedThemes.includes(e.id) && !e.flags.includes(Flags.isPreset))
+            .map((x) => (
+              <ThemeToggle data={x} collapsible showModalButtonPrompt />
+            ))}
+        </>
       </Focusable>
+      {unpinnedThemes.length > 0 && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: ".5em",
+            fontSize: "0.8rem",
+            padding: "8px 0",
+          }}
+        >
+          <FaEyeSlash />
+          <div>
+            {unpinnedThemes.length} theme{unpinnedThemes.length > 1 ? "s are" : "is"} hidden.
+          </div>
+        </div>
+      )}
     </>
   );
 }

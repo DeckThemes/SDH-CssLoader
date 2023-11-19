@@ -88,11 +88,6 @@ export function ThemeBrowserCardStyles({ customCardSize }: { customCardSize?: nu
         transition-duration: 0.32s;
         transition-timing-function: cubic-bezier(0.17, 0.45, 0.14, 0.83);
       }
-      .gpfocuswithin > div > .CSSLoader_ThemeCard_Image {
-        filter: saturate(0);
-        transform: scale(1.03);
-        transition-delay: 0.1s;
-      }
       .CSSLoader_ThemeCard_ImageDarkener {
         position: absolute;
         top: 0;
@@ -101,7 +96,7 @@ export function ThemeBrowserCardStyles({ customCardSize }: { customCardSize?: nu
         transition-property: opacity;
         transition-duration: 0.65s;
         transition-timing-function: cubic-bezier(0.17, 0.45, 0.14, 0.83);
-        background-color: #0056d6;
+        background: linear-gradient(0deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,0) 30%);
         mix-blend-mode: multiply;
         width: var(--cssloader-themecard-width);
         height: var(--cssloader-themecard-imgheight);

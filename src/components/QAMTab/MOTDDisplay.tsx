@@ -61,23 +61,31 @@ export function MOTDDisplay() {
             padding: "0.75em",
             display: "flex",
             flexDirection: "column",
+            position: "relative",
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <span style={{ fontWeight: "bold" }}>{motd?.name}</span>
             <DialogButton
               style={{
-                width: "20px",
-                minWidth: "20px",
-                height: "20px",
+                width: "1em",
+                minWidth: "1em",
+                height: "1em",
                 padding: "0",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                position: "absolute",
+                top: ".75em",
+                right: ".75em",
               }}
               onClick={dismiss}
             >
-              <FaTimes />
+              <FaTimes
+                style={{
+                  height: ".75em",
+                }}
+              />
             </DialogButton>
           </div>
           <span style={{ fontSize: "0.75em", whiteSpace: "pre-line" }}>{motd?.description}</span>

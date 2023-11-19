@@ -1,5 +1,5 @@
 import { SidebarNavigation } from "decky-frontend-lib";
-import { BsFolderFill } from "react-icons/bs";
+import { BsFolderFill, BsGearFill } from "react-icons/bs";
 import { RiPaintFill, RiSettings2Fill } from "react-icons/ri";
 import { ThemeSettings } from "./ThemeSettings";
 import { PresetSettings } from "./PresetSettings";
@@ -7,6 +7,7 @@ import { PluginSettings } from "./PluginSettings";
 import { Credits } from "./Credits";
 import { AiFillGithub, AiFillHeart } from "react-icons/ai";
 import { DonatePage } from "./DonatePage";
+import { FaFolder, FaGithub, FaHeart } from "react-icons/fa";
 
 export function SettingsPageRouter() {
   return (
@@ -71,28 +72,28 @@ export function SettingsPageRouter() {
           },
           {
             title: "Profiles",
-            icon: <BsFolderFill />,
+            icon: <FaFolder />,
             route: "/cssloader/settings/profiles",
 
             content: <PresetSettings />,
           },
           {
             title: "Settings",
-            icon: <RiSettings2Fill />,
+            icon: <BsGearFill />,
             route: "/cssloader/settings/plugin",
 
             content: <PluginSettings />,
           },
           {
             title: "Donate",
-            icon: <AiFillHeart />,
+            icon: <FaHeart />,
             route: "/cssloader/settings/donate",
 
             content: <DonatePage />,
           },
           {
             title: "Credits",
-            icon: <AiFillGithub />,
+            icon: <FaGithub />,
             route: "/cssloader/settings/credits",
 
             content: <Credits />,
