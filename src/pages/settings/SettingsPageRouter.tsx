@@ -25,7 +25,7 @@ export function SettingsPageRouter() {
           }
           /* The actual element of the ToggleContainer with the BG */
           .CSSLoader_FullTheme_ToggleContainer > div {
-            background: #23262e;
+            background: rgba(255,255,255,.15);
             border-radius: 2px;
             padding-left: 5px;
             padding-right: 5px;
