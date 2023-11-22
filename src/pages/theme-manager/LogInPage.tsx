@@ -5,6 +5,7 @@ import { logInWithShortToken, logOut } from "../../api";
 import { useCssLoaderState } from "../../state";
 import { enableServer, getServerState, storeWrite } from "../../python";
 import { disableNavPatch, enableNavPatch } from "../../deckyPatches/NavPatch";
+import { FaArrowRightToBracket } from "react-icons/fa6";
 
 export const LogInPage: VFC = () => {
   const { apiShortToken, apiFullToken, apiMeData } = useCssLoaderState();
@@ -76,7 +77,7 @@ export const LogInPage: VFC = () => {
                   gap: "0.5em",
                 }}
               >
-                <SiWebauthn style={{ height: "1.5em", width: "1.5em" }} />
+                <FaArrowRightToBracket style={{ height: "1.5em", width: "1.5em" }} />
                 <span>Log In</span>
               </DialogButton>
             </Focusable>

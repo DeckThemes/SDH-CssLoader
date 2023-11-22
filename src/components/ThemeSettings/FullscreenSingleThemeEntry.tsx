@@ -3,10 +3,10 @@ import { LocalThemeStatus, Theme } from "../../ThemeTypes";
 import { useCssLoaderState } from "../../state";
 import * as python from "../../python";
 import { ImCog } from "react-icons/im";
-import { AiFillEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { toggleTheme } from "../../backend/backendHelpers/toggleTheme";
 import { ThemeSettingsModalRoot } from "../Modals/ThemeSettingsModal";
-import { FaTrash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaTrash } from "react-icons/fa";
+import { BsGearFill } from "react-icons/bs";
 
 export function FullscreenSingleThemeEntry({
   data: e,
@@ -94,9 +94,9 @@ export function FullscreenSingleThemeEntry({
           }}
         >
           {isPinned ? (
-            <AiFillEye className="CSSLoader_FullTheme_IconTranslate" />
+            <FaEye className="CSSLoader_FullTheme_IconTranslate" />
           ) : (
-            <AiOutlineEyeInvisible className="CSSLoader_FullTheme_IconTranslate" />
+            <FaEyeSlash className="CSSLoader_FullTheme_IconTranslate" />
           )}
         </DialogButton>
         <DialogButton
@@ -106,7 +106,7 @@ export function FullscreenSingleThemeEntry({
             showModal(<ThemeSettingsModalRoot selectedTheme={e.id} />);
           }}
         >
-          <ImCog className="CSSLoader_FullTheme_IconTranslate" />
+          <BsGearFill className="CSSLoader_FullTheme_IconTranslate" />
         </DialogButton>
       </div>
     </>

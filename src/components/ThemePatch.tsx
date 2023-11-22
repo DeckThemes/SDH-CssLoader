@@ -10,7 +10,8 @@ export const ThemePatch: VFC<{
   index: number;
   fullArr: Patch[];
   themeName: string;
-}> = ({ data, index, fullArr, themeName }) => {
+  modal?: boolean;
+}> = ({ data, index, fullArr, themeName, modal = false }) => {
   const { selectedPreset } = useCssLoaderState();
   const [selectedIndex, setIndex] = useState(data.options.indexOf(data.value));
 
@@ -54,7 +55,7 @@ export const ThemePatch: VFC<{
           <PanelSectionRow>
             <SliderField
               bottomSeparator={bottomSeparatorValue}
-              label={` ↳ ${data.name}`}
+              label={modal ? data.name : <PatchLabel name={data.name} />}
               min={0}
               max={data.options.length - 1}
               value={selectedIndex}
@@ -81,7 +82,7 @@ export const ThemePatch: VFC<{
           <PanelSectionRow>
             <ToggleField
               bottomSeparator={bottomSeparatorValue}
-              label={` ↳ ${data.name}`}
+              label={modal ? data.name : <PatchLabel name={data.name} />}
               checked={data.value === "Yes"}
               onChange={(bool) => {
                 const newValue = bool ? "Yes" : "No";
@@ -101,7 +102,7 @@ export const ThemePatch: VFC<{
           <PanelSectionRow>
             <DropdownItem
               bottomSeparator={bottomSeparatorValue}
-              label={` ↳ ${data.name}`}
+              label={modal ? data.name : <PatchLabel name={data.name} />}
               menuLabel={`${data.name}`}
               rgOptions={data.options.map((x, i) => {
                 return { data: i, label: x };
@@ -122,8 +123,11 @@ export const ThemePatch: VFC<{
       return (
         <>
           <PanelSectionRow>
-            {/* For some reason spans by default have a gray color, so I manually set it to the same white as the other titles */}
-            <span style={{ color: "#dcdedf" }}>↳ {data.name}</span>
+            {modal ? (
+              <span style={{ color: "#dcdedf" }}>{data.name}</span>
+            ) : (
+              <PatchLabel name={data.name} />
+            )}
           </PanelSectionRow>
           <ComponentWrapper />
         </>
@@ -131,4 +135,17 @@ export const ThemePatch: VFC<{
     default:
       return null;
   }
+};
+
+const PatchLabel = ({ name }: { name: string }) => {
+  return (
+    <div
+      className="DialogLabel"
+      style={{
+        marginBottom: "0px",
+      }}
+    >
+      {name}
+    </div>
+  );
 };

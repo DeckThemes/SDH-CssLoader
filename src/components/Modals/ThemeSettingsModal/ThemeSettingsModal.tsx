@@ -140,7 +140,7 @@ function ThemeSettingsModal({
               <>
                 <Focusable className="CSSLoader_ThemeSettingsModal_PatchContainer">
                   {themeData.patches.map((x, i, arr) => (
-                    <ThemePatch data={x} index={i} fullArr={arr} themeName={themeData.name} />
+                    <ThemePatch data={x} index={i} fullArr={arr} themeName={themeData.name} modal />
                   ))}
                 </Focusable>
               </>
