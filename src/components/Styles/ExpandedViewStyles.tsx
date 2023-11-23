@@ -21,6 +21,9 @@ export function ExpandedViewStyles({
     .flex {
       display: flex;
     }
+    .blurry-valve-footer-offset {
+      margin-bottom: 40px;
+    }
     .flex-col {
       display: flex;
       flex-direction: column;

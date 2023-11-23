@@ -202,7 +202,7 @@ export const ExpandedViewPage: VFC = () => {
           <ScrollPanelGroup
             // @ts-ignore
             focusable={false}
-            className="flex"
+            className="flex blurry-valve-footer-offset"
             // onCancelButton doesn't work here
             onCancelActionDescription="Back"
             onButtonDown={(evt: any) => {
