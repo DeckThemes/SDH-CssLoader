@@ -4,7 +4,7 @@
   "flags": [],
   "publish": {
     "tags": ["style"],
-    "description": "Dynamically loads themes developed with CSS into the Steam Deck UI. For more information, visit deckthemes.com.",
+    "description": "Dynamically loads themes developed with CSS into the Steam UI. For more information, visit deckthemes.com.",
     "image": "https://cdn.discordapp.com/attachments/450631843583229954/998236445032599573/unknown.png"
   }
 }
