@@ -1,10 +1,10 @@
 {
   "name": "CSS Loader",
-  "author": "Such Meme, Many Skill, Beebles",
+  "author": "DeckThemes",
   "flags": [],
   "publish": {
     "tags": ["style"],
-    "description": "Loads CSS (themes) dynamically into the steam deck game ui",
-    "image": "https://cdn.discordapp.com/attachments/450631843583229954/998236445032599573/unknown.png"
+    "description": "Dynamically loads themes developed with CSS into the Steam UI. For more information, visit deckthemes.com.",
+    "image": "https://raw.githubusercontent.com/suchmememanyskill/SDH-CssLoader/main/assets/css-store-preview.png"
   }
 }

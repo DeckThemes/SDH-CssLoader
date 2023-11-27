@@ -18,3 +18,16 @@ export function toggleWatchState(bool: boolean, onlyThisSession: boolean = false
     }
   );
 }
+
+// Todo: when i rewrite store interop, move this
+export function setHiddenMotd(id: string) {
+  return server!.callPluginMethod<{ key: string; val: string }>("store_write", {
+    key: "hiddenMotd",
+    val: id,
+  });
+}
+export function getHiddenMotd() {
+  return server!.callPluginMethod<{ key: string }, string>("store_read", {
+    key: "hiddenMotd",
+  });
+}

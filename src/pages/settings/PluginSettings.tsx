@@ -54,7 +54,7 @@ export function PluginSettings() {
         <ToggleField
           checked={serverOn}
           label="Enable Standalone Backend"
-          description="This needs to be enabled if you are using CSSLoader Desktop on Linux"
+          description="Enables support for CSS Loader Desktop on Linux"
           onChange={(value) => {
             setServer(value);
           }}
@@ -64,15 +64,15 @@ export function PluginSettings() {
         <ToggleField
           checked={navPatchEnabled}
           label="Enable Nav Patch"
-          description="This fixes issues with themes that attempt to hide elements of the UI"
-          onChange={setNavPatch}
+          description="Fixes issues with themes that attempt to hide elements of the UI"
+          onChange={(value) => setNavPatch(value, true)}
         />
       </Focusable>
       <Focusable>
         <ToggleField
           checked={watchOn}
           label="Live CSS Editing"
-          description="CSS Loader will watch ~/homebrew/themes for any changes and will automatically re-inject CSS."
+          description="Watches ~/homebrew/themes for any changes and automatically re-injects CSS"
           onChange={setWatch}
         />
       </Focusable>

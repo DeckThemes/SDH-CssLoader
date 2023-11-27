@@ -78,8 +78,17 @@ export async function scheduleCheckForUpdates() {
 
 export async function changePreset(themeName: string, themeList: Theme[]) {
   return new Promise(async (resolve) => {
-    // Disables all themes before enabling the preset
-    await Promise.all(themeList.filter((e) => e.enabled).map((e) => setThemeState(e.name, false)));
+    const { selectedPreset } = globalState!.getPublicState();
+
+    if (selectedPreset) {
+      // If you already have a preset enabled, since all currently enabled themes are part of that preset, you only need to disable it, not every theme
+      await setThemeState(selectedPreset!.name, false);
+    } else {
+      // On the contrary, if you have no preset, you still do have to disable the current themes and then enable the preset
+      await Promise.all(
+        themeList.filter((e) => e.enabled).map((e) => setThemeState(e.name, false))
+      );
+    }
 
     if (themeName !== "None") {
       await setThemeState(themeName, true);

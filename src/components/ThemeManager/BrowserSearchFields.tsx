@@ -11,6 +11,7 @@ import {
 } from "decky-frontend-lib";
 import { useEffect, useMemo, memo } from "react";
 import { TiRefreshOutline } from "react-icons/ti";
+import { FaRotate } from "react-icons/fa6";
 import { ThemeQueryRequest } from "../../apiTypes";
 import { genericGET } from "../../api";
 import { useCssLoaderState } from "../../state";
@@ -91,11 +92,11 @@ export function BrowserSearchFields({
             style={{
               display: "flex",
               flexDirection: "column",
-              maxWidth: repoOptions.length <= 1 ? "40%" : "33%",
-              minWidth: repoOptions.length <= 1 ? "40%" : "33%",
+              maxWidth: repoOptions.length <= 1 ? "49%" : "33%",
+              minWidth: repoOptions.length <= 1 ? "49%" : "33%",
             }}
           >
-            <span>Sort</span>
+            <span className="DialogLabel">Sort</span>
             <Dropdown
               menuLabel="Sort"
               rgOptions={formattedFilters.order}
@@ -112,12 +113,12 @@ export function BrowserSearchFields({
             style={{
               display: "flex",
               flexDirection: "column",
-              maxWidth: repoOptions.length <= 1 ? "40%" : "33%",
-              minWidth: repoOptions.length <= 1 ? "40%" : "33%",
+              maxWidth: repoOptions.length <= 1 ? "49%" : "33%",
+              minWidth: repoOptions.length <= 1 ? "49%" : "33%",
               marginLeft: "auto",
             }}
           >
-            <span>Filter</span>
+            <span className="DialogLabel">Filter</span>
             <Dropdown
               menuLabel="Filter"
               rgOptions={formattedFilters.filters}
@@ -161,9 +162,13 @@ export function BrowserSearchFields({
             style={{
               maxWidth: "20%",
               height: "50%",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.5em",
+              display: "flex",
             }}
           >
-            <TiRefreshOutline style={{ transform: "translate(0, 2px)" }} />
+            <FaRotate />
             <span>Refresh</span>
           </DialogButton>
           <div

@@ -1,10 +1,9 @@
 import { DialogButton, Focusable, showModal } from "decky-frontend-lib";
 import { LocalThemeStatus, Theme } from "../../../ThemeTypes";
-import { FaTrashAlt } from "react-icons/fa";
+import { FaDownload, FaEye, FaEyeSlash, FaRegStar, FaStar, FaTrashAlt } from "react-icons/fa";
 import { DeleteConfirmationModalRoot } from "../DeleteConfirmationModal";
 import { useCssLoaderState } from "../../../state";
 import * as python from "../../../python";
-import { AiFillEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import {
   genericGET,
   logInWithShortToken,
@@ -13,7 +12,6 @@ import {
   installTheme,
 } from "../../../api";
 import { useState, useEffect } from "react";
-import { BsStarFill, BsStar, BsFillCloudDownloadFill } from "react-icons/bs";
 
 export function ThemeSettingsModalButtons({
   themeData,
@@ -91,7 +89,7 @@ export function ThemeSettingsModalButtons({
               );
             }}
           >
-            <BsFillCloudDownloadFill className="CSSLoader_ThemeSettingsModal_IconTranslate" />
+            <FaDownload className="CSSLoader_ThemeSettingsModal_IconTranslate" />
             <span className="CSSLoader_ThemeSettingsModal_UpdateText">Update</span>
           </DialogButton>
         )}
@@ -107,9 +105,9 @@ export function ThemeSettingsModalButtons({
           }}
         >
           {isPinned ? (
-            <AiFillEye className="CSSLoader_ThemeSettingsModal_IconTranslate" />
+            <FaEye className="CSSLoader_ThemeSettingsModal_IconTranslate" />
           ) : (
-            <AiOutlineEyeInvisible className="CSSLoader_ThemeSettingsModal_IconTranslate" />
+            <FaEyeSlash className="CSSLoader_ThemeSettingsModal_IconTranslate" />
           )}
         </DialogButton>
         {starFetchLoaded && (
@@ -118,7 +116,7 @@ export function ThemeSettingsModalButtons({
             className="CSSLoader_ThemeSettingsModalHeader_DialogButton"
             onClick={toggleStar}
           >
-            {isStarred ? <BsStarFill /> : <BsStar />}
+            {isStarred ? <FaStar /> : <FaRegStar />}
           </DialogButton>
         )}
         <DialogButton
