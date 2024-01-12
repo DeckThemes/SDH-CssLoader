@@ -165,7 +165,9 @@ export async function genericGET(
         throw new Error(`No json returned!`);
       })
       .catch((err) => {
-        console.error(`Error fetching ${fetchPath}`, err);
+        if (!failSilently) {
+          console.error(`Error fetching ${fetchPath}`, err);
+        }
         onError();
       });
   }

@@ -11,7 +11,7 @@ export function MOTDDisplay() {
   const { hiddenMotd, setGlobalState } = useCssLoaderState();
   useEffect(() => {
     async function getMotd() {
-      const res = await genericGET("/motd", false);
+      const res = await genericGET("/motd", false, undefined, () => {}, true);
       setMotd(res);
     }
     getMotd();

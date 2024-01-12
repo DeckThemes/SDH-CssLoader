@@ -255,7 +255,11 @@ export const ExpandedViewPage: VFC = () => {
                     width={selectedImageWidth}
                     height={selectedImageHeight}
                     style={{ objectFit: "contain" }}
-                    src={`https://api.deckthemes.com/blobs/${fullThemeData.images[focusedImage].id}`}
+                    src={
+                      fullThemeData.images.length > 0
+                        ? `https://api.deckthemes.com/blobs/${fullThemeData.images?.[focusedImage]?.id}`
+                        : `https://share.deckthemes.com/cssplaceholder.png`
+                    }
                   />
                   {fullThemeData.images.length > 1 && (
                     <div className="image-number-container">
