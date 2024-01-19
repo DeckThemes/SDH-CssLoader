@@ -106,7 +106,7 @@ DEFAULT_MAPPINGS = {
     "desktoppopup": ["OverlayBrowser_Browser", "SP Overlay:.*", "notificationtoasts_.*", "SteamBrowser_Find", "OverlayTab\\d+_Find", "!ModalDialogPopup", "!FullModalOverlay"],
     "desktopoverlay": ["desktoppopup"],
     "desktopcontextmenu": [".*Menu", ".*Supernav"],
-    "bigpicture": ["~Valve Steam Gamepad/default~"],
+    "bigpicture": ["~Valve Steam Gamepad/default~", "~Valve%20Steam%20Gamepad/default~"],
     "bigpictureoverlay": ["QuickAccess", "MainMenu"],
     "store": ["~https://store.steampowered.com~", "~https://steamcommunity.com~"],
 
