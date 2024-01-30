@@ -9,6 +9,7 @@ import { shortenNumber } from "../../logic/numbers";
 
 const cardWidth = {
   5: 152,
+  4.5: 183.33,
   4: 195,
   3: 260,
 };

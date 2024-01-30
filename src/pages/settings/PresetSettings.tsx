@@ -113,7 +113,7 @@ function UploadedProfilesDisplay() {
 
   return (
     <>
-      <ThemeBrowserCardStyles customCardSize={5} />
+      <ThemeBrowserCardStyles customCardSize={4.5} />
       <Focusable style={{ display: "flex", flexDirection: "column", position: "relative" }}>
         <DialogButton
           style={{
@@ -143,9 +143,9 @@ function UploadedProfilesDisplay() {
                 <>
                   <Focusable style={{ display: "flex", flexDirection: "column" }}>
                     <span>Public Profiles:</span>
-                    <Focusable style={{ display: "flex", flexWrap: "wrap", gap: "1em" }}>
+                    <Focusable style={{ display: "flex", flexWrap: "wrap", gap: "0.5em" }}>
                       {publicProfiles.map((e) => (
-                        <VariableSizeCard data={e} cols={5} onClick={() => {}} />
+                        <VariableSizeCard data={e} cols={4.5} onClick={() => {}} />
                       ))}
                     </Focusable>
                   </Focusable>
@@ -157,9 +157,9 @@ function UploadedProfilesDisplay() {
                 <>
                   <Focusable style={{ display: "flex", flexDirection: "column" }}>
                     <span>Private Profiles:</span>
-                    <Focusable style={{ display: "flex", flexWrap: "wrap", gap: "1em" }}>
+                    <Focusable style={{ display: "flex", flexWrap: "wrap", gap: "0.5em" }}>
                       {privateProfiles.map((e) => (
-                        <VariableSizeCard data={e} cols={5} onClick={() => {}} />
+                        <VariableSizeCard data={e} cols={4.5} onClick={() => {}} />
                       ))}
                     </Focusable>
                   </Focusable>

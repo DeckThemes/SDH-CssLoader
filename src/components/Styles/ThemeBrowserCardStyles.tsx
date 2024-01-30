@@ -1,5 +1,10 @@
 import { useCssLoaderState } from "../../state";
 
+const width = { 3: "260px", 4: "195px", 4.5: "183.33px", 5: "152px" };
+const imgheightFactory = (size: number) => (Number(width[size].slice(0, -2)) / 16) * 10 + "px";
+const fontsize = { 3: "1em", 4: "0.75em", 4.5: "0.7", 5: "0.5em" };
+const bubblesize = { 3: "40px", 4: "30px", 4.5: "25px", 5: "20px" };
+
 export function ThemeBrowserCardStyles({ customCardSize }: { customCardSize?: number }) {
   const { browserCardSize } = customCardSize
     ? { browserCardSize: customCardSize }
@@ -9,22 +14,12 @@ export function ThemeBrowserCardStyles({ customCardSize }: { customCardSize?: nu
     <style>
       {`
       :root {
-        --cssloader-themecard-width: ${
-          browserCardSize === 3 ? "260px" : browserCardSize === 4 ? "195px" : "152px"
-        };
+        --cssloader-themecard-width: ${width[browserCardSize] || width[5]};
         --cssloader-themecard-imgheight: ${
-          browserCardSize === 3
-            ? (260 / 16) * 10 + "px"
-            : browserCardSize === 4
-            ? (195 / 16) * 10 + "px"
-            : (152 / 16) * 10 + "px"
+          imgheightFactory(browserCardSize) || imgheightFactory(5)
         };
-        --cssloader-themecard-fontsize: ${
-          browserCardSize === 3 ? "1em" : browserCardSize === 4 ? "0.75em" : "0.5em"
-        };
-        --cssloader-themecard-bubblesize: ${
-          browserCardSize === 3 ? "40px" : browserCardSize === 4 ? "30px" : "20px"
-        };
+        --cssloader-themecard-fontsize: ${fontsize[browserCardSize] || fontsize[5]};
+        --cssloader-themecard-bubblesize: ${bubblesize[browserCardSize] || bubblesize[5]};
       }
       .CSSLoader_ThemeCard_NotifBubble {
         position: absolute;
