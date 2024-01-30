@@ -5,8 +5,9 @@ import { LogInPage } from "./LogInPage";
 import { StarredThemesPage } from "./StarredThemesPage";
 import { SubmissionsPage } from "./SubmissionBrowserPage";
 import { ThemeBrowserPage } from "./ThemeBrowserPage";
+import { ThemeBrowserCardStyles } from "../../components/Styles";
 export function ThemeManagerRouter() {
-  const { apiMeData, currentTab, setGlobalState, browserCardSize } = useCssLoaderState();
+  const { apiMeData, currentTab, setGlobalState } = useCssLoaderState();
   return (
     <div
       style={{
@@ -15,6 +16,7 @@ export function ThemeManagerRouter() {
         background: "#0e141b",
       }}
     >
+      <ThemeBrowserCardStyles />
       <Tabs
         activeTab={currentTab}
         onShowTab={(tabID: string) => {
