@@ -13,6 +13,7 @@ import * as python from "../../python";
 import { PartialCSSThemeInfo, ThemeQueryResponse } from "../../apiTypes";
 import { ThemeBrowserCardStyles } from "../../components/Styles";
 import { PremiumFeatureModal } from "../../components/Modals/PremiumFeatureModal";
+import { FaGlobe } from "react-icons/fa";
 
 export function PresetSettings() {
   const { localThemeList, setGlobalState, updateStatuses, apiShortToken, apiFullToken, apiMeData } =
@@ -65,8 +66,10 @@ export function PresetSettings() {
 function UploadedProfilesDisplay() {
   const { apiFullToken, apiShortToken, apiMeData } = useCssLoaderState();
 
-  const [publicProfiles, setPublicProfiles] = useState<PartialCSSThemeInfo[]>([]);
-  const [privateProfiles, setPrivateProfiles] = useState<PartialCSSThemeInfo[]>([]);
+  const [uploadedProfiles, setUploadedProfiles] = useState<
+    (PartialCSSThemeInfo & { isPrivate?: boolean })[]
+  >([]);
+
   const [profilesLoaded, setLoaded] = useState<boolean>(false);
   useEffect(() => {
     async function getUserProfiles() {
@@ -77,16 +80,22 @@ function UploadedProfilesDisplay() {
       // Since the short token could be invalid, we still have to re-check for if the log in actually worked.
       // The react value doesn't update mid function, so we re-grab it.
       const upToDateFullToken = python.globalState?.getGlobalState("apiFullToken");
-      console.log("up to date token", upToDateFullToken);
       if (!upToDateFullToken) return;
+
+      let profileArray: PartialCSSThemeInfo[] = [];
       const publicProfileData = await genericGET("/users/me/themes?filters=", true);
       if (publicProfileData && publicProfileData.total > 0) {
-        setPublicProfiles(publicProfileData.items);
+        profileArray.push(...publicProfileData.items);
       }
       const privateProfileData = await genericGET("/users/me/themes/private?filters=", true);
       if (privateProfileData && privateProfileData.total > 0) {
-        setPrivateProfiles(privateProfileData.items);
+        profileArray.push(
+          ...privateProfileData.items.map((e: PartialCSSThemeInfo) => ({ ...e, isPrivate: true }))
+        );
       }
+      profileArray.sort((a, b) => (a.name > b.name ? 1 : -1));
+      setUploadedProfiles(profileArray);
+
       setLoaded(true);
     }
     if (apiShortToken) getUserProfiles();
@@ -138,34 +147,29 @@ function UploadedProfilesDisplay() {
         </DialogButton>
         {profilesLoaded ? (
           <>
-            <Focusable style={{ display: "flex", flexDirection: "column" }}>
-              {publicProfiles.length > 0 && (
-                <>
-                  <Focusable style={{ display: "flex", flexDirection: "column" }}>
-                    <span>Public Profiles:</span>
-                    <Focusable style={{ display: "flex", flexWrap: "wrap", gap: "0.5em" }}>
-                      {publicProfiles.map((e) => (
-                        <VariableSizeCard data={e} cols={4.5} onClick={() => {}} />
-                      ))}
-                    </Focusable>
-                  </Focusable>
-                </>
-              )}
-              {apiMeData.premiumTier &&
-              apiMeData.premiumTier !== "None" &&
-              privateProfiles.length > 0 ? (
-                <>
-                  <Focusable style={{ display: "flex", flexDirection: "column" }}>
-                    <span>Private Profiles:</span>
-                    <Focusable style={{ display: "flex", flexWrap: "wrap", gap: "0.5em" }}>
-                      {privateProfiles.map((e) => (
-                        <VariableSizeCard data={e} cols={4.5} onClick={() => {}} />
-                      ))}
-                    </Focusable>
-                  </Focusable>
-                </>
-              ) : null}
-            </Focusable>
+            {uploadedProfiles.length > 0 && (
+              <>
+                <Focusable
+                  style={{ display: "flex", flexWrap: "wrap", gap: "0.5em", paddingTop: "1em" }}
+                >
+                  {uploadedProfiles.map((e) => (
+                    <VariableSizeCard
+                      data={e}
+                      cols={4.5}
+                      onClick={() => {}}
+                      CustomBubbleIcon={
+                        e.isPrivate ? null : (
+                          <FaGlobe
+                            style={{ fontSize: "0.9em" }}
+                            className="CSSLoader_ThemeCard_BubbleIcon"
+                          />
+                        )
+                      }
+                    />
+                  ))}
+                </Focusable>
+              </>
+            )}
           </>
         ) : (
           <span>Loading Profiles...</span>

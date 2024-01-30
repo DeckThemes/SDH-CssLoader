@@ -2,7 +2,7 @@ import { useCssLoaderState } from "../../state";
 
 const width = { 3: "260px", 4: "195px", 4.5: "183.33px", 5: "152px" };
 const imgheightFactory = (size: number) => (Number(width[size].slice(0, -2)) / 16) * 10 + "px";
-const fontsize = { 3: "1em", 4: "0.75em", 4.5: "0.7", 5: "0.5em" };
+const fontsize = { 3: "1em", 4: "0.75em", 4.5: "0.7em", 5: "0.5em" };
 const bubblesize = { 3: "40px", 4: "30px", 4.5: "25px", 5: "20px" };
 
 export function ThemeBrowserCardStyles({ customCardSize }: { customCardSize?: number }) {
@@ -28,6 +28,19 @@ export function ThemeBrowserCardStyles({ customCardSize }: { customCardSize?: nu
         left: 0;
         top: 0;
         color: black;
+        font-size: var(--cssloader-themecard-fontsize);
+        width: var(--cssloader-themecard-bubblesize);
+        height: var(--cssloader-themecard-bubblesize);
+      }
+      .CSSLoader_ThemeCard_CustomBubble {
+        position: absolute;
+        background: linear-gradient(225deg, #2563eb 50%, transparent 51%);
+        z-index: 10001;
+        right: 0;
+        top: 0;
+        color: black;
+        display: flex;
+        justify-content: end;
         font-size: var(--cssloader-themecard-fontsize);
         width: var(--cssloader-themecard-bubblesize);
         height: var(--cssloader-themecard-bubblesize);

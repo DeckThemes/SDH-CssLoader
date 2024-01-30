@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 import { useCssLoaderState } from "../../state";
 import { Theme } from "../../ThemeTypes";
 import { Focusable, Navigation } from "decky-frontend-lib";
@@ -21,6 +21,7 @@ export const VariableSizeCard: FC<{
   prevSearchOptsVarName?: string;
   refPassthrough?: any;
   onClick?: () => void;
+  CustomBubbleIcon?: ReactNode;
 }> = ({
   data: e,
   cols: size,
@@ -28,6 +29,7 @@ export const VariableSizeCard: FC<{
   searchOpts,
   prevSearchOptsVarName,
   onClick,
+  CustomBubbleIcon,
 }) => {
   const { localThemeList, apiUrl, setGlobalState } = useCssLoaderState();
   function checkIfThemeInstalled(themeObj: PartialCSSThemeInfo) {
@@ -61,6 +63,9 @@ export const VariableSizeCard: FC<{
           <div className="CSSLoader_ThemeCard_NotifBubble">
             <AiOutlineDownload className="CSSLoader_ThemeCard_BubbleIcon" />
           </div>
+        )}
+        {CustomBubbleIcon && (
+          <div className="CSSLoader_ThemeCard_CustomBubble">{CustomBubbleIcon}</div>
         )}
         <Focusable
           className={`CSSLoader_ThemeCard_Container`}
