@@ -124,7 +124,7 @@ function ThemeSettingsModal({
           <>
             <Focusable className="CSSLoader_ThemeSettingsModal_Header">
               <div className="CSSLoader_ThemeSettingsModal_TitleContainer">
-                <span className="CSSLoader_ThemeSettingsModal_Title">{themeData.name}</span>
+                <span className="CSSLoader_ThemeSettingsModal_Title">{themeData.display_name}</span>
                 <span className="CSSLoader_ThemeSettingsModal_Subtitle">
                   {themeData.version} | {themeData.author}
                 </span>
