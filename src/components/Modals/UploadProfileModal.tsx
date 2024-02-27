@@ -11,6 +11,8 @@ import {
 } from "decky-frontend-lib";
 import { useMemo, useState } from "react";
 import { Flags } from "../../ThemeTypes";
+import { publishProfile } from "../../backend/apiHelpers/profileUploadingHelpers";
+import { TaskStatus } from "../TaskStatus";
 
 export function UploadProfileModalRoot({ closeModal }: { closeModal?: any }) {
   return (
@@ -25,7 +27,7 @@ export function UploadProfileModalRoot({ closeModal }: { closeModal?: any }) {
 
 function UploadProfileModal() {
   const { localThemeList } = useCssLoaderState();
-  let [selectedProfile, setProfile] = useState(
+  const [selectedProfile, setProfile] = useState(
     localThemeList.find((e) => e.flags.includes(Flags.isPreset))?.id
   );
   const profiles = useMemo(() => {
@@ -37,6 +39,31 @@ function UploadProfileModal() {
 
   const [isPublic, setPublic] = useState<boolean>(false);
   const [description, setDescription] = useState<string>("");
+
+  const [uploadStatus, setUploadStatus] = useState<
+    "idle" | "submitting" | "taskStatus" | "completed"
+  >("idle");
+  const [taskId, setTaskId] = useState<string | undefined>(undefined);
+
+  async function onUpload() {
+    if (!selectedProfile) return;
+    setUploadStatus("submitting");
+    // eventually run the submit here
+    const taskId = await publishProfile(selectedProfile, isPublic, description);
+    setUploadStatus("taskStatus");
+    setTaskId(taskId);
+  }
+
+  function onTaskFinish(success: boolean) {
+    setUploadStatus("completed");
+    if (success) {
+      // closeModal();
+    }
+  }
+
+  if (uploadStatus === "taskStatus" && taskId) {
+    return <TaskStatus task={taskId} onFinish={onTaskFinish} />;
+  }
 
   return (
     <Focusable style={{ display: "flex", flexDirection: "column" }}>
