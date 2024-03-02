@@ -3,6 +3,7 @@ from css_inject import Inject, ALL_INJECTS
 from css_theme import Theme, CSS_LOADER_VER
 from css_themepatch import ThemePatch
 from css_browserhook import remove_all, commit_all
+from css_remoteinstall import upload
 
 from asyncio import sleep
 from os import listdir, path, mkdir
@@ -170,6 +171,17 @@ class Loader:
             return result
         except Exception as e:
             return Result(False, str(e))  
+
+    async def upload_theme(self, name : str, base_url : str, bearer_token : str) -> Result:
+        theme = await self._get_theme(name)
+
+        if theme is None:
+            return Result(False, f"Could not find theme {name}")
+        
+        try:
+            return await upload(theme, base_url, bearer_token)
+        except Exception as e:
+            return Result(False, str(e))
 
     async def _enable_theme(self, theme : Theme, set_deps : bool = True, set_deps_value : bool = True, ignore_dependencies : list = []) -> Result:
         if theme is None:
