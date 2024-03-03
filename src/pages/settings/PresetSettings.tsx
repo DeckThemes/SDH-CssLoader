@@ -71,35 +71,42 @@ function UploadedProfilesDisplay() {
   >([]);
 
   const [profilesLoaded, setLoaded] = useState<boolean>(false);
-  useEffect(() => {
-    async function getUserProfiles() {
-      if (!apiFullToken) {
-        await logInWithShortToken();
-      }
 
-      // Since the short token could be invalid, we still have to re-check for if the log in actually worked.
-      // The react value doesn't update mid function, so we re-grab it.
-      const upToDateFullToken = python.globalState?.getGlobalState("apiFullToken");
-      if (!upToDateFullToken) return;
-
-      let profileArray: PartialCSSThemeInfo[] = [];
-      const publicProfileData = await genericGET("/users/me/themes?filters=", true);
-      if (publicProfileData && publicProfileData.total > 0) {
-        profileArray.push(...publicProfileData.items);
-      }
-      const privateProfileData = await genericGET("/users/me/themes/private?filters=", true);
-      if (privateProfileData && privateProfileData.total > 0) {
-        profileArray.push(
-          ...privateProfileData.items.map((e: PartialCSSThemeInfo) => ({ ...e, isPrivate: true }))
-        );
-      }
-      profileArray.sort((a, b) => (a.name > b.name ? 1 : -1));
-      setUploadedProfiles(profileArray);
-
-      setLoaded(true);
+  async function getUserProfiles() {
+    setLoaded(false);
+    if (!apiFullToken) {
+      await logInWithShortToken();
     }
-    if (apiShortToken) getUserProfiles();
+
+    // Since the short token could be invalid, we still have to re-check for if the log in actually worked.
+    // The react value doesn't update mid function, so we re-grab it.
+    const upToDateFullToken = python.globalState?.getGlobalState("apiFullToken");
+    if (!upToDateFullToken) return;
+
+    let profileArray: PartialCSSThemeInfo[] = [];
+    const publicProfileData = await genericGET("/users/me/themes?filters=", true);
+    if (publicProfileData && publicProfileData.total > 0) {
+      profileArray.push(...publicProfileData.items);
+    }
+    const privateProfileData = await genericGET("/users/me/themes/private?filters=", true);
+    if (privateProfileData && privateProfileData.total > 0) {
+      profileArray.push(
+        ...privateProfileData.items.map((e: PartialCSSThemeInfo) => ({ ...e, isPrivate: true }))
+      );
+    }
+    profileArray.sort((a, b) => (a.name > b.name ? 1 : -1));
+    setUploadedProfiles(profileArray);
+
+    setLoaded(true);
+  }
+
+  useEffect(() => {
+    if (apiShortToken) void getUserProfiles();
   }, []);
+
+  function onUploadFinish() {
+    void getUserProfiles();
+  }
 
   if (!apiMeData) {
     return (
@@ -134,7 +141,7 @@ function UploadedProfilesDisplay() {
           }}
           onClick={() => {
             if (apiMeData.premiumTier && apiMeData.premiumTier !== "None") {
-              showModal(<UploadProfileModalRoot />);
+              showModal(<UploadProfileModalRoot onUploadFinish={onUploadFinish} />);
               return;
             }
             showModal(

@@ -1,66 +1,52 @@
+import { refreshToken } from "../../api";
 import { TaskQueryResponse } from "../../apiTypes/SubmissionTypes";
+import { server } from "../pythonRoot";
 import { genericApiFetch } from "./fetchWrappers";
 
-async function fetchLocalZip(fileName: string) {
-  if (!fileName.endsWith(".zip")) {
-    throw new Error(`File must be a .zip!`);
-  }
-  const filesRes = await fetch(`/themes_custom/${fileName}`);
-  if (!filesRes.ok) {
-    throw new Error(`Couldn't fetch zip!`);
-  }
-  const rawBlob = await filesRes.blob();
-  const correctBlob = new Blob([rawBlob], { type: "application/x-zip-compressed" });
-  return correctBlob;
-}
-
-export async function uploadZipAsBlob(fileName: string): Promise<string> {
-  if (!fileName.endsWith(".zip")) {
-    throw new Error(`File must be a .zip!`);
-  }
-  const fileBlob = await fetchLocalZip(fileName);
-  console.log("BLOB", fileBlob);
-  const formData = new FormData();
-  formData.append("File", fileBlob, fileName);
-  console.log("FORM", formData);
-
-  const json = await genericApiFetch(
-    "/blobs",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      body: formData,
-    },
-    { requiresAuth: true }
-  );
-  if (json) {
-    return json;
-  }
-  throw new Error(`No json returned!`);
-}
+type BlobResponse = {
+  message: {
+    blobType: string;
+    downloadCount: number;
+    id: string;
+    uploaded: string;
+  };
+};
 
 export async function publishProfile(
-  profileId: string,
+  profileName: string,
   isPublic: boolean,
   description: string
 ): Promise<string> {
-  // const zipName = `${profileId}.zip`;
-  const zipName = "round.zip";
-  const blobId = await uploadZipAsBlob(zipName);
-  if (!blobId) throw new Error(`No blobId returned!`);
+  const token = await refreshToken();
 
-  // ALL OF THIS IS UNTESTED, BLOB IS 415'ing RN
+  const deckyRes = await server!.callPluginMethod<{}, BlobResponse>("upload_theme", {
+    name: profileName,
+    base_url: "https://api.deckthemes.com",
+    bearer_token: token,
+  });
+  if (!deckyRes.success) {
+    throw new Error(`Failed To Call Backend ${deckyRes.result.toString()}`);
+  }
+  deckyRes.result = deckyRes.result as BlobResponse;
+  if (!deckyRes.result?.message?.id) {
+    throw new Error(`No blobId returned!`);
+  }
+  const blobId = deckyRes.result.message.id;
+
   const json = await genericApiFetch(
     `/submissions/css_zip`,
     {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         blob: blobId,
-        imageBlobs: [],
-        description: description,
-        privateSubmission: !isPublic,
+        meta: {
+          imageBlobs: [],
+          description: description,
+          privateSubmission: !isPublic,
+        },
       }),
     },
     { requiresAuth: true }

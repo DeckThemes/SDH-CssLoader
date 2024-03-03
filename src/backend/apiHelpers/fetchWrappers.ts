@@ -2,18 +2,29 @@ import { refreshToken } from "../../api";
 import { toast } from "../../python";
 import { globalState, server } from "../pythonRoot";
 
+// function createHeadersObj(authToken: string | undefined, request: RequestInit | undefined) {
+//   const headers = new Headers();
+//   if (request && request.headers) {
+//     for (const [key, value] of Object.entries(request.headers)) {
+//       headers.append(key, value);
+//     }
+//   }
+//   if (authToken) headers.set("Authorization", `Bearer ${authToken}`);
+
+//   return headers;
+// }
+
 function createHeadersObj(authToken: string | undefined, request: RequestInit | undefined) {
-  const headers = new Headers();
+  let headers = {};
   if (request && request.headers) {
     for (const [key, value] of Object.entries(request.headers)) {
-      headers.append(key, value);
+      headers[key] = value;
     }
   }
-  if (authToken) headers.set("Authorization", `Bearer ${authToken}`);
+  if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
 
   return headers;
 }
-
 export async function genericApiFetch(
   fetchPath: string,
   request: RequestInit | undefined = undefined,
@@ -39,14 +50,7 @@ export async function genericApiFetch(
   const { apiUrl } = globalState!.getPublicState();
   function doTheFetching(authToken: string | undefined = undefined) {
     const headers = createHeadersObj(authToken, request);
-    console.log("TOKEN", authToken);
 
-    console.log("TEST", {
-      method: "GET",
-      // If a  custom method is specified in request it will overwrite
-      ...request,
-      headers: headers,
-    });
     return server!
       .fetchNoCors<Response>(`${apiUrl}${fetchPath}`, {
         method: "GET",
@@ -68,8 +72,6 @@ export async function genericApiFetch(
         throw new Error(`Res not OK!, code ${res.status} - ${res.body}`);
       })
       .then((json) => {
-        console.log("JSON", json);
-
         if (json) {
           return json;
         }

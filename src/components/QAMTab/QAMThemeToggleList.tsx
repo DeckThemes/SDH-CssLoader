@@ -5,7 +5,7 @@ import { Flags } from "../../ThemeTypes";
 import { ThemeErrorCard } from "../ThemeErrorCard";
 import { BsArrowDown } from "react-icons/bs";
 import { FaEyeSlash } from "react-icons/fa";
-import { uploadZipAsBlob } from "../../backend/apiHelpers/profileUploadingHelpers";
+import { publishProfile } from "../../backend/apiHelpers/profileUploadingHelpers";
 
 export function QAMThemeToggleList() {
   const { localThemeList, unpinnedThemes } = useCssLoaderState();
@@ -40,13 +40,6 @@ export function QAMThemeToggleList() {
         `}
       </style>
       <Focusable className="CSSLoader_ThemeListContainer">
-        <DialogButton
-          onClick={() => {
-            uploadZipAsBlob("round.zip");
-          }}
-        >
-          TEST
-        </DialogButton>
         <>
           {localThemeList
             .filter((e) => !unpinnedThemes.includes(e.id) && !e.flags.includes(Flags.isPreset))

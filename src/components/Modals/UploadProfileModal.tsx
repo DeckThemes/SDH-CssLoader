@@ -14,18 +14,30 @@ import { Flags } from "../../ThemeTypes";
 import { publishProfile } from "../../backend/apiHelpers/profileUploadingHelpers";
 import { TaskStatus } from "../TaskStatus";
 
-export function UploadProfileModalRoot({ closeModal }: { closeModal?: any }) {
+export function UploadProfileModalRoot({
+  closeModal,
+  onUploadFinish,
+}: {
+  closeModal?: any;
+  onUploadFinish: () => void;
+}) {
   return (
     <ModalRoot onCancel={closeModal} onEscKeypress={closeModal}>
       {/* @ts-ignore */}
       <CssLoaderContextProvider cssLoaderStateClass={python.globalState}>
-        <UploadProfileModal />
+        <UploadProfileModal closeModal={closeModal} onUploadFinish={onUploadFinish} />
       </CssLoaderContextProvider>
     </ModalRoot>
   );
 }
 
-function UploadProfileModal() {
+function UploadProfileModal({
+  closeModal,
+  onUploadFinish,
+}: {
+  closeModal: () => void;
+  onUploadFinish: () => void;
+}) {
   const { localThemeList } = useCssLoaderState();
   const [selectedProfile, setProfile] = useState(
     localThemeList.find((e) => e.flags.includes(Flags.isPreset))?.id
@@ -49,7 +61,11 @@ function UploadProfileModal() {
     if (!selectedProfile) return;
     setUploadStatus("submitting");
     // eventually run the submit here
-    const taskId = await publishProfile(selectedProfile, isPublic, description);
+    const taskId = await publishProfile(
+      localThemeList.find((e) => e.id === selectedProfile)!.name,
+      isPublic,
+      description
+    );
     setUploadStatus("taskStatus");
     setTaskId(taskId);
   }
@@ -57,7 +73,8 @@ function UploadProfileModal() {
   function onTaskFinish(success: boolean) {
     setUploadStatus("completed");
     if (success) {
-      // closeModal();
+      closeModal();
+      onUploadFinish();
     }
   }
 
@@ -82,7 +99,7 @@ function UploadProfileModal() {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
-      <ButtonItem>
+      <ButtonItem onClick={onUpload}>
         <span>Upload</span>
       </ButtonItem>
     </Focusable>
