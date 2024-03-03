@@ -144,6 +144,9 @@ class Plugin:
         return {
             "fails": self.loader.last_load_errors
         }
+    
+    async def upload_theme(self, name : str, base_url : str, bearer_token : str) -> dict:
+        return (await self.loader.upload_theme(name, base_url, bearer_token)).to_dict()
 
     async def _main(self):
         global Initialized

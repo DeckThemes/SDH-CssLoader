@@ -1,6 +1,6 @@
-import asyncio, json, tempfile, os, aiohttp, zipfile
+import asyncio, json, tempfile, os, aiohttp, zipfile, shutil
 from css_utils import Result, Log, get_theme_path, store_or_file_config
-from css_theme import CSS_LOADER_VER
+from css_theme import CSS_LOADER_VER, Theme
 
 async def run(command : str) -> str:
     proc = await asyncio.create_subprocess_shell(command,        
@@ -65,3 +65,29 @@ async def install(id : str, base_url : str, local_themes : list) -> Result:
             await install(x["id"], base_url, local_themes)
     
     return Result(True)
+
+async def upload(theme : Theme, base_url : str, bearer_token : str) -> Result:
+    if not base_url.endswith("/"):
+        base_url = base_url + "/"
+
+    url = f"{base_url}blobs"
+
+    with tempfile.TemporaryDirectory() as tmp:
+        themePath = os.path.join(tmp, "theme.zip")
+        print(themePath[:-4])
+        print(theme.themePath)
+        shutil.make_archive(themePath[:-4], 'zip', theme.themePath)
+
+        with open(themePath, "rb") as file:
+            async with aiohttp.ClientSession(headers={"User-Agent": f"SDH-CSSLoader/{CSS_LOADER_VER}", "Authorization": f"Bearer {bearer_token}"}, connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
+                try:
+                    mp = aiohttp.FormData()
+                    mp.add_field("file", file)
+                    async with session.post(url, data=mp) as resp:
+                        if resp.status != 200:
+                            raise Exception(f"Invalid status code {resp.status}")
+
+                        data = await resp.json()
+                        return Result(True, data)
+                except Exception as e:
+                    return Result(False, str(e))
