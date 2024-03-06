@@ -48,41 +48,34 @@ export async function genericApiFetch(
   } = options;
 
   const { apiUrl } = globalState!.getPublicState();
-  function doTheFetching(authToken: string | undefined = undefined) {
+  async function doTheFetching(authToken: string | undefined = undefined) {
     const headers = createHeadersObj(authToken, request);
-
-    return server!
-      .fetchNoCors<Response>(`${apiUrl}${fetchPath}`, {
+    try {
+      const deckyRes = await server!.fetchNoCors<Response>(`${apiUrl}${fetchPath}`, {
         method: "GET",
         // If a  custom method is specified in request it will overwrite
         ...request,
         headers: headers,
-      })
-      .then((deckyRes) => {
-        if (deckyRes.success) {
-          return deckyRes.result;
-        }
-        throw new Error(`Fetch not successful!`);
-      })
-      .then((res) => {
-        if (res.status >= 200 && res.status <= 300 && res.body) {
-          // @ts-ignore
-          return JSON.parse(res.body || "");
-        }
-        throw new Error(`Res not OK!, code ${res.status} - ${res.body}`);
-      })
-      .then((json) => {
-        if (json) {
-          return json;
-        }
-        throw new Error(`No json returned!`);
-      })
-      .catch((err) => {
-        if (!failSilently) {
-          console.error(`Error fetching ${fetchPath}`, err);
-        }
-        onError();
       });
+      if (!deckyRes.success) {
+        throw new Error(`Fetch not successful!`);
+      }
+      const res = deckyRes.result;
+      if (res.status < 200 || res.status > 300 || !res.body) {
+        throw new Error(`Res not OK!, code ${res.status} - ${res.body}`);
+      }
+      // @ts-ignore
+      const json = JSON.parse(res.body || "");
+      if (!json) {
+        throw new Error(`No json returned!`);
+      }
+      return json;
+    } catch (err) {
+      if (!failSilently) {
+        console.error(`Error fetching ${fetchPath}`, err);
+      }
+      onError();
+    }
   }
   if (requiresAuth) {
     if (customAuthToken) {

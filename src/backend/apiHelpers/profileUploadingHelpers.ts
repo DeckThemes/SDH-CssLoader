@@ -32,27 +32,35 @@ export async function publishProfile(
     throw new Error(`No blobId returned!`);
   }
   const blobId = deckyRes.result.message.id;
-
-  const json = await genericApiFetch(
-    `/submissions/css_zip`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        blob: blobId,
-        meta: {
-          imageBlobs: [],
-          description: description,
-          privateSubmission: !isPublic,
+  try {
+    const json = await genericApiFetch(
+      `/submissions/css_zip`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      }),
-    },
-    { requiresAuth: true }
-  );
-  if (!json || !json.task) throw new Error(`No task returned`);
-  return json.task;
+        body: JSON.stringify({
+          blob: blobId,
+          meta: {
+            imageBlobs: [],
+            description: description,
+            privateSubmission: !isPublic,
+          },
+        }),
+      },
+      {
+        requiresAuth: true,
+        onError: () => {
+          throw new Error(`Error Posting Request`);
+        },
+      }
+    );
+    if (!json || !json.task) throw new Error(`No task returned`);
+    return json.task;
+  } catch (error) {
+    throw new Error(`Failed to submit profile: ${error}`);
+  }
 }
 
 export async function getTaskStatus(taskId: string): Promise<TaskQueryResponse> {

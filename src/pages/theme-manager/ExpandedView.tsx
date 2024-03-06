@@ -20,6 +20,7 @@ import { AuthorViewModalRoot } from "../../components/Modals/AuthorViewModal";
 import { ExpandedViewStyles } from "../../components/Styles";
 import { shortenNumber } from "../../logic/numbers";
 import { FaRegStar, FaStar } from "react-icons/fa";
+import { Loading } from "../../components";
 
 export const ExpandedViewPage: VFC = () => {
   const {
@@ -139,37 +140,12 @@ export const ExpandedViewPage: VFC = () => {
 
   const [focusedImage, setFocusedImage] = useState<number>(0);
 
-  if (!loaded) {
+  if (!loaded)
     return (
-      <>
-        <style>
-          {`
-            @keyframes spin {
-              to {
-                transform: rotate(360deg);
-              }
-            }
-            .spinny {
-              animation: spin 1s linear infinite;
-            }
-          `}
-        </style>
-        <div
-          style={{
-            marginTop: "40px",
-            display: "flex",
-            gap: "1em",
-            alignItems: "center",
-            justifyContent: "center",
-            flex: "1",
-          }}
-        >
-          <ImSpinner5 className="spinny" size={48} />
-          <span style={{ fontWeight: "bold", fontSize: "2.5em" }}>Loading</span>
-        </div>
-      </>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: "1" }}>
+        <Loading />
+      </div>
     );
-  }
 
   // if theres no theme in the detailed view
   if (fullThemeData) {

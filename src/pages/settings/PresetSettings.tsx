@@ -84,11 +84,11 @@ function UploadedProfilesDisplay() {
     if (!upToDateFullToken) return;
 
     let profileArray: PartialCSSThemeInfo[] = [];
-    const publicProfileData = await genericGET("/users/me/themes?filters=", true);
+    const publicProfileData = await genericGET("/users/me/themes?filters=Profile", true);
     if (publicProfileData && publicProfileData.total > 0) {
       profileArray.push(...publicProfileData.items);
     }
-    const privateProfileData = await genericGET("/users/me/themes/private?filters=", true);
+    const privateProfileData = await genericGET("/users/me/themes/private?filters=Profile", true);
     if (privateProfileData && privateProfileData.total > 0) {
       profileArray.push(
         ...privateProfileData.items.map((e: PartialCSSThemeInfo) => ({ ...e, isPrivate: true }))
@@ -154,28 +154,18 @@ function UploadedProfilesDisplay() {
         </DialogButton>
         {profilesLoaded ? (
           <>
-            {uploadedProfiles.length > 0 && (
+            {uploadedProfiles.length > 0 ? (
               <>
                 <Focusable
                   style={{ display: "flex", flexWrap: "wrap", gap: "0.5em", paddingTop: "1em" }}
                 >
                   {uploadedProfiles.map((e) => (
-                    <VariableSizeCard
-                      data={e}
-                      cols={4.5}
-                      onClick={() => {}}
-                      CustomBubbleIcon={
-                        e.isPrivate ? null : (
-                          <FaGlobe
-                            style={{ fontSize: "0.9em" }}
-                            className="CSSLoader_ThemeCard_BubbleIcon"
-                          />
-                        )
-                      }
-                    />
+                    <UploadedProfileCard data={e} />
                   ))}
                 </Focusable>
               </>
+            ) : (
+              <span>You have no uploaded profiles</span>
             )}
           </>
         ) : (
@@ -183,5 +173,19 @@ function UploadedProfilesDisplay() {
         )}
       </Focusable>
     </>
+  );
+}
+
+function UploadedProfileCard({ data }: { data: PartialCSSThemeInfo & { isPrivate?: boolean } }) {
+  return (
+    <VariableSizeCard
+      data={data}
+      cols={4.5}
+      CustomBubbleIcon={
+        data.isPrivate ? null : (
+          <FaGlobe style={{ fontSize: "0.9em" }} className="CSSLoader_ThemeCard_BubbleIcon" />
+        )
+      }
+    />
   );
 }

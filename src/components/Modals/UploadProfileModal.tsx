@@ -3,6 +3,7 @@ import * as python from "../../python";
 import {
   ButtonItem,
   ConfirmModal,
+  DialogButton,
   DropdownItem,
   Focusable,
   ModalRoot,
@@ -53,38 +54,56 @@ function UploadProfileModal({
   const [description, setDescription] = useState<string>("");
 
   const [uploadStatus, setUploadStatus] = useState<
-    "idle" | "submitting" | "taskStatus" | "completed"
+    "idle" | "submitting" | "taskStatus" | "completed" | "error"
   >("idle");
   const [taskId, setTaskId] = useState<string | undefined>(undefined);
+  const [errorData, setErrorData] = useState<string | undefined>(undefined);
 
   async function onUpload() {
     if (!selectedProfile) return;
-    setUploadStatus("submitting");
-    // eventually run the submit here
-    const taskId = await publishProfile(
-      localThemeList.find((e) => e.id === selectedProfile)!.name,
-      isPublic,
-      description
-    );
-    setUploadStatus("taskStatus");
-    setTaskId(taskId);
-  }
-
-  function onTaskFinish(success: boolean) {
-    setUploadStatus("completed");
-    if (success) {
-      closeModal();
-      onUploadFinish();
+    try {
+      setUploadStatus("submitting");
+      const taskId = await publishProfile(
+        localThemeList.find((e) => e.id === selectedProfile)!.name,
+        isPublic,
+        description
+      );
+      setUploadStatus("taskStatus");
+      setTaskId(taskId);
+    } catch (error) {
+      if (typeof error === "string") setErrorData(error);
+      setUploadStatus("error");
     }
   }
 
-  if (uploadStatus === "taskStatus" && taskId) {
-    return <TaskStatus task={taskId} onFinish={onTaskFinish} />;
+  function onTaskFinish() {
+    closeModal();
+    onUploadFinish();
+  }
+
+  if (uploadStatus !== "idle") {
+    return (
+      <TaskStatus
+        errorData={errorData}
+        uploadStatus={uploadStatus}
+        setUploadStatus={setUploadStatus}
+        taskId={taskId}
+        onFinish={onTaskFinish}
+      />
+    );
   }
 
   return (
     <Focusable style={{ display: "flex", flexDirection: "column" }}>
-      <span>Upload Profile</span>
+      <style>
+        {`
+          .confirm-button .gpfocuswithin {
+            background: #1a9fff;
+            color: #fff;
+          }
+        `}
+      </style>
+      <span style={{ fontSize: "22px", fontWeight: "bold" }}>Upload Profile</span>
       <DropdownItem
         selectedOption={selectedProfile}
         rgOptions={eligibleProfiles.map((e) => ({ data: e.id, label: e.display_name }))}
@@ -99,9 +118,14 @@ function UploadProfileModal({
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
-      <ButtonItem onClick={onUpload}>
-        <span>Upload</span>
-      </ButtonItem>
+      <Focusable style={{ display: "flex", gap: "1em" }}>
+        <DialogButton className="confirm-button" onClick={onUpload}>
+          <span>Upload</span>
+        </DialogButton>
+        <DialogButton onClick={closeModal}>
+          <span>Cancel</span>
+        </DialogButton>
+      </Focusable>
     </Focusable>
   );
 }
