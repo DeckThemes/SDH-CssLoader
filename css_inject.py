@@ -2,7 +2,7 @@ import json
 import re
 import os
 import aiohttp
-import time
+import asyncio
 from typing import List
 from css_utils import Result, Log, store_read, get_theme_path
 from css_browserhook import BrowserTabHook as CssTab, inject, remove
@@ -14,7 +14,7 @@ async def initialize_class_mappings():
     setting = store_read("beta_translations")
     css_translations_url = "https://api.deckthemes.com/beta.json" if (setting == "1" or setting == "true") else "https://api.deckthemes.com/stable.json"
 
-    timeout = 8
+    timeout = 10
     while timeout > 0:
         try:
             async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=2)) as session:
@@ -25,7 +25,7 @@ async def initialize_class_mappings():
 
                         break
 
-            time.sleep(0.3)
+            await asyncio.sleep(1.5)
         except Exception as ex:
             Log(f"Failed to fetch css translations from server: {str(ex)}")
         finally:
