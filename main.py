@@ -6,7 +6,7 @@ from watchdog.observers import Observer
 sys.path.append(os.path.dirname(__file__))
 
 from css_utils import Log, create_steam_symlink, Result, get_theme_path, store_read as util_store_read, store_write as util_store_write, store_or_file_config
-from css_inject import ALL_INJECTS
+from css_inject import ALL_INJECTS, initialize_class_mappings
 from css_theme import CSS_LOADER_VER
 from css_remoteinstall import install
 
@@ -158,6 +158,7 @@ class Plugin:
         self.server_loaded = False
 
         Log("Initializing css loader...")
+        initialize_class_mappings()
         Log(f"Max supported manifest version: {CSS_LOADER_VER}")
         
         create_steam_symlink()
