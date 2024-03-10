@@ -14,7 +14,7 @@ async def initialize_class_mappings():
     setting = store_read("beta_translations")
     css_translations_url = "https://api.deckthemes.com/beta.json" if (setting == "1" or setting == "true") else "https://api.deckthemes.com/stable.json"
 
-    timeout = 10
+    timeout = 20
     while timeout > 0:
         try:
             async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=2)) as session:
@@ -25,10 +25,10 @@ async def initialize_class_mappings():
 
                         break
 
-            await asyncio.sleep(1.5)
+            await asyncio.sleep(0.5)
         except Exception as ex:
             Log(f"Failed to fetch css translations from server: {str(ex)}")
-            await asyncio.sleep(1.5)
+            await asyncio.sleep(3)
         finally:
             timeout -= 1
 
