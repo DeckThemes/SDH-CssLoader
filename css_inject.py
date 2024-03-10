@@ -1,14 +1,15 @@
 import json
 import re
 import os
-import requests
+import aiohttp
+import time
 from typing import List
 from css_utils import Result, Log, store_read, get_theme_path
 from css_browserhook import BrowserTabHook as CssTab, inject, remove
 
 CLASS_MAPPINGS = {}
 
-def initialize_class_mappings():
+async def initialize_class_mappings():
     css_translations_path = os.path.join(get_theme_path(), "css_translations.json")
     setting = store_read("beta_translations")
     css_translations_url = "https://api.deckthemes.com/beta.json" if (setting == "1" or setting == "true") else "https://api.deckthemes.com/stable.json"
@@ -16,13 +17,17 @@ def initialize_class_mappings():
     timeout = 8
     while timeout > 0:
         try:
-            response = requests.get(css_translations_url, timeout=2)
-            if response.status_code == 200:
-                with open(css_translations_path, "w", encoding="utf-8") as fp:
-                    json.dump(response.json(), fp)
-                break
-        except:
-            pass
+            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=2)) as session:
+                async with session.get(css_translations_url) as response:
+                    if response.status == 200:
+                        with open(css_translations_path, "w", encoding="utf-8") as fp:
+                            json.dump(await response.json(), fp)
+
+                        break
+
+            time.sleep(0.3)
+        except Exception as ex:
+            Log(f"Failed to fetch css translations from server: {str(ex)}")
         finally:
             timeout -= 1
 

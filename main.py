@@ -158,7 +158,7 @@ class Plugin:
         self.server_loaded = False
 
         Log("Initializing css loader...")
-        initialize_class_mappings()
+        await initialize_class_mappings()
         Log(f"Max supported manifest version: {CSS_LOADER_VER}")
         
         create_steam_symlink()
