@@ -28,6 +28,7 @@ async def initialize_class_mappings():
             await asyncio.sleep(1.5)
         except Exception as ex:
             Log(f"Failed to fetch css translations from server: {str(ex)}")
+            await asyncio.sleep(1.5)
         finally:
             timeout -= 1
 
