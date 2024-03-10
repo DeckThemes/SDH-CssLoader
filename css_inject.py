@@ -20,7 +20,7 @@ async def fetch_class_mappings(css_translations_path : str):
     css_translations_url = "https://api.deckthemes.com/beta.json" if (setting == "1" or setting == "true") else "https://api.deckthemes.com/stable.json"
 
     try:
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=2)) as session:
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False), timeout=aiohttp.ClientTimeout(total=2)) as session:
             async with session.get(css_translations_url) as response:
                 if response.status == 200:
                     with open(css_translations_path, "w", encoding="utf-8") as fp:
@@ -34,13 +34,13 @@ async def fetch_class_mappings(css_translations_path : str):
 
 async def every(__seconds: float, func, *args, **kwargs):
     while True:
-        await asyncio.sleep(__seconds)
         await func(*args, **kwargs)
+        await asyncio.sleep(__seconds)
 
 async def initialize_class_mappings():
     css_translations_path = os.path.join(get_theme_path(), "css_translations.json")
 
-    asyncio.get_event_loop().create_task(every(120, fetch_class_mappings, css_translations_path))
+    asyncio.get_event_loop().create_task(every(60, fetch_class_mappings, css_translations_path))
 
     if not os.path.exists(css_translations_path):
         Log("Failed to get css translations from local file")
