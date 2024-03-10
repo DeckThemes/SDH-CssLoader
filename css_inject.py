@@ -40,6 +40,8 @@ async def every(__seconds: float, func, *args, **kwargs):
 async def initialize_class_mappings():
     css_translations_path = os.path.join(get_theme_path(), "css_translations.json")
 
+    await fetch_class_mappings(css_translations_path)
+
     asyncio.get_event_loop().create_task(every(60, fetch_class_mappings, css_translations_path))
 
     if not os.path.exists(css_translations_path):
