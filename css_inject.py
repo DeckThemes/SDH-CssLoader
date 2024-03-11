@@ -8,54 +8,30 @@ from css_utils import Result, Log, store_read, get_theme_path
 from css_browserhook import BrowserTabHook as CssTab, inject, remove
 
 CLASS_MAPPINGS = {}
-SUCCESSFUL_FETCH_THIS_RUN = False
 
-async def fetch_class_mappings(css_translations_path : str):
-    global SUCCESSFUL_FETCH_THIS_RUN
-
-    if SUCCESSFUL_FETCH_THIS_RUN:
-        return
-
-    setting = store_read("beta_translations")
-    css_translations_url = "https://api.deckthemes.com/beta.json" if (setting == "1" or setting == "true") else "https://api.deckthemes.com/stable.json"
-
-    try:
-        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False), timeout=aiohttp.ClientTimeout(total=2)) as session:
-            async with session.get(css_translations_url) as response:
-                if response.status == 200:
-                    with open(css_translations_path, "w", encoding="utf-8") as fp:
-                        json.dump(await response.json(), fp)
-
-                        SUCCESSFUL_FETCH_THIS_RUN = True
-                        Log(f"Fetched css translations from server")
-
-    except Exception as ex:
-        Log(f"Failed to fetch css translations from server: {str(ex)}")
-
-async def every(__seconds: float, func, *args, **kwargs):
-    while True:
-        await func(*args, **kwargs)
-        await asyncio.sleep(__seconds)
-
-async def initialize_class_mappings():
+def initialize_class_mappings():
     css_translations_path = os.path.join(get_theme_path(), "css_translations.json")
-
-    await fetch_class_mappings(css_translations_path)
-
-    asyncio.get_event_loop().create_task(every(60, fetch_class_mappings, css_translations_path))
 
     if not os.path.exists(css_translations_path):
         Log("Failed to get css translations from local file")
         return
 
-    with open(css_translations_path, "r", encoding="utf-8") as fp:
-        data : dict = json.load(fp)
+    try:
+        with open(css_translations_path, "r", encoding="utf-8") as fp:
+            data : dict = json.load(fp)
+    except Exception as e:
+        Log(f"Failed to load css translations from local file: {str(e)}")
+        return
+
+    CLASS_MAPPINGS.clear()
 
     # Data is in the format of { "uid": ["ver1", "ver2", "ver3"]}
     for uid in data:
         latest_value = data[uid][-1]
         for y in data[uid][:-1]:
             CLASS_MAPPINGS[y] = latest_value
+
+    Log("Loaded css translations from local file")
 
 ALL_INJECTS = []
 
