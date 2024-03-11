@@ -43,10 +43,10 @@ async def fetch_class_mappings(css_translations_path : str, loader : Loader):
                     with open(css_translations_path, "w", encoding="utf-8") as fp:
                         fp.write(await response.text())
 
-                        SUCCESSFUL_FETCH_THIS_RUN = True
-                        Log(f"Fetched css translations from server")
-                        initialize_class_mappings()
-                        asyncio.get_running_loop().create_task(loader.reset(silent=True))
+                    SUCCESSFUL_FETCH_THIS_RUN = True
+                    Log(f"Fetched css translations from server")
+                    initialize_class_mappings()
+                    asyncio.get_running_loop().create_task(loader.reset(silent=True))
 
     except Exception as ex:
         Log(f"Failed to fetch css translations from server: {str(ex)}")
