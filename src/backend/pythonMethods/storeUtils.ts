@@ -14,7 +14,7 @@ export async function booleanStoreRead(key: string) {
 export async function booleanStoreWrite(key: string, value: boolean) {
   const deckyRes = await server!.callPluginMethod<{ key: string; val: string }>("store_write", {
     key,
-    value: val ? "1" : "0",
+    val: value ? "1" : "0",
   });
   if (!deckyRes.success) {
     toast(`Error fetching ${key}`, deckyRes.result);
