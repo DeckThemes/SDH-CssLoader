@@ -1,14 +1,33 @@
+import { toast } from "../../python";
 import { server, globalState } from "../pythonRoot";
+import { booleanStoreRead } from "./storeUtils";
 
 export function enableServer() {
   return server!.callPluginMethod("enable_server", {});
 }
-export function getServerState() {
-  return server!.callPluginMethod<{}, boolean>("get_server_state", {});
+
+export async function getServerState() {
+  const deckyRes = await server!.callPluginMethod<{}, boolean>("get_server_state", {});
+  if (!deckyRes.success) {
+    toast("Error fetching server state", deckyRes.result);
+    return false;
+  }
+  return deckyRes.result;
 }
-export function getWatchState() {
-  return server!.callPluginMethod<{}, boolean>("get_watch_state", {});
+
+export async function getWatchState() {
+  const deckyRes = await server!.callPluginMethod<{}, boolean>("get_watch_state", {});
+  if (!deckyRes.success) {
+    toast("Error fetching watch state", deckyRes.result);
+    return false;
+  }
+  return deckyRes.result;
 }
+
+export async function getBetaTranslationsState() {
+  return booleanStoreRead("beta_translations");
+}
+
 export function toggleWatchState(bool: boolean, onlyThisSession: boolean = false) {
   return server!.callPluginMethod<{ enable: boolean; only_this_session: boolean }, void>(
     "toggle_watch_state",
