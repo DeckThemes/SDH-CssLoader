@@ -55,7 +55,7 @@ export function PluginSettings() {
     await fetchBetaTranslationsState();
     toast(
       "Beta translations " + (enabled ? "enabled" : "disabled") + ".",
-      "Please restart Steam to apply changes."
+      "Please restart your Deck to apply changes."
     );
   }
 
