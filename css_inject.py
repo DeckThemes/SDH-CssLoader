@@ -1,7 +1,37 @@
+import json
+import re
+import os
+import aiohttp
+import asyncio
 from typing import List
-from css_utils import Result, Log
+from css_utils import Result, Log, store_read, get_theme_path
 from css_browserhook import BrowserTabHook as CssTab, inject, remove
-import uuid
+
+CLASS_MAPPINGS = {}
+
+def initialize_class_mappings():
+    css_translations_path = os.path.join(get_theme_path(), "css_translations.json")
+
+    if not os.path.exists(css_translations_path):
+        Log("Failed to get css translations from local file")
+        return
+
+    try:
+        with open(css_translations_path, "r", encoding="utf-8") as fp:
+            data : dict = json.load(fp)
+    except Exception as e:
+        Log(f"Failed to load css translations from local file: {str(e)}")
+        return
+
+    CLASS_MAPPINGS.clear()
+
+    # Data is in the format of { "uid": ["ver1", "ver2", "ver3"]}
+    for uid in data:
+        latest_value = data[uid][-1]
+        for y in data[uid][:-1]:
+            CLASS_MAPPINGS[y] = latest_value
+
+    Log("Loaded css translations from local file")
 
 ALL_INJECTS = []
 
@@ -9,7 +39,7 @@ def helper_get_tab_from_list(tab_list : List[str], cssTab : CssTab) -> str|None:
     for x in tab_list:
         if cssTab.compare(x):
             return x
-        
+
     return None
 
 class Inject:
@@ -28,8 +58,14 @@ class Inject:
             with open(self.cssPath, "r") as fp:
                 self.css = fp.read()
 
+            split_css = re.split(r"(\.[_a-zA-Z]+[_a-zA-Z0-9-]*)", self.css)
+
+            for x in range(len(split_css)):
+                if split_css[x].startswith(".") and split_css[x][1:] in CLASS_MAPPINGS:
+                    split_css[x] = "." + CLASS_MAPPINGS[split_css[x][1:]]
+
+            self.css = ("".join(split_css)).replace("\\", "\\\\").replace("`", "\\`")
             Log(f"Loaded css at {self.cssPath}")
-            self.css = self.css.replace("\\", "\\\\").replace("`", "\\`")
 
             return Result(True)
         except Exception as e:
