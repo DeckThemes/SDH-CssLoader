@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "color": "^4.2.3",
-    "decky-frontend-lib": "^3.24.3",
+    "decky-frontend-lib": "^3.25.0",
     "lodash": "^4.17.21",
     "react-icons": "^4.12.0"
   },

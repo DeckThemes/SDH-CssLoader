@@ -1,7 +1,7 @@
 import { Focusable, ToggleField } from "decky-frontend-lib";
 import { useMemo, useState, useEffect } from "react";
 import { useCssLoaderState } from "../../state";
-import { storeWrite, toast } from "../../python";
+import { toast } from "../../python";
 import { setNavPatch } from "../../deckyPatches/NavPatch";
 import {
   getWatchState,
@@ -11,9 +11,10 @@ import {
   getBetaTranslationsState,
 } from "../../backend/pythonMethods/pluginSettingsMethods";
 import { booleanStoreWrite } from "../../backend/pythonMethods/storeUtils";
+import { disableUnminifyMode, enableUnminifyMode } from "../../deckyPatches/UnminifyMode";
 
 export function PluginSettings() {
-  const { navPatchInstance } = useCssLoaderState();
+  const { navPatchInstance, unminifyModeOn, setGlobalState } = useCssLoaderState();
   const [serverOn, setServerOn] = useState<boolean>(false);
   const [watchOn, setWatchOn] = useState<boolean>(false);
   const [betaTranslationsOn, setBetaTranslationsOn] = useState<boolean>(false);
@@ -38,6 +39,15 @@ export function PluginSettings() {
     void fetchWatchState();
     void fetchBetaTranslationsState();
   }, []);
+
+  function setUnminify(enabled: boolean) {
+    setGlobalState("unminifyModeOn", enabled);
+    if (enabled) {
+      enableUnminifyMode();
+      return;
+    }
+    disableUnminifyMode();
+  }
 
   async function setWatch(enabled: boolean) {
     await toggleWatchState(enabled, false);
@@ -93,6 +103,14 @@ export function PluginSettings() {
           label="Live CSS Editing"
           description="Watches ~/homebrew/themes for any changes and automatically re-injects CSS"
           onChange={setWatch}
+        />
+      </Focusable>
+      <Focusable>
+        <ToggleField
+          checked={unminifyModeOn}
+          label="Unminify Mode"
+          description="Adds unminified classnames to devtools view, resets on steam client restart, VERY VERY LAGGY!"
+          onChange={setUnminify}
         />
       </Focusable>
     </div>
