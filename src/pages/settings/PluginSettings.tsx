@@ -109,7 +109,7 @@ export function PluginSettings() {
         <ToggleField
           checked={unminifyModeOn}
           label="Unminify Mode"
-          description="Adds unminified classnames to devtools view, resets on steam client restart, VERY VERY LAGGY!"
+          description="Adds unminified classnames to devtools view, resets on steam client restart"
           onChange={setUnminify}
         />
       </Focusable>
