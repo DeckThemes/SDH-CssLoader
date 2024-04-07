@@ -180,6 +180,20 @@ class Plugin:
     async def upload_theme(self, name : str, base_url : str, bearer_token : str) -> dict:
         return (await self.loader.upload_theme(name, base_url, bearer_token)).to_dict()
 
+    async def fetch_class_mappings(self):
+        await self._fetch_class_mappings(self)
+        return Result(True).to_dict()
+
+    async def _fetch_class_mappings(self, run_in_bg : bool = False):
+        global SUCCESSFUL_FETCH_THIS_RUN
+
+        SUCCESSFUL_FETCH_THIS_RUN = False
+        css_translations_path = os.path.join(get_theme_path(), "css_translations.json")
+        if run_in_bg:
+            asyncio.get_event_loop().create_task(every(60, fetch_class_mappings, css_translations_path, self.loader))
+        else:
+            await fetch_class_mappings(css_translations_path, self.loader)
+
     async def _main(self):
         global Initialized
         if Initialized:
@@ -208,8 +222,7 @@ class Plugin:
         if (ALWAYS_RUN_SERVER or store_or_file_config("server")):
             await self.enable_server(self)
 
-        css_translations_path = os.path.join(get_theme_path(), "css_translations.json")
-        asyncio.get_event_loop().create_task(every(60, fetch_class_mappings, css_translations_path, self.loader))
+        await self._fetch_class_mappings(self, True)
         await initialize()
 
 if __name__ == '__main__':
