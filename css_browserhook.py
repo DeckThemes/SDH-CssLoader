@@ -1,6 +1,6 @@
 import os, re, uuid, asyncio, json, aiohttp, time
 from typing import List
-from css_utils import get_theme_path, Log, Result
+from css_utils import get_theme_path, Log, Result, PLATFORM_WIN
 import css_inject
 
 MAX_QUEUE_SIZE = 500
@@ -414,7 +414,11 @@ class BrowserHook:
         while True:
             await asyncio.sleep(3)
             try:
-                async with aiohttp.ClientSession() as web:
+                if PLATFORM_WIN:
+                    trust_env = True
+                else:
+                    trust_env = False
+                async with aiohttp.ClientSession(trust_env=trust_env) as web:
                     res = await web.get(f"http://127.0.0.1:8080/json/version", timeout=3)
 
                 if (res.status != 200):
