@@ -5,7 +5,7 @@ from watchdog.observers import Observer
 
 sys.path.append(os.path.dirname(__file__))
 
-from css_utils import Log, create_steam_symlink, Result, get_theme_path, store_read as util_store_read, store_write as util_store_write, store_or_file_config
+from css_utils import Log, create_steam_symlink, Result, get_theme_path, store_read as util_store_read, store_write as util_store_write, store_or_file_config, is_steam_beta_active
 from css_inject import ALL_INJECTS, initialize_class_mappings
 from css_theme import CSS_LOADER_VER
 from css_remoteinstall import install
@@ -34,7 +34,13 @@ async def fetch_class_mappings(css_translations_path : str, loader : Loader):
         return
 
     setting = util_store_read("beta_translations")
-    css_translations_url = "https://api.deckthemes.com/beta.json" if (setting == "1" or setting == "true") else "https://api.deckthemes.com/stable.json"
+
+    if ((len(setting.strip()) < 0 or setting == "-1" or setting == "auto") and is_steam_beta_active()) or (setting == "1" or setting == "true"):
+        css_translations_url = "https://api.deckthemes.com/beta.json"
+    else:
+        css_translations_url = "https://api.deckthemes.com/stable.json"
+
+    Log(f"Fetching CSS mappings from {css_translations_url}")
 
     try:
         async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False), timeout=aiohttp.ClientTimeout(total=2)) as session:
