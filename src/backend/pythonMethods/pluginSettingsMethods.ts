@@ -1,6 +1,6 @@
-import { toast } from "../../python";
+import { storeRead, toast } from "../../python";
 import { server, globalState } from "../pythonRoot";
-import { booleanStoreRead } from "./storeUtils";
+import { booleanStoreRead, stringStoreRead } from "./storeUtils";
 
 export function enableServer() {
   return server!.callPluginMethod("enable_server", {});
@@ -25,7 +25,7 @@ export async function getWatchState() {
 }
 
 export async function getBetaTranslationsState() {
-  return booleanStoreRead("beta_translations");
+  return stringStoreRead("beta_translations");
 }
 
 export function toggleWatchState(bool: boolean, onlyThisSession: boolean = false) {
@@ -49,4 +49,8 @@ export function getHiddenMotd() {
   return server!.callPluginMethod<{ key: string }, string>("store_read", {
     key: "hiddenMotd",
   });
+}
+
+export function fetchClassMappings() {
+  return server!.callPluginMethod<{}>("fetch_class_mappings", {});
 }

@@ -99,6 +99,20 @@ def get_steam_path() -> str:
     else:
         return f"{get_user_home()}/.steam/steam"
 
+def is_steam_beta_active() -> bool:
+    beta_path = os.path.join(get_steam_path(), "package", "beta")
+    if not os.path.exists(beta_path):
+        return False
+
+    with open(beta_path, 'r') as fp:
+        content = fp.read().strip()
+
+    stable_branches = [
+        "steamdeck_stable",
+    ]
+
+    return content not in stable_branches
+
 def create_steam_symlink() -> Result:
     return create_symlink(get_theme_path(), os.path.join(get_steam_path(), "steamui", "themes_custom"))
 

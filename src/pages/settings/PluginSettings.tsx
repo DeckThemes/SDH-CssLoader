@@ -1,7 +1,7 @@
-import { Focusable, ToggleField } from "decky-frontend-lib";
+import { DropdownItem, Focusable, ToggleField } from "decky-frontend-lib";
 import { useMemo, useState, useEffect } from "react";
 import { useCssLoaderState } from "../../state";
-import { storeWrite, toast } from "../../python";
+import { toast } from "../../python";
 import { setNavPatch } from "../../deckyPatches/NavPatch";
 import {
   getWatchState,
@@ -9,14 +9,16 @@ import {
   enableServer,
   toggleWatchState,
   getBetaTranslationsState,
+  fetchClassMappings,
 } from "../../backend/pythonMethods/pluginSettingsMethods";
-import { booleanStoreWrite } from "../../backend/pythonMethods/storeUtils";
+import { booleanStoreWrite, stringStoreWrite } from "../../backend/pythonMethods/storeUtils";
+import { disableUnminifyMode, enableUnminifyMode } from "../../deckyPatches/UnminifyMode";
 
 export function PluginSettings() {
-  const { navPatchInstance } = useCssLoaderState();
+  const { navPatchInstance, unminifyModeOn, setGlobalState } = useCssLoaderState();
   const [serverOn, setServerOn] = useState<boolean>(false);
   const [watchOn, setWatchOn] = useState<boolean>(false);
-  const [betaTranslationsOn, setBetaTranslationsOn] = useState<boolean>(false);
+  const [betaTranslationsOn, setBetaTranslationsOn] = useState<string>("-1");
 
   const navPatchEnabled = useMemo(() => !!navPatchInstance, [navPatchInstance]);
 
@@ -30,6 +32,10 @@ export function PluginSettings() {
   }
   async function fetchBetaTranslationsState() {
     const value = await getBetaTranslationsState();
+    if (!["0", "1", "-1"].includes(value)) {
+      setBetaTranslationsOn("-1");
+      return;
+    }
     setBetaTranslationsOn(value);
   }
 
@@ -38,6 +44,15 @@ export function PluginSettings() {
     void fetchWatchState();
     void fetchBetaTranslationsState();
   }, []);
+
+  function setUnminify(enabled: boolean) {
+    setGlobalState("unminifyModeOn", enabled);
+    if (enabled) {
+      enableUnminifyMode();
+      return;
+    }
+    disableUnminifyMode();
+  }
 
   async function setWatch(enabled: boolean) {
     await toggleWatchState(enabled, false);
@@ -50,23 +65,25 @@ export function PluginSettings() {
     await fetchServerState();
   }
 
-  async function setBetaTranslations(enabled: boolean) {
-    await booleanStoreWrite("beta_translations", enabled);
+  async function setBetaTranslations(value: string) {
+    await stringStoreWrite("beta_translations", value);
+    await fetchClassMappings();
     await fetchBetaTranslationsState();
-    toast(
-      "Beta translations " + (enabled ? "enabled" : "disabled") + ".",
-      "Please restart your Deck to apply changes."
-    );
   }
 
   return (
     <div>
       <Focusable>
-        <ToggleField
-          checked={betaTranslationsOn}
-          label="Enable Beta Branch CSS Translations"
-          description="Enable this if you use Steam beta, as this will tell CSS Loader to use beta classnames"
-          onChange={setBetaTranslations}
+        <DropdownItem
+          rgOptions={[
+            { data: "-1", label: "Auto-Detect" },
+            { data: "0", label: "Force Stable" },
+            { data: "1", label: "Force Beta" },
+          ]}
+          selectedOption={betaTranslationsOn}
+          label="SteamOS Branch"
+          description="Choose the version of SteamOS you are on. This allows us to provide the correct translations for your system."
+          onChange={(data) => setBetaTranslations(data.data)}
         />
       </Focusable>
       <Focusable>
@@ -93,6 +110,14 @@ export function PluginSettings() {
           label="Live CSS Editing"
           description="Watches ~/homebrew/themes for any changes and automatically re-injects CSS"
           onChange={setWatch}
+        />
+      </Focusable>
+      <Focusable>
+        <ToggleField
+          checked={unminifyModeOn}
+          label="Unminify Mode"
+          description="Adds unminified classnames to devtools view, resets on steam client restart"
+          onChange={setUnminify}
         />
       </Focusable>
     </div>

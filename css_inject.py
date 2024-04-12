@@ -65,6 +65,14 @@ class Inject:
                     split_css[x] = "." + CLASS_MAPPINGS[split_css[x][1:]]
 
             self.css = ("".join(split_css)).replace("\\", "\\\\").replace("`", "\\`")
+
+            split_css = re.split(r"(\[class[*^|~]=\"[_a-zA-Z0-9-]*\"\])", self.css)
+
+            for x in range(len(split_css)):
+                if split_css[x].startswith("[class") and split_css[x].endswith("\"]") and split_css[x][9:-2] in CLASS_MAPPINGS:
+                    split_css[x] = split_css[x][0:9] + CLASS_MAPPINGS[split_css[x][9:-2]] + split_css[x][-2:]
+
+            self.css = ("".join(split_css)).replace("\\", "\\\\").replace("`", "\\`")
             Log(f"Loaded css at {self.cssPath}")
 
             return Result(True)
@@ -142,7 +150,7 @@ DEFAULT_MAPPINGS = {
     "desktoppopup": ["OverlayBrowser_Browser", "SP Overlay:.*", "notificationtoasts_.*", "SteamBrowser_Find", "OverlayTab\\d+_Find", "!ModalDialogPopup", "!FullModalOverlay"],
     "desktopoverlay": ["desktoppopup"],
     "desktopcontextmenu": [".*Menu", ".*Supernav"],
-    "bigpicture": ["~Valve Steam Gamepad/default~", "~Valve%20Steam%20Gamepad/default~"],
+    "bigpicture": ["~Valve Steam Gamepad/default~", "~Valve%20Steam%20Gamepad~"],
     "bigpictureoverlay": ["QuickAccess", "MainMenu"],
     "store": ["~https://store.steampowered.com~", "~https://steamcommunity.com~"],
 
