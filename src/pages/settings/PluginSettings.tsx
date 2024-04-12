@@ -32,7 +32,7 @@ export function PluginSettings() {
   }
   async function fetchBetaTranslationsState() {
     const value = await getBetaTranslationsState();
-    if (![!"0", "1", "-1"].includes(value)) {
+    if (!["0", "1", "-1"].includes(value)) {
       setBetaTranslationsOn("-1");
       return;
     }
