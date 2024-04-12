@@ -110,7 +110,7 @@ def is_steam_beta_active() -> bool:
     stable_branches = [
         "steamdeck_stable",
     ]
-    
+
     return content not in stable_branches
 
 def create_steam_symlink() -> Result:
