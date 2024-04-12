@@ -35,7 +35,7 @@ async def fetch_class_mappings(css_translations_path : str, loader : Loader):
 
     setting = util_store_read("beta_translations")
 
-    if ((len(setting.strip()) < 0 or setting == "-1" or setting == "auto") and is_steam_beta_active()) or (setting == "1" or setting == "true"):
+    if ((len(setting.strip()) <= 0 or setting == "-1" or setting == "auto") and is_steam_beta_active()) or (setting == "1" or setting == "true"):
         css_translations_url = "https://api.deckthemes.com/beta.json"
     else:
         css_translations_url = "https://api.deckthemes.com/stable.json"
