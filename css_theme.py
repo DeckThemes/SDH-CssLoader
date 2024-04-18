@@ -64,7 +64,7 @@ class Theme:
         self.tab_mappings = json["tabs"] if ("tabs" in json) else {}
 
         if (CSS_LOADER_VER < self.require):
-            raise Exception("A newer version of the CssLoader is required to load this theme")
+            raise Exception(f"A newer version of the CssLoader is required to load this theme (Read manifest version {self.require} but only up to {CSS_LOADER_VER} is supported)")
 
         self.dependencies = json["dependencies"] if "dependencies" in json else {}
 
