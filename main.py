@@ -1,12 +1,12 @@
-import os, asyncio, sys, time
+import os, asyncio, sys, time, aiohttp, json
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 sys.path.append(os.path.dirname(__file__))
 
-from css_utils import Log, create_steam_symlink, Result, get_theme_path, store_read as util_store_read, store_write as util_store_write, store_or_file_config
-from css_inject import ALL_INJECTS
+from css_utils import Log, create_steam_symlink, Result, get_theme_path, store_read as util_store_read, store_write as util_store_write, store_or_file_config, is_steam_beta_active
+from css_inject import ALL_INJECTS, initialize_class_mappings
 from css_theme import CSS_LOADER_VER
 from css_remoteinstall import install
 
@@ -24,6 +24,44 @@ except:
     pass
 
 Initialized = False
+
+SUCCESSFUL_FETCH_THIS_RUN = False
+
+async def fetch_class_mappings(css_translations_path : str, loader : Loader):
+    global SUCCESSFUL_FETCH_THIS_RUN
+
+    if SUCCESSFUL_FETCH_THIS_RUN:
+        return
+
+    setting = util_store_read("beta_translations")
+
+    if ((len(setting.strip()) <= 0 or setting == "-1" or setting == "auto") and is_steam_beta_active()) or (setting == "1" or setting == "true"):
+        css_translations_url = "https://api.deckthemes.com/beta.json"
+    else:
+        css_translations_url = "https://api.deckthemes.com/stable.json"
+
+    Log(f"Fetching CSS mappings from {css_translations_url}")
+
+    try:
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False), timeout=aiohttp.ClientTimeout(total=2)) as session:
+            async with session.get(css_translations_url) as response:
+                if response.status == 200:
+                    with open(css_translations_path, "w", encoding="utf-8") as fp:
+                        fp.write(await response.text())
+
+                    SUCCESSFUL_FETCH_THIS_RUN = True
+                    Log(f"Fetched css translations from server")
+                    initialize_class_mappings()
+                    asyncio.get_running_loop().create_task(loader.reset(silent=True))
+
+    except Exception as ex:
+        Log(f"Failed to fetch css translations from server: {str(ex)}")
+        
+
+async def every(__seconds: float, func, *args, **kwargs):
+    while True:
+        await func(*args, **kwargs)
+        await asyncio.sleep(__seconds)
 
 class FileChangeHandler(FileSystemEventHandler):
     def __init__(self, loader : Loader, loop):
@@ -148,6 +186,20 @@ class Plugin:
     async def upload_theme(self, name : str, base_url : str, bearer_token : str) -> dict:
         return (await self.loader.upload_theme(name, base_url, bearer_token)).to_dict()
 
+    async def fetch_class_mappings(self):
+        await self._fetch_class_mappings(self)
+        return Result(True).to_dict()
+
+    async def _fetch_class_mappings(self, run_in_bg : bool = False):
+        global SUCCESSFUL_FETCH_THIS_RUN
+
+        SUCCESSFUL_FETCH_THIS_RUN = False
+        css_translations_path = os.path.join(get_theme_path(), "css_translations.json")
+        if run_in_bg:
+            asyncio.get_event_loop().create_task(every(60, fetch_class_mappings, css_translations_path, self.loader))
+        else:
+            await fetch_class_mappings(css_translations_path, self.loader)
+
     async def _main(self):
         global Initialized
         if Initialized:
@@ -158,6 +210,7 @@ class Plugin:
         self.server_loaded = False
 
         Log("Initializing css loader...")
+        initialize_class_mappings()
         Log(f"Max supported manifest version: {CSS_LOADER_VER}")
         
         create_steam_symlink()
@@ -175,6 +228,7 @@ class Plugin:
         if (ALWAYS_RUN_SERVER or store_or_file_config("server")):
             await self.enable_server(self)
 
+        await self._fetch_class_mappings(self, True)
         await initialize()
 
 if __name__ == '__main__':

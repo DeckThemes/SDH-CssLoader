@@ -4,11 +4,8 @@ import {
   PanelSection,
   PanelSectionRow,
   ServerAPI,
-  DialogButton,
-  Focusable,
-  Navigation,
 } from "decky-frontend-lib";
-import { useEffect, useState, FC } from "react";
+import { useEffect, useState } from "react";
 import * as python from "./python";
 import * as api from "./api";
 import { RiPaintFill } from "react-icons/ri";
@@ -21,8 +18,8 @@ import { Flags, Theme } from "./ThemeTypes";
 import { dummyFunction, getInstalledThemes, reloadBackend } from "./python";
 import { bulkThemeUpdateCheck } from "./logic/bulkThemeUpdateCheck";
 import { disableNavPatch, enableNavPatch } from "./deckyPatches/NavPatch";
-import { FaCog, FaStore } from "react-icons/fa";
 import { SettingsPageRouter } from "./pages/settings/SettingsPageRouter";
+import { disableUnminifyMode } from "./deckyPatches/UnminifyMode";
 
 function Content() {
   const { localThemeList, setGlobalState } = useCssLoaderState();
@@ -205,6 +202,7 @@ export default definePlugin((serverApi: ServerAPI) => {
     onDismount: () => {
       const { updateCheckTimeout } = state.getPublicState();
       if (updateCheckTimeout) clearTimeout(updateCheckTimeout);
+      disableUnminifyMode();
       disableNavPatch();
     },
   };

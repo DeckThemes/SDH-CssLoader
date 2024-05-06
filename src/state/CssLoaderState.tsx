@@ -43,6 +43,7 @@ interface PublicCssLoaderState {
   nextUpdateCheckTime: number;
   updateCheckTimeout: NodeJS.Timeout | undefined;
 
+  unminifyModeOn: boolean;
   navPatchInstance: Patch | undefined;
   updateStatuses: UpdateStatus[];
   selectedPreset: Theme | undefined;
@@ -153,6 +154,7 @@ export class CssLoaderState {
   private submissionThemeList: ThemeQueryResponse = { total: 0, items: [] };
   private backendVersion: number = 6;
   private hiddenMotd: string = "";
+  private unminifyModeOn: boolean = false;
 
   // You can listen to this eventBus' 'stateUpdate' event and use that to trigger a useState or other function that causes a re-render
   public eventBus = new EventTarget();
@@ -176,6 +178,7 @@ export class CssLoaderState {
       unpinnedThemes: this.unpinnedThemes,
       isInstalling: this.isInstalling,
       hiddenMotd: this.hiddenMotd,
+      unminifyModeOn: this.unminifyModeOn,
 
       navPatchInstance: this.navPatchInstance,
       selectedRepo: this.selectedRepo,
