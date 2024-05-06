@@ -6,3 +6,4 @@ export * from "./ThemeManager";
 export * from "./OptionalDepsModal";
 export * from "./QAMTab";
 export * from "./Modals";
+export * from "./Loading";

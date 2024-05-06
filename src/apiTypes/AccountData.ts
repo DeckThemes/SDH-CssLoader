@@ -12,6 +12,15 @@ export interface AccountData extends UserInfo {
   permissions: Permissions[];
 }
 
+export type PremiumTiers = "None" | "Tier1" | "Tier2" | "Tier3";
+
+export interface FullAccountData extends AccountData {
+  hasDeckKey: boolean;
+  premiumTier: PremiumTiers;
+  email: string;
+  lastLoginDate: string;
+}
+
 export interface AuthContextContents {
   accountInfo: AccountData | undefined;
   setAccountInfo:

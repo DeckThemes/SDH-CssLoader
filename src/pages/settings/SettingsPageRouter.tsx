@@ -5,13 +5,14 @@ import { ThemeSettings } from "./ThemeSettings";
 import { PresetSettings } from "./PresetSettings";
 import { PluginSettings } from "./PluginSettings";
 import { Credits } from "./Credits";
-import { AiFillGithub, AiFillHeart } from "react-icons/ai";
 import { DonatePage } from "./DonatePage";
 import { FaFolder, FaGithub, FaHeart } from "react-icons/fa";
+import { ThemeBrowserCardStyles } from "../../components/Styles";
 
 export function SettingsPageRouter() {
   return (
     <>
+      <ThemeBrowserCardStyles />
       <style>
         {`
           /* Remove side padding on the PanelSections */

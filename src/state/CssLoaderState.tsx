@@ -3,6 +3,7 @@ import { createContext, FC, useContext, useEffect, useState } from "react";
 import {
   AccountData,
   FilterQueryResponse,
+  FullAccountData,
   PartialCSSThemeInfo,
   ThemeQueryRequest,
   ThemeQueryResponse,
@@ -37,7 +38,7 @@ interface PublicCssLoaderState {
   apiShortToken: string;
   apiFullToken: string;
   apiTokenExpireDate: Date | number | undefined;
-  apiMeData: AccountData | undefined;
+  apiMeData: FullAccountData | undefined;
   // This is a unix timestamp
   nextUpdateCheckTime: number;
   updateCheckTimeout: NodeJS.Timeout | undefined;
@@ -76,7 +77,7 @@ export class CssLoaderState {
   private apiShortToken: string = "";
   private apiFullToken: string = "";
   private apiTokenExpireDate: Date | number | undefined = undefined;
-  private apiMeData: AccountData | undefined = undefined;
+  private apiMeData: FullAccountData | undefined = undefined;
   private localThemeList: Theme[] = [];
   private themeErrors: ThemeError[] = [];
   private selectedRepo: SingleDropdownOption = {

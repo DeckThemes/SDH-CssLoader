@@ -1,10 +1,11 @@
-import { Focusable } from "decky-frontend-lib";
+import { DialogButton, Focusable } from "decky-frontend-lib";
 import { useCssLoaderState } from "../../state";
 import { ThemeToggle } from "../ThemeToggle";
 import { Flags } from "../../ThemeTypes";
 import { ThemeErrorCard } from "../ThemeErrorCard";
 import { BsArrowDown } from "react-icons/bs";
 import { FaEyeSlash } from "react-icons/fa";
+import { publishProfile } from "../../backend/apiHelpers/profileUploadingHelpers";
 
 export function QAMThemeToggleList() {
   const { localThemeList, unpinnedThemes } = useCssLoaderState();

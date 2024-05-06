@@ -58,7 +58,7 @@ export async function logInWithShortToken(
           setGlobalState("apiShortToken", shortTokenValue);
           setGlobalState("apiFullToken", data.token);
           setGlobalState("apiTokenExpireDate", new Date().valueOf() + 1000 * 60 * 10);
-          genericGET(`/auth/me`, true, data.token).then((meData) => {
+          genericGET(`/auth/me_full`, true, data.token).then((meData) => {
             if (meData?.username) {
               setGlobalState("apiMeData", meData);
               toast("Logged In!", `Logged in as ${meData.username}`);
@@ -70,6 +70,7 @@ export async function logInWithShortToken(
       })
       .catch((err) => {
         console.error(`Error authenticating from short token.`, err);
+        toast("Error Authenticating", JSON.stringify(err));
       });
   } else {
     toast("Invalid Token", "Token must be 12 characters long.");

@@ -7,7 +7,7 @@ import { SubmissionsPage } from "./SubmissionBrowserPage";
 import { ThemeBrowserPage } from "./ThemeBrowserPage";
 import { ThemeBrowserCardStyles } from "../../components/Styles";
 export function ThemeManagerRouter() {
-  const { apiMeData, currentTab, setGlobalState, browserCardSize } = useCssLoaderState();
+  const { apiMeData, currentTab, setGlobalState } = useCssLoaderState();
   return (
     <div
       style={{
