@@ -6,8 +6,7 @@ import {
   ScrollPanelGroup,
 } from "decky-frontend-lib";
 import { useEffect, useRef, useState, VFC } from "react";
-import { ImCog, ImSpinner5 } from "react-icons/im";
-import { BsStar, BsStarFill } from "react-icons/bs";
+import { ImCog } from "react-icons/im";
 
 import * as python from "../../python";
 import { genericGET, refreshToken, toggleStar as apiToggleStar, installTheme } from "../../api";

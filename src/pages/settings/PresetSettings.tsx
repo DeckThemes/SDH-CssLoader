@@ -1,69 +1,20 @@
-import { ButtonItem, DialogButton, Focusable, PanelSection, showModal } from "decky-frontend-lib";
+import { useEffect, useMemo, useState } from "react";
 import { useCssLoaderState } from "../../state";
-import { Flags, Theme } from "../../ThemeTypes";
-import { useEffect, useState } from "react";
-import {
-  PresetSelectionDropdown,
-  UploadProfileModalRoot,
-  VariableSizeCard,
-} from "../../components";
-import { FullscreenProfileEntry } from "../../components/ThemeSettings/FullscreenProfileEntry";
+import { PartialCSSThemeInfo } from "../../apiTypes";
 import { genericGET, installTheme, logInWithShortToken } from "../../api";
 import * as python from "../../python";
-import { PartialCSSThemeInfo, ThemeQueryResponse } from "../../apiTypes";
-import { ThemeBrowserCardStyles } from "../../components/Styles";
+import { PresetSelectionDropdown, UploadProfileModalRoot } from "../../components";
+import { Flags, Theme } from "../../ThemeTypes";
+import { DialogButton, Focusable, showModal } from "decky-frontend-lib";
+import { FullscreenCloudProfileEntry } from "../../components/ThemeSettings/FullscreenCloudProfileEntry";
+import { FullscreenProfileEntry } from "../../components/ThemeSettings/FullscreenProfileEntry";
 import { PremiumFeatureModal } from "../../components/Modals/PremiumFeatureModal";
-import { FaGlobe } from "react-icons/fa";
 
 export function PresetSettings() {
-  const { localThemeList, setGlobalState, updateStatuses, apiShortToken, apiFullToken, apiMeData } =
-    useCssLoaderState();
+  const { localThemeList, setGlobalState, updateStatuses } = useCssLoaderState();
 
   const [isInstalling, setInstalling] = useState(false);
 
-  async function handleUpdate(e: Theme) {
-    setInstalling(true);
-    await installTheme(e.id);
-    // This just updates the updateStatuses arr to know that this theme now is up to date, no need to re-fetch the API to know that
-    setGlobalState(
-      "updateStatuses",
-      updateStatuses.map((f) => (f[0] === e.id ? [e.id, "installed", false] : e))
-    );
-    setInstalling(false);
-  }
-
-  async function handleUninstall(listEntry: Theme) {
-    setInstalling(true);
-    await python.deleteTheme(listEntry.name);
-    await python.reloadBackend();
-    setInstalling(false);
-  }
-
-  return (
-    <div className="CSSLoader_PanelSection_NoPadding_Parent">
-      <PanelSection title="Profiles">
-        <PresetSelectionDropdown />
-        <Focusable
-          style={{ display: "flex", flexDirection: "column", gap: "0.5em", padding: "0.5em 0" }}
-        >
-          {localThemeList
-            .filter((e) => e.flags.includes(Flags.isPreset))
-            .map((e) => (
-              <FullscreenProfileEntry
-                data={e}
-                {...{ handleUninstall, isInstalling, handleUpdate }}
-              />
-            ))}
-        </Focusable>
-      </PanelSection>
-      <PanelSection title="Your Uploaded Profiles">
-        <UploadedProfilesDisplay />
-      </PanelSection>
-    </div>
-  );
-}
-
-function UploadedProfilesDisplay() {
   const { apiFullToken, apiShortToken, apiMeData } = useCssLoaderState();
 
   const [uploadedProfiles, setUploadedProfiles] = useState<
@@ -104,88 +55,116 @@ function UploadedProfilesDisplay() {
     if (apiShortToken) void getUserProfiles();
   }, []);
 
+  type MergedCloudProfile = { isCloud: true; data: PartialCSSThemeInfo & { isPrivate: boolean } };
+  type MergedNormalProfile = { isCloud: false; data: Theme };
+
+  const mergedProfileList: (MergedCloudProfile | MergedNormalProfile)[] = useMemo(() => {
+    const filteredLocalProfiles: MergedNormalProfile[] = localThemeList
+      .filter((e) => e.flags.includes(Flags.isPreset))
+      .filter((e) => {
+        if (uploadedProfiles.some((f) => f.id === e.id)) return false;
+        return true;
+      })
+      .map((e) => ({ isCloud: false, data: e }));
+
+    const filteredCloudProfiles = uploadedProfiles.map((e) => ({
+      isCloud: true,
+      data: e,
+    })) as MergedCloudProfile[];
+
+    return [...filteredLocalProfiles, ...filteredCloudProfiles].sort((a, b) =>
+      a.data.name > b.data.name ? 1 : -1
+    );
+  }, [uploadedProfiles, localThemeList]);
+
   function onUploadFinish() {
     void getUserProfiles();
   }
 
-  if (!apiMeData) {
-    return (
-      <>
-        {apiShortToken ? (
-          <>
-            <span>Loading</span>
-          </>
-        ) : (
-          <>
-            <span>
-              You are not logged in. Log In with your DeckThemes account to view your uploaded
-              profiles.
-            </span>
-          </>
-        )}
-      </>
+  async function handleUpdate(e: Theme | PartialCSSThemeInfo) {
+    setInstalling(true);
+    await installTheme(e.id);
+    // This just updates the updateStatuses arr to know that this theme now is up to date, no need to re-fetch the API to know that
+    setGlobalState(
+      "updateStatuses",
+      updateStatuses.map((f) => (f[0] === e.id ? [e.id, "installed", false] : f))
     );
+    setInstalling(false);
+  }
+
+  async function handleUninstall(listEntry: Theme | PartialCSSThemeInfo) {
+    setInstalling(true);
+    await python.deleteTheme(listEntry.name);
+    await python.reloadBackend();
+    setGlobalState(
+      "updateStatuses",
+      updateStatuses.filter((f) => f[0] !== listEntry.id)
+    );
+    setInstalling(false);
   }
 
   return (
-    <>
-      <ThemeBrowserCardStyles customCardSize={4.5} />
-      <Focusable style={{ display: "flex", flexDirection: "column", position: "relative" }}>
-        <DialogButton
-          style={{
-            width: "fit-content",
-            opacity: apiMeData.premiumTier && apiMeData.premiumTier !== "None" ? "100%" : "50%",
-            position: "absolute",
-            top: "-2.6em",
-            right: "0",
-          }}
-          onClick={() => {
-            if (apiMeData.premiumTier && apiMeData.premiumTier !== "None") {
-              showModal(<UploadProfileModalRoot onUploadFinish={onUploadFinish} />);
-              return;
-            }
-            showModal(
-              <PremiumFeatureModal blurb="Since syncing profiles from your Deck to DeckThemes servers uses up storage, this feature is for those who support us on Patreon and help pay the bills." />
+    <div className="CSSLoader_PanelSection_NoPadding_Parent">
+      <PresetSelectionDropdown />
+      <Focusable
+        style={{ display: "flex", flexDirection: "column", gap: "0.5em", padding: "0.5em 0" }}
+      >
+        {mergedProfileList.map((e) => {
+          if (e.isCloud) {
+            return (
+              <FullscreenCloudProfileEntry
+                data={e.data}
+                handleUninstall={handleUninstall}
+                handleUpdate={handleUpdate}
+                isInstalling={isInstalling}
+              />
             );
-            return;
-          }}
-        >
-          Upload Profile
-        </DialogButton>
-        {profilesLoaded ? (
+          }
+          return (
+            <FullscreenProfileEntry
+              data={e.data}
+              handleUninstall={handleUninstall}
+              handleUpdate={handleUpdate}
+              isInstalling={isInstalling}
+            />
+          );
+        })}
+      </Focusable>
+      <Focusable>
+        {apiMeData ? (
           <>
-            {uploadedProfiles.length > 0 ? (
-              <>
-                <Focusable
-                  style={{ display: "flex", flexWrap: "wrap", gap: "0.5em", paddingTop: "1em" }}
-                >
-                  {uploadedProfiles.map((e) => (
-                    <UploadedProfileCard data={e} />
-                  ))}
-                </Focusable>
-              </>
-            ) : (
-              <span>You have no uploaded profiles</span>
-            )}
+            <DialogButton
+              style={{
+                width: "fit-content",
+                opacity: apiMeData.premiumTier && apiMeData.premiumTier !== "None" ? "100%" : "50%",
+              }}
+              onClick={() => {
+                if (apiMeData.premiumTier && apiMeData.premiumTier !== "None") {
+                  showModal(<UploadProfileModalRoot onUploadFinish={onUploadFinish} />);
+                  return;
+                }
+                showModal(
+                  <PremiumFeatureModal blurb="Since syncing profiles from your Deck to DeckThemes servers uses up storage, this feature is for those who support us on Patreon and help pay the bills." />
+                );
+                return;
+              }}
+            >
+              Upload Profile
+            </DialogButton>
           </>
         ) : (
-          <span>Loading Profiles...</span>
+          <>
+            {apiShortToken ? (
+              <span>Loading</span>
+            ) : (
+              <span>
+                You are not logged in. Log In with your DeckThemes account to view your uploaded
+                profiles.
+              </span>
+            )}
+          </>
         )}
       </Focusable>
-    </>
-  );
-}
-
-function UploadedProfileCard({ data }: { data: PartialCSSThemeInfo & { isPrivate?: boolean } }) {
-  return (
-    <VariableSizeCard
-      data={data}
-      cols={4.5}
-      CustomBubbleIcon={
-        data.isPrivate ? null : (
-          <FaGlobe style={{ fontSize: "0.9em" }} className="CSSLoader_ThemeCard_BubbleIcon" />
-        )
-      }
-    />
+    </div>
   );
 }

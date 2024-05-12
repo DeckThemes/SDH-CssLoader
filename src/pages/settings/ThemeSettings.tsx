@@ -34,6 +34,7 @@ export function ThemeSettings() {
     setInstalling(true);
     const unpinned = unpinnedThemes.includes(e.id);
     await installTheme(e.id);
+
     // This just updates the updateStatuses arr to know that this theme now is up to date, no need to re-fetch the API to know that
     setGlobalState(
       "updateStatuses",
