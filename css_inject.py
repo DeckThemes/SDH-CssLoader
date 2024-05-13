@@ -31,7 +31,7 @@ def initialize_class_mappings():
         for y in data[uid][:-1]:
             CLASS_MAPPINGS[y] = latest_value
 
-    Log("Loaded css translations from local file")
+    Log(f"Loaded {len(CLASS_MAPPINGS)} css translations from local file")
 
 ALL_INJECTS = []
 

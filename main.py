@@ -46,8 +46,13 @@ async def fetch_class_mappings(css_translations_path : str, loader : Loader):
         async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False), timeout=aiohttp.ClientTimeout(total=2)) as session:
             async with session.get(css_translations_url) as response:
                 if response.status == 200:
+                    text = await response.text()
+                    
+                    if len(text.strip()) <= 0:
+                        raise Exception("Empty response")
+
                     with open(css_translations_path, "w", encoding="utf-8") as fp:
-                        fp.write(await response.text())
+                        fp.write(text)
 
                     SUCCESSFUL_FETCH_THIS_RUN = True
                     Log(f"Fetched css translations from server")
@@ -55,9 +60,8 @@ async def fetch_class_mappings(css_translations_path : str, loader : Loader):
                     asyncio.get_running_loop().create_task(loader.reset(silent=True))
 
     except Exception as ex:
-        Log(f"Failed to fetch css translations from server: {str(ex)}")
+        Log(f"Failed to fetch css translations from server [{type(ex).__name__}]: {str(ex)}")
         
-
 async def every(__seconds: float, func, *args, **kwargs):
     while True:
         await func(*args, **kwargs)
