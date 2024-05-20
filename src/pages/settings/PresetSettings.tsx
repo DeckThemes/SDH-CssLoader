@@ -72,9 +72,10 @@ export function PresetSettings() {
       data: e,
     })) as MergedCloudProfile[];
 
-    return [...filteredLocalProfiles, ...filteredCloudProfiles].sort((a, b) =>
-      a.data.name > b.data.name ? 1 : -1
-    );
+    return [
+      ...filteredLocalProfiles.sort((a, b) => (a.data.name > b.data.name ? 1 : -1)),
+      ...filteredCloudProfiles.sort((a, b) => (a.data.name > b.data.name ? 1 : -1)),
+    ];
   }, [uploadedProfiles, localThemeList]);
 
   function onUploadFinish() {
