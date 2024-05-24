@@ -1,4 +1,4 @@
-import os, asyncio, sys, time, aiohttp, json
+import os, asyncio, sys, time, aiohttp, json, socket
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
@@ -32,6 +32,13 @@ async def fetch_class_mappings(css_translations_path : str, loader : Loader):
 
     if SUCCESSFUL_FETCH_THIS_RUN:
         return
+    
+    try:
+        socket.setdefaulttimeout(3)
+        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("8.8.8.8", 53))
+    except:
+        Log("No internet connection. Not fetching css translations")
+        return
 
     setting = util_store_read("beta_translations")
 
@@ -43,7 +50,7 @@ async def fetch_class_mappings(css_translations_path : str, loader : Loader):
     Log(f"Fetching CSS mappings from {css_translations_url}")
 
     try:
-        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False, use_dns_cache=False), timeout=aiohttp.ClientTimeout(total=5)) as session:
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False, use_dns_cache=False), timeout=aiohttp.ClientTimeout(total=5)) as session:
             async with session.get(css_translations_url) as response:
                 if response.status == 200:
                     text = await response.text()
