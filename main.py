@@ -43,7 +43,7 @@ async def fetch_class_mappings(css_translations_path : str, loader : Loader):
     Log(f"Fetching CSS mappings from {css_translations_url}")
 
     try:
-        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False), timeout=aiohttp.ClientTimeout(total=2)) as session:
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(verify_ssl=False, use_dns_cache=False), timeout=aiohttp.ClientTimeout(total=5)) as session:
             async with session.get(css_translations_url) as response:
                 if response.status == 200:
                     text = await response.text()
