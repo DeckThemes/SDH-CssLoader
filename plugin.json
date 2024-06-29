@@ -1,6 +1,7 @@
 {
   "name": "CSS Loader",
   "author": "DeckThemes",
+  "api_version": 1,
   "flags": [],
   "publish": {
     "tags": ["style"],

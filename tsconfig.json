@@ -15,9 +15,16 @@
     "noImplicitThis": true,
     "noImplicitAny": true,
     "strict": true,
-    "suppressImplicitAnyIndexErrors": true,
     "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true
+    "paths": {
+      "@cssloader/backend": ["./src/backend"],
+      "@/backend": ["./src/backend-impl"],
+      "@/lib": ["./src/lib"],
+      "@/styles": ["./src/styles"],
+      "@/types": ["./src/types"],
+      "@/modules/*": ["./src/modules/*"],
+      "@/decky-patches": ["./src/decky-patches"]
+    }
   },
   "include": ["src"],
   "exclude": ["node_modules"]
