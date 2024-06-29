@@ -19,7 +19,7 @@ IS_STANDALONE = False
 
 try:
     if not store_or_file_config("no_redirect_logs"):
-        import decky_plugin
+        import decky
 except:
     pass
 
@@ -219,16 +219,16 @@ class Plugin:
         await self.loader.load(False)
 
         if (store_or_file_config("watch")):
-            await self.toggle_watch_state(self)
+            await self.toggle_watch_state()
         else:
             Log("Not observing themes folder for file changes")
 
         Log(f"Initialized css loader. Found {len(self.loader.themes)} themes. Total {len(ALL_INJECTS)} injects, {len([x for x in ALL_INJECTS if x.enabled])} injected")
         
         if (ALWAYS_RUN_SERVER or store_or_file_config("server")):
-            await self.enable_server(self)
+            await self.enable_server()
 
-        await self._fetch_class_mappings(self, True)
+        await self._fetch_class_mappings(True)
         await initialize()
 
 if __name__ == '__main__':
@@ -254,7 +254,8 @@ if __name__ == '__main__':
             count = 0
             while count < 5:
                 try:
-                    task = asyncio.create_task(Plugin._main(Plugin))
+                    instance = Plugin()
+                    task = asyncio.create_task(instance._main())
                     await asyncio.shield(task)
                 except asyncio.CancelledError as e:
                     print(str(e))
