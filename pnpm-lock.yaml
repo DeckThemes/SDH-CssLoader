@@ -26,12 +26,6 @@ importers:
       react-icons:
         specifier: ^4.12.0
         version: 4.12.0(react@18.3.1)
-      rollup-plugin-delete:
-        specifier: ^2.0.0
-        version: 2.0.0
-      rollup-plugin-external-globals:
-        specifier: ^0.10.0
-        version: 0.10.0(rollup@4.18.0)
       tailwind-merge:
         specifier: ^2.3.0
         version: 2.3.0
@@ -56,7 +50,7 @@ importers:
         version: 5.0.7(rollup@4.18.0)
       '@rollup/plugin-typescript':
         specifier: ^11.1.6
-        version: 11.1.6(rollup@4.18.0)(tslib@2.6.2)(typescript@5.4.5)
+        version: 11.1.6(rollup@4.18.0)(tslib@2.6.2)(typescript@4.9.5)
       '@types/color':
         specifier: ^3.0.3
         version: 3.0.6
@@ -72,6 +66,12 @@ importers:
       rollup:
         specifier: ^4.18.0
         version: 4.18.0
+      rollup-plugin-delete:
+        specifier: ^2.0.0
+        version: 2.0.0
+      rollup-plugin-external-globals:
+        specifier: ^0.10.0
+        version: 0.10.0(rollup@4.18.0)
       rollup-plugin-import-assets:
         specifier: ^1.1.1
         version: 1.1.1(rollup@4.18.0)
@@ -85,8 +85,8 @@ importers:
         specifier: ^2.4.0
         version: 2.6.2
       typescript:
-        specifier: ^5.4.5
-        version: 5.4.5
+        specifier: ^4.6.4
+        version: 4.9.5
 
 packages:
 
@@ -1420,9 +1420,9 @@ packages:
   tslib@2.6.2:
     resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
 
-  typescript@5.4.5:
-    resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
-    engines: {node: '>=14.17'}
+  typescript@4.9.5:
+    resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
+    engines: {node: '>=4.2.0'}
     hasBin: true
 
   undici-types@5.26.5:
@@ -1616,11 +1616,11 @@ snapshots:
     optionalDependencies:
       rollup: 4.18.0
 
-  '@rollup/plugin-typescript@11.1.6(rollup@4.18.0)(tslib@2.6.2)(typescript@5.4.5)':
+  '@rollup/plugin-typescript@11.1.6(rollup@4.18.0)(tslib@2.6.2)(typescript@4.9.5)':
     dependencies:
       '@rollup/pluginutils': 5.1.0(rollup@4.18.0)
       resolve: 1.22.8
-      typescript: 5.4.5
+      typescript: 4.9.5
     optionalDependencies:
       rollup: 4.18.0
       tslib: 2.6.2
@@ -2827,7 +2827,7 @@ snapshots:
 
   tslib@2.6.2: {}
 
-  typescript@5.4.5: {}
+  typescript@4.9.5: {}
 
   undici-types@5.26.5: {}
 
