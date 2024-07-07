@@ -1,5 +1,5 @@
 import { ModalRoot } from "@decky/ui";
-import { StyleProvider } from "../components";
+import { StyleProvider } from "../providers";
 
 export function Modal({
   closeModal,

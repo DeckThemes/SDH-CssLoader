@@ -14,7 +14,7 @@ export function TitleView() {
 
   const onStoreClick = () => {
     Navigation.CloseSideMenus();
-    Navigation.Navigate("/cssloader/theme-manager");
+    Navigation.Navigate("/cssloader/theme-store");
   };
 
   return (

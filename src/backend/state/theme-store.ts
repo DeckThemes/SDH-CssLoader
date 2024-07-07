@@ -14,6 +14,7 @@ import { FetchError } from "../errors";
 const apiUrl = "https://api.deckthemes.com";
 
 export interface CSSLoaderStateValues {
+  apiUrl: string;
   // Account Data
   apiShortToken: string;
   apiFullToken: string;
@@ -107,6 +108,7 @@ export const createCSSLoaderStore = (backend: Backend) =>
     }
 
     return {
+      apiUrl: apiUrl,
       // Account Data
       apiShortToken: "",
       apiFullToken: "",

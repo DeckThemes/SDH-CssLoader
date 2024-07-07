@@ -37,7 +37,7 @@ export enum Flags {
   "navPatch" = "REQUIRE_NAV_PATCH",
 }
 
-export type LocalThemeStatus = "installed" | "outdated" | "local";
+export type LocalThemeStatus = "installed" | "outdated" | "local" | "notinstalled";
 export type UpdateStatus = [string, LocalThemeStatus, false | MinimalCSSThemeInfo];
 
 type ThemeErrorTitle = string;

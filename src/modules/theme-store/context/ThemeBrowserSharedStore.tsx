@@ -2,12 +2,14 @@
 
 import { createStore, useStore } from "zustand";
 
+export type ColumnNumbers = 3 | 4 | 5;
+
 interface ThemeBrowserSharedStoreValues {
-  browserCardSize: number;
+  browserCardSize: ColumnNumbers;
 }
 
 interface ThemeBrowserSharedStoreActions {
-  setBrowserCardSize: (value: number) => void;
+  setBrowserCardSize: (value: ColumnNumbers) => void;
 }
 
 interface IThemeBrowserSharedStore
@@ -17,7 +19,7 @@ interface IThemeBrowserSharedStore
 const themeBrowserSharedStore = createStore<IThemeBrowserSharedStore>((set) => {
   return {
     browserCardSize: 3,
-    setBrowserCardSize: (value: number) => set({ browserCardSize: value }),
+    setBrowserCardSize: (value: ColumnNumbers) => set({ browserCardSize: value }),
   };
 });
 

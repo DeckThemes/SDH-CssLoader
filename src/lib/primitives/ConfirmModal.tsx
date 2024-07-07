@@ -1,5 +1,5 @@
 import { ConfirmModal as CM } from "@decky/ui";
-import { StyleProvider } from "../components";
+import { StyleProvider } from "../providers";
 
 export function ConfirmModal({
   closeModal,

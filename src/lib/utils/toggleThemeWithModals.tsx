@@ -2,7 +2,7 @@ import { Flags, Theme } from "@/types";
 import { showModal } from "@decky/ui";
 import { getCSSLoaderState } from "@/backend";
 import { getDeckyPatchState } from "../../decky-patches";
-import { NavPatchInfoModal, OptionalDepsModal } from "../components";
+import { NavPatchInfoModal, OptionalDepsModal } from "../components/modals";
 
 export async function toggleThemeWithModals(theme: Theme, value: boolean, rerender?: () => void) {
   const { toggleTheme } = getCSSLoaderState();

@@ -42,7 +42,7 @@ export function BrowserSearchFields() {
   return (
     <>
       <PanelSectionRow>
-        <Focusable className="flex w-full justify-between">
+        <Focusable className="flex justify-between">
           <div className="cl-store-filter-field-container">
             <span className="DialogLabel">Sort</span>
             <Dropdown
@@ -72,7 +72,7 @@ export function BrowserSearchFields() {
         </Focusable>
       </PanelSectionRow>
       <PanelSectionRow>
-        <Focusable className="flex items-center w-full justify-between">
+        <Focusable className="flex items-center justify-between">
           <div className="cl-store-searchbar">
             <TextField
               label="Search"
@@ -87,10 +87,7 @@ export function BrowserSearchFields() {
             <FaRotate />
             <span>Refresh</span>
           </DialogButton>
-          <div
-            style={{ maxWidth: "20%", minWidth: "20%", marginLeft: "auto" }}
-            className="cl-store-scale-slider"
-          >
+          <div className="cl-store-scale-slider">
             <SliderField
               min={3}
               max={5}

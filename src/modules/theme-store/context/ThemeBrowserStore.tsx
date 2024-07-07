@@ -2,6 +2,7 @@ import { createContext, useContext, useRef } from "react";
 import { FilterQueryResponse, ThemeQueryRequest, ThemeQueryResponse } from "@/types";
 import { StoreApi, createStore, useStore } from "zustand";
 import { getCSSLoaderState } from "@/backend";
+import { isEqual } from "lodash";
 
 interface ThemeBrowserStoreValues {
   themes: ThemeQueryResponse;
@@ -81,6 +82,7 @@ export function ThemeBrowserStoreProvider({
       initializeStore: async () => {
         try {
           await get().getFilters();
+          await get().getThemes();
         } catch (error) {}
       },
       getFilters: async () => {
@@ -97,8 +99,12 @@ export function ThemeBrowserStoreProvider({
         } catch (error) {}
       },
       setSearchOpts(searchOpts) {
-        const prevSearchOpts = get().searchOpts;
+        const { searchOpts: prevSearchOpts, themes, getThemes } = get();
         set({ searchOpts, prevSearchOpts });
+
+        if (!isEqual(prevSearchOpts, searchOpts) || themes.total === 0) {
+          getThemes();
+        }
       },
       refreshThemes: async () => {},
       getThemes: async () => {

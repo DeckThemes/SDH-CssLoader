@@ -10,6 +10,18 @@
   flex-direction: column !important;
 }
 
+.flex-wrap {
+  flex-wrap: wrap !important;
+}
+
+.gap-2 {
+  gap: 0.5rem !important;
+}
+
+.gap-3 {
+  gap: 0.75rem !important;
+}
+
 .gap-4 {
   gap: 1rem !important;
 }
@@ -56,6 +68,14 @@
 
 .font-bold {
   font-weight: bold !important;
+}
+
+/* Fullscreen Routes */
+
+.cl_fullscreenroute_container {
+  margin-top: 40px !important;
+  height: calc(100% - 40px) !important;
+  background: #0e141b !important;
 }
 
 /* TitleView */
@@ -192,4 +212,101 @@
   flex-wrap: wrap !important;
   justify-content: center !important;
   gap: 5px !important;
+}
+
+/* Store Theme Cards */
+/* The variables should be injected wherever needed */
+/* This one actually is based on font-size, so EM makes sense */
+
+.cl_storeitem_notifbubble {
+  position: absolute;
+  background: linear-gradient(135deg, #fca904 50%, transparent 51%);
+  z-index: 10001;
+  left: 0;
+  top: 0;
+  color: black;
+  font-size: var(--cl-storeitem-fontsize);
+  width: var(--cl-storeitem-bubblesize);
+  height: var(--cl-storeitem-bubblesize);
+}
+.cl_storeitem_bubbleicon {
+  padding: 0.25em;
+}
+.cl_storeitem_container {
+  display: flex;
+  flex-direction: column;
+  background-color: #ACB2C924;
+  overflow: hidden;
+  width: var(--cl-storeitem-width);
+}
+.gpfocuswithin.cl_storeitem_container {
+  background-color: #ACB2C947;
+}
+.cl_storeitem_imagecontainer {
+  overflow: hidden;
+  position: relative;
+  width: var(--cl-storeitem-width);
+  height: var(--cl-storeitem-imgheight);
+}
+.cl_storeitem_supinfocontainer {
+  display: flex;
+  gap: 0.5em;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  bottom: 0;
+  transform: translateY(100%);
+  opacity: 0;
+  transition-property: transform,opacity;
+  transition-timing-function: cubic-bezier(0.17, 0.45, 0.14, 0.83);
+  transition-duration: 0.15s;
+  font-size: var(--cl-storeitem-fontsize);
+}
+.gpfocuswithin > div > .cl_storeitem_supinfocontainer {
+  transform: translateY(0);
+  opacity: 1;
+  transition-delay: 0.1s;
+}
+.cl_storeitem_maininfocontainer {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5em;
+  font-size: var(--cl-storeitem-fontsize);
+}
+.cl_storeitem_image {
+  object-fit: cover;
+  transition-property: filter,transform;
+  transition-duration: 0.32s;
+  transition-timing-function: cubic-bezier(0.17, 0.45, 0.14, 0.83);
+}
+.cl_storeitem_imagedarkener {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: 0.65s;
+  transition-timing-function: cubic-bezier(0.17, 0.45, 0.14, 0.83);
+  background: linear-gradient(0deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,0) 30%);
+  mix-blend-mode: multiply;
+  width: var(--cl-storeitem-width);
+  height: var(--cl-storeitem-imgheight);
+}
+.gpfocuswithin > div > .cl_storeitem_imagedarkener {
+  opacity: 1;
+}
+.cl_storeitem_title {
+  font-weight: bold;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.cl_storeitem_iconinfoitem {
+  display: flex;
+  gap: 0.25em;
+  align-items: center;
+}
+.cl_storeitem_subtitle {
+  font-size: 0.75em;
 }
