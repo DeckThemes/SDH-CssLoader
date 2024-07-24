@@ -1,4 +1,4 @@
-import { callable, toaster } from "@decky/api";
+import { callable, toaster, fetchNoCors } from "@decky/api";
 import { CallError, FetchError, type IBackendRepository } from "@cssloader/backend";
 
 class DeckyBackendRepository implements IBackendRepository {
@@ -16,7 +16,7 @@ class DeckyBackendRepository implements IBackendRepository {
   }
   async fetch<Return>(url: string, request: RequestInit) {
     try {
-      const res = await fetch(url, request);
+      const res = await fetchNoCors(url, request);
       if (!res.ok) {
         throw new Error(`Res Not Okay - Code ${res.status}`);
       }

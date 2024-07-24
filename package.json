@@ -46,8 +46,8 @@
     "typescript": "^4.6.4"
   },
   "dependencies": {
-    "@decky/api": "^1.0.3",
-    "@decky/ui": "^4.0.1",
+    "@decky/api": "^1.0.6",
+    "@decky/ui": "^4.4.0",
     "clsx": "^2.1.1",
     "color": "^4.2.3",
     "lodash": "^4.17.21",
