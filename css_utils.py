@@ -126,7 +126,7 @@ def store_path() -> str:
     return os.path.join(get_theme_path(), "STORE")
 
 def get_mappings_folder_path() -> str:
-    return os.path.join(get_theme_path(), "MAPPINGS")
+    return os.path.join(get_theme_path(), "__MAPPINGS")
 
 def store_reads() -> dict:
     path = store_path()
