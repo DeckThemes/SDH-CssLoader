@@ -5,7 +5,7 @@ from watchdog.observers import Observer
 
 sys.path.append(os.path.dirname(__file__))
 
-from css_utils import Log, create_steam_symlink, Result, get_theme_path, store_read as util_store_read, store_write as util_store_write, store_or_file_config, is_steam_beta_active
+from css_utils import Log, create_steam_symlink, Result, get_theme_path, save_mappings as util_save_mappings, store_read as util_store_read, store_write as util_store_write, store_or_file_config, is_steam_beta_active
 from css_inject import ALL_INJECTS, initialize_class_mappings
 from css_theme import CSS_LOADER_VER
 from css_remoteinstall import install
@@ -178,6 +178,10 @@ class Plugin:
     
     async def store_write(self, key : str, val : str) -> dict:
         util_store_write(key, val)
+        return Result(True).to_dict()
+    
+    async def save_mappings(self, val: str, version: str) -> dict:
+        util_save_mappings(val, version)
         return Result(True).to_dict()
 
     async def exit(self):

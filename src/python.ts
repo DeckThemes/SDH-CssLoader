@@ -272,3 +272,7 @@ export function generatePresetFromThemeNames(name: string, themeNames: string[])
     themeNames: themeNames,
   });
 }
+
+export function saveMappings(val: string, version: string) {
+  return server!.callPluginMethod("save_mappings", { val: val, version: version });
+}

@@ -1,4 +1,4 @@
-import { DropdownItem, Focusable, ToggleField } from "decky-frontend-lib";
+import { ButtonItem, DropdownItem, Focusable, ToggleField } from "decky-frontend-lib";
 import { useMemo, useState, useEffect } from "react";
 import { useCssLoaderState } from "../../state";
 import { toast } from "../../python";
@@ -13,6 +13,7 @@ import {
 } from "../../backend/pythonMethods/pluginSettingsMethods";
 import { booleanStoreWrite, stringStoreWrite } from "../../backend/pythonMethods/storeUtils";
 import { disableUnminifyMode, enableUnminifyMode } from "../../deckyPatches/UnminifyMode";
+import { dumpMappings } from "../../deckyPatches/dump-mappings";
 
 export function PluginSettings() {
   const { navPatchInstance, unminifyModeOn, setGlobalState } = useCssLoaderState();
@@ -119,6 +120,15 @@ export function PluginSettings() {
           description="Adds unminified classnames to devtools view, resets on steam client restart"
           onChange={setUnminify}
         />
+      </Focusable>
+      <Focusable>
+        <ButtonItem
+          label="Dump Mappings"
+          description="Dumps the current webpack module mappings to a file, for internal dev use"
+          onClick={() => dumpMappings()}
+        >
+          Dump
+        </ButtonItem>
       </Focusable>
     </div>
   );

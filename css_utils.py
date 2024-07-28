@@ -125,6 +125,9 @@ def create_cef_flag() -> Result:
 def store_path() -> str:
     return os.path.join(get_theme_path(), "STORE")
 
+def get_mappings_folder_path() -> str:
+    return os.path.join(get_theme_path(), "MAPPINGS")
+
 def store_reads() -> dict:
     path = store_path()
     items = {}
@@ -157,7 +160,19 @@ def store_write(key : str, val : str):
     items[key] = val.replace('\n', '')
     with open(path, 'w') as fp:
         fp.write("\n".join([f"{x}:{items[x]}" for x in items]))
+
+def save_mappings(val: str, version: str):
+    is_beta = is_steam_beta_active()
+    branch_str = "beta" if is_beta else "stable"
+    path = get_mappings_folder_path()
+
+    if not os.exists(path):
+        create_dir(path)
     
+    file_location = os.path.join(path, f"{version}.{branch_str}.json")
+    with open(file_location, 'w') as fp:
+        fp.write(val)
+
 def store_or_file_config(key : str) -> bool:
     if os.path.exists(os.path.join(get_theme_path(), key.upper())):
         return True
