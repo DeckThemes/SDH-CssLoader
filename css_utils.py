@@ -126,7 +126,7 @@ def store_path() -> str:
     return os.path.join(get_theme_path(), "STORE")
 
 def get_mappings_folder_path() -> str:
-    path =  os.path.join(get_theme_path(), "__MAPPINGS")
+    path =  os.path.join(get_theme_path(), "__mappings")
 
     if not os.path.exists(path):
         create_dir(path)
