@@ -25,22 +25,19 @@ interface IThemeBrowserStore extends ThemeBrowserStoreValues, ThemeBrowserStoreA
 const ThemeBrowserStoreContext = createContext<StoreApi<IThemeBrowserStore> | null>(null);
 
 function generateParamStr(searchOpts: ThemeQueryRequest) {
+  const searchOptsClone = structuredClone(searchOpts);
   let prependString = "BPM-CSS.-Preset";
-  switch (searchOpts.filters) {
-    // If it's desktop themes, remove the "BPM Only" filter in the default
-    case "Desktop":
-      prependString = "-Preset";
-      break;
-    // If it's presets, remove the preset exclusion in the default
-    case "Preset":
-      prependString = "BPM-CSS";
-      break;
+  if (searchOptsClone.filters.includes("Desktop")) {
+    prependString = "-Preset";
   }
-  searchOpts.filters === "All" ? (searchOpts.filters = "") : (prependString += ".");
-  prependString && (searchOpts.filters = prependString + searchOpts.filters);
+  if (searchOptsClone.filters.includes("Preset")) {
+    prependString = "BPM-CSS";
+  }
+  searchOptsClone.filters === "All" ? (searchOptsClone.filters = "") : (prependString += ".");
+  prependString && (searchOptsClone.filters = prependString + searchOptsClone.filters);
 
   // @ts-expect-error
-  const paramStr = new URLSearchParams(searchOpts).toString();
+  const paramStr = new URLSearchParams(searchOptsClone).toString();
   return paramStr;
 }
 
