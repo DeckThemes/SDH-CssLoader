@@ -1,15 +1,12 @@
 import { PartialCSSThemeInfo } from "@/types";
-import {
-  ColumnNumbers,
-  useThemeBrowserSharedStateValue,
-  useThemeBrowserStoreValue,
-} from "../context";
+import { ColumnNumbers, useThemeBrowserSharedValue, useThemeBrowserStoreValue } from "../context";
 import { forwardRef } from "react";
 import { shortenNumber, useThemeInstallState } from "@/lib";
-import { useCSSLoaderStateValue } from "@/backend";
+import { useCSSLoaderValue } from "@/backend";
 import { AiOutlineDownload } from "react-icons/ai";
 import { Focusable } from "@decky/ui";
 import { FaBullseye, FaDownload, FaStar } from "react-icons/fa6";
+import { useExpandedViewStateAction } from "@/modules/expanded-view";
 
 interface ThemeCardProps {
   theme: PartialCSSThemeInfo;
@@ -23,10 +20,12 @@ const cardWidth = {
 };
 
 export const ThemeCard = forwardRef<HTMLDivElement, ThemeCardProps>(({ theme, size }, ref) => {
-  const apiUrl = useCSSLoaderStateValue("apiUrl");
-  const browserCardSize = useThemeBrowserSharedStateValue("browserCardSize");
+  const apiUrl = useCSSLoaderValue("apiUrl");
+  const browserCardSize = useThemeBrowserSharedValue("browserCardSize");
   const cols = size ?? browserCardSize;
   const installStatus = useThemeInstallState(theme);
+
+  const openTheme = useExpandedViewStateAction("openTheme");
 
   const imageUrl =
     theme?.images[0]?.id && theme.images[0].id !== "MISSING"
@@ -45,7 +44,7 @@ export const ThemeCard = forwardRef<HTMLDivElement, ThemeCardProps>(({ theme, si
         className="cl_storeitem_container"
         focusWithinClassName="gpfocuswithin"
         onActivate={() => {
-          // ADD IN CLICK LOGIC
+          openTheme(theme.id);
         }}
       >
         <div className="cl_storeitem_imagecontainer">

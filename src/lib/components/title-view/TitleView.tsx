@@ -1,11 +1,11 @@
 import { DialogButton, Navigation, Focusable, quickAccessMenuClasses } from "@decky/ui";
 import { BsGearFill } from "react-icons/bs";
 import { FaDownload } from "react-icons/fa";
-import { useCSSLoaderStateValue } from "@/backend";
+import { useCSSLoaderValue } from "@/backend";
 import { cn } from "../../utils";
 
 export function TitleView() {
-  const themes = useCSSLoaderStateValue("themes");
+  const themes = useCSSLoaderValue("themes");
 
   const onSettingsClick = () => {
     Navigation.CloseSideMenus();

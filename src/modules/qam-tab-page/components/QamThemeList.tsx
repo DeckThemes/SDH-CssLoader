@@ -1,11 +1,11 @@
 import { Focusable } from "@decky/ui";
-import { useCSSLoaderStateValue } from "../../../backend-impl/decky-theme-store";
+import { useCSSLoaderValue } from "../../../backend-impl/decky-theme-store";
 import { Flags } from "@/types";
 import { QamThemeToggle } from "./QamThemeToggle";
 
 export function QamThemeList() {
-  const themes = useCSSLoaderStateValue("themes");
-  const unpinnedThemes = useCSSLoaderStateValue("unpinnedThemes");
+  const themes = useCSSLoaderValue("themes");
+  const unpinnedThemes = useCSSLoaderValue("unpinnedThemes");
 
   if (themes.length === 0) {
     return <span>You have no themes, visit the theme store to download some!</span>;

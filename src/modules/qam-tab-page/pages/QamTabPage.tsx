@@ -6,10 +6,10 @@ import {
   QamRefreshButton,
   QamThemeList,
 } from "../components";
-import { useCSSLoaderStateValue } from "@/backend";
+import { useCSSLoaderValue } from "@/backend";
 
 export function QamTabPage() {
-  const themes = useCSSLoaderStateValue("themes");
+  const themes = useCSSLoaderValue("themes");
 
   return (
     <>

@@ -1,8 +1,8 @@
-import { useCSSLoaderStateValue } from "@/backend";
+import { useCSSLoaderValue } from "@/backend";
 import { FaEyeSlash } from "react-icons/fa";
 
 export function QamHiddenThemesDisplay() {
-  const unpinnedThemes = useCSSLoaderStateValue("unpinnedThemes");
+  const unpinnedThemes = useCSSLoaderValue("unpinnedThemes");
 
   if (unpinnedThemes.length === 0) {
     return null;

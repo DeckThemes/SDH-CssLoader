@@ -1,5 +1,5 @@
 import { Patch } from "@/types";
-import { useCSSLoaderAction, useCSSLoaderStateValue } from "@/backend";
+import { useCSSLoaderAction, useCSSLoaderValue } from "@/backend";
 import { useState } from "react";
 import { DropdownItem, PanelSectionRow, SliderField, ToggleField } from "@decky/ui";
 import { ThemePatchComponent } from "./ThemePatchComponent";

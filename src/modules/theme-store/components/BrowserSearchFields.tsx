@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import {
-  useThemeBrowserSharedStateAction,
-  useThemeBrowserSharedStateValue,
+  useThemeBrowserSharedAction,
+  useThemeBrowserSharedValue,
   useThemeBrowserStoreAction,
   useThemeBrowserStoreValue,
 } from "../context";
@@ -23,8 +23,8 @@ export function BrowserSearchFields() {
   const setSearchOpts = useThemeBrowserStoreAction("setSearchOpts");
   const refreshThemes = useThemeBrowserStoreAction("refreshThemes");
 
-  const browserCardSize = useThemeBrowserSharedStateValue("browserCardSize");
-  const setBrowserCardSize = useThemeBrowserSharedStateAction("setBrowserCardSize");
+  const browserCardSize = useThemeBrowserSharedValue("browserCardSize");
+  const setBrowserCardSize = useThemeBrowserSharedAction("setBrowserCardSize");
 
   const formattedFilters: DropdownOption[] = useMemo(() => {
     const totalNumOptions = Object.values(filters).reduce((acc, cur) => acc + Number(cur), 0);

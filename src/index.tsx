@@ -4,7 +4,8 @@ import { QamTabPage } from "@/modules/qam-tab-page";
 import { definePlugin, routerHook } from "@decky/api";
 import { getCSSLoaderState } from "@/backend";
 import { getDeckyPatchState } from "./decky-patches";
-import { ThemeStoreRouter } from "./modules/theme-store/pages/ThemeStoreRouter";
+import { ThemeStoreRouter } from "./modules/theme-store";
+import { ExpandedViewPage } from "./modules/expanded-view";
 
 export default definePlugin(() => {
   getCSSLoaderState().initializeStore();
@@ -13,6 +14,12 @@ export default definePlugin(() => {
   routerHook.addRoute("/cssloader/theme-store", () => (
     <StyleProvider>
       <ThemeStoreRouter />
+    </StyleProvider>
+  ));
+
+  routerHook.addRoute("/cssloader/expanded-view", () => (
+    <StyleProvider>
+      <ExpandedViewPage />
     </StyleProvider>
   ));
 

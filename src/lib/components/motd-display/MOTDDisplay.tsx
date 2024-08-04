@@ -2,7 +2,7 @@ import { DialogButton, Focusable, PanelSection } from "@decky/ui";
 import { useEffect, useMemo } from "react";
 import { Motd } from "@/types";
 import { FaTimes } from "react-icons/fa";
-import { useCSSLoaderAction, useCSSLoaderStateValue } from "@/backend";
+import { useCSSLoaderAction, useCSSLoaderValue } from "@/backend";
 
 const SEVERITIES = {
   High: {
@@ -22,8 +22,8 @@ const SEVERITIES = {
 export function MOTDDisplay() {
   const getMotd = useCSSLoaderAction("getMotd");
   const hideMotd = useCSSLoaderAction("hideMotd");
-  const motd = useCSSLoaderStateValue("motd");
-  const hiddenMotdId = useCSSLoaderStateValue("hiddenMotdId");
+  const motd = useCSSLoaderValue("motd");
+  const hiddenMotdId = useCSSLoaderValue("hiddenMotdId");
 
   useEffect(() => {
     void getMotd();

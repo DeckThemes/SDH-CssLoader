@@ -1,5 +1,5 @@
 import { ThemePatchComponent } from "@/types";
-import { useCSSLoaderAction, useCSSLoaderStateValue } from "@/backend";
+import { useCSSLoaderAction, useCSSLoaderValue } from "@/backend";
 import { ButtonItem, ColorPickerModal, PanelSectionRow, showModal } from "@decky/ui";
 import { FaFolder } from "react-icons/fa";
 import { FileSelectionType, openFilePicker } from "@decky/api";
@@ -21,7 +21,7 @@ export function ThemePatchComponent({
   const bottomSeparatorValue = shouldHaveBottomSeparator ? "standard" : "none";
 
   const setComponentValue = useCSSLoaderAction("setComponentValue");
-  const themeRootPath = useCSSLoaderStateValue("themeRootPath");
+  const themeRootPath = useCSSLoaderValue("themeRootPath");
   const toast = useCSSLoaderAction("toast");
   if (currentPatchValue !== component.on) return null;
 

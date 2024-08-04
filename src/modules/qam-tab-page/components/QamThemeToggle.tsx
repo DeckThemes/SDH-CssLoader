@@ -1,4 +1,4 @@
-import { useCSSLoaderAction, useCSSLoaderStateValue } from "@/backend";
+import { useCSSLoaderAction, useCSSLoaderValue } from "@/backend";
 import { ThemePatch, toggleThemeWithModals, useForcedRerender } from "@/lib";
 import { useEffect, useState } from "react";
 import { LocalThemeStatus, Theme } from "@/types";
@@ -6,8 +6,8 @@ import { ButtonItem, Focusable, PanelSectionRow, ToggleField, showModal } from "
 import { RiArrowDownSFill, RiArrowUpSFill } from "react-icons/ri";
 
 export function QamThemeToggle({ theme }: { theme: Theme }) {
-  const updateStatuses = useCSSLoaderStateValue("updateStatuses");
-  const isWorking = useCSSLoaderStateValue("isWorking");
+  const updateStatuses = useCSSLoaderValue("updateStatuses");
+  const isWorking = useCSSLoaderValue("isWorking");
   const installTheme = useCSSLoaderAction("installTheme");
 
   const [collapsed, setCollapsed] = useState<boolean>(true);

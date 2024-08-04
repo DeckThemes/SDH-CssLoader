@@ -3,11 +3,11 @@ import { Flags } from "@/types";
 import { useMemo } from "react";
 import { FiPlusCircle } from "react-icons/fi";
 import { useForcedRerender } from "../../hooks";
-import { useCSSLoaderAction, useCSSLoaderStateValue } from "@/backend";
+import { useCSSLoaderAction, useCSSLoaderValue } from "@/backend";
 
 export function PresetSelectionDropdown() {
-  const themes = useCSSLoaderStateValue("themes");
-  const selectedPreset = useCSSLoaderStateValue("selectedPreset");
+  const themes = useCSSLoaderValue("themes");
+  const selectedPreset = useCSSLoaderValue("selectedPreset");
   const changePreset = useCSSLoaderAction("changePreset");
   const presets = useMemo(() => themes.filter((e) => e.flags.includes(Flags.isPreset)), [themes]);
   const hasInvalidPresetState = presets.length > 1;

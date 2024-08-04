@@ -26,10 +26,10 @@ const themeBrowserSharedStore = createStore<IThemeBrowserSharedStore>((set) => {
 const useThemeBrowserSharedState = (fn: (state: IThemeBrowserSharedStore) => any) =>
   useStore(themeBrowserSharedStore, fn);
 
-export const useThemeBrowserSharedStateValue = <T extends keyof ThemeBrowserSharedStoreValues>(
+export const useThemeBrowserSharedValue = <T extends keyof ThemeBrowserSharedStoreValues>(
   key: T
 ): IThemeBrowserSharedStore[T] => useThemeBrowserSharedState((state) => state[key]);
 
-export const useThemeBrowserSharedStateAction = <T extends keyof ThemeBrowserSharedStoreActions>(
+export const useThemeBrowserSharedAction = <T extends keyof ThemeBrowserSharedStoreActions>(
   key: T
 ): IThemeBrowserSharedStore[T] => useThemeBrowserSharedState((state) => state[key]);

@@ -11,7 +11,7 @@ const cssLoaderStore = createCSSLoaderStore(backend);
 
 const useCSSLoaderStore = (fn: (state: ICSSLoaderState) => any) => useStore(cssLoaderStore, fn);
 
-export const useCSSLoaderStateValue = <T extends keyof CSSLoaderStateValues>(
+export const useCSSLoaderValue = <T extends keyof CSSLoaderStateValues>(
   key: T
 ): ICSSLoaderState[T] => useCSSLoaderStore((state) => state[key]);
 

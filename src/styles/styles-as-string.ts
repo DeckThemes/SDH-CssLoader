@@ -215,7 +215,7 @@ export const styles = `
 
 /* Store Theme Cards */
 /* The variables should be injected wherever needed */
-/* This one actually is based on font-size, so EM makes sense */
+/* This module actually is based on font-size, so EM makes sense over REM */
 
 .cl_storeitem_notifbubble {
   position: absolute;
@@ -308,5 +308,21 @@ export const styles = `
 }
 .cl_storeitem_subtitle {
   font-size: 0.75em;
+}
+
+/* Expanded View */
+
+@keyframes cl_spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.cl_spinny {
+  animation: cl_spin 1s linear infinite;
+}
+
+.cl_fullscreen_loadingtext {
+  font-size: 2.5rem;
+  font-weight: bold;
 }
 `;
