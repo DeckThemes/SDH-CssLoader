@@ -17,6 +17,7 @@ export default definePlugin(() => {
   ));
 
   return {
+    name: "SDH-CSSLoader",
     titleView: (
       <StyleProvider>
         <TitleView />
