@@ -1,4 +1,8 @@
-import { ExpandedViewLoadingPage, ExpandedViewScrollingSection } from "../components";
+import {
+  ExpandedViewLoadingPage,
+  ExpandedViewCssVariables,
+  ExpandedViewScrollingSection,
+} from "../components";
 import { useExpandedViewValue } from "../context";
 
 export function ExpandedViewPage() {
@@ -11,6 +15,7 @@ export function ExpandedViewPage() {
 
   return (
     <div className="cl_expandedview_container">
+      <ExpandedViewCssVariables />
       <ExpandedViewScrollingSection />
     </div>
   );

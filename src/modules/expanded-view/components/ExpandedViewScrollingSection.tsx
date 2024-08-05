@@ -1,12 +1,14 @@
 import { ScrollPanelGroup } from "@decky/ui";
-import { useExpandedViewAction } from "../context";
+import { useExpandedViewAction, useExpandedViewValue } from "../context";
+import { ExpandedViewImageContainer } from "./ExpandedViewImageContainer";
 
 export function ExpandedViewScrollingSection() {
   const close = useExpandedViewAction("close");
+
   return (
     <ScrollPanelGroup
       // @ts-ignore
-      classname="cl_expandedview_scrollcontainer"
+      className="cl_expandedview_scrollpanel"
       focusable={false}
       // onCancelButton doesn't work here
       onCancelActionDescription="Back"
@@ -16,6 +18,10 @@ export function ExpandedViewScrollingSection() {
           close();
         }
       }}
-    ></ScrollPanelGroup>
+    >
+      <div className="cl_expandedview_themedatacontainer">
+        <ExpandedViewImageContainer />
+      </div>
+    </ScrollPanelGroup>
   );
 }
