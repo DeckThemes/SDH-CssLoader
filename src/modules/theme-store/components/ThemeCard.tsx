@@ -6,7 +6,7 @@ import { useCSSLoaderValue } from "@/backend";
 import { AiOutlineDownload } from "react-icons/ai";
 import { Focusable } from "@decky/ui";
 import { FaBullseye, FaDownload, FaStar } from "react-icons/fa6";
-import { useExpandedViewStateAction } from "@/modules/expanded-view";
+import { useExpandedViewAction } from "@/modules/expanded-view";
 
 interface ThemeCardProps {
   theme: PartialCSSThemeInfo;
