@@ -16,6 +16,7 @@ from css_loader import Loader
 
 ALWAYS_RUN_SERVER = False
 IS_STANDALONE = False
+GOOGLE_PING_COUNT = 0
 
 try:
     if not store_or_file_config("no_redirect_logs"):
@@ -28,17 +29,22 @@ Initialized = False
 SUCCESSFUL_FETCH_THIS_RUN = False
 
 async def fetch_class_mappings(css_translations_path : str, loader : Loader):
-    global SUCCESSFUL_FETCH_THIS_RUN
+    global SUCCESSFUL_FETCH_THIS_RUN, GOOGLE_PING_COUNT
 
     if SUCCESSFUL_FETCH_THIS_RUN:
         return
     
-    try:
-        socket.setdefaulttimeout(3)
-        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("8.8.8.8", 53))
-    except:
-        Log("No internet connection. Not fetching css translations")
-        return
+    if GOOGLE_PING_COUNT < 5:
+        try:
+            socket.setdefaulttimeout(3)
+            socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("8.8.8.8", 53))
+        except Exception as e:
+            Log(f"No internet connection. Not fetching css translations. (Error: {str(e)})")
+            GOOGLE_PING_COUNT += 1
+            return
+    else:
+        Log("Skipping internet check...")
+    
 
     setting = util_store_read("beta_translations")
 
