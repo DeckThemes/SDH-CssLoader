@@ -55,7 +55,7 @@ class Inject:
 
     async def load(self) -> Result:
         try:
-            with open(self.cssPath, "r") as fp:
+            with open(self.cssPath, "r", encoding="utf-8") as fp:
                 self.css = fp.read()
 
             split_css = re.split(r"(\.[_a-zA-Z]+[_a-zA-Z0-9-]*)", self.css)

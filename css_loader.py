@@ -310,7 +310,7 @@ class Loader:
             try:
                 theme = None
                 if path.exists(themeDataPath):
-                    with open(themeDataPath, "r") as fp:
+                    with open(themeDataPath, "r", encoding="utf-8") as fp:
                         theme = json.load(fp)
                     
                 themeData = Theme(themePath, theme, configPath)
