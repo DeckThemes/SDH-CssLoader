@@ -4,6 +4,7 @@ from css_utils import get_theme_path, Log, Result, PLATFORM_WIN
 import css_inject
 
 MAX_QUEUE_SIZE = 500
+ON_WEBSOCKET_CONNECT = asyncio.Event()
 
 class BrowserTabHook:
     def __init__(self, browserHook, sessionId : str, targetInfo : dict):
@@ -232,8 +233,8 @@ class BrowserHook:
         return self.current_id
     
     async def open_websocket(self):
-        self.client = aiohttp.ClientSession()
-        self.websocket = await self.client.ws_connect(self.ws_url)
+        self.client = aiohttp.ClientSession(trust_env=True)
+        self.websocket = await self.client.ws_connect(self.ws_url, ssl=False)
 
     async def close_websocket(self):
         self.connected_tabs.clear()
@@ -427,6 +428,8 @@ class BrowserHook:
                 Log("Connected to Steam Browser")
                 await self.send_command("Target.setDiscoverTargets", {"discover": True}, None, False)
 
+                ON_WEBSOCKET_CONNECT.set()
+
                 async for message in self.websocket:
                     data = message.json()
                     for x in self.ws_response:
@@ -435,6 +438,8 @@ class BrowserHook:
 
             except Exception as e:
                 Result(False, f"[Health Check] {str(e)}")
+
+            ON_WEBSOCKET_CONNECT.clear()
 
             try:
                 await self.close_websocket()

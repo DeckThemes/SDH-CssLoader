@@ -12,7 +12,9 @@ from css_remoteinstall import install
 
 from css_server import start_server
 from css_browserhook import initialize
-from css_loader import Loader
+from css_loader import Loader, get_loader_instance
+from css_mappings import force_fetch_translations, start_fetch_translations
+
 
 ALWAYS_RUN_SERVER = False
 IS_STANDALONE = False
@@ -25,60 +27,6 @@ except:
     pass
 
 Initialized = False
-
-SUCCESSFUL_FETCH_THIS_RUN = False
-
-async def fetch_class_mappings(css_translations_path : str, loader : Loader):
-    global SUCCESSFUL_FETCH_THIS_RUN, GOOGLE_PING_COUNT
-
-    if SUCCESSFUL_FETCH_THIS_RUN:
-        return
-    
-    if GOOGLE_PING_COUNT < 5:
-        try:
-            socket.setdefaulttimeout(3)
-            socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("8.8.8.8", 53))
-        except Exception as e:
-            Log(f"No internet connection. Not fetching css translations. (Error: {str(e)})")
-            GOOGLE_PING_COUNT += 1
-            return
-    else:
-        Log("Skipping internet check...")
-    
-
-    setting = util_store_read("beta_translations")
-
-    if ((len(setting.strip()) <= 0 or setting == "-1" or setting == "auto") and is_steam_beta_active()) or (setting == "1" or setting == "true"):
-        css_translations_url = "https://api.deckthemes.com/beta.json"
-    else:
-        css_translations_url = "https://api.deckthemes.com/stable.json"
-
-    Log(f"Fetching CSS mappings from {css_translations_url}")
-
-    try:
-        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False, use_dns_cache=False), timeout=aiohttp.ClientTimeout(total=30)) as session:
-            async with session.get(css_translations_url) as response:
-                if response.status == 200:
-                    text = await response.text()
-                    
-                    if len(text.strip()) <= 0:
-                        raise Exception("Empty response")
-
-                    with open(css_translations_path, "w", encoding="utf-8") as fp:
-                        fp.write(text)
-
-                    SUCCESSFUL_FETCH_THIS_RUN = True
-                    Log(f"Fetched css translations from server")
-                    initialize_class_mappings()
-                    asyncio.get_running_loop().create_task(loader.reset(silent=True))
-
-    except Exception as ex:
-        Log(f"Failed to fetch css translations from server [{type(ex).__name__}]: {str(ex)}")
-        
-async def every(__seconds: float, func, *args, **kwargs):
-    while True:
-        await func(*args, **kwargs)
-        await asyncio.sleep(__seconds)
 
 class FileChangeHandler(FileSystemEventHandler):
     def __init__(self, loader : Loader, loop):
@@ -208,18 +156,8 @@ class Plugin:
         return (await self.loader.upload_theme(name, base_url, bearer_token)).to_dict()
 
     async def fetch_class_mappings(self):
-        await self._fetch_class_mappings(self)
+        await force_fetch_translations()
         return Result(True).to_dict()
-
-    async def _fetch_class_mappings(self, run_in_bg : bool = False):
-        global SUCCESSFUL_FETCH_THIS_RUN
-
-        SUCCESSFUL_FETCH_THIS_RUN = False
-        css_translations_path = os.path.join(get_theme_path(), "css_translations.json")
-        if run_in_bg:
-            asyncio.get_event_loop().create_task(every(60, fetch_class_mappings, css_translations_path, self.loader))
-        else:
-            await fetch_class_mappings(css_translations_path, self.loader)
 
     async def _main(self):
         global Initialized
@@ -236,7 +174,7 @@ class Plugin:
         
         create_steam_symlink()
 
-        self.loader = Loader()
+        self.loader = get_loader_instance()
         await self.loader.load(False)
 
         if (store_or_file_config("watch")):
@@ -249,7 +187,7 @@ class Plugin:
         if (ALWAYS_RUN_SERVER or store_or_file_config("server")):
             await self.enable_server(self)
 
-        await self._fetch_class_mappings(self, True)
+        start_fetch_translations()
         await initialize()
 
 if __name__ == '__main__':
