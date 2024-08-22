@@ -7,7 +7,7 @@ import {
 import { backend } from "./decky-backend-service";
 import { useStore } from "zustand";
 
-const cssLoaderStore = createCSSLoaderStore(backend);
+export const cssLoaderStore = createCSSLoaderStore(backend);
 
 const useCSSLoaderStore = (fn: (state: ICSSLoaderState) => any) => useStore(cssLoaderStore, fn);
 

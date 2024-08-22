@@ -1,4 +1,4 @@
-import { getCSSLoaderState } from "@/backend";
+import { cssLoaderStore, getCSSLoaderState } from "@/backend";
 import { FullCSSThemeInfo } from "@/types";
 import { Navigation } from "@decky/ui";
 import { createStore, useStore } from "zustand";
@@ -7,6 +7,7 @@ interface IExpandedViewStoreValues {
   loaded: boolean;
   error: string | null;
   openedId: string | null;
+  isStarred: boolean;
   data: FullCSSThemeInfo;
   focusedImageId: string;
   imageAreaStyleKeys: {
@@ -22,7 +23,7 @@ interface IExpandedViewStoreValues {
 
 interface IExpandedViewStoreActions {
   openTheme: (themeId: string) => Promise<void>;
-  downloadTheme: () => Promise<void>;
+  toggleStar: () => Promise<void>;
   setFocusedImage: (imageId: string) => void;
   close: () => void;
 }
@@ -55,6 +56,7 @@ const expandedViewStore = createStore<IExpandedViewStore>((set, get) => {
     loaded: false,
     openedId: null,
     data: {} as FullCSSThemeInfo,
+    isStarred: false,
     error: null,
     focusedImageId: "",
     imageAreaStyleKeys: {
@@ -69,31 +71,64 @@ const expandedViewStore = createStore<IExpandedViewStore>((set, get) => {
     openTheme: async (themeId) => {
       set({ loaded: false, error: null, openedId: themeId });
       Navigation.Navigate("/cssloader/expanded-view");
-      const { apiFetch } = getCSSLoaderState();
+      const { apiFetch, apiFullToken } = getCSSLoaderState();
       try {
         const response = await apiFetch<FullCSSThemeInfo>(`/themes/${themeId}`);
-        if (response) {
-          set({ data: response, loaded: true, focusedImageId: response.images[0]?.id || "" });
-          setImageSizes();
-          return;
+        if (!response) {
+          throw new Error("No response returned");
         }
-        throw new Error("No response returned");
+        set({ data: response, loaded: true, focusedImageId: response.images[0]?.id || "" });
+        setImageSizes();
+
+        if (!apiFullToken) return;
+        const starResponse = await apiFetch<{ starred: boolean }>(
+          `/users/me/stars/${themeId}`,
+          {},
+          true
+        );
+        if (!starResponse) {
+          // Silently error
+          set({ isStarred: false });
+        }
+        set({ isStarred: starResponse.starred });
+        // If you star and then quickly refresh, the API hasn't updated the cached starcount
+        if (response.starCount === 0) {
+          set({ data: { ...response, starCount: 1 } });
+        }
       } catch (error) {
         set({ error: "Error fetching theme!", loaded: true });
         setImageSizes();
       }
     },
-    downloadTheme: async () => {
-      // const { apiFetch } = getCSSLoaderState();
-      // try {
-      //   await apiFetch(`/theme/${get().data.id}/download`, {}, true);
-      // } catch (error) {
-      //   set({ error: "Error downloading theme!" });
-      // }
+    toggleStar: async () => {
+      try {
+        const { data, isStarred } = get();
+        const { apiFetch, apiFullToken } = getCSSLoaderState();
+        if (!apiFullToken && !data.id) return;
+        const response = await apiFetch(`/users/me/stars/${data.id}`, {
+          method: isStarred ? "DELETE" : "POST",
+        });
+        const newIsStarred = !isStarred;
+        set({
+          isStarred: newIsStarred,
+          data: {
+            ...data,
+            starCount: newIsStarred
+              ? data.starCount + 1
+              : // If it was at 0 stars before (api hadn't updated, prevent it from going to -1)
+              data.starCount === 0
+              ? 0
+              : data.starCount - 1,
+          },
+        });
+      } catch (error) {
+        // TODO: (potentially) handle error
+      }
     },
     close: () => {
       set({
         loaded: false,
+        isStarred: false,
         openedId: null,
         data: {} as FullCSSThemeInfo,
         error: null,

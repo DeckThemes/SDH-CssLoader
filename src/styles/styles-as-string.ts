@@ -13,6 +13,10 @@ export const styles = `
   flex-wrap: wrap !important;
 }
 
+.gap-1 {
+  gap: 0.25rem !important;
+}
+
 .gap-2 {
   gap: 0.5rem !important;
 }
@@ -41,6 +45,10 @@ export const styles = `
   justify-content: center !important;
 }
 
+.justify-around {
+  justify-content: space-around !important;
+}
+
 .justify-between {
   justify-content: space-between !important;
 }
@@ -67,6 +75,13 @@ export const styles = `
 
 .font-bold {
   font-weight: bold !important;
+}
+
+.absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 /* Fullscreen Routes */
@@ -218,96 +233,96 @@ export const styles = `
 /* This module actually is based on font-size, so EM makes sense over REM */
 
 .cl_storeitem_notifbubble {
-  position: absolute;
-  background: linear-gradient(135deg, #fca904 50%, transparent 51%);
-  z-index: 10001;
-  left: 0;
-  top: 0;
+  position: absolute !important;
+  background: linear-gradient(135deg, #fca904 50%, transparent 51%) !important;
+  z-index: 10001 !important;
+  left: 0 !important;
+  top: 0 !important;
   color: black;
-  font-size: var(--cl-storeitem-fontsize);
-  width: var(--cl-storeitem-bubblesize);
-  height: var(--cl-storeitem-bubblesize);
+  font-size: var(--cl-storeitem-fontsize) !important;
+  width: var(--cl-storeitem-bubblesize) !important;
+  height: var(--cl-storeitem-bubblesize) !important;
 }
 .cl_storeitem_bubbleicon {
-  padding: 0.25em;
+  padding: 0.25em !important;
 }
 .cl_storeitem_container {
-  display: flex;
-  flex-direction: column;
-  background-color: #ACB2C924;
-  overflow: hidden;
-  width: var(--cl-storeitem-width);
+  display: flex !important;
+  flex-direction: column !important;
+  background-color: #ACB2C924 !important;
+  overflow: hidden !important;
+  width: var(--cl-storeitem-width) !important;
 }
 .gpfocuswithin.cl_storeitem_container {
-  background-color: #ACB2C947;
+  background-color: #ACB2C947 !important;
 }
 .cl_storeitem_imagecontainer {
-  overflow: hidden;
-  position: relative;
-  width: var(--cl-storeitem-width);
-  height: var(--cl-storeitem-imgheight);
+  overflow: hidden !important;
+  position: relative !important;
+  width: var(--cl-storeitem-width) !important;
+  height: var(--cl-storeitem-imgheight) !important;
 }
 .cl_storeitem_supinfocontainer {
-  display: flex;
-  gap: 0.5em;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  bottom: 0;
-  transform: translateY(100%);
-  opacity: 0;
-  transition-property: transform,opacity;
-  transition-timing-function: cubic-bezier(0.17, 0.45, 0.14, 0.83);
-  transition-duration: 0.15s;
-  font-size: var(--cl-storeitem-fontsize);
+  display: flex !important;
+  gap: 0.5em !important;
+  width: 100% !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  transform: translateY(100%) !important;
+  opacity: 0 !important;
+  transition-property: transform,opacity !important;
+  transition-timing-function: cubic-bezier(0.17, 0.45, 0.14, 0.83) !important;
+  transition-duration: 0.15s !important;
+  font-size: var(--cl-storeitem-fontsize) !important;
 }
 .gpfocuswithin > div > .cl_storeitem_supinfocontainer {
-  transform: translateY(0);
-  opacity: 1;
-  transition-delay: 0.1s;
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  transition-delay: 0.1s !important;
 }
 .cl_storeitem_maininfocontainer {
-  display: flex;
-  flex-direction: column;
-  padding: 0.5em;
-  font-size: var(--cl-storeitem-fontsize);
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0.5em !important;
+  font-size: var(--cl-storeitem-fontsize) !important;
 }
 .cl_storeitem_image {
-  object-fit: cover;
-  transition-property: filter,transform;
-  transition-duration: 0.32s;
-  transition-timing-function: cubic-bezier(0.17, 0.45, 0.14, 0.83);
+  object-fit: cover !important;
+  transition-property: filter,transform !important;
+  transition-duration: 0.32s !important;
+  transition-timing-function: cubic-bezier(0.17, 0.45, 0.14, 0.83) !important;
 }
 .cl_storeitem_imagedarkener {
-  position: absolute;
-  top: 0;
-  left: 0;
-  opacity: 0;
-  transition-property: opacity;
-  transition-duration: 0.65s;
-  transition-timing-function: cubic-bezier(0.17, 0.45, 0.14, 0.83);
-  background: linear-gradient(0deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,0) 30%);
-  mix-blend-mode: multiply;
-  width: var(--cl-storeitem-width);
-  height: var(--cl-storeitem-imgheight);
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  opacity: 0 !important;
+  transition-property: opacity !important;
+  transition-duration: 0.65s !important;
+  transition-timing-function: cubic-bezier(0.17, 0.45, 0.14, 0.83) !important;
+  background: linear-gradient(0deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,0) 30%) !important;
+  mix-blend-mode: multiply !important;
+  width: var(--cl-storeitem-width) !important;
+  height: var(--cl-storeitem-imgheight) !important;
 }
 .gpfocuswithin > div > .cl_storeitem_imagedarkener {
-  opacity: 1;
+  opacity: 1 !important;
 }
 .cl_storeitem_title {
-  font-weight: bold;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
+  font-weight: bold !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
 }
 .cl_storeitem_iconinfoitem {
-  display: flex;
-  gap: 0.25em;
-  align-items: center;
+  display: flex !important;
+  gap: 0.25em !important;
+  align-items: center !important;
 }
 .cl_storeitem_subtitle {
-  font-size: 0.75em;
+  font-size: 0.75em !important;
 }
 
 /* Expanded View */
@@ -318,11 +333,135 @@ export const styles = `
   }
 }
 .cl_spinny {
-  animation: cl_spin 1s linear infinite;
+  animation: cl_spin 1s linear infinite !important;
 }
 
-.cl_fullscreen_loadingtext {
-  font-size: 2.5rem;
-  font-weight: bold;
+.cl_expandedview_loadingtext {
+  font-size: 2.5rem !important;
+  font-weight: bold !important;
+}
+
+.cl_expandedview_container {
+  background: rgb(27, 40, 56) !important;
+  padding: auto 1rem !important;
+  gap: 1rem !important;
+  display: flex !important;
+  justify-content: space-between !important;
+}
+
+.cl_expandedview_scrollpanel {
+  display: flex !important;
+  margin-bottom: 40px !important;
+}
+
+.cl_expandedview_themedatacontainer {
+  display: flex !important;
+  flex-direction: column !important;
+  height: max-content !important;
+  min-height: 100% !important;
+  background: rgba(14, 20, 27, 0.8) !important;
+  width: var(--cl-ev-image-area-width) !important;
+}
+
+.cl_expandedview_imageareacontainer {
+  display: flex !important;
+  gap: var(--cl-ev-gap-between-carousel-and-image) !important;
+  padding: var(--cl-ev-image-area-padding) !important;
+}
+
+.cl_expandedview_imagecarouselcontainer {
+  display: flex !important;
+  justify-content: space-around !important;
+  flex-direction: column !important;
+  width: var(--cl-ev-image-carousel-entry-width) !important;
+  height: var(--cl-ev-selected-image-height) !important;
+}
+
+.cl_expandedview_imagecarouselentry {
+  width: var(--cl-ev-image-carousel-entry-width) !important;
+  height: var(--cl-ev-image-carousel-entry-height) !important;
+  position: relative !important;
+}
+
+.cl_expandedview_selectedimage {
+  position: relative !important; 
+  width: var(--cl-ev-selected-image-width) !important;
+  height: var(--cl-ev-selected-image-height) !important;
+}
+
+.cl_expandedview_imagenumbercontainer {
+  .image-number-container {
+    width: 3em !important;
+    height: 2em !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #000a !important;
+    position: absolute !important;
+    bottom: 1em !important;
+    right: 1em !important;
+  }
+}
+
+.cl_expandedview_title {
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+  font-size: 1.5rem !important;
+  font-weight: bold !important;
+}
+
+.cl_expandedview_version {
+  font-size: 1.25rem !important;
+  font-weight: bold !important;
+}
+
+.cl_expandedview_graytext {
+  color: rgb(124, 142, 163) !important;
+}
+
+.cl_expandedview_bluetext {
+  color: rgb(26, 159, 255) !important;
+}
+
+.cl_expandedview_targetbutton {
+  background: rgba(59, 90, 114, 0.5) !important;
+  color: rgb(26, 159, 255) !important;
+  padding: 8px 12px !important;
+  width: fit-content !important;
+}
+
+.cl_expandedview_buttonscontainer {
+  position: sticky !important;
+  padding-top: 1em !important;
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.25em !important;
+}
+
+.cl_expandedview_singlebuttoncontainer {
+  background: #2a4153 !important;
+  padding: 1em !important;
+}
+
+.cl_expandedview_starbutton {
+  min-width: 30% !important;
+  padding: 8px 12px !important;
+  width: fit-content !important;
+}
+
+.cl_expandedview_installtext {
+  width: 200px !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+}
+
+.cl_expandedview_bluebutton {
+  background: #1a9fff !important;
+}
+.cl_expandedview_bluebutton.gpfocuswithin {
+  background: white !important;
 }
 `;
