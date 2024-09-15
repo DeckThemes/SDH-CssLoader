@@ -1,5 +1,5 @@
 from logging import getLogger
-import os, platform, traceback
+import os, platform, traceback, re
 
 HOME = os.getenv("HOME")
 
@@ -29,6 +29,7 @@ FLAG_PRESET = "PRESET"
 
 def Log(text : str):
     Logger.info(f"[CSS_Loader] {text}")
+    print(text)
 
 class Result:
     def __init__(self, success : bool, message : str = "Success", log : bool = True):
@@ -177,3 +178,19 @@ def save_mappings(val: str, version: str):
     file_location = os.path.join(path, f"{version}.{branch_str}.json")
     with open(file_location, 'w') as fp:
         fp.write(val)
+
+def get_steam_version() -> None|str:
+    path = os.path.join(get_steam_path(), "logs", "console_log.txt")
+
+    if not os.path.exists(path):
+        return None
+    
+    with open(path, 'r') as fp:
+        for line in reversed(fp.readlines()):
+            match = re.match(r"^\[.*?\] Client version: (.*?)$", line)
+            if match:
+                version = match.group(1)
+                if version != None and len(version) > 0:
+                    return version
+        
+        return None
