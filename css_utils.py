@@ -177,10 +177,3 @@ def save_mappings(val: str, version: str):
     file_location = os.path.join(path, f"{version}.{branch_str}.json")
     with open(file_location, 'w') as fp:
         fp.write(val)
-
-def store_or_file_config(key : str) -> bool:
-    if os.path.exists(os.path.join(get_theme_path(), key.upper())):
-        return True
-    
-    read = store_read(key)
-    return read == "True" or read == "1"

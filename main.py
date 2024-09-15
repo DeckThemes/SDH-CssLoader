@@ -5,10 +5,11 @@ from watchdog.observers import Observer
 
 sys.path.append(os.path.dirname(__file__))
 
-from css_utils import Log, create_steam_symlink, Result, get_theme_path, save_mappings as util_save_mappings, store_read as util_store_read, store_write as util_store_write, store_or_file_config, is_steam_beta_active
+from css_utils import Log, create_steam_symlink, Result, get_theme_path, save_mappings as util_save_mappings, store_read as util_store_read, store_write as util_store_write, is_steam_beta_active
 from css_inject import ALL_INJECTS, initialize_class_mappings
 from css_theme import CSS_LOADER_VER
 from css_remoteinstall import install
+from css_settings import setting_redirect_logs, setting_watch_files, set_setting_watch_files, setting_run_server
 
 from css_server import start_server
 from css_browserhook import initialize
@@ -21,7 +22,7 @@ IS_STANDALONE = False
 GOOGLE_PING_COUNT = 0
 
 try:
-    if not store_or_file_config("no_redirect_logs"):
+    if setting_redirect_logs():
         import decky_plugin
 except:
     pass
@@ -75,7 +76,7 @@ class Plugin:
             self.observer.start()
 
             if not only_this_session:
-                util_store_write("watch", "1")
+                set_setting_watch_files(True)
 
             return Result(True).to_dict()
         elif self.observer != None and not enable:
@@ -84,7 +85,7 @@ class Plugin:
             self.observer = None
 
             if not only_this_session:
-                util_store_write("watch", "0")
+                set_setting_watch_files(False)
 
             return Result(True).to_dict()
         
@@ -177,14 +178,14 @@ class Plugin:
         self.loader = get_loader_instance()
         await self.loader.load(False)
 
-        if (store_or_file_config("watch")):
+        if (setting_watch_files()):
             await self.toggle_watch_state(self)
         else:
             Log("Not observing themes folder for file changes")
 
         Log(f"Initialized css loader. Found {len(self.loader.themes)} themes. Total {len(ALL_INJECTS)} injects, {len([x for x in ALL_INJECTS if x.enabled])} injected")
         
-        if (ALWAYS_RUN_SERVER or store_or_file_config("server")):
+        if (ALWAYS_RUN_SERVER or setting_run_server()):
             await self.enable_server(self)
 
         start_fetch_translations()

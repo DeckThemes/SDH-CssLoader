@@ -1,5 +1,6 @@
 import asyncio, json, tempfile, os, aiohttp, zipfile, shutil
-from css_utils import Result, Log, get_theme_path, store_or_file_config
+from css_utils import Result, Log, get_theme_path
+from css_settings import setting_install_dependencies
 from css_theme import CSS_LOADER_VER, Theme
 
 async def run(command : str) -> str:
@@ -57,7 +58,7 @@ async def install(id : str, base_url : str, local_themes : list) -> Result:
 
     tempDir.cleanup()
 
-    if not store_or_file_config("no_deps_install"):
+    if setting_install_dependencies():
         for x in data["dependencies"]:
             if x["name"] in local_themes:
                 continue

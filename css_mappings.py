@@ -1,6 +1,7 @@
 import os, asyncio, aiohttp
 from css_loader import get_loader_instance
-from css_utils import Log, store_read, is_steam_beta_active, get_theme_path
+from css_utils import Log, get_theme_path
+from css_settings import setting_beta_mappings
 from css_inject import initialize_class_mappings
 from css_browserhook import ON_WEBSOCKET_CONNECT
 
@@ -13,9 +14,7 @@ async def __fetch_class_mappings(css_translations_path : str):
     if SUCCESSFUL_FETCH_THIS_RUN:
         return
     
-    setting = store_read("beta_translations")
-
-    if ((len(setting.strip()) <= 0 or setting == "-1" or setting == "auto") and is_steam_beta_active()) or (setting == "1" or setting == "true"):
+    if setting_beta_mappings():
         css_translations_url = "https://api.deckthemes.com/beta.json"
     else:
         css_translations_url = "https://api.deckthemes.com/stable.json"
