@@ -14,7 +14,7 @@ from css_settings import setting_redirect_logs, setting_watch_files, set_setting
 from css_server import start_server
 from css_browserhook import initialize
 from css_loader import Loader
-from css_mappings import force_fetch_translations, start_fetch_translations, load_global_translations
+from css_mappings import force_fetch_translations, start_fetch_translations, load_global_translations, generate_webpack_id_name_list_from_local_file
 
 
 ALWAYS_RUN_SERVER = False
@@ -138,6 +138,9 @@ class Plugin:
     async def save_mappings(self, val: str, version: str) -> dict:
         util_save_mappings(val, version)
         return Result(True).to_dict()
+    
+    async def get_webpack_mappigns(self) -> dict:
+        return generate_webpack_id_name_list_from_local_file()
 
     async def exit(self):
         try:

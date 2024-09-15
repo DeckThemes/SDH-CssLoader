@@ -40,6 +40,46 @@ def __get_target_steam_version(data : dict) -> str|None:
     
     return target_steam_version
 
+def generate_webpack_id_name_list_from_local_file() -> dict[str, dict]:
+    name_list = {}
+    path = os.path.join(get_theme_path(), "css_translations.json")
+
+    try:
+        with open(path, 'r', encoding="utf-8") as fp:
+            data = json.load(fp)
+    except Exception as e:
+        Log(f"Error while loading translations: {str(e)}.")
+        return name_list 
+
+    target_steam_version = __get_target_steam_version(data)
+    same_branch_versions = __get_same_branch_versions(data)
+    if target_steam_version == None:
+        return name_list
+
+    for _, (module_id, module_data) in enumerate(data['module_mappings'].items()):
+        if target_steam_version in module_data['ids']:
+            new_module_id = module_data['ids'][target_steam_version]
+        else: 
+            prev = "9999999999999"
+            new_module_id = None
+            for _, (steam_version, module_id_of_steam_version) in list(enumerate(module_data['ids'].items()))[::-1]:
+                if target_steam_version not in same_branch_versions:
+                    continue
+
+                if int(prev) > int(target_steam_version) and int(steam_version) < int(target_steam_version):
+                    new_module_id = module_id_of_steam_version
+                    break
+
+                prev = steam_version
+                
+        if new_module_id == None:
+            # Assuming module doesn't exist in this steam version
+            continue
+            
+        name_list[new_module_id] = {"name": str(module_id) if module_data['name'] is None else module_data['name'], "ignore": module_data['ignore_webpack_keys']}
+    
+    return name_list
+
 def generate_translations_from_local_file() -> dict[str, str]:
     translations = {}
     timer = time.time()
