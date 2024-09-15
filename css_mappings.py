@@ -16,7 +16,7 @@ def __get_target_steam_version(data : dict) -> str|None:
         target_steam_version = local_steam_version
     else:
         target_steam_version = None
-        prev = "999999999999"
+        prev = "9999999999999"
         for i, (k, v) in list(enumerate(data['versions'].items()))[::-1]:
             if v == local_steam_version:
                 if int(prev) > int(target_steam_version) and int(k) < int(target_steam_version):
@@ -80,6 +80,7 @@ def generate_translations_from_local_file() -> dict[str, str]:
                 translations[class_mapping_value] = class_target
 
             translations[f"{module_name}_{class_name}"] = class_target
+            translations[f"{module_id}_{class_name}"] = class_target
     
     Log(f"Loaded {len(translations)} css translations from local file in {time.time() - timer:.0f}s")
     return translations
