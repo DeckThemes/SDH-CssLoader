@@ -6,15 +6,15 @@ from watchdog.observers import Observer
 sys.path.append(os.path.dirname(__file__))
 
 from css_utils import Log, create_steam_symlink, Result, get_theme_path, save_mappings as util_save_mappings, store_read as util_store_read, store_write as util_store_write, is_steam_beta_active
-from css_inject import ALL_INJECTS, initialize_class_mappings
+from css_inject import ALL_INJECTS
 from css_theme import CSS_LOADER_VER
 from css_remoteinstall import install
 from css_settings import setting_redirect_logs, setting_watch_files, set_setting_watch_files, setting_run_server
 
 from css_server import start_server
 from css_browserhook import initialize
-from css_loader import Loader, get_loader_instance
-from css_mappings import force_fetch_translations, start_fetch_translations
+from css_loader import Loader
+from css_mappings import force_fetch_translations, start_fetch_translations, load_global_translations
 
 
 ALWAYS_RUN_SERVER = False
@@ -157,7 +157,7 @@ class Plugin:
         return (await self.loader.upload_theme(name, base_url, bearer_token)).to_dict()
 
     async def fetch_class_mappings(self):
-        await force_fetch_translations()
+        await force_fetch_translations(self.loader)
         return Result(True).to_dict()
 
     async def _main(self):
@@ -170,12 +170,12 @@ class Plugin:
         self.server_loaded = False
 
         Log("Initializing css loader...")
-        initialize_class_mappings()
+        load_global_translations()
         Log(f"Max supported manifest version: {CSS_LOADER_VER}")
         
         create_steam_symlink()
 
-        self.loader = get_loader_instance()
+        self.loader = Loader()
         await self.loader.load(False)
 
         if (setting_watch_files()):
@@ -188,7 +188,7 @@ class Plugin:
         if (ALWAYS_RUN_SERVER or setting_run_server()):
             await self.enable_server(self)
 
-        start_fetch_translations()
+        start_fetch_translations(self.loader)
         await initialize()
 
 if __name__ == '__main__':

@@ -1,12 +1,11 @@
 import os, asyncio, aiohttp, json, time
-from css_loader import get_loader_instance
 from css_utils import Log, get_theme_path, get_steam_version
 from css_settings import setting_beta_mappings
-from css_inject import initialize_class_mappings
 from css_browserhook import ON_WEBSOCKET_CONNECT
 
 STARTED_FETCHING_TRANSLATIONS = False
 SUCCESSFUL_FETCH_THIS_RUN = False
+CLASS_MAPPINGS = {}
 
 def __get_target_steam_version(data : dict) -> str|None:
     local_steam_version = get_steam_version()
@@ -82,19 +81,25 @@ def generate_translations_from_local_file() -> dict[str, str]:
 
             translations[f"{module_name}_{class_name}"] = class_target
     
+    Log(f"Loaded {len(translations)} css translations from local file in {time.time() - timer:.0f}s")
     return translations
 
-async def __fetch_class_mappings(css_translations_path : str):
+def load_global_translations():
+    CLASS_MAPPINGS.clear()
+
+    try:
+        for _, (k, v) in enumerate(generate_translations_from_local_file().items()):
+            CLASS_MAPPINGS[k] = v
+    except Exception as e:
+        Log(f"Error while loading global translations: {str(e)}")
+
+async def __fetch_class_mappings(css_translations_path : str, loader):
     global SUCCESSFUL_FETCH_THIS_RUN
 
     if SUCCESSFUL_FETCH_THIS_RUN:
         return
     
-    if setting_beta_mappings():
-        css_translations_url = "https://api.deckthemes.com/beta.json"
-    else:
-        css_translations_url = "https://api.deckthemes.com/stable.json"
-
+    css_translations_url = "https://api.deckthemes.com/mappings.json"
     Log(f"Fetching CSS mappings from {css_translations_url}")
 
     try:
@@ -111,8 +116,8 @@ async def __fetch_class_mappings(css_translations_path : str):
 
                     SUCCESSFUL_FETCH_THIS_RUN = True
                     Log(f"Fetched css translations from server")
-                    initialize_class_mappings()
-                    asyncio.get_running_loop().create_task(get_loader_instance().reset(silent=True))
+                    load_global_translations()
+                    asyncio.get_running_loop().create_task(loader.reset(silent=True))
 
     except Exception as ex:
         Log(f"Failed to fetch css translations from server [{type(ex).__name__}]: {str(ex)}")
@@ -126,13 +131,13 @@ async def __every(__seconds: float, func, *args, **kwargs):
         await func(*args, **kwargs)
         await asyncio.sleep(__seconds)
 
-async def force_fetch_translations():
+async def force_fetch_translations(loader):
     global SUCCESSFUL_FETCH_THIS_RUN
     
     SUCCESSFUL_FETCH_THIS_RUN = False
     css_translations_path = os.path.join(get_theme_path(), "css_translations.json")
-    await __fetch_class_mappings(css_translations_path)
+    await __fetch_class_mappings(css_translations_path, loader)
 
-def start_fetch_translations():
+def start_fetch_translations(loader):
     css_translations_path = os.path.join(get_theme_path(), "css_translations.json")
-    asyncio.get_event_loop().create_task(__every(60, __fetch_class_mappings, css_translations_path))
+    asyncio.get_event_loop().create_task(__every(60, __fetch_class_mappings, css_translations_path, loader))

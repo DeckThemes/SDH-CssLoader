@@ -6,32 +6,7 @@ import asyncio
 from typing import List
 from css_utils import Result, Log, store_read, get_theme_path
 from css_browserhook import BrowserTabHook as CssTab, inject, remove
-
-CLASS_MAPPINGS = {}
-
-def initialize_class_mappings():
-    css_translations_path = os.path.join(get_theme_path(), "css_translations.json")
-
-    if not os.path.exists(css_translations_path):
-        Log("Failed to get css translations from local file")
-        return
-
-    try:
-        with open(css_translations_path, "r", encoding="utf-8") as fp:
-            data : dict = json.load(fp)
-    except Exception as e:
-        Log(f"Failed to load css translations from local file: {str(e)}")
-        return
-
-    CLASS_MAPPINGS.clear()
-
-    # Data is in the format of { "uid": ["ver1", "ver2", "ver3"]}
-    for uid in data:
-        latest_value = data[uid][-1]
-        for y in data[uid][:-1]:
-            CLASS_MAPPINGS[y] = latest_value
-
-    Log(f"Loaded {len(CLASS_MAPPINGS)} css translations from local file")
+from css_mappings import CLASS_MAPPINGS
 
 ALL_INJECTS = []
 

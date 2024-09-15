@@ -9,8 +9,6 @@ from asyncio import sleep
 from os import listdir, path, mkdir
 import json
 
-LOADER_INSTANCE = None
-
 class Loader:
     def __init__(self):
         self.busy = False
@@ -377,12 +375,3 @@ class Loader:
                 break
         
         return Result(True)
-    
-
-def get_loader_instance() -> Loader:
-    global LOADER_INSTANCE
-
-    if LOADER_INSTANCE == None:
-        LOADER_INSTANCE = Loader()
-    
-    return LOADER_INSTANCE

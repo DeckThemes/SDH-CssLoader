@@ -29,7 +29,6 @@ FLAG_PRESET = "PRESET"
 
 def Log(text : str):
     Logger.info(f"[CSS_Loader] {text}")
-    print(text)
 
 class Result:
     def __init__(self, success : bool, message : str = "Success", log : bool = True):
