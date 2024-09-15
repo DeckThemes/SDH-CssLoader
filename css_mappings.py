@@ -7,26 +7,35 @@ STARTED_FETCHING_TRANSLATIONS = False
 SUCCESSFUL_FETCH_THIS_RUN = False
 CLASS_MAPPINGS = {}
 
+def __get_target_branch() -> str:
+    is_beta = setting_beta_mappings()
+    return "beta" if is_beta else "stable"
+
+def __get_same_branch_versions(data : dict) -> list[str]:
+    target_branch = __get_target_branch()
+    return [x for x in data['versions'] if data['versions'][x] == target_branch]
+
 def __get_target_steam_version(data : dict) -> str|None:
     local_steam_version = get_steam_version()
-    is_beta = setting_beta_mappings()
-    target_branch = ("beta" if is_beta else "stable")
 
-    if local_steam_version and local_steam_version in data['versions'] and data['versions'][local_steam_version] == target_branch:
+    if local_steam_version and local_steam_version in data['versions'] and data['versions'][local_steam_version] == __get_target_branch():
         target_steam_version = local_steam_version
     else:
         target_steam_version = None
         prev = "9999999999999"
-        for i, (k, v) in list(enumerate(data['versions'].items()))[::-1]:
-            if v == local_steam_version:
-                if int(prev) > int(target_steam_version) and int(k) < int(target_steam_version):
-                    target_steam_version = k
-                    break
+        for version in __get_same_branch_versions(data):
+            if local_steam_version == None:
+                target_steam_version = version
+                break
 
-                prev = k
+            if int(prev) > int(local_steam_version) and int(version) < int(local_steam_version):
+                target_steam_version = version
+                break
+
+            prev = version
         
         if target_steam_version not in data['versions']:
-            Log("Cannot find suitable version for translation")
+            Log("Cannot find suitable version for translation.")
             return None
     
     return target_steam_version
@@ -34,6 +43,7 @@ def __get_target_steam_version(data : dict) -> str|None:
 def generate_translations_from_local_file() -> dict[str, str]:
     translations = {}
     timer = time.time()
+    failed_match_version = 0
 
     path = os.path.join(get_theme_path(), "css_translations.json")
 
@@ -49,20 +59,24 @@ def generate_translations_from_local_file() -> dict[str, str]:
         return translations
     
     target_steam_version = __get_target_steam_version(data)
+    same_branch_versions = __get_same_branch_versions(data)
     if target_steam_version == None:
         return translations
     
-    Log(f"Using steam version {target_steam_version} for translations")
+    Log(f"Using steam version {target_steam_version} for translations. Available versions for the {__get_target_branch()} branch: {same_branch_versions}")
 
     for _, (module_id, module_data) in enumerate(data['module_mappings'].items()):
         module_name = (str(module_id) if module_data['name'] is None else module_data['name'])
         for _, (class_name, class_mappings) in enumerate(module_data['classname_mappings'].items()):
-            class_target = None
             if target_steam_version in class_mappings:
                 class_target = class_mappings[target_steam_version]
             else:
                 prev = "9999999999999"
+                class_target = None
                 for _, (class_mapping_name, class_mapping_value) in list(enumerate(class_mappings.items()))[::-1]:
+                    if target_steam_version not in same_branch_versions:
+                        continue
+
                     if int(prev) > int(target_steam_version) and int(class_mapping_name) < int(target_steam_version):
                         class_target = class_mapping_value
                         break
@@ -70,7 +84,8 @@ def generate_translations_from_local_file() -> dict[str, str]:
                     prev = class_mapping_name
                 
                 if class_target == None:
-                    Log(f"No suitable version found for mapping {module_id}_{class_name}. Using last")
+                    #Log(f"No suitable version found for mapping {module_id}_{class_name}. Using last")
+                    failed_match_version += 1
                     class_target = class_mappings[list(class_mappings)[-1]]
                 
             for class_mapping_value in class_mappings.values():
@@ -82,7 +97,7 @@ def generate_translations_from_local_file() -> dict[str, str]:
             translations[f"{module_name}_{class_name}"] = class_target
             translations[f"{module_id}_{class_name}"] = class_target
     
-    Log(f"Loaded {len(translations)} css translations from local file in {time.time() - timer:.0f}s")
+    Log(f"Loaded {len(translations)} css translations from local file in {time.time() - timer:.1f}s. Failed to match version on {failed_match_version} translations.")
     return translations
 
 def load_global_translations():

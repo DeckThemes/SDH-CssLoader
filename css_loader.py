@@ -40,7 +40,7 @@ class Loader:
         self.themes.sort(key=lambda d: self.scores[d.name])
 
         for x in self.themes:
-            Log(f"Loading theme {x.name}")
+            #Log(f"Loading theme {x.name}")
             await x.load(inject_now)
         
         await self._cache_lists()
