@@ -7,10 +7,7 @@ export async function dumpMappings() {
     if (!map) return;
     const jsonStr = JSON.stringify(Object.fromEntries(map));
 
-    const steamInfo = await SteamClient.System.GetSystemInfo();
-    const version = String(steamInfo.nSteamVersion);
-
-    await saveMappings(jsonStr, version);
+    await saveMappings(jsonStr);
   } catch (error) {
     console.error("ERROR SAVING MAPPINGS", error);
   }

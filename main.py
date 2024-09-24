@@ -135,8 +135,8 @@ class Plugin:
         util_store_write(key, val)
         return Result(True).to_dict()
     
-    async def save_mappings(self, val: str, version: str) -> dict:
-        util_save_mappings(val, version)
+    async def save_mappings(self, val: str) -> dict:
+        util_save_mappings(val)
         return Result(True).to_dict()
     
     async def get_webpack_mappigns(self) -> dict:

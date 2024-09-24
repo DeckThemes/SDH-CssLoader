@@ -273,6 +273,6 @@ export function generatePresetFromThemeNames(name: string, themeNames: string[])
   });
 }
 
-export function saveMappings(val: string, version: string) {
-  return server!.callPluginMethod("save_mappings", { val: val, version: version });
+export function saveMappings(val: string) {
+  return server!.callPluginMethod("save_mappings", { val: val });
 }

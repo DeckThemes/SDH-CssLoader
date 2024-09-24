@@ -126,7 +126,7 @@ def store_path() -> str:
     return os.path.join(get_theme_path(), "STORE")
 
 def get_mappings_folder_path() -> str:
-    path =  os.path.join(get_theme_path(), "__mappings")
+    path = os.path.join(get_theme_path(), "__mappings")
 
     if not os.path.exists(path):
         create_dir(path)
@@ -166,18 +166,6 @@ def store_write(key : str, val : str):
     with open(path, 'w') as fp:
         fp.write("\n".join([f"{x}:{items[x]}" for x in items]))
 
-def save_mappings(val: str, version: str):
-    is_beta = is_steam_beta_active()
-    branch_str = "beta" if is_beta else "stable"
-    path = get_mappings_folder_path()
-
-    if not os.exists(path):
-        create_dir(path)
-    
-    file_location = os.path.join(path, f"{version}.{branch_str}.json")
-    with open(file_location, 'w') as fp:
-        fp.write(val)
-
 def get_steam_version() -> None|str:
     path = os.path.join(get_steam_path(), "logs", "console_log.txt")
 
@@ -193,3 +181,12 @@ def get_steam_version() -> None|str:
                     return version
         
         return None
+    
+def save_mappings(val: str):
+    is_beta = is_steam_beta_active()
+    branch_str = "beta" if is_beta else "stable"
+    path = get_mappings_folder_path()
+    
+    file_location = os.path.join(path, f"{get_steam_version()}.{branch_str}.json")
+    with open(file_location, 'w', encoding="utf-8") as fp:
+        fp.write(val)
