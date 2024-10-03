@@ -14,7 +14,7 @@ export function ExpandedViewImageContainer() {
   const setFocusedImage = useExpandedViewAction("setFocusedImage");
 
   return (
-    <div className="cl_expandedview_imageareacontainer">
+    <Focusable className="cl_expandedview_imageareacontainer">
       {/* Image Carousel Container */}
       {data.images.length > 1 && (
         <ScrollPanelGroup
@@ -66,6 +66,6 @@ export function ExpandedViewImageContainer() {
           </div>
         )}
       </Focusable>
-    </div>
+    </Focusable>
   );
 }

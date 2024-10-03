@@ -1,10 +1,13 @@
-import { DialogButton, Focusable, ScrollPanelGroup } from "@decky/ui";
+import { DialogButton, Focusable, Navigation, ScrollPanelGroup } from "@decky/ui";
 import { useExpandedViewAction, useExpandedViewValue } from "../context";
 import { ExpandedViewImageContainer } from "./ExpandedViewImageContainer";
+import { useThemeBrowserSharedAction } from "@/modules/theme-store/context";
 
 export function ExpandedViewScrollingSection() {
   const data = useExpandedViewValue("data");
   const close = useExpandedViewAction("close");
+
+  const setTargetOverride = useThemeBrowserSharedAction("setTargetOverride");
 
   return (
     <ScrollPanelGroup
@@ -20,16 +23,16 @@ export function ExpandedViewScrollingSection() {
         }
       }}
     >
-      <div className="cl_expandedview_themedatacontainer">
+      <Focusable className="cl_expandedview_themedatacontainer">
         <ExpandedViewImageContainer />
-        <div className="flex flex-col gap-1">
+        <Focusable className="cl_expandedview_infocontainer">
           {/* Title / Version */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             <span className="cl_expandedview_title">{data.displayName}</span>
             <span className="cl_expandedview_version">{data.version}</span>
           </div>
           {/* Author / Modified Date */}
-          <div className="flex gap-1 cl_expandedview_graytext">
+          <Focusable className="flex gap-1 cl_expandedview_graytext">
             <Focusable
               onOKActionDescription="View Profile"
               focusClassName="gpfocuswithin"
@@ -41,7 +44,7 @@ export function ExpandedViewScrollingSection() {
               By <span className="cl_expandedview_bluetext">{data.specifiedAuthor}</span>
             </Focusable>
             <span>Last Updated {new Date(data.updated).toLocaleDateString()}</span>
-          </div>
+          </Focusable>
           {/* Description */}
           <Focusable
             focusWithinClassName="gpfocuswihtin"
@@ -56,28 +59,25 @@ export function ExpandedViewScrollingSection() {
             </span>
           </Focusable>
           {/* Targets */}
-          <div className="flex flex-col gap-1">
+          <Focusable className="flex flex-col gap-1">
             <span className="font-bold">Targets</span>
-            <div className="flex gap-1">
+            <Focusable className="flex gap-1">
               {data.targets.map((target) => (
                 <DialogButton
                   onOKActionDescription={`View Other '${target}' Themes`}
                   onClick={() => {
-                    // TODO: target navigation
-                    // setGlobalState("themeSearchOpts", { ...themeSearchOpts, filters: e });
-                    // setGlobalState("currentTab", "ThemeBrowser");
-                    // setGlobalState("forceScrollBackUp", true);
-                    // Navigation.NavigateBack();
+                    setTargetOverride(target);
+                    Navigation.NavigateBack();
                   }}
                   className="cl_expandedview_targetbutton"
                 >
                   {target}
                 </DialogButton>
               ))}
-            </div>
-          </div>
-        </div>
-      </div>
+            </Focusable>
+          </Focusable>
+        </Focusable>
+      </Focusable>
     </ScrollPanelGroup>
   );
 }

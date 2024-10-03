@@ -15,10 +15,12 @@ export function ExpandedViewPage() {
   if (error) return <span>{error}</span>;
 
   return (
-    <div className="cl_expandedview_container">
-      <ExpandedViewCssVariables />
-      <ExpandedViewScrollingSection />
-      <ExpandedViewButtonsSection />
+    <div className="cl_fullscreenroute_container">
+      <div className="cl_expandedview_container">
+        <ExpandedViewCssVariables />
+        <ExpandedViewScrollingSection />
+        <ExpandedViewButtonsSection />
+      </div>
     </div>
   );
 }

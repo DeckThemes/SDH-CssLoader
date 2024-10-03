@@ -2,7 +2,7 @@ import { shortenNumber, useThemeInstallState } from "@/lib";
 import { useExpandedViewAction, useExpandedViewValue } from "../context";
 import { FaRegStar, FaStar } from "react-icons/fa";
 import { DialogButton } from "@decky/ui";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCSSLoaderAction, useCSSLoaderValue } from "@/backend";
 import { ImCog } from "react-icons/im";
 
@@ -26,11 +26,20 @@ export function ExpandedViewButtonsSection() {
     setStarButtonBlurred(false);
   }
 
+  const downloadButtonRef = useRef<HTMLElement>(null);
+  const [hasBeenFocused, setHasFocused] = useState<boolean>(false);
+  useEffect(() => {
+    if (downloadButtonRef?.current && !hasBeenFocused) {
+      downloadButtonRef.current.focus();
+      setHasFocused(true);
+    }
+  }, [downloadButtonRef, hasBeenFocused]);
+
   return (
     <div className="cl_expandedview_buttonscontainer">
       {/* Star */}
       <div className="cl_expandedview_singlebuttoncontainer">
-        <div className="w-full justify-between">
+        <div className="flex w-full justify-between">
           <div className="flex gap-1 items-center">
             {isStarred ? <FaStar /> : <FaRegStar />}
             {/* Need to make the text size smaller or else it wraps */}

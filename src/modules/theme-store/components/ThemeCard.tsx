@@ -25,7 +25,7 @@ export const ThemeCard = forwardRef<HTMLDivElement, ThemeCardProps>(({ theme, si
   const cols = size ?? browserCardSize;
   const installStatus = useThemeInstallState(theme);
 
-  const openTheme = useExpandedViewStateAction("openTheme");
+  const openTheme = useExpandedViewAction("openTheme");
 
   const imageUrl =
     theme?.images[0]?.id && theme.images[0].id !== "MISSING"

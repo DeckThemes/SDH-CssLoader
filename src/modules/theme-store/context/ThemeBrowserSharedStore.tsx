@@ -6,10 +6,12 @@ export type ColumnNumbers = 3 | 4 | 5;
 
 interface ThemeBrowserSharedStoreValues {
   browserCardSize: ColumnNumbers;
+  targetOverride: string | null;
 }
 
 interface ThemeBrowserSharedStoreActions {
   setBrowserCardSize: (value: ColumnNumbers) => void;
+  setTargetOverride: (value: string | null) => void;
 }
 
 interface IThemeBrowserSharedStore
@@ -19,7 +21,9 @@ interface IThemeBrowserSharedStore
 const themeBrowserSharedStore = createStore<IThemeBrowserSharedStore>((set) => {
   return {
     browserCardSize: 3,
+    targetOverride: "",
     setBrowserCardSize: (value: ColumnNumbers) => set({ browserCardSize: value }),
+    setTargetOverride: (value: string | null) => set({ targetOverride: value }),
   };
 });
 

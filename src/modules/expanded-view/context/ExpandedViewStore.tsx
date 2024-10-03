@@ -105,7 +105,7 @@ const expandedViewStore = createStore<IExpandedViewStore>((set, get) => {
         const { data, isStarred } = get();
         const { apiFetch, apiFullToken } = getCSSLoaderState();
         if (!apiFullToken && !data.id) return;
-        const response = await apiFetch(`/users/me/stars/${data.id}`, {
+        await apiFetch(`/users/me/stars/${data.id}`, {
           method: isStarred ? "DELETE" : "POST",
         });
         const newIsStarred = !isStarred;
