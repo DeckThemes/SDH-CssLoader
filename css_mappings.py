@@ -13,7 +13,7 @@ def __get_target_branch() -> str:
 
 def __get_same_branch_versions(data : dict) -> list[str]:
     target_branch = __get_target_branch()
-    return [x for x in data['versions'] if data['versions'][x] == target_branch]
+    return [x for x in data['versions'] if data['versions'][x] == target_branch][::-1]
 
 def __get_target_steam_version(data : dict) -> str|None:
     local_steam_version = get_steam_version()
