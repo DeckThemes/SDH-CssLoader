@@ -178,6 +178,7 @@ def get_steam_version() -> None|str:
             if match:
                 version = match.group(1)
                 if version != None and len(version) > 0:
+                    Log(f"Got steam version: '{version}'")
                     return version
         
         return None
