@@ -145,7 +145,6 @@ export const createCSSLoaderStore = (backend: Backend) =>
           set({ backendVersion });
 
           const themes = (await backend.getThemes()) ?? [];
-          console.log("THEMES", themes.length, themes.filter((e) => e.enabled).length);
           set({
             themes,
             selectedPreset: themes.find((e) => e.flags.includes(Flags.isPreset) && e.enabled),
@@ -288,9 +287,7 @@ export const createCSSLoaderStore = (backend: Backend) =>
         async function fetchThemeIDS(idsToQuery: string[]): Promise<MinimalCSSThemeInfo[]> {
           const queryStr = "?ids=" + idsToQuery.join(".");
           try {
-            console.log("FETCHTHEMEIDS STRING", themes.length);
             const value = await apiFetch<MinimalCSSThemeInfo[]>(`/themes/ids${queryStr}`);
-            console.log("VALUE", value);
             if (value) return value;
           } catch {}
           return [];

@@ -35,7 +35,7 @@ export function ExpandedViewImageContainer() {
                 width={imageCarouselEntryWidth}
                 height={imageCarouselEntryHeight}
                 style={{ objectFit: "contain" }}
-                src={`https://api.deckthemes.com/blobs/${focusedImageId}`}
+                src={`https://api.deckthemes.com/blobs/${image.id}`}
               />
             </Focusable>
           ))}

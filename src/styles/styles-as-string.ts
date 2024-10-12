@@ -78,10 +78,10 @@ export const styles = `
 }
 
 .absolute-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
 }
 
 /* Fullscreen Routes */
@@ -352,8 +352,7 @@ export const styles = `
 .cl_expandedview_scrollpanel {
   display: flex !important;
   margin-bottom: 40px !important;
-  /* To be completely honest, I'm not sure why this isn't inherited from fullscrenroute_container */
-  height: calc(100vh - 40px) !important
+  height: calc(100vh - 80px) !important
 }
 
 .cl_expandedview_themedatacontainer {
@@ -392,25 +391,24 @@ export const styles = `
 }
 
 .cl_expandedview_imagenumbercontainer {
-  .image-number-container {
-    width: 3em !important;
-    height: 2em !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background: #000a !important;
-    position: absolute !important;
-    bottom: 1em !important;
-    right: 1em !important;
-  }
+  width: 3em !important;
+  height: 2em !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #000a !important;
+  position: absolute !important;
+  bottom: 1em !important;
+  right: 1em !important;
 }
 
 .cl_expandedview_infocontainer {
-  padding-left: 1rem;
-  padding-right: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+  padding-bottom: 1rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.25rem !important;
 }
 
 .cl_expandedview_title {
@@ -437,7 +435,6 @@ export const styles = `
 .cl_expandedview_targetbuttonscontainer {
   display: flex !important;
   gap: 0.25rem !important;
-  padding-bottom: 80px !important;
 }
 
 .cl_expandedview_targetbutton {
@@ -454,7 +451,7 @@ export const styles = `
 
 .cl_expandedview_buttonscontainer {
   position: sticky !important;
-  padding-top: 1em !important;
+  padding-top: 1rem !important;
   flex: 1 !important;
   display: flex !important;
   flex-direction: column !important;
@@ -463,7 +460,7 @@ export const styles = `
 
 .cl_expandedview_singlebuttoncontainer {
   background: #2a4153 !important;
-  padding: 1em !important;
+  padding: 1rem !important;
 }
 
 .cl_expandedview_starbutton {
@@ -484,5 +481,11 @@ export const styles = `
 }
 .cl_expandedview_bluebutton.gpfocuswithin {
   background: white !important;
+}
+
+.cl_expandedview_configure_button {
+  width: 1rem !important;
+  min-width: 1rem !important;
+  position: relative;
 }
 `;

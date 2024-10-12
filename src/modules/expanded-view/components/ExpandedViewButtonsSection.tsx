@@ -73,41 +73,43 @@ export function ExpandedViewButtonsSection() {
             {shortenNumber(data.download.downloadCount) ?? data.download.downloadCount} Download
             {data.download.downloadCount === 1 ? "" : "s"}
           </span>
-          <DialogButton
-            // @ts-ignore
-            ref={downloadButtonRef}
-            className="cl_expandedview_bluebutton"
-            disabled={isWorking}
-            onClick={() => {
-              installTheme(data.id);
-            }}
-          >
-            <span className="CssLoader_ThemeBrowser_ExpandedView_InstallText">
-              {/* Technically 'local' should mean a remote copy doesn't exist, but there might be weird network race conditions on the install status check */}
-              {(installStatus === "installed" || installStatus === "local") && "Reinstall"}
-              {installStatus === "outdated" && "Update"}
-              {installStatus === "notinstalled" && "Install"}
-            </span>
-          </DialogButton>
-          {installStatus === "installed" && (
+          <Focusable className="flex gap-1">
             <DialogButton
+              // @ts-ignore
+              ref={downloadButtonRef}
+              className="cl_expandedview_bluebutton"
+              disabled={isWorking}
               onClick={() => {
-                // TODO: THEME SETTINGS MODAL
-                // showModal(
-                //   <ThemeSettingsModalRoot
-                //     selectedTheme={
-                //       installedThemes.find((e) => e.id === fullThemeData.id)?.id ||
-                //       // using name here because in submissions id is different
-                //       installedThemes.find((e) => e.name === fullThemeData.name)!.id
-                //     }
-                //   />
-                // );
+                installTheme(data.id);
               }}
-              className="relative"
             >
-              <ImCog className="absolute-center" />
+              <span className="CssLoader_ThemeBrowser_ExpandedView_InstallText">
+                {/* Technically 'local' should mean a remote copy doesn't exist, but there might be weird network race conditions on the install status check */}
+                {(installStatus === "installed" || installStatus === "local") && "Reinstall"}
+                {installStatus === "outdated" && "Update"}
+                {installStatus === "notinstalled" && "Install"}
+              </span>
             </DialogButton>
-          )}
+            {(installStatus === "installed" || installStatus === "local") && (
+              <DialogButton
+                onClick={() => {
+                  // TODO: THEME SETTINGS MODAL
+                  // showModal(
+                  //   <ThemeSettingsModalRoot
+                  //     selectedTheme={
+                  //       installedThemes.find((e) => e.id === fullThemeData.id)?.id ||
+                  //       // using name here because in submissions id is different
+                  //       installedThemes.find((e) => e.name === fullThemeData.name)!.id
+                  //     }
+                  //   />
+                  // );
+                }}
+                className="cl_expandedview_configure_button"
+              >
+                <ImCog className="absolute-center" />
+              </DialogButton>
+            )}
+          </Focusable>
         </div>
       </div>
     </Focusable>
