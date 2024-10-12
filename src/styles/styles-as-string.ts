@@ -1,10 +1,6 @@
 import { gamepadDialogClasses } from "@decky/ui";
 
 export const styles = `
-/* THIS FILE IS NOT USED IN BUILD */
-/* ANY MODIFICATIONS HERE MUST BE COPY PASTED INTO stylesAsString.ts */
-/* THAT IS NEEDED FOR STATIC CLASS INJECTIOn */
-
 .flex {
   display: flex !important;
 }
@@ -356,6 +352,8 @@ export const styles = `
 .cl_expandedview_scrollpanel {
   display: flex !important;
   margin-bottom: 40px !important;
+  /* To be completely honest, I'm not sure why this isn't inherited from fullscrenroute_container */
+  height: calc(100vh - 40px) !important
 }
 
 .cl_expandedview_themedatacontainer {
@@ -436,11 +434,22 @@ export const styles = `
   color: rgb(26, 159, 255) !important;
 }
 
+.cl_expandedview_targetbuttonscontainer {
+  display: flex !important;
+  gap: 0.25rem !important;
+  padding-bottom: 80px !important;
+}
+
 .cl_expandedview_targetbutton {
   background: rgba(59, 90, 114, 0.5) !important;
   color: rgb(26, 159, 255) !important;
   padding: 8px 12px !important;
   width: fit-content !important;
+}
+
+.cl_expandedview_targetbutton.gpfocuswithin {
+  background: white !important;
+  color: black !important;
 }
 
 .cl_expandedview_buttonscontainer {

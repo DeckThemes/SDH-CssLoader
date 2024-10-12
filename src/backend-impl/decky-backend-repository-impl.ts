@@ -17,6 +17,8 @@ class DeckyBackendRepository implements IBackendRepository {
   async fetch<Return>(url: string, request: RequestInit) {
     try {
       console.debug("CSSLOADER FETCH", url, request);
+      // TODO: Think this is a decky types issue
+      // @ts-ignore
       const res = await fetchNoCors(url, request);
       if (!res.ok) {
         throw new Error(`Res Not Okay - Code ${res.status}`);

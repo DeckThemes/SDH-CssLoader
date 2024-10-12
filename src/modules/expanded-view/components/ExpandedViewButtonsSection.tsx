@@ -1,7 +1,7 @@
 import { shortenNumber, useThemeInstallState } from "@/lib";
 import { useExpandedViewAction, useExpandedViewValue } from "../context";
 import { FaRegStar, FaStar } from "react-icons/fa";
-import { DialogButton } from "@decky/ui";
+import { DialogButton, Focusable } from "@decky/ui";
 import { useEffect, useRef, useState } from "react";
 import { useCSSLoaderAction, useCSSLoaderValue } from "@/backend";
 import { ImCog } from "react-icons/im";
@@ -36,8 +36,10 @@ export function ExpandedViewButtonsSection() {
     }
   }, [downloadButtonRef, hasBeenFocused]);
 
+  console.log("INSTALL STATUS, ", installStatus);
+
   return (
-    <div className="cl_expandedview_buttonscontainer">
+    <Focusable className="cl_expandedview_buttonscontainer">
       {/* Star */}
       <div className="cl_expandedview_singlebuttoncontainer">
         <div className="flex w-full justify-between">
@@ -81,7 +83,8 @@ export function ExpandedViewButtonsSection() {
             }}
           >
             <span className="CssLoader_ThemeBrowser_ExpandedView_InstallText">
-              {installStatus === "installed" && "Reinstall"}
+              {/* Technically 'local' should mean a remote copy doesn't exist, but there might be weird network race conditions on the install status check */}
+              {(installStatus === "installed" || installStatus === "local") && "Reinstall"}
               {installStatus === "outdated" && "Update"}
               {installStatus === "notinstalled" && "Install"}
             </span>
@@ -107,6 +110,6 @@ export function ExpandedViewButtonsSection() {
           )}
         </div>
       </div>
-    </div>
+    </Focusable>
   );
 }

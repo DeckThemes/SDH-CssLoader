@@ -27,6 +27,8 @@ const themeBrowserSharedStore = createStore<IThemeBrowserSharedStore>((set) => {
   };
 });
 
+export const getThemeBrowserSharedState = () => themeBrowserSharedStore.getState();
+
 const useThemeBrowserSharedState = (fn: (state: IThemeBrowserSharedStore) => any) =>
   useStore(themeBrowserSharedStore, fn);
 

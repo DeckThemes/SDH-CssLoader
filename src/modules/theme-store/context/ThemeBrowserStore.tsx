@@ -3,6 +3,7 @@ import { FilterQueryResponse, ThemeQueryRequest, ThemeQueryResponse } from "@/ty
 import { StoreApi, createStore, useStore } from "zustand";
 import { getCSSLoaderState } from "@/backend";
 import { isEqual } from "lodash";
+import { getThemeBrowserSharedState } from "./ThemeBrowserSharedStore";
 
 interface ThemeBrowserStoreValues {
   themes: ThemeQueryResponse;
@@ -110,6 +111,9 @@ export function ThemeBrowserStoreProvider({
       getThemes: async () => {
         try {
           const { searchOpts } = get();
+          const { targetOverride } = getThemeBrowserSharedState();
+          const formattedSearchOpts = { ...searchOpts };
+          targetOverride && (formattedSearchOpts.filters = targetOverride);
 
           const { apiFetch } = getCSSLoaderState();
           const response = await apiFetch<ThemeQueryResponse>(

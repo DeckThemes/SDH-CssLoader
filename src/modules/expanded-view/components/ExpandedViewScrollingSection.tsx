@@ -61,7 +61,7 @@ export function ExpandedViewScrollingSection() {
           {/* Targets */}
           <Focusable className="flex flex-col gap-1">
             <span className="font-bold">Targets</span>
-            <Focusable className="flex gap-1">
+            <Focusable className="cl_expandedview_targetbuttonscontainer">
               {data.targets.map((target) => (
                 <DialogButton
                   onOKActionDescription={`View Other '${target}' Themes`}

@@ -1,3 +1,4 @@
+import { Focusable } from "@decky/ui";
 import {
   ExpandedViewLoadingPage,
   ExpandedViewCssVariables,
@@ -16,11 +17,11 @@ export function ExpandedViewPage() {
 
   return (
     <div className="cl_fullscreenroute_container">
-      <div className="cl_expandedview_container">
-        <ExpandedViewCssVariables />
+      <ExpandedViewCssVariables />
+      <Focusable className="cl_expandedview_container">
         <ExpandedViewScrollingSection />
         <ExpandedViewButtonsSection />
-      </div>
+      </Focusable>
     </div>
   );
 }
