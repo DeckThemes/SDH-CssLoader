@@ -36,11 +36,10 @@ class Loader:
         for x in self.themes:
             await self._set_theme_score(x)
         
-        Log(self.scores)
         self.themes.sort(key=lambda d: self.scores[d.name])
 
         for x in self.themes:
-            Log(f"Loading theme {x.name}")
+            #Log(f"Loading theme {x.name}")
             await x.load(inject_now)
         
         await self._cache_lists()
@@ -298,6 +297,7 @@ class Loader:
 
         possibleThemeDirs = [str(x) for x in listdir(themesDir)]
         fails = []
+        theme_count = 0
 
         for x in possibleThemeDirs:
             themePath = themesDir + "/" + x
@@ -310,7 +310,7 @@ class Loader:
             try:
                 theme = None
                 if path.exists(themeDataPath):
-                    with open(themeDataPath, "r") as fp:
+                    with open(themeDataPath, "r", encoding="utf-8") as fp:
                         theme = json.load(fp)
                     
                 themeData = Theme(themePath, theme, configPath)
@@ -325,11 +325,13 @@ class Loader:
 
                 if (themeData.name not in theme_names):
                     self.themes.append(themeData)
-                    Log(f"Found theme {themeData.name}")
+                    theme_count += 1
 
             except Exception as e:
                 Result(False, f"Failed parsing '{x}': {e}") # Couldn't properly parse everything
                 fails.append((x, str(e)))
+        
+        Log(f"Loaded {theme_count} themes, failed to load {len(fails)} themes")
 
         return fails
     

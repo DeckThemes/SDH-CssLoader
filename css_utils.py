@@ -1,5 +1,5 @@
 from logging import getLogger
-import os, platform, traceback
+import os, platform, traceback, re
 
 HOME = os.getenv("HOME")
 
@@ -125,6 +125,14 @@ def create_cef_flag() -> Result:
 def store_path() -> str:
     return os.path.join(get_theme_path(), "STORE")
 
+def get_mappings_folder_path() -> str:
+    path = os.path.join(get_theme_path(), "__mappings")
+
+    if not os.path.exists(path):
+        create_dir(path)
+
+    return path
+
 def store_reads() -> dict:
     path = store_path()
     items = {}
@@ -157,10 +165,29 @@ def store_write(key : str, val : str):
     items[key] = val.replace('\n', '')
     with open(path, 'w') as fp:
         fp.write("\n".join([f"{x}:{items[x]}" for x in items]))
+
+def get_steam_version() -> None|str:
+    path = os.path.join(get_steam_path(), "logs", "console_log.txt")
+
+    if not os.path.exists(path):
+        return None
     
-def store_or_file_config(key : str) -> bool:
-    if os.path.exists(os.path.join(get_theme_path(), key.upper())):
-        return True
+    with open(path, 'r') as fp:
+        for line in reversed(fp.readlines()):
+            match = re.match(r"^\[.*?\] Client version: (.*?)$", line)
+            if match:
+                version = match.group(1)
+                if version != None and len(version) > 0:
+                    Log(f"Got steam version: '{version}'")
+                    return version
+        
+        return None
     
-    read = store_read(key)
-    return read == "True" or read == "1"
+def save_mappings(val: str):
+    is_beta = is_steam_beta_active()
+    branch_str = "beta" if is_beta else "stable"
+    path = get_mappings_folder_path()
+    
+    file_location = os.path.join(path, f"{get_steam_version()}.{branch_str}.json")
+    with open(file_location, 'w', encoding="utf-8") as fp:
+        fp.write(val)

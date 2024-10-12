@@ -5,74 +5,29 @@ from watchdog.observers import Observer
 
 sys.path.append(os.path.dirname(__file__))
 
-from css_utils import Log, create_steam_symlink, Result, get_theme_path, store_read as util_store_read, store_write as util_store_write, store_or_file_config, is_steam_beta_active
-from css_inject import ALL_INJECTS, initialize_class_mappings
+from css_utils import Log, create_steam_symlink, Result, get_theme_path, save_mappings as util_save_mappings, store_read as util_store_read, store_write as util_store_write, is_steam_beta_active
+from css_inject import ALL_INJECTS
 from css_theme import CSS_LOADER_VER
 from css_remoteinstall import install
+from css_settings import setting_redirect_logs, setting_watch_files, set_setting_watch_files, setting_run_server
 
 from css_server import start_server
 from css_browserhook import initialize
 from css_loader import Loader
+from css_mappings import force_fetch_translations, start_fetch_translations, load_global_translations, generate_webpack_id_name_list_from_local_file
+
 
 ALWAYS_RUN_SERVER = False
 IS_STANDALONE = False
+GOOGLE_PING_COUNT = 0
 
 try:
-    if not store_or_file_config("no_redirect_logs"):
+    if setting_redirect_logs():
         import decky
 except:
     pass
 
 Initialized = False
-
-SUCCESSFUL_FETCH_THIS_RUN = False
-
-async def fetch_class_mappings(css_translations_path : str, loader : Loader):
-    global SUCCESSFUL_FETCH_THIS_RUN
-
-    if SUCCESSFUL_FETCH_THIS_RUN:
-        return
-    
-    try:
-        socket.setdefaulttimeout(3)
-        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("8.8.8.8", 53))
-    except:
-        Log("No internet connection. Not fetching css translations")
-        return
-
-    setting = util_store_read("beta_translations")
-
-    if ((len(setting.strip()) <= 0 or setting == "-1" or setting == "auto") and is_steam_beta_active()) or (setting == "1" or setting == "true"):
-        css_translations_url = "https://api.deckthemes.com/beta.json"
-    else:
-        css_translations_url = "https://api.deckthemes.com/stable.json"
-
-    Log(f"Fetching CSS mappings from {css_translations_url}")
-
-    try:
-        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False, use_dns_cache=False), timeout=aiohttp.ClientTimeout(total=30)) as session:
-            async with session.get(css_translations_url) as response:
-                if response.status == 200:
-                    text = await response.text()
-                    
-                    if len(text.strip()) <= 0:
-                        raise Exception("Empty response")
-
-                    with open(css_translations_path, "w", encoding="utf-8") as fp:
-                        fp.write(text)
-
-                    SUCCESSFUL_FETCH_THIS_RUN = True
-                    Log(f"Fetched css translations from server")
-                    initialize_class_mappings()
-                    asyncio.get_running_loop().create_task(loader.reset(silent=True))
-
-    except Exception as ex:
-        Log(f"Failed to fetch css translations from server [{type(ex).__name__}]: {str(ex)}")
-        
-async def every(__seconds: float, func, *args, **kwargs):
-    while True:
-        await func(*args, **kwargs)
-        await asyncio.sleep(__seconds)
 
 class FileChangeHandler(FileSystemEventHandler):
     def __init__(self, loader : Loader, loop):
@@ -121,7 +76,7 @@ class Plugin:
             self.observer.start()
 
             if not only_this_session:
-                util_store_write("watch", "1")
+                set_setting_watch_files(True)
 
             return Result(True).to_dict()
         elif self.observer != None and not enable:
@@ -130,7 +85,7 @@ class Plugin:
             self.observer = None
 
             if not only_this_session:
-                util_store_write("watch", "0")
+                set_setting_watch_files(False)
 
             return Result(True).to_dict()
         
@@ -179,6 +134,13 @@ class Plugin:
     async def store_write(self, key : str, val : str) -> dict:
         util_store_write(key, val)
         return Result(True).to_dict()
+    
+    async def save_mappings(self, val: str) -> dict:
+        util_save_mappings(val)
+        return Result(True).to_dict()
+    
+    async def get_webpack_mappigns(self) -> dict:
+        return generate_webpack_id_name_list_from_local_file()
 
     async def exit(self):
         try:
@@ -198,18 +160,8 @@ class Plugin:
         return (await self.loader.upload_theme(name, base_url, bearer_token)).to_dict()
 
     async def fetch_class_mappings(self):
-        await self._fetch_class_mappings(self)
+        await force_fetch_translations(self.loader)
         return Result(True).to_dict()
-
-    async def _fetch_class_mappings(self, run_in_bg : bool = False):
-        global SUCCESSFUL_FETCH_THIS_RUN
-
-        SUCCESSFUL_FETCH_THIS_RUN = False
-        css_translations_path = os.path.join(get_theme_path(), "css_translations.json")
-        if run_in_bg:
-            asyncio.get_event_loop().create_task(every(60, fetch_class_mappings, css_translations_path, self.loader))
-        else:
-            await fetch_class_mappings(css_translations_path, self.loader)
 
     async def _main(self):
         global Initialized
@@ -221,7 +173,7 @@ class Plugin:
         self.server_loaded = False
 
         Log("Initializing css loader...")
-        initialize_class_mappings()
+        load_global_translations()
         Log(f"Max supported manifest version: {CSS_LOADER_VER}")
         
         create_steam_symlink()
@@ -229,17 +181,17 @@ class Plugin:
         self.loader = Loader()
         await self.loader.load(False)
 
-        if (store_or_file_config("watch")):
-            await self.toggle_watch_state()
+        if (setting_watch_files()):
+            await self.toggle_watch_state(self)
         else:
             Log("Not observing themes folder for file changes")
 
         Log(f"Initialized css loader. Found {len(self.loader.themes)} themes. Total {len(ALL_INJECTS)} injects, {len([x for x in ALL_INJECTS if x.enabled])} injected")
         
-        if (ALWAYS_RUN_SERVER or store_or_file_config("server")):
-            await self.enable_server()
+        if (ALWAYS_RUN_SERVER or setting_run_server()):
+            await self.enable_server(self)
 
-        await self._fetch_class_mappings(True)
+        start_fetch_translations(self.loader)
         await initialize()
 
 if __name__ == '__main__':
