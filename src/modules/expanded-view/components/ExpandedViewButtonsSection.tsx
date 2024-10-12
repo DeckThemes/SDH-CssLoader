@@ -12,6 +12,7 @@ export function ExpandedViewButtonsSection() {
   const toggleStar = useExpandedViewAction("toggleStar");
 
   const apiFullToken = useCSSLoaderValue("apiFullToken");
+  // Because this is an action handled by the expanded view store and not the backend theme store, we can't just use the backend's isWorking
   const [starButtonBlurred, setStarButtonBlurred] = useState<boolean>(false);
 
   const isWorking = useCSSLoaderValue("isWorking");

@@ -103,7 +103,10 @@ export function ThemeBrowserStoreProvider({
           getThemes();
         }
       },
-      refreshThemes: async () => {},
+      refreshThemes: async () => {
+        const { getThemes } = get();
+        await getThemes();
+      },
       getThemes: async () => {
         try {
           const { searchOpts } = get();

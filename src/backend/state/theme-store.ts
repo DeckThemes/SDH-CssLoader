@@ -373,6 +373,7 @@ export const createCSSLoaderStore = (backend: Backend) =>
         } catch (error) {}
       },
       installTheme: async (themeId: string) => {
+        set({ isWorking: true });
         try {
           await backend.downloadThemeFromUrl(themeId, apiUrl);
           const { updateStatuses, reloadThemes } = get();
@@ -381,6 +382,7 @@ export const createCSSLoaderStore = (backend: Backend) =>
           updateStatusesClone.push([themeId, "installed", false]);
           set({ updateStatuses: updateStatusesClone });
         } catch (error) {}
+        set({ isWorking: false });
       },
       toggleTheme: async (
         theme: Theme,

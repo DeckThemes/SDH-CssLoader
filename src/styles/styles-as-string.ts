@@ -1,6 +1,10 @@
 import { gamepadDialogClasses } from "@decky/ui";
 
 export const styles = `
+/* THIS FILE IS NOT USED IN BUILD */
+/* ANY MODIFICATIONS HERE MUST BE COPY PASTED INTO stylesAsString.ts */
+/* THAT IS NEEDED FOR STATIC CLASS INJECTIOn */
+
 .flex {
   display: flex !important;
 }
@@ -343,7 +347,7 @@ export const styles = `
 
 .cl_expandedview_container {
   background: rgb(27, 40, 56) !important;
-  padding: auto 1rem !important;
+  padding: 0 1rem !important;
   gap: 1rem !important;
   display: flex !important;
   justify-content: space-between !important;
@@ -401,6 +405,14 @@ export const styles = `
     bottom: 1em !important;
     right: 1em !important;
   }
+}
+
+.cl_expandedview_infocontainer {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem
 }
 
 .cl_expandedview_title {

@@ -9,10 +9,12 @@ export function PresetSelectionDropdown() {
   const themes = useCSSLoaderValue("themes");
   const selectedPreset = useCSSLoaderValue("selectedPreset");
   const changePreset = useCSSLoaderAction("changePreset");
-  const presets = useMemo(() => themes.filter((e) => e.flags.includes(Flags.isPreset)), [themes]);
-  const hasInvalidPresetState = presets.length > 1;
+  const presets = themes.filter((e) => e.flags.includes(Flags.isPreset));
+  const hasInvalidPresetState = presets.filter((e) => e.enabled).length > 1;
 
   const [render, rerender] = useForcedRerender();
+
+  console.log(themes, presets, selectedPreset, hasInvalidPresetState);
 
   return (
     <>
