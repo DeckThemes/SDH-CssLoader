@@ -25,6 +25,7 @@ const createDeckyPatchStore = (backend: Backend) =>
     initializeStore: async () => {
       try {
         const shouldEnable = await backend.storeRead("enableNavPatch");
+        return;
         if (shouldEnable) {
           const patch = enableNavPatch();
           set({ navPatchInstance: patch });
