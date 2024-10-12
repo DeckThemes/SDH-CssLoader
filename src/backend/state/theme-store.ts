@@ -171,7 +171,9 @@ export const createCSSLoaderStore = (backend: Backend) =>
           const { bulkThemeUpdateCheck, scheduleBulkThemeUpdateCheck } = get();
           await bulkThemeUpdateCheck();
           scheduleBulkThemeUpdateCheck();
-        } catch (error) {}
+        } catch (error) {
+          console.log("Error During Initialzation", error);
+        }
       },
       deactivate: () => {
         const { updateCheckTimeout } = get();
@@ -181,17 +183,31 @@ export const createCSSLoaderStore = (backend: Backend) =>
         backend.toast("CSS Loader", message);
       },
       reloadPlugin: async () => {
+        set({ isWorking: true });
         try {
-          const { reloadThemes, bulkThemeUpdateCheck } = get();
-          await reloadThemes();
-          await bulkThemeUpdateCheck();
+          const { reloadThemes, initializeStore, bulkThemeUpdateCheck, dummyFunctionResult } =
+            get();
+
+          // If the dummy func result is false, the plugin never initialized properly anyway, so we should just re-initialize the whole thing.
+          if (dummyFunctionResult === false) {
+            await initializeStore();
+          } else {
+            // Otherwise, we can just reload the necessary stuff
+            const dummyFunctionResult = await backend.dummyFunction();
+            set({ dummyFunctionResult });
+            await reloadThemes();
+            await bulkThemeUpdateCheck();
+          }
         } catch (error) {}
+        set({ isWorking: false });
       },
       reloadThemes: async () => {
         try {
           await backend.reset();
           await get().getThemes();
-        } catch (error) {}
+        } catch (error) {
+          console.error("Error Reloading Themes", error);
+        }
       },
       refreshToken: async (): Promise<string | undefined> => {
         const { apiFullToken, apiTokenExpireDate } = get();

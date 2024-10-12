@@ -22,7 +22,13 @@ export class Backend {
     await Backend.repository.call<[], void>("reset", []);
   }
   async dummyFunction(): Promise<boolean> {
-    return await Backend.repository.call<[], boolean>("dummy_function", []);
+    // While most of the try catching should happen in the stores, this makes sense here
+    try {
+      const value = await Backend.repository.call<[], boolean>("dummy_function", []);
+      return value;
+    } catch (error) {
+      return false;
+    }
   }
   async storeRead(key: string) {
     return Backend.repository.call<[string], string>("store_read", [key]);
