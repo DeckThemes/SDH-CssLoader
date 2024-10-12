@@ -21,7 +21,9 @@ export function QamTabPage() {
           <QamHiddenThemesDisplay />
         </PanelSection>
       </QamDummyFunctionBoundary>
-      <QamRefreshButton />
+      <PanelSection>
+        <QamRefreshButton />
+      </PanelSection>
     </>
   );
 }
