@@ -1,6 +1,7 @@
 {
   "name": "SDH-CssLoader",
-  "version": "2.1.2",
+  "type": "module",
+  "version": "2.2.0",
   "description": "A css loader",
   "scripts": {
     "build": "shx rm -rf dist && rollup -c",
@@ -18,23 +19,26 @@
     "steam-deck",
     "deck"
   ],
-  "author": "Jonas Dellinger <jonas@dellinger.dev>",
+  "author": "Deckthemes",
   "license": "GPL-2.0-or-later",
   "bugs": {
     "url": "https://github.com/SteamDeckHomebrew/decky-plugin-template/issues"
   },
   "homepage": "https://github.com/SteamDeckHomebrew/decky-plugin-template#readme",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^21.1.0",
-    "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^13.2.1",
-    "@rollup/plugin-replace": "^4.0.0",
-    "@rollup/plugin-typescript": "^8.3.2",
+    "@rollup/plugin-alias": "^5.1.0",
+    "@rollup/plugin-commonjs": "^26.0.1",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-replace": "^5.0.7",
+    "@rollup/plugin-typescript": "^11.1.6",
     "@types/color": "^3.0.3",
     "@types/lodash": "^4.14.191",
     "@types/react": "16.14.0",
     "@types/webpack": "^5.28.0",
-    "rollup": "^2.70.2",
+    "rollup": "^4.18.0",
+    "rollup-plugin-delete": "^2.0.0",
+    "rollup-plugin-external-globals": "^0.10.0",
     "rollup-plugin-import-assets": "^1.1.1",
     "rollup-plugin-styles": "^4.0.0",
     "shx": "^0.3.4",
@@ -42,10 +46,14 @@
     "typescript": "^4.6.4"
   },
   "dependencies": {
+    "@decky/api": "^1.0.6",
+    "@decky/ui": "^4.4.0",
+    "clsx": "^2.1.1",
     "color": "^4.2.3",
-    "decky-frontend-lib": "^3.25.0",
     "lodash": "^4.17.21",
-    "react-icons": "^4.12.0"
+    "react-icons": "^4.12.0",
+    "tailwind-merge": "^2.3.0",
+    "zustand": "^4.5.2"
   },
   "pnpm": {
     "peerDependencyRules": {
@@ -54,5 +62,6 @@
         "react-dom"
       ]
     }
-  }
+  },
+  "packageManager": "pnpm@9.9.0+sha512.60c18acd138bff695d339be6ad13f7e936eea6745660d4cc4a776d5247c540d0edee1a563695c183a66eb917ef88f2b4feb1fc25f32a7adcadc7aaf3438e99c1"
 }

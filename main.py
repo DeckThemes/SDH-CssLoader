@@ -23,7 +23,7 @@ GOOGLE_PING_COUNT = 0
 
 try:
     if setting_redirect_logs():
-        import decky_plugin
+        import decky
 except:
     pass
 
@@ -217,7 +217,8 @@ if __name__ == '__main__':
             count = 0
             while count < 5:
                 try:
-                    task = asyncio.create_task(Plugin._main(Plugin))
+                    instance = Plugin()
+                    task = asyncio.create_task(instance._main())
                     await asyncio.shield(task)
                 except asyncio.CancelledError as e:
                     print(str(e))
