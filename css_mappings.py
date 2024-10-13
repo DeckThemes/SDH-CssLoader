@@ -13,7 +13,8 @@ def __get_target_branch() -> str:
 
 def __get_same_branch_versions(data : dict) -> list[str]:
     target_branch = __get_target_branch()
-    return [x for x in data['versions'] if data['versions'][x] == target_branch][::-1]
+    versions = sorted([x for x in data['versions'] if data['versions'][x] == target_branch], key=lambda x : int(x), reverse=True)
+    return versions
 
 def __get_target_steam_version(data : dict) -> str|None:
     local_steam_version = get_steam_version()
@@ -62,7 +63,8 @@ def generate_webpack_id_name_list_from_local_file() -> dict[str, dict]:
         else: 
             prev = "9999999999999"
             new_module_id = None
-            for _, (steam_version, module_id_of_steam_version) in list(enumerate(module_data['ids'].items()))[::-1]:
+            mapping_sorted = sorted(list(enumerate(module_data['ids'].items())), key=lambda x: int(x[0]), reverse=True)
+            for _, (steam_version, module_id_of_steam_version) in mapping_sorted:
                 if target_steam_version not in same_branch_versions:
                     continue
 
@@ -113,7 +115,8 @@ def generate_translations_from_local_file() -> dict[str, str]:
             else:
                 prev = "9999999999999"
                 class_target = None
-                for _, (class_mapping_name, class_mapping_value) in list(enumerate(class_mappings.items()))[::-1]:
+                class_mapping_sorting = sorted(list(enumerate(class_mappings.items())), key=lambda x: int(x[0]), reverse=True)
+                for _, (class_mapping_name, class_mapping_value) in class_mapping_sorting:
                     if target_steam_version not in same_branch_versions:
                         continue
 
