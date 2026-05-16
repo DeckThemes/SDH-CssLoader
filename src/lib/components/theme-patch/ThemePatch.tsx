@@ -64,6 +64,7 @@ export function ThemePatch({
         )}
         {patch.type === "dropdown" && (
           <DropdownItem
+            layout="below"
             bottomSeparator={bottomSeparatorValue}
             label={inModal ? patch.name : <PatchLabel name={patch.name} />}
             menuLabel={patch.name}

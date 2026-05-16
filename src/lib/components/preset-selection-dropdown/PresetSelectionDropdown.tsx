@@ -20,6 +20,7 @@ export function PresetSelectionDropdown({ noBottomSeparator }: { noBottomSeparat
           <DropdownItem
             bottomSeparator={noBottomSeparator ? "none" : "standard"}
             label="Selected Profile"
+            layout="below"
             selectedOption={
               hasInvalidPresetState ? "Invalid State" : selectedPreset?.name || "None"
             }
