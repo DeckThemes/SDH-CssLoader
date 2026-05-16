@@ -1,10 +1,8 @@
 import { Focusable } from "decky-frontend-lib";
-import { useCssLoaderState } from "../../state";
-import { ThemeToggle } from "../ThemeToggle";
-import { Flags } from "../../ThemeTypes";
-import { ThemeErrorCard } from "../ThemeErrorCard";
-import { BsArrowDown } from "react-icons/bs";
 import { FaEyeSlash } from "react-icons/fa";
+import { useCssLoaderState } from "../../state";
+import { Flags } from "../../ThemeTypes";
+import { ThemeToggle } from "../ThemeToggle";
 
 export function QAMThemeToggleList() {
   const { localThemeList, unpinnedThemes } = useCssLoaderState();
@@ -34,6 +32,10 @@ export function QAMThemeToggleList() {
         }
         /* POST Aug 18th Beta */
         .CSSLoader_QAM_CollapseButton_Container > div > div > div > div > button {
+          height: 10px !important;
+        }
+        /* May 16 2026 Patch */
+        .CSSLoader_QAM_CollapseButton_Container > div > div > div > div > div > button {
           height: 10px !important;
         }
         `}

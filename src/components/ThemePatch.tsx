@@ -1,9 +1,9 @@
 import { DropdownItem, PanelSectionRow, SliderField, ToggleField } from "decky-frontend-lib";
-import * as python from "../python";
 import { useState, VFC } from "react";
+import * as python from "../python";
+import { useCssLoaderState } from "../state";
 import { Patch } from "../ThemeTypes";
 import { PatchComponent } from "./PatchComponent";
-import { useCssLoaderState } from "../state";
 
 export const ThemePatch: VFC<{
   data: Patch;
@@ -101,6 +101,7 @@ export const ThemePatch: VFC<{
         <>
           <PanelSectionRow>
             <DropdownItem
+              layout="below"
               bottomSeparator={bottomSeparatorValue}
               label={modal ? data.name : <PatchLabel name={data.name} />}
               menuLabel={`${data.name}`}

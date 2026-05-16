@@ -9,11 +9,10 @@ import {
   SliderField,
   TextField,
 } from "decky-frontend-lib";
-import { useEffect, useMemo, memo } from "react";
-import { TiRefreshOutline } from "react-icons/ti";
+import { memo, useEffect, useMemo } from "react";
 import { FaRotate } from "react-icons/fa6";
-import { ThemeQueryRequest } from "../../apiTypes";
 import { genericGET } from "../../api";
+import { ThemeQueryRequest } from "../../apiTypes";
 import { useCssLoaderState } from "../../state";
 import { FilterDropdownCustomLabel } from "./FilterDropdownCustomLabel";
 
@@ -48,6 +47,8 @@ export function BrowserSearchFields({
       }
     });
   }
+
+  console.log(gamepadDialogClasses, gamepadSliderClasses);
 
   const formattedFilters = useMemo<{ filters: DropdownOption[]; order: DropdownOption[] }>(
     () => ({
@@ -202,6 +203,13 @@ export function BrowserSearchFields({
 
               /* POST Aug. 18th Beta */
               .CssLoader_ThemeBrowser_ScaleSlider > div > div > .${
+                // @ts-ignore
+                gamepadDialogClasses.FieldChildrenInner
+              } {
+                min-width: 100% !important;
+              }
+              /* May 16 2026 Patch */
+              .CssLoader_ThemeBrowser_ScaleSlider .${
                 // @ts-ignore
                 gamepadDialogClasses.FieldChildrenInner
               } {

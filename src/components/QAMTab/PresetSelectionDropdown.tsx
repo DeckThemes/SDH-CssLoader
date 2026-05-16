@@ -1,11 +1,11 @@
 import { DropdownItem, PanelSectionRow, showModal } from "decky-frontend-lib";
-import { useCssLoaderState } from "../../state";
-import { Flags } from "../../ThemeTypes";
 import { useMemo } from "react";
-import { changePreset, getInstalledThemes } from "../../python";
-import { CreatePresetModalRoot } from "../Modals/CreatePresetModal";
 import { FiPlusCircle } from "react-icons/fi";
 import { useRerender } from "../../hooks";
+import { changePreset, getInstalledThemes } from "../../python";
+import { useCssLoaderState } from "../../state";
+import { Flags } from "../../ThemeTypes";
+import { CreatePresetModalRoot } from "../Modals/CreatePresetModal";
 
 export function PresetSelectionDropdown() {
   const { localThemeList, selectedPreset } = useCssLoaderState();
@@ -19,6 +19,7 @@ export function PresetSelectionDropdown() {
       {render && (
         <PanelSectionRow>
           <DropdownItem
+            layout="below"
             label="Selected Profile"
             selectedOption={
               localThemeList.filter((e) => e.enabled && e.flags.includes(Flags.isPreset)).length > 1
