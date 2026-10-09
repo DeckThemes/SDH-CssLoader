@@ -47,7 +47,7 @@ class BrowserTabHook:
                 if "value" in res["result"]["result"]:
                     res = res["result"]["result"]["value"]
                 elif "type" in res["result"]["result"] and res["result"]["result"]["type"] == "undefined":
-                    res = "Undefined"
+                    res = None
                 else:
                     res = None
             else:
