@@ -22,6 +22,19 @@ export function fetchThemePath() {
   return server!.callPluginMethod("fetch_theme_path", {});
 }
 
+export async function getSteamLanguage(): Promise<string> {
+  if (!server) return "english";
+  try {
+    const res = await server.callPluginMethod<Record<string, any>, string>("get_steam_language", {});
+    if (res.success && typeof res.result === "string") {
+      return res.result;
+    }
+  } catch (e) {
+    console.warn("Failed to get steam language from python:", e);
+  }
+  return "english";
+}
+
 export function resolve(promise: Promise<any>, setter: any) {
   (async function () {
     let data = await promise;

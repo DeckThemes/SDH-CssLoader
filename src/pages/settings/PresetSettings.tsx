@@ -6,6 +6,7 @@ import { PresetSelectionDropdown } from "../../components";
 import { FullscreenProfileEntry } from "../../components/ThemeSettings/FullscreenProfileEntry";
 import { installTheme } from "../../api";
 import * as python from "../../python";
+import { t } from "../../i18n";
 
 export function PresetSettings() {
   const { localThemeList, setGlobalState, updateStatuses } = useCssLoaderState();
@@ -32,7 +33,7 @@ export function PresetSettings() {
 
   return (
     <div className="CSSLoader_PanelSection_NoPadding_Parent">
-      <PanelSection title="Profiles">
+      <PanelSection title={t("TAB_PROFILES", "Profiles")}>
         <PresetSelectionDropdown />
         <Focusable
           style={{ display: "flex", flexDirection: "column", gap: "0.5em", padding: "0.5em 0" }}

@@ -13,6 +13,7 @@ import {
 } from "../../backend/pythonMethods/pluginSettingsMethods";
 import { booleanStoreWrite, stringStoreWrite } from "../../backend/pythonMethods/storeUtils";
 import { disableUnminifyMode, enableUnminifyMode } from "../../deckyPatches/UnminifyMode";
+import { t } from "../../i18n";
 
 export function PluginSettings() {
   const { navPatchInstance, unminifyModeOn, setGlobalState } = useCssLoaderState();
@@ -76,21 +77,21 @@ export function PluginSettings() {
       <Focusable>
         <DropdownItem
           rgOptions={[
-            { data: "-1", label: "Auto-Detect" },
-            { data: "0", label: "Force Stable" },
-            { data: "1", label: "Force Beta" },
+            { data: "-1", label: t("BRANCH_AUTO_DETECT", "Auto-Detect") },
+            { data: "0", label: t("BRANCH_FORCE_STABLE", "Force Stable") },
+            { data: "1", label: t("BRANCH_FORCE_BETA", "Force Beta") },
           ]}
           selectedOption={betaTranslationsOn}
-          label="SteamOS Branch"
-          description="Choose the version of SteamOS you are on. This allows us to provide the correct translations for your system."
+          label={t("STEAMOS_BRANCH", "SteamOS Branch")}
+          description={t("STEAMOS_BRANCH_DESC", "Choose the version of SteamOS you are on. This allows us to provide the correct translations for your system.")}
           onChange={(data) => setBetaTranslations(data.data)}
         />
       </Focusable>
       <Focusable>
         <ToggleField
           checked={serverOn}
-          label="Enable Standalone Backend"
-          description="Enables support for CSS Loader Desktop on Linux"
+          label={t("ENABLE_STANDALONE_BACKEND", "Enable Standalone Backend")}
+          description={t("ENABLE_STANDALONE_BACKEND_DESC", "Enables support for CSS Loader Desktop on Linux")}
           onChange={(value) => {
             setServer(value);
           }}
@@ -99,24 +100,24 @@ export function PluginSettings() {
       <Focusable>
         <ToggleField
           checked={navPatchEnabled}
-          label="Enable Nav Patch"
-          description="Fixes issues with themes that attempt to hide elements of the UI"
+          label={t("ENABLE_NAV_PATCH", "Enable Nav Patch")}
+          description={t("ENABLE_NAV_PATCH_DESC", "Fixes issues with themes that attempt to hide elements of the UI")}
           onChange={(value) => setNavPatch(value, true)}
         />
       </Focusable>
       <Focusable>
         <ToggleField
           checked={watchOn}
-          label="Live CSS Editing"
-          description="Watches ~/homebrew/themes for any changes and automatically re-injects CSS"
+          label={t("LIVE_CSS_EDITING", "Live CSS Editing")}
+          description={t("LIVE_CSS_EDITING_DESC", "Watches ~/homebrew/themes for any changes and automatically re-injects CSS")}
           onChange={setWatch}
         />
       </Focusable>
       <Focusable>
         <ToggleField
           checked={unminifyModeOn}
-          label="Unminify Mode"
-          description="Adds unminified classnames to devtools view, resets on steam client restart"
+          label={t("UNMINIFY_MODE", "Unminify Mode")}
+          description={t("UNMINIFY_MODE_DESC", "Adds unminified classnames to devtools view, resets on steam client restart")}
           onChange={setUnminify}
         />
       </Focusable>

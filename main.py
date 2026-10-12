@@ -201,6 +201,23 @@ class Plugin:
         await self._fetch_class_mappings(self)
         return Result(True).to_dict()
 
+    async def get_steam_language(self) -> str:
+        for p in [
+            os.path.expanduser("~/.steam/registry.vdf"),
+            os.path.expanduser("~/.local/share/Steam/registry.vdf"),
+            os.path.expanduser("~/.steam/steam/registry.vdf"),
+        ]:
+            if os.path.exists(p):
+                try:
+                    with open(p, "r", encoding="utf-8", errors="ignore") as f:
+                        import re
+                        m = re.search(r"\"language\"\s+\"([^\"]+)\"", f.read(), re.IGNORECASE)
+                        if m:
+                            return m.group(1).lower()
+                except Exception:
+                    pass
+        return "english"
+
     async def _fetch_class_mappings(self, run_in_bg : bool = False):
         global SUCCESSFUL_FETCH_THIS_RUN
 

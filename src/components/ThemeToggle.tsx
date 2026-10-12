@@ -10,6 +10,7 @@ import { useRerender } from "../hooks";
 import { ThemeSettingsModalRoot } from "./Modals/ThemeSettingsModal";
 import { installTheme } from "../api";
 import { toggleTheme } from "../backend/backendHelpers/toggleTheme";
+import t, { translateThemeTitle } from "../i18n/i18n";
 
 export const ThemeToggle: VFC<{
   data: Theme;
@@ -39,7 +40,7 @@ export const ThemeToggle: VFC<{
   // I extracted these here as doing conditional props inline sucks
   const modalButtonProps = showModalButtonPrompt
     ? {
-        onOptionsActionDescription: "Expand Settings",
+        onOptionsActionDescription: t("EXPAND_SETTINGS", "Expand Settings"),
         onOptionsButton: () => {
           showModal(
             // @ts-ignore
@@ -60,7 +61,7 @@ export const ThemeToggle: VFC<{
               updateStatuses.map((e) => (e[0] === data.id ? [data.id, "installed", false] : e))
             );
           },
-          onSecondaryActionDescription: "Update Theme",
+          onSecondaryActionDescription: t("UPDATE_THEME", "Update Theme"),
         }
       : {};
 
@@ -71,7 +72,7 @@ export const ThemeToggle: VFC<{
           <PanelSectionRow>
             <Focusable
               style={{ width: "100%", padding: 0, margin: 0, position: "relative" }}
-              onOKActionDescription="Toggle Theme"
+              onOKActionDescription={t("TOGGLE_THEME", "Toggle Theme")}
               {...modalButtonProps}
               {...updateButtonProps}
             >
@@ -95,11 +96,11 @@ export const ThemeToggle: VFC<{
                 disabled={isInstalling}
                 bottomSeparator={data.enabled && data?.patches?.length > 0 ? "none" : "standard"}
                 checked={data.enabled}
-                label={data.display_name}
+                label={translateThemeTitle(data.display_name, data.name)}
                 description={
                   isPreset
-                    ? `Preset`
-                    : `${updateStatus === "outdated" ? "Update Available" : data.version} | ${
+                    ? t("PRESET", "Preset")
+                    : `${updateStatus === "outdated" ? t("UPDATE_AVAILABLE", "Update Available") : data.version} | ${
                         data.author
                       }`
                 }

@@ -6,6 +6,7 @@ import { AiOutlineDownload } from "react-icons/ai";
 import { PartialCSSThemeInfo, ThemeQueryRequest } from "../../apiTypes";
 import { FaBullseye, FaDownload, FaStar } from "react-icons/fa";
 import { shortenNumber } from "../../logic/numbers";
+import t, { translateFilter, translateThemeTitle } from "../../i18n/i18n";
 
 const cardWidth = {
   5: 152,
@@ -96,16 +97,18 @@ export const VariableSizeCard: FC<{
               </div>
               <div className="CSSLoader_ThemeCard_IconInfoContainer">
                 <FaBullseye />
-                <span>{e.target}</span>
+                <span>{translateFilter(e.target)}</span>
               </div>
             </div>
           </div>
           <div className="CSSLoader_ThemeCard_MainInfoContainer">
-            <span className="CSSLoader_ThemeCard_Title">{e.displayName}</span>
+            <span className="CSSLoader_ThemeCard_Title">{translateThemeTitle(e.displayName, e.name)}</span>
             <span className="CSSLoader_ThemeCard_SubTitle">
-              {e.version} - Last Updated {new Date(e.updated).toLocaleDateString()}
+              {e.version} - {t("LAST_UPDATED", "Last Updated {date}", { date: new Date(e.updated).toLocaleDateString() })}
             </span>
-            <span className="CSSLoader_ThemeCard_SubTitle">By {e.specifiedAuthor}</span>
+            <span className="CSSLoader_ThemeCard_SubTitle">
+              {t("BY_AUTHOR", "By {author}", { author: e.specifiedAuthor })}
+            </span>
           </div>
         </Focusable>
       </div>

@@ -6,6 +6,8 @@ import { StarredThemesPage } from "./StarredThemesPage";
 import { SubmissionsPage } from "./SubmissionBrowserPage";
 import { ThemeBrowserPage } from "./ThemeBrowserPage";
 import { ThemeBrowserCardStyles } from "../../components/Styles";
+import { t } from "../../i18n";
+
 export function ThemeManagerRouter() {
   const { apiMeData, currentTab, setGlobalState, browserCardSize } = useCssLoaderState();
   return (
@@ -24,21 +26,21 @@ export function ThemeManagerRouter() {
         }}
         tabs={[
           {
-            title: "All Themes",
+            title: t("ALL_THEMES", "All Themes"),
             content: <ThemeBrowserPage />,
             id: "ThemeBrowser",
           },
           ...(!!apiMeData
             ? [
                 {
-                  title: "Starred Themes",
+                  title: t("STARRED_THEMES", "Starred Themes"),
                   content: <StarredThemesPage />,
                   id: "StarredThemes",
                 },
                 ...(apiMeData.permissions.includes(Permissions.viewSubs)
                   ? [
                       {
-                        title: "Submissions",
+                        title: t("SUBMISSIONS", "Submissions"),
                         content: <SubmissionsPage />,
                         id: "SubmissionsPage",
                       },
@@ -47,7 +49,7 @@ export function ThemeManagerRouter() {
               ]
             : []),
           {
-            title: "DeckThemes Account",
+            title: t("DECKTHEMES_ACCOUNT", "DeckThemes Account"),
             content: <LogInPage />,
             id: "LogInPage",
           },

@@ -4,6 +4,7 @@ import { ThemeQueryRequest, ThemeQueryResponse } from "../../apiTypes";
 import { generateParamStr } from "../../logic";
 import { genericGET } from "../../api";
 import { useCssLoaderState } from "../../state";
+import { t } from "../../i18n";
 
 export function LoadMoreButton({
   fetchPath = "/themes",
@@ -56,7 +57,7 @@ export function LoadMoreButton({
       {themeArr.items.length < themeArr.total ? (
         <>
           <DialogButton onClick={loadMore} disabled={loading}>
-            Load More
+            {t("LOAD_MORE", "Load More")}
           </DialogButton>
         </>
       ) : null}

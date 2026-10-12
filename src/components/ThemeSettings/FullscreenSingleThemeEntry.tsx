@@ -7,6 +7,7 @@ import { toggleTheme } from "../../backend/backendHelpers/toggleTheme";
 import { ThemeSettingsModalRoot } from "../Modals/ThemeSettingsModal";
 import { FaEye, FaEyeSlash, FaTrash } from "react-icons/fa";
 import { BsGearFill } from "react-icons/bs";
+import t, { translateThemeTitle } from "../../i18n/i18n";
 
 export function FullscreenSingleThemeEntry({
   data: e,
@@ -33,7 +34,7 @@ export function FullscreenSingleThemeEntry({
   // I extracted these here as doing conditional props inline sucks
   const modalButtonProps = showModalButtonPrompt
     ? {
-        onOptionsActionDescription: "Expand Settings",
+        onOptionsActionDescription: t("EXPAND_SETTINGS", "Expand Settings"),
         onOptionsButton: () => {
           showModal(<ThemeSettingsModalRoot selectedTheme={e.id} />);
         },
@@ -46,7 +47,7 @@ export function FullscreenSingleThemeEntry({
           onSecondaryButton: () => {
             handleUpdate(e);
           },
-          onSecondaryActionDescription: "Update Theme",
+          onSecondaryActionDescription: t("UPDATE_THEME", "Update Theme"),
         }
       : {};
 
@@ -75,7 +76,7 @@ export function FullscreenSingleThemeEntry({
           <ToggleField
             disabled={isInstalling}
             bottomSeparator="none"
-            label={<span className="CSSLoader_FullTheme_ThemeLabel">{e.display_name}</span>}
+            label={<span className="CSSLoader_FullTheme_ThemeLabel">{translateThemeTitle(e.display_name, e.name)}</span>}
             checked={e.enabled}
             onChange={(switchValue: boolean) => {
               toggleTheme(e, switchValue);

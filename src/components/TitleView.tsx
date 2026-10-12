@@ -2,6 +2,7 @@ import { DialogButton, Navigation, staticClasses, Focusable } from "decky-fronte
 import { BsGearFill } from "react-icons/bs";
 import { FaDownload } from "react-icons/fa";
 import { useCssLoaderState } from "../state";
+import t from "../i18n/i18n";
 
 export function TitleView({ onDocsClick }: { onDocsClick?: () => {} }) {
   const { localThemeList } = useCssLoaderState();
@@ -43,7 +44,7 @@ export function TitleView({ onDocsClick }: { onDocsClick?: () => {} }) {
         }
         `}
       </style>
-      <div style={{ marginRight: "auto" }}>CSS Loader</div>
+      <div style={{ marginRight: "auto" }}>{t("CSS_LOADER_TITLE", "CSS Loader")}</div>
       <DialogButton
         style={{
           height: "28px",

@@ -20,6 +20,7 @@ import { AuthorViewModalRoot } from "../../components/Modals/AuthorViewModal";
 import { ExpandedViewStyles } from "../../components/Styles";
 import { shortenNumber } from "../../logic/numbers";
 import { FaRegStar, FaStar } from "react-icons/fa";
+import t, { translateFilter, translateThemeTitle } from "../../i18n/i18n";
 
 export const ExpandedViewPage: VFC = () => {
   const {
@@ -98,13 +99,13 @@ export const ExpandedViewPage: VFC = () => {
     let buttonText = "";
     switch (installStatus) {
       case "installed":
-        buttonText = "Reinstall";
+        buttonText = t("REINSTALL", "Reinstall");
         break;
       case "outdated":
-        buttonText = "Update";
+        buttonText = t("UPDATE", "Update");
         break;
       default:
-        buttonText = "Install";
+        buttonText = t("INSTALL", "Install");
         break;
     }
     return buttonText;
@@ -165,7 +166,7 @@ export const ExpandedViewPage: VFC = () => {
           }}
         >
           <ImSpinner5 className="spinny" size={48} />
-          <span style={{ fontWeight: "bold", fontSize: "2.5em" }}>Loading</span>
+          <span style={{ fontWeight: "bold", fontSize: "2.5em" }}>{t("LOADING", "Loading")}</span>
         </div>
       </>
     );
@@ -204,7 +205,7 @@ export const ExpandedViewPage: VFC = () => {
             focusable={false}
             className="flex blurry-valve-footer-offset"
             // onCancelButton doesn't work here
-            onCancelActionDescription="Back"
+            onCancelActionDescription={t("BACK", "Back")}
             onButtonDown={(evt: any) => {
               if (!evt?.detail?.button) return;
               if (evt.detail.button === 2) {
@@ -275,20 +276,24 @@ export const ExpandedViewPage: VFC = () => {
                 {/* Info */}
                 <div className="flex flex-col gap-1/4">
                   <div className="flex gap-1/2 items-center">
-                    <span className="name-text">{fullThemeData.displayName}</span>
+                    <span className="name-text">{translateThemeTitle(fullThemeData.displayName, fullThemeData.name)}</span>
                     <span className="bold text-lg">{fullThemeData.version}</span>
                   </div>
                   <div className="flex gap-1/4 gray-text font-sm">
                     <Focusable
-                      onOKActionDescription="View Profile"
+                      onOKActionDescription={t("VIEW_PROFILE", "View Profile")}
                       focusClassName="gpfocuswithin"
                       onActivate={() => {
                         showModal(<AuthorViewModalRoot authorData={fullThemeData.author} />);
                       }}
                     >
-                      By <span className="blue-text">{fullThemeData.specifiedAuthor}</span>
+                      {t("BY_AUTHOR", "By {author}", { author: fullThemeData.specifiedAuthor })}
                     </Focusable>
-                    <span>Last Updated {new Date(fullThemeData.updated).toLocaleDateString()}</span>
+                    <span>
+                      {t("LAST_UPDATED", "Last Updated {date}", {
+                        date: new Date(fullThemeData.updated).toLocaleDateString(),
+                      })}
+                    </span>
                   </div>
                 </div>
                 {/* Description */}
@@ -297,7 +302,7 @@ export const ExpandedViewPage: VFC = () => {
                   className="flex-col gap-1/4"
                   onActivate={() => {}}
                 >
-                  <span className="bold">Description</span>
+                  <span className="bold">{t("DESCRIPTION", "Description")}</span>
                   <span className={fullThemeData?.description?.length > 400 ? "text-sm" : ""}>
                     {fullThemeData?.description || (
                       <i
@@ -305,18 +310,20 @@ export const ExpandedViewPage: VFC = () => {
                           color: "#666",
                         }}
                       >
-                        No description provided.
+                        {t("NO_DESCRIPTION", "No description provided.")}
                       </i>
                     )}
                   </span>
                 </Focusable>
                 {/* Targets */}
                 <Focusable className="flex-col gap-1/4">
-                  <span className="bold">Targets</span>
+                  <span className="bold">{t("TARGETS", "Targets")}</span>
                   <Focusable className="flex gap-1/4">
                     {fullThemeData.targets.map((e) => (
                       <DialogButton
-                        onOKActionDescription={`View Other "${e}" Themes`}
+                        onOKActionDescription={t("VIEW_OTHER_THEMES", 'View Other "{target}" Themes', {
+                          target: translateFilter(e),
+                        })}
                         onClick={() => {
                           setGlobalState("themeSearchOpts", { ...themeSearchOpts, filters: e });
                           setGlobalState("currentTab", "ThemeBrowser");
@@ -325,7 +332,7 @@ export const ExpandedViewPage: VFC = () => {
                         }}
                         className="target-text"
                       >
-                        {e}
+                        {translateFilter(e)}
                       </DialogButton>
                     ))}
                   </Focusable>
@@ -340,8 +347,13 @@ export const ExpandedViewPage: VFC = () => {
                 {isStarred ? <FaStar /> : <FaRegStar />}
                 {/* Need to make the text size smaller or else it wraps */}
                 <span style={{ fontSize: fullThemeData.starCount >= 100 ? "0.75em" : "1em" }}>
-                  {shortenNumber(fullThemeData.starCount) ?? fullThemeData.starCount} Star
-                  {fullThemeData.starCount === 1 ? "" : "s"}
+                  {fullThemeData.starCount === 1
+                    ? t("STAR_COUNT_SINGLE", "{count} Star", {
+                        count: shortenNumber(fullThemeData.starCount) ?? fullThemeData.starCount,
+                      })
+                    : t("STAR_COUNT", "{count} Stars", {
+                        count: shortenNumber(fullThemeData.starCount) ?? fullThemeData.starCount,
+                      })}
                 </span>
               </div>
               <DialogButton
@@ -351,18 +363,31 @@ export const ExpandedViewPage: VFC = () => {
               >
                 <div className="flex items-center justify-center gap-1/4">
                   <span>
-                    {!apiFullToken ? "Log In to Star" : isStarred ? "Unstar Theme" : "Star Theme"}
+                    {!apiFullToken
+                      ? t("LOGIN_TO_STAR", "Log In to Star")
+                      : isStarred
+                      ? t("UNSTAR_THEME", "Unstar Theme")
+                      : t("STAR_THEME", "Star Theme")}
                   </span>
                 </div>
               </DialogButton>
             </div>
             <div className="flex flex-col gap-1/4 button-bg">
-              <span className="install-text">Install {fullThemeData.displayName}</span>
+              <span className="install-text">
+                {t("INSTALL_THEME_TITLE", "Install {name}", { name: translateThemeTitle(fullThemeData.displayName, fullThemeData.name) })}
+              </span>
               <span className="bold">
-                {shortenNumber(fullThemeData.download.downloadCount) ??
-                  fullThemeData.download.downloadCount}{" "}
-                Download
-                {fullThemeData.download.downloadCount === 1 ? "" : "s"}
+                {fullThemeData.download.downloadCount === 1
+                  ? t("DOWNLOAD_COUNT_SINGLE", "{count} Download", {
+                      count:
+                        shortenNumber(fullThemeData.download.downloadCount) ??
+                        fullThemeData.download.downloadCount,
+                    })
+                  : t("DOWNLOAD_COUNT", "{count} Downloads", {
+                      count:
+                        shortenNumber(fullThemeData.download.downloadCount) ??
+                        fullThemeData.download.downloadCount,
+                    })}
               </span>
               <Focusable className="install-button-container">
                 <DialogButton
@@ -416,7 +441,7 @@ export const ExpandedViewPage: VFC = () => {
           background: "#0e141b",
         }}
       >
-        <span>Error fetching selected theme, please go back and retry.</span>
+        <span>{t("STORE_ERROR_FETCH", "Error fetching selected theme, please go back and retry.")}</span>
       </div>
     </>
   );

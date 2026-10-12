@@ -5,6 +5,7 @@ import { BrowserSearchFields, LoadMoreButton, VariableSizeCard } from "../../com
 import { useEffect, useRef, useState } from "react";
 import { isEqual } from "lodash";
 import { getThemes } from "../../api";
+import { t } from "../../i18n";
 
 export function SubmissionsPage() {
   const {
@@ -49,8 +50,15 @@ export function SubmissionsPage() {
             height: "80%",
           }}
         >
-          <span style={{ fontSize: "1.5em", fontWeight: "bold" }}>You Are Not Logged In!</span>
-          <span>Link your deck to your deckthemes.com account to sync Starred Themes</span>
+          <span style={{ fontSize: "1.5em", fontWeight: "bold" }}>
+            {t("NOT_LOGGED_IN_TITLE", "You Are Not Logged In!")}
+          </span>
+          <span>
+            {t(
+              "NOT_LOGGED_IN_SYNC",
+              "Link your deck to your deckthemes.com account to sync Starred Themes"
+            )}
+          </span>
         </div>
       </>
     );

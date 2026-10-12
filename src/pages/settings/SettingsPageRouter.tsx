@@ -8,6 +8,7 @@ import { Credits } from "./Credits";
 import { AiFillGithub, AiFillHeart } from "react-icons/ai";
 import { DonatePage } from "./DonatePage";
 import { FaFolder, FaGithub, FaHeart } from "react-icons/fa";
+import { t } from "../../i18n";
 
 export function SettingsPageRouter() {
   return (
@@ -65,34 +66,34 @@ export function SettingsPageRouter() {
       <SidebarNavigation
         pages={[
           {
-            title: "Themes",
+            title: t("TAB_THEMES", "Themes"),
             icon: <RiPaintFill />,
             route: "/cssloader/settings/themes",
             content: <ThemeSettings />,
           },
           {
-            title: "Profiles",
+            title: t("TAB_PROFILES", "Profiles"),
             icon: <FaFolder />,
             route: "/cssloader/settings/profiles",
 
             content: <PresetSettings />,
           },
           {
-            title: "Settings",
+            title: t("TAB_SETTINGS", "Settings"),
             icon: <BsGearFill />,
             route: "/cssloader/settings/plugin",
 
             content: <PluginSettings />,
           },
           {
-            title: "Donate",
+            title: t("TAB_DONATE", "Donate"),
             icon: <FaHeart />,
             route: "/cssloader/settings/donate",
 
             content: <DonatePage />,
           },
           {
-            title: "Credits",
+            title: t("TAB_CREDITS", "Credits"),
             icon: <FaGithub />,
             route: "/cssloader/settings/credits",
 

@@ -6,6 +6,7 @@ import { changePreset, getInstalledThemes } from "../../python";
 import { useCssLoaderState } from "../../state";
 import { Flags } from "../../ThemeTypes";
 import { CreatePresetModalRoot } from "../Modals/CreatePresetModal";
+import t, { translateThemeTitle } from "../../i18n/i18n";
 
 export function PresetSelectionDropdown() {
   const { localThemeList, selectedPreset } = useCssLoaderState();
@@ -20,7 +21,7 @@ export function PresetSelectionDropdown() {
         <PanelSectionRow>
           <DropdownItem
             layout="below"
-            label="Selected Profile"
+            label={t("SELECTED_PROFILE", "Selected Profile")}
             selectedOption={
               localThemeList.filter((e) => e.enabled && e.flags.includes(Flags.isPreset)).length > 1
                 ? "Invalid State"
@@ -29,10 +30,10 @@ export function PresetSelectionDropdown() {
             rgOptions={[
               ...(localThemeList.filter((e) => e.enabled && e.flags.includes(Flags.isPreset))
                 .length > 1
-                ? [{ data: "Invalid State", label: "Invalid State" }]
+                ? [{ data: "Invalid State", label: t("INVALID_STATE", "Invalid State") }]
                 : []),
-              { data: "None", label: "None" },
-              ...presets.map((e) => ({ label: e.display_name, data: e.name })),
+              { data: "None", label: t("NONE", "None") },
+              ...presets.map((e) => ({ label: translateThemeTitle(e.display_name, e.name), data: e.name })),
               // This is a jank way of only adding it if creatingNewProfile = false
               {
                 data: "New Profile",
@@ -46,7 +47,7 @@ export function PresetSelectionDropdown() {
                     }}
                   >
                     <FiPlusCircle />
-                    <span>New Profile</span>
+                    <span>{t("NEW_PROFILE", "New Profile")}</span>
                   </div>
                 ),
               },

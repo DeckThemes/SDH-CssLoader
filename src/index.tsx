@@ -20,6 +20,7 @@ import { bulkThemeUpdateCheck } from "./logic/bulkThemeUpdateCheck";
 import { disableNavPatch, enableNavPatch } from "./deckyPatches/NavPatch";
 import { SettingsPageRouter } from "./pages/settings/SettingsPageRouter";
 import { disableUnminifyMode } from "./deckyPatches/UnminifyMode";
+import t, { initLanguage } from "./i18n/i18n";
 
 function Content() {
   const { localThemeList, setGlobalState } = useCssLoaderState();
@@ -57,7 +58,7 @@ function Content() {
   return (
     <>
       <MOTDDisplay />
-      <PanelSection title="Themes">
+      <PanelSection title={t("THEMES", "Themes")}>
         {dummyFuncResult ? (
           <>
             <style>
@@ -90,15 +91,17 @@ function Content() {
         ) : (
           <PanelSectionRow>
             <span>
-              CssLoader failed to initialize, try reloading, and if that doesn't work, try
-              restarting your deck.
+              {t(
+                "INIT_FAILED",
+                "CssLoader failed to initialize, try reloading, and if that doesn't work, try restarting your deck."
+              )}
             </span>
           </PanelSectionRow>
         )}
 
         <PanelSectionRow>
           <ButtonItem layout="below" onClick={() => reload()}>
-            Refresh
+            {t("REFRESH", "Refresh")}
           </ButtonItem>
         </PanelSectionRow>
       </PanelSection>
@@ -112,6 +115,7 @@ export default definePlugin((serverApi: ServerAPI) => {
   python.setStateClass(state);
   api.setServer(serverApi);
   api.setStateClass(state);
+  void initLanguage();
 
   python.resolve(python.getThemes(), async (allThemes: Theme[]) => {
     // Set selectedPreset
@@ -191,7 +195,7 @@ export default definePlugin((serverApi: ServerAPI) => {
         <TitleView />
       </CssLoaderContextProvider>
     ),
-    title: <div>CSSLoader</div>,
+    title: <div>{t("CSS_LOADER_TITLE", "CSSLoader")}</div>,
     alwaysRender: true,
     content: (
       <CssLoaderContextProvider cssLoaderStateClass={state}>

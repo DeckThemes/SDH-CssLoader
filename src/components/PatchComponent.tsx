@@ -9,6 +9,7 @@ import { ColorPickerModal } from "decky-frontend-lib";
 import { ThemePatchComponent } from "../ThemeTypes";
 import { FaFolder } from "react-icons/fa";
 import { useCssLoaderState } from "../state";
+import { t } from "../i18n";
 
 export const PatchComponent: VFC<{
   data: ThemePatchComponent;
@@ -37,11 +38,17 @@ export const PatchComponent: VFC<{
         async function pickImage(rootPath: string) {
           const res = await python.openFilePicker(rootPath);
           if (!res.path.includes(rootPath)) {
-            python.toast("Invalid File", "Images must be within themes folder");
+            python.toast(
+              t("TOAST_INVALID_FILE", "Invalid File"),
+              t("TOAST_INVALID_FILE_DIR", "Images must be within themes folder")
+            );
             return;
           }
           if (!/\.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(res.path)) {
-            python.toast("Invalid File", "Must be an image file");
+            python.toast(
+              t("TOAST_INVALID_FILE", "Invalid File"),
+              t("TOAST_INVALID_FILE_IMG", "Must be an image file")
+            );
             return;
           }
           const relativePath = res.path.split(`${rootPath}/`)[1];
@@ -55,7 +62,7 @@ export const PatchComponent: VFC<{
               layout="below"
             >
               <div style={{ display: "flex", alignItems: "center" }}>
-                <span>Open {data.name}</span>
+                <span>{t("OPEN_ITEM", "Open {name}", { name: data.name })}</span>
                 <div
                   style={{
                     marginLeft: "auto",
@@ -99,7 +106,7 @@ export const PatchComponent: VFC<{
                 layout={"below"}
               >
                 <div style={{ display: "flex", alignItems: "center" }}>
-                  <span>Open {data.name}</span>
+                  <span>{t("OPEN_ITEM", "Open {name}", { name: data.name })}</span>
                   <div
                     style={{
                       marginLeft: "auto",

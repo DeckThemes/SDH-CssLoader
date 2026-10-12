@@ -12,6 +12,7 @@ import {
   installTheme,
 } from "../../../api";
 import { useState, useEffect } from "react";
+import t from "../../../i18n/i18n";
 
 export function ThemeSettingsModalButtons({
   themeData,
@@ -49,7 +50,10 @@ export function ThemeSettingsModalButtons({
         });
       }
     } else {
-      python.toast("Not Logged In!", "You can only star themes if logged in.");
+      python.toast(
+        t("TOAST_NOT_LOGGED_IN_TITLE", "Not Logged In!"),
+        t("TOAST_NOT_LOGGED_IN_DESC", "You can only star themes if logged in.")
+      );
     }
   }
 
@@ -90,7 +94,7 @@ export function ThemeSettingsModalButtons({
             }}
           >
             <FaDownload className="CSSLoader_ThemeSettingsModal_IconTranslate" />
-            <span className="CSSLoader_ThemeSettingsModal_UpdateText">Update</span>
+            <span className="CSSLoader_ThemeSettingsModal_UpdateText">{t("UPDATE", "Update")}</span>
           </DialogButton>
         )}
         <DialogButton

@@ -1,6 +1,7 @@
 import { CssLoaderContextProvider } from "../../state";
 import * as python from "../../python";
 import { ConfirmModal, ModalRoot } from "decky-frontend-lib";
+import t from "../../i18n/i18n";
 
 export function DeleteConfirmationModalRoot({
   themesToBeDeleted,
@@ -22,7 +23,7 @@ export function DeleteConfirmationModalRoot({
 
   return (
     <ConfirmModal
-      strTitle="Delete Themes"
+      strTitle={t("DELETE_CONFIRM_TITLE", "Delete Themes")}
       onCancel={closeModal}
       onEscKeypress={closeModal}
       onOK={deleteThemes}
@@ -38,8 +39,11 @@ export function DeleteConfirmationModalRoot({
 function DeleteConfirmationModal({ themesToBeDeleted }: { themesToBeDeleted: string[] }) {
   return (
     <div>
-      Are you sure you want to delete{" "}
-      {themesToBeDeleted.length === 1 ? `this theme` : `these ${themesToBeDeleted.length} themes`}?
+      {themesToBeDeleted.length === 1
+        ? t("DELETE_CONFIRM_SINGLE", "Are you sure you want to delete this theme?")
+        : t("DELETE_CONFIRM_MULTI", "Are you sure you want to delete these {count} themes?", {
+            count: themesToBeDeleted.length,
+          })}
     </div>
   );
 }

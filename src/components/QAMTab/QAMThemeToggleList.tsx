@@ -3,6 +3,7 @@ import { FaEyeSlash } from "react-icons/fa";
 import { useCssLoaderState } from "../../state";
 import { Flags } from "../../ThemeTypes";
 import { ThemeToggle } from "../ThemeToggle";
+import t from "../../i18n/i18n";
 
 export function QAMThemeToggleList() {
   const { localThemeList, unpinnedThemes } = useCssLoaderState();
@@ -10,7 +11,12 @@ export function QAMThemeToggleList() {
   if (localThemeList.length === 0) {
     return (
       <>
-        <span>You have no themes installed. Get started by selecting the download icon above!</span>
+        <span>
+          {t(
+            "NO_THEMES_INSTALLED",
+            "You have no themes installed. Get started by selecting the download icon above!"
+          )}
+        </span>
       </>
     );
   }
@@ -61,7 +67,9 @@ export function QAMThemeToggleList() {
         >
           <FaEyeSlash />
           <div>
-            {unpinnedThemes.length} theme{unpinnedThemes.length > 1 ? "s are" : "is"} hidden.
+            {unpinnedThemes.length === 1
+              ? t("HIDDEN_THEMES_SINGLE", "{count} theme is hidden.", { count: unpinnedThemes.length })
+              : t("HIDDEN_THEMES_MULTI", "{count} themes are hidden.", { count: unpinnedThemes.length })}
           </div>
         </div>
       )}

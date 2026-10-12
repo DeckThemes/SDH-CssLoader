@@ -9,6 +9,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { SiKofi, SiPatreon } from "react-icons/si";
 import { server } from "../../python";
+import { t } from "../../i18n";
 
 export function DonatePage() {
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -105,8 +106,10 @@ export function DonatePage() {
         `}
       </style>
       <p className="donation-spiel">
-        Donations help to cover the costs of hosting the store, as well as funding development for
-        CSS Loader and its related projects.
+        {t(
+          "DONATE_SPIEL",
+          "Donations help to cover the costs of hosting the store, as well as funding development for CSS Loader and its related projects."
+        )}
       </p>
       <Focusable className="support-methods-container">
         <Focusable
@@ -116,20 +119,20 @@ export function DonatePage() {
         >
           <div className="method-title-container">
             <SiPatreon />
-            <span className="method-title">Patreon</span>
+            <span className="method-title">{t("PATREON_TITLE", "Patreon")}</span>
           </div>
-          <span className="method-subtitle">Recurring Donation</span>
+          <span className="method-subtitle">{t("RECURRING_DONATION", "Recurring Donation")}</span>
           <span className="link-header">patreon.com/deckthemes</span>
-          <span className="perks-header">Perks: </span>
+          <span className="perks-header">{t("PERKS_HEADER", "Perks: ")}</span>
           <ul>
             <li>
               {/* Potentially could expand this to add it to deckthemes and audioloader */}
-              Your name in CSS Loader
+              {t("PERK_1", "Your name in CSS Loader")}
             </li>
-            <li>Patreon badge on deckthemes.com</li>
+            <li>{t("PERK_2", "Patreon badge on deckthemes.com")}</li>
             <li>
               {/* Could also impl. this on deck store to make it more meaningful */}
-              Colored name + VIP channel in the DeckThemes Discord
+              {t("PERK_3", "Colored name + VIP channel in the DeckThemes Discord")}
             </li>
           </ul>
         </Focusable>
@@ -140,15 +143,15 @@ export function DonatePage() {
         >
           <div className="method-title-container">
             <SiKofi />
-            <span className="method-title">Ko-Fi</span>
+            <span className="method-title">{t("KOFI_TITLE", "Ko-Fi")}</span>
           </div>
-          <span className="method-subtitle">One-time Donation</span>
+          <span className="method-subtitle">{t("ONETIME_DONATION", "One-time Donation")}</span>
           <span className="link-header">ko-fi.com/suchmememanyskill</span>
         </Focusable>
       </Focusable>
       {loaded ? (
         <div className="CSSLoader_PanelSection_NoPadding_Parent supporter-list-container">
-          <PanelSection title="Patreon Supporters">
+          <PanelSection title={t("PATREON_SUPPORTERS", "Patreon Supporters")}>
             {formattedSupporters.map((e) => {
               return (
                 <Focusable onActivate={() => {}} focusWithinClassName="gpfocuswithin">

@@ -2,6 +2,7 @@ import { DialogButton } from "decky-frontend-lib";
 import { useCssLoaderState } from "../../state";
 import { Theme } from "../../ThemeTypes";
 import { FaDownload } from "react-icons/fa";
+import t from "../../i18n/i18n";
 
 export function UpdateAllThemesButton({
   handleUpdate,
@@ -23,7 +24,7 @@ export function UpdateAllThemesButton({
       {updateStatuses.filter((e) => e[1] === "outdated").length > 0 && (
         <DialogButton className="CSSLoader_InstalledThemes_UpdateAllButton" onClick={updateAll}>
           <FaDownload />
-          <span>Update All Themes</span>
+          <span>{t("UPDATE_ALL_THEMES", "Update All Themes")}</span>
         </DialogButton>
       )}
     </>

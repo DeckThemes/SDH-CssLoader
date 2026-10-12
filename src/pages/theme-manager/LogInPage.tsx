@@ -6,6 +6,7 @@ import { useCssLoaderState } from "../../state";
 import { enableServer, getServerState, storeWrite } from "../../python";
 import { disableNavPatch, enableNavPatch } from "../../deckyPatches/NavPatch";
 import { FaArrowRightToBracket } from "react-icons/fa6";
+import { t } from "../../i18n";
 
 export const LogInPage: VFC = () => {
   const { apiShortToken, apiFullToken, apiMeData } = useCssLoaderState();
@@ -16,10 +17,10 @@ export const LogInPage: VFC = () => {
     <div>
       <div>
         {apiFullToken ? (
-          <h1 style={{ fontWeight: "bold", fontSize: "2em" }}>Your Account</h1>
+          <h1 style={{ fontWeight: "bold", fontSize: "2em" }}>{t("YOUR_ACCOUNT", "Your Account")}</h1>
         ) : (
           <h1 style={{ fontSize: "1em", fontWeight: "normal" }}>
-            <span style={{ fontWeight: "bold", fontSize: "2em" }}>Log In</span>
+            <span style={{ fontWeight: "bold", fontSize: "2em" }}>{t("LOG_IN", "Log In")}</span>
           </h1>
         )}
         {apiFullToken ? (
@@ -28,10 +29,12 @@ export const LogInPage: VFC = () => {
               <div style={{ minWidth: "65%", marginRight: "auto" }}>
                 {apiMeData ? (
                   <>
-                    <span>Logged In As {apiMeData.username}</span>
+                    <span>
+                      {t("LOGGED_IN_AS", "Logged In As {username}", { username: apiMeData.username })}
+                    </span>
                   </>
                 ) : (
-                  <span>Loading...</span>
+                  <span>{t("LOADING", "Loading...")}</span>
                 )}
               </div>
               <DialogButton
@@ -46,7 +49,7 @@ export const LogInPage: VFC = () => {
                 }}
                 onClick={logOut}
               >
-                <span>Unlink My Deck</span>
+                <span>{t("UNLINK_DECK", "Unlink My Deck")}</span>
               </DialogButton>
             </Focusable>
           </>
@@ -56,7 +59,7 @@ export const LogInPage: VFC = () => {
               <div style={{ minWidth: "65%", marginRight: "auto" }}>
                 <TextField
                   disabled={!!apiFullToken}
-                  label="DeckThemes Account Key"
+                  label={t("ACCOUNT_KEY_LABEL", "DeckThemes Account Key")}
                   bIsPassword
                   value={shortTokenInterimValue}
                   onChange={(e) => setShortTokenIntValue(e.target.value)}
@@ -78,16 +81,21 @@ export const LogInPage: VFC = () => {
                 }}
               >
                 <FaArrowRightToBracket style={{ height: "1.5em", width: "1.5em" }} />
-                <span>Log In</span>
+                <span>{t("LOG_IN", "Log In")}</span>
               </DialogButton>
             </Focusable>
           </>
         )}
         <p>
-          Logging in gives you access to star themes, saving them to their own page where you can
-          quickly find them.
+          {t(
+            "LOGIN_PERKS_DESC",
+            "Logging in gives you access to star themes, saving them to their own page where you can quickly find them."
+          )}
           <br />
-          Create an account on deckthemes.com and generate an account key on your profile page.
+          {t(
+            "LOGIN_CREATE_ACCOUNT_DESC",
+            "Create an account on deckthemes.com and generate an account key on your profile page."
+          )}
           <br />
         </p>
       </div>

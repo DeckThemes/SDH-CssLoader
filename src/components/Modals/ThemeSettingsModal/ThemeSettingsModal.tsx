@@ -7,6 +7,7 @@ import { globalState } from "../../../python";
 import { ThemeSettingsModalButtons } from "./ThemeSettingsModalButtons";
 import { toggleTheme } from "../../../backend/backendHelpers/toggleTheme";
 import { ThemePatch } from "../../ThemePatch";
+import t, { translateThemeTitle } from "../../../i18n/i18n";
 export function ThemeSettingsModalRoot({
   closeModal,
   selectedTheme,
@@ -124,7 +125,7 @@ function ThemeSettingsModal({
           <>
             <Focusable className="CSSLoader_ThemeSettingsModal_Header">
               <div className="CSSLoader_ThemeSettingsModal_TitleContainer">
-                <span className="CSSLoader_ThemeSettingsModal_Title">{themeData.display_name}</span>
+                <span className="CSSLoader_ThemeSettingsModal_Title">{translateThemeTitle(themeData.display_name, themeData.name)}</span>
                 <span className="CSSLoader_ThemeSettingsModal_Subtitle">
                   {themeData.version} | {themeData.author}
                 </span>
@@ -147,7 +148,7 @@ function ThemeSettingsModal({
             )}
           </>
         ) : (
-          <span>No Theme Data</span>
+          <span>{t("NO_THEME_DATA", "No Theme Data")}</span>
         )}
         <Focusable className="CSSLoader_ThemeSettingsModal_Footer">
           <DialogButton
@@ -156,7 +157,7 @@ function ThemeSettingsModal({
               closeModal();
             }}
           >
-            Close
+            {t("CLOSE", "Close")}
           </DialogButton>
           {themeData && <ThemeSettingsModalButtons themeData={themeData} closeModal={closeModal} />}
         </Focusable>

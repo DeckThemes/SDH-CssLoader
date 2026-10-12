@@ -4,6 +4,7 @@ import { useCssLoaderState } from "../../state";
 import { AiOutlineDownload } from "react-icons/ai";
 import { FaTrash } from "react-icons/fa";
 import { installTheme } from "../../api";
+import t, { translateThemeTitle } from "../../i18n/i18n";
 
 export function FullscreenProfileEntry({
   data: e,
@@ -30,7 +31,7 @@ export function FullscreenProfileEntry({
           padding: "0",
         }}
       >
-        <span>{e.display_name}</span>
+        <span>{translateThemeTitle(e.display_name, e.name)}</span>
         <Focusable
           style={{
             display: "flex",
@@ -65,7 +66,7 @@ export function FullscreenProfileEntry({
                 transform: "translate(0, -50%)",
               }}
             >
-              <i>Local Theme</i>
+              <i>{t("LOCAL_THEME", "Local Theme")}</i>
             </span>
           )}
           <DialogButton

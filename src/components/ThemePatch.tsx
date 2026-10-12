@@ -4,6 +4,7 @@ import * as python from "../python";
 import { useCssLoaderState } from "../state";
 import { Patch } from "../ThemeTypes";
 import { PatchComponent } from "./PatchComponent";
+import { translatePatchName, translatePatchValue } from "../i18n";
 
 export const ThemePatch: VFC<{
   data: Patch;
@@ -55,7 +56,7 @@ export const ThemePatch: VFC<{
           <PanelSectionRow>
             <SliderField
               bottomSeparator={bottomSeparatorValue}
-              label={modal ? data.name : <PatchLabel name={data.name} />}
+              label={modal ? translatePatchName(data.name) : <PatchLabel name={data.name} />}
               min={0}
               max={data.options.length - 1}
               value={selectedIndex}
@@ -68,7 +69,7 @@ export const ThemePatch: VFC<{
               notchCount={data.options.length}
               notchLabels={data.options.map((e, i) => ({
                 notchIndex: i,
-                label: e,
+                label: translatePatchValue(e),
                 value: i,
               }))}
             />
@@ -82,7 +83,7 @@ export const ThemePatch: VFC<{
           <PanelSectionRow>
             <ToggleField
               bottomSeparator={bottomSeparatorValue}
-              label={modal ? data.name : <PatchLabel name={data.name} />}
+              label={modal ? translatePatchName(data.name) : <PatchLabel name={data.name} />}
               checked={data.value === "Yes"}
               onChange={(bool) => {
                 const newValue = bool ? "Yes" : "No";
@@ -103,17 +104,18 @@ export const ThemePatch: VFC<{
             <DropdownItem
               layout="below"
               bottomSeparator={bottomSeparatorValue}
-              label={modal ? data.name : <PatchLabel name={data.name} />}
-              menuLabel={`${data.name}`}
+              label={modal ? translatePatchName(data.name) : <PatchLabel name={data.name} />}
+              menuLabel={`${translatePatchName(data.name)}`}
               rgOptions={data.options.map((x, i) => {
-                return { data: i, label: x };
+                return { data: i, label: translatePatchValue(x) };
               })}
               selectedOption={selectedIndex}
               onChange={(index) => {
                 setIndex(index.data);
-                data.value = index.label as string;
-                setLabel(data.value);
-                setPatchValue(data.value);
+                const selectedVal = data.options[index.data] ?? (index.label as string);
+                data.value = selectedVal;
+                setLabel(selectedVal);
+                setPatchValue(selectedVal);
               }}
             />
           </PanelSectionRow>
@@ -125,7 +127,7 @@ export const ThemePatch: VFC<{
         <>
           <PanelSectionRow>
             {modal ? (
-              <span style={{ color: "#dcdedf" }}>{data.name}</span>
+              <span style={{ color: "#dcdedf" }}>{translatePatchName(data.name)}</span>
             ) : (
               <PatchLabel name={data.name} />
             )}
@@ -146,7 +148,7 @@ const PatchLabel = ({ name }: { name: string }) => {
         marginBottom: "0px",
       }}
     >
-      {name}
+      {translatePatchName(name)}
     </div>
   );
 };

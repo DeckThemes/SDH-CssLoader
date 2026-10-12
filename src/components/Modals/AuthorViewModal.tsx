@@ -8,6 +8,7 @@ import { ImSpinner5 } from "react-icons/im";
 import { VariableSizeCard } from "../ThemeManager";
 import { ThemeBrowserCardStyles } from "../Styles";
 import { SupporterIcon } from "../SupporterIcon";
+import { t } from "../../i18n";
 
 export function AuthorViewModalRoot({
   closeModal,
@@ -143,7 +144,7 @@ function AuthorViewModal({
             }}
           >
             <ImSpinner5 className="spinny" size={48} />
-            <span style={{ fontWeight: "bold", fontSize: "2.5em" }}>Loading</span>
+            <span style={{ fontWeight: "bold", fontSize: "2.5em" }}>{t("LOADING", "Loading")}</span>
           </div>
         </>
       )}

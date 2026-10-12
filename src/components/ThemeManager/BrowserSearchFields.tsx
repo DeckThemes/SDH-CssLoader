@@ -15,6 +15,7 @@ import { genericGET } from "../../api";
 import { ThemeQueryRequest } from "../../apiTypes";
 import { useCssLoaderState } from "../../state";
 import { FilterDropdownCustomLabel } from "./FilterDropdownCustomLabel";
+import t, { translateFilter, translateSortOrder } from "../../i18n/i18n";
 
 export function BrowserSearchFields({
   searchOpts,
@@ -55,7 +56,7 @@ export function BrowserSearchFields({
           data: "All",
           label: (
             <FilterDropdownCustomLabel
-              filterValue="All"
+              filterValue={t("FILTER_ALL", "All")}
               itemCount={
                 Object.values(unformattedFilters.filters).reduce(
                   (prev, cur) => prev + Number(cur),
@@ -69,10 +70,10 @@ export function BrowserSearchFields({
           .filter(([_, itemCount]) => Number(itemCount) > 0)
           .map(([filterValue, itemCount]) => ({
             data: filterValue,
-            label: <FilterDropdownCustomLabel filterValue={filterValue} itemCount={itemCount} />,
+            label: <FilterDropdownCustomLabel filterValue={translateFilter(filterValue)} itemCount={itemCount} />,
           })),
       ],
-      order: unformattedFilters.order.map((e) => ({ data: e, label: e })),
+      order: unformattedFilters.order.map((e) => ({ data: e, label: translateSortOrder(e) })),
     }),
     [unformattedFilters]
   );
@@ -95,11 +96,11 @@ export function BrowserSearchFields({
               minWidth: repoOptions.length <= 1 ? "49%" : "33%",
             }}
           >
-            <span className="DialogLabel">Sort</span>
+            <span className="DialogLabel">{t("SORT", "Sort")}</span>
             <Dropdown
-              menuLabel="Sort"
+              menuLabel={t("SORT", "Sort")}
               rgOptions={formattedFilters.order}
-              strDefaultLabel="Last Updated (Newest)"
+              strDefaultLabel={t("SORT_DEFAULT", "Last Updated (Newest)")}
               selectedOption={searchOpts.order}
               onChange={(e) => {
                 setGlobalState(prevSearchOptsVarName, searchOpts);
@@ -117,11 +118,11 @@ export function BrowserSearchFields({
               marginLeft: "auto",
             }}
           >
-            <span className="DialogLabel">Filter</span>
+            <span className="DialogLabel">{t("FILTER", "Filter")}</span>
             <Dropdown
-              menuLabel="Filter"
+              menuLabel={t("FILTER", "Filter")}
               rgOptions={formattedFilters.filters}
-              strDefaultLabel="All"
+              strDefaultLabel={t("FILTER_ALL", "All")}
               selectedOption={searchOpts.filters}
               onChange={(e) => {
                 setGlobalState(prevSearchOptsVarName, searchOpts);
@@ -148,7 +149,7 @@ export function BrowserSearchFields({
         <Focusable style={{ display: "flex", alignItems: "center", width: "96%" }}>
           <div style={{ minWidth: "55%", marginRight: "auto" }}>
             <TextField
-              label="Search"
+              label={t("SEARCH", "Search")}
               value={searchOpts.search}
               onChange={(e) => {
                 setGlobalState(prevSearchOptsVarName, searchOpts);
@@ -168,7 +169,7 @@ export function BrowserSearchFields({
             }}
           >
             <FaRotate />
-            <span>Refresh</span>
+            <span>{t("REFRESH", "Refresh")}</span>
           </DialogButton>
           <div
             style={{ maxWidth: "20%", minWidth: "20%", marginLeft: "auto" }}

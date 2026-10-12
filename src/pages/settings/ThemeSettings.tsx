@@ -8,6 +8,7 @@ import { installTheme } from "../../api";
 import * as python from "../../python";
 import { DeleteMenu } from "../../components/ThemeSettings/DeleteMenu";
 import { UpdateAllThemesButton } from "../../components/ThemeSettings/UpdateAllThemesButton";
+import { t } from "../../i18n";
 
 export function ThemeSettings() {
   const { localThemeList, unpinnedThemes, themeErrors, setGlobalState, updateStatuses } =
@@ -80,14 +81,14 @@ export function ThemeSettings() {
           }
         `}
       </style>
-      <PanelSection title="Installed Themes">
+      <PanelSection title={t("INSTALLED_THEMES", "Installed Themes")}>
         <Focusable className="CSSLoader_InstalledThemes_Container">
           <Focusable className="CSSLoader_InstalledThemes_ButtonsContainer">
             <DialogButton
               className="CSSLoader_InstalledThemes_ModeButton"
               onClick={() => (mode === "delete" ? setMode("view") : setMode("delete"))}
             >
-              {mode === "delete" ? "Go Back" : "Delete Themes"}
+              {mode === "delete" ? t("GO_BACK", "Go Back") : t("DELETE_THEMES", "Delete Themes")}
             </DialogButton>
             <UpdateAllThemesButton handleUpdate={handleUpdate} />
           </Focusable>
@@ -110,7 +111,7 @@ export function ThemeSettings() {
         </Focusable>
       </PanelSection>
       {themeErrors.length > 0 && (
-        <PanelSection title="Errors">
+        <PanelSection title={t("ERRORS", "Errors")}>
           <Focusable
             style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gridGap: "1em" }}
           >

@@ -8,6 +8,7 @@ import {
 import { Theme } from "../../ThemeTypes";
 import { useState } from "react";
 import { DeleteConfirmationModalRoot } from "../Modals/DeleteConfirmationModal";
+import t from "../../i18n/i18n";
 
 export function DeleteMenu({
   themeList,
@@ -19,7 +20,7 @@ export function DeleteMenu({
   let [choppingBlock, setChoppingBlock] = useState<string[]>([]); // name arr
   return (
     <Focusable>
-      <PanelSection title="Delete Themes">
+      <PanelSection title={t("DELETE_THEMES", "Delete Themes")}>
         {themeList.map((e) => (
           <div>
             <DialogCheckbox
@@ -46,7 +47,7 @@ export function DeleteMenu({
             );
           }}
         >
-          Delete
+          {t("DELETE", "Delete")}
         </DialogButton>
       </PanelSection>
     </Focusable>
