@@ -368,12 +368,11 @@ class BrowserHook:
         while True:
             try:
                 result = await self.send_command("Target.getTargets", {}, None, True)
-                target_infos = result["result"]["targetInfos"]
-                target_ids = [x["targetId"] for x in target_infos if x["type"] == "page"]
-                for x in self.connected_tabs: # Remove tabs that are no longer connected
-                    if x.id not in target_ids:
-                        Log(f"Disconnected from tab: {x.title}")
-                        self.connected_tabs.remove(x)
+                target_infos = [x for x in result["result"]["targetInfos"] if x["type"] == "page"]
+                target_ids = [x["targetId"] for x in target_infos]
+                for x in [x for x in self.connected_tabs if x.id not in target_ids]: # Remove tabs that are no longer connected
+                    Log(f"Disconnected from tab: {x.title}")
+                    self.connected_tabs.remove(x)
                 
                 connected_ids = [x.id for x in self.connected_tabs]
                 for x in target_infos:
