@@ -9,29 +9,45 @@ from css_browserhook import BrowserTabHook as CssTab, inject, remove
 
 CLASS_MAPPINGS = {}
 
-def initialize_class_mappings():
+def initialize_class_mappings() -> bool:
     css_translations_path = os.path.join(get_theme_path(), "css_translations.json")
 
     if not os.path.exists(css_translations_path):
         Log("Failed to get css translations from local file")
-        return
+        return False
 
     try:
         with open(css_translations_path, "r", encoding="utf-8") as fp:
             data : dict = json.load(fp)
     except Exception as e:
         Log(f"Failed to load css translations from local file: {str(e)}")
-        return
+        return False
 
-    CLASS_MAPPINGS.clear()
+    if not isinstance(data, dict) or not data:
+        Log("Failed to load css translations: expected a non-empty JSON object")
+        return False
+
+    mappings = {}
 
     # Data is in the format of { "uid": ["ver1", "ver2", "ver3"]}
-    for uid in data:
-        latest_value = data[uid][-1]
-        for y in data[uid][:-1]:
-            CLASS_MAPPINGS[y] = latest_value
+    for uid, versions in data.items():
+        if not isinstance(versions, list) or not versions or not all(isinstance(value, str) and value for value in versions):
+            Log(f"Failed to load css translations: invalid mapping entry {uid}")
+            return False
+
+        latest_value = versions[-1]
+        for previous_value in versions[:-1]:
+            mappings[previous_value] = latest_value
+
+    if not mappings:
+        Log("Failed to load css translations: the file contains no class translations")
+        return False
+
+    CLASS_MAPPINGS.clear()
+    CLASS_MAPPINGS.update(mappings)
 
     Log(f"Loaded {len(CLASS_MAPPINGS)} css translations from local file")
+    return True
 
 ALL_INJECTS = []
 

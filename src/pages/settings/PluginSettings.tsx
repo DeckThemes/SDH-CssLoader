@@ -10,8 +10,13 @@ import {
   toggleWatchState,
   getBetaTranslationsState,
   fetchClassMappings,
+  setLocalCssMappings,
 } from "../../backend/pythonMethods/pluginSettingsMethods";
-import { booleanStoreWrite, stringStoreWrite } from "../../backend/pythonMethods/storeUtils";
+import {
+  booleanStoreRead,
+  booleanStoreWrite,
+  stringStoreWrite,
+} from "../../backend/pythonMethods/storeUtils";
 import { disableUnminifyMode, enableUnminifyMode } from "../../deckyPatches/UnminifyMode";
 
 export function PluginSettings() {
@@ -19,6 +24,7 @@ export function PluginSettings() {
   const [serverOn, setServerOn] = useState<boolean>(false);
   const [watchOn, setWatchOn] = useState<boolean>(false);
   const [betaTranslationsOn, setBetaTranslationsOn] = useState<string>("-1");
+  const [localMappingsOn, setLocalMappingsOn] = useState<boolean>(false);
 
   const navPatchEnabled = useMemo(() => !!navPatchInstance, [navPatchInstance]);
 
@@ -39,10 +45,15 @@ export function PluginSettings() {
     setBetaTranslationsOn(value);
   }
 
+  async function fetchLocalMappingsState() {
+    setLocalMappingsOn(await booleanStoreRead("use_local_css_mappings"));
+  }
+
   useEffect(() => {
     void fetchServerState();
     void fetchWatchState();
     void fetchBetaTranslationsState();
+    void fetchLocalMappingsState();
   }, []);
 
   function setUnminify(enabled: boolean) {
@@ -71,6 +82,16 @@ export function PluginSettings() {
     await fetchBetaTranslationsState();
   }
 
+  async function setLocalMappings(enabled: boolean) {
+    const response = await setLocalCssMappings(enabled);
+    if (!response.success) {
+      toast("Failed to update CSS mapping source", String(response.result));
+    } else if (!response.result.success) {
+      toast("Local CSS mappings unavailable", response.result.message);
+    }
+    await fetchLocalMappingsState();
+  }
+
   return (
     <div>
       <Focusable>
@@ -84,6 +105,14 @@ export function PluginSettings() {
           label="SteamOS Branch"
           description="Choose the version of SteamOS you are on. This allows us to provide the correct translations for your system."
           onChange={(data) => setBetaTranslations(data.data)}
+        />
+      </Focusable>
+      <Focusable>
+        <ToggleField
+          checked={localMappingsOn}
+          label="Use Local CSS Mappings"
+          description="Use the existing local mapping file and skip remote mapping downloads."
+          onChange={setLocalMappings}
         />
       </Focusable>
       <Focusable>

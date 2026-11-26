@@ -26,13 +26,25 @@ except:
 Initialized = False
 
 SUCCESSFUL_FETCH_THIS_RUN = False
+CLASS_MAPPINGS_LOCK = asyncio.Lock()
+LOCAL_MAPPINGS_LOGGED_THIS_RUN = False
+
+
+def use_local_css_mappings() -> bool:
+    return util_store_read("use_local_css_mappings").lower() in {"1", "true"}
 
 async def fetch_class_mappings(css_translations_path : str, loader : Loader):
-    global SUCCESSFUL_FETCH_THIS_RUN
+    global SUCCESSFUL_FETCH_THIS_RUN, LOCAL_MAPPINGS_LOGGED_THIS_RUN
+
+    if use_local_css_mappings():
+        if not LOCAL_MAPPINGS_LOGGED_THIS_RUN:
+            Log("Using local css translations; skipping remote mapping fetches")
+            LOCAL_MAPPINGS_LOGGED_THIS_RUN = True
+        return
 
     if SUCCESSFUL_FETCH_THIS_RUN:
         return
-    
+
     try:
         socket.setdefaulttimeout(3)
         socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect(("8.8.8.8", 53))
@@ -54,21 +66,32 @@ async def fetch_class_mappings(css_translations_path : str, loader : Loader):
             async with session.get(css_translations_url) as response:
                 if response.status == 200:
                     text = await response.text()
-                    
+
                     if len(text.strip()) <= 0:
                         raise Exception("Empty response")
 
-                    with open(css_translations_path, "w", encoding="utf-8") as fp:
-                        fp.write(text)
+                    async with CLASS_MAPPINGS_LOCK:
+                        # Local mode may have been enabled while the request was in flight.
+                        if use_local_css_mappings():
+                            Log("Discarding remote css translations because local mappings were enabled")
+                            return
 
-                    SUCCESSFUL_FETCH_THIS_RUN = True
-                    Log(f"Fetched css translations from server")
-                    initialize_class_mappings()
-                    asyncio.get_running_loop().create_task(loader.reset(silent=True))
+                        if SUCCESSFUL_FETCH_THIS_RUN:
+                            return
+
+                        with open(css_translations_path, "w", encoding="utf-8") as fp:
+                            fp.write(text)
+
+                        SUCCESSFUL_FETCH_THIS_RUN = True
+                        Log(f"Fetched css mappings from server")
+                        if initialize_class_mappings():
+                            asyncio.get_running_loop().create_task(loader.reset(silent=True))
+                        else:
+                            Log("Fetched css mappings could not be loaded")
 
     except Exception as ex:
         Log(f"Failed to fetch css translations from server [{type(ex).__name__}]: {str(ex)}")
-        
+
 async def every(__seconds: float, func, *args, **kwargs):
     while True:
         await func(*args, **kwargs)
@@ -199,6 +222,37 @@ class Plugin:
 
     async def fetch_class_mappings(self):
         await self._fetch_class_mappings(self)
+        return Result(True).to_dict()
+
+    async def set_local_css_mappings(self, enabled : bool) -> dict:
+        global SUCCESSFUL_FETCH_THIS_RUN, LOCAL_MAPPINGS_LOGGED_THIS_RUN
+
+        css_translations_path = os.path.join(get_theme_path(), "css_translations.json")
+
+        if enabled:
+            # Set this before waiting for the lock so an in-flight remote request
+            # discards its response instead of replacing the local mapping file.
+            util_store_write("use_local_css_mappings", "1")
+            async with CLASS_MAPPINGS_LOCK:
+                if not initialize_class_mappings():
+                    util_store_write("use_local_css_mappings", "0")
+                    SUCCESSFUL_FETCH_THIS_RUN = False
+                    LOCAL_MAPPINGS_LOGGED_THIS_RUN = False
+                    error = "The local css_translations.json file is missing or invalid"
+                else:
+                    LOCAL_MAPPINGS_LOGGED_THIS_RUN = True
+                    Log("Loaded local css translations; remote mapping fetches are disabled")
+                    await self.loader.reset(silent=True)
+                    return Result(True).to_dict()
+
+            # Preserve the default remote behavior if enabling local mode fails.
+            await fetch_class_mappings(css_translations_path, self.loader)
+            return Result(False, error).to_dict()
+
+        util_store_write("use_local_css_mappings", "0")
+        LOCAL_MAPPINGS_LOGGED_THIS_RUN = False
+        SUCCESSFUL_FETCH_THIS_RUN = False
+        await fetch_class_mappings(css_translations_path, self.loader)
         return Result(True).to_dict()
 
     async def _fetch_class_mappings(self, run_in_bg : bool = False):

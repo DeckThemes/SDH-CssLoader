@@ -54,3 +54,10 @@ export function getHiddenMotd() {
 export function fetchClassMappings() {
   return server!.callPluginMethod<{}>("fetch_class_mappings", {});
 }
+
+export function setLocalCssMappings(enabled: boolean) {
+  return server!.callPluginMethod<
+    { enabled: boolean },
+    { success: boolean; message: string }
+  >("set_local_css_mappings", { enabled });
+}
