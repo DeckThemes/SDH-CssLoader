@@ -1,4 +1,4 @@
-import os, asyncio, sys, time, aiohttp, json, socket
+import os, asyncio, sys, time, aiohttp, json, socket, tempfile
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
@@ -29,6 +29,34 @@ SUCCESSFUL_FETCH_THIS_RUN = False
 CLASS_MAPPINGS_LOCK = asyncio.Lock()
 LOCAL_MAPPINGS_LOGGED_THIS_RUN = False
 MAPPING_REQUEST_GENERATION = 0
+
+
+def write_class_mappings_atomically(path: str, data: dict) -> None:
+    directory = os.path.dirname(path) or "."
+    file_descriptor, temporary_path = tempfile.mkstemp(
+        prefix=f".{os.path.basename(path)}.", suffix=".tmp", dir=directory
+    )
+
+    try:
+        with os.fdopen(file_descriptor, "w", encoding="utf-8") as fp:
+            json.dump(data, fp)
+            fp.flush()
+            os.fsync(fp.fileno())
+
+        try:
+            existing_mode = os.stat(path).st_mode & 0o777
+            os.chmod(temporary_path, existing_mode)
+        except FileNotFoundError:
+            pass
+
+        os.replace(temporary_path, path)
+        temporary_path = None
+    finally:
+        if temporary_path is not None:
+            try:
+                os.unlink(temporary_path)
+            except FileNotFoundError:
+                pass
 
 
 def use_local_css_mappings() -> bool:
@@ -93,8 +121,7 @@ async def fetch_class_mappings(css_translations_path : str, loader : Loader):
                             Log("Discarding stale css translations response")
                             return
 
-                        with open(css_translations_path, "w", encoding="utf-8") as fp:
-                            json.dump(remote_data, fp)
+                        write_class_mappings_atomically(css_translations_path, remote_data)
 
                         replace_class_mappings(remote_mappings)
                         SUCCESSFUL_FETCH_THIS_RUN = True
