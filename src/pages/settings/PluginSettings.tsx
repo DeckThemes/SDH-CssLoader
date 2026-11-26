@@ -1,5 +1,5 @@
 import { DropdownItem, Focusable, ToggleField } from "decky-frontend-lib";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useCssLoaderState } from "../../state";
 import { toast } from "../../python";
 import { setNavPatch } from "../../deckyPatches/NavPatch";
@@ -25,6 +25,8 @@ export function PluginSettings() {
   const [watchOn, setWatchOn] = useState<boolean>(false);
   const [betaTranslationsOn, setBetaTranslationsOn] = useState<string>("-1");
   const [localMappingsOn, setLocalMappingsOn] = useState<boolean>(false);
+  const [localMappingsPending, setLocalMappingsPending] = useState<boolean>(false);
+  const localMappingsPendingRef = useRef<boolean>(false);
 
   const navPatchEnabled = useMemo(() => !!navPatchInstance, [navPatchInstance]);
 
@@ -83,13 +85,21 @@ export function PluginSettings() {
   }
 
   async function setLocalMappings(enabled: boolean) {
-    const response = await setLocalCssMappings(enabled);
-    if (!response.success) {
-      toast("Failed to update CSS mapping source", String(response.result));
-    } else if (!response.result.success) {
-      toast("Local CSS mappings unavailable", response.result.message);
+    if (localMappingsPendingRef.current) return;
+    localMappingsPendingRef.current = true;
+    setLocalMappingsPending(true);
+    try {
+      const response = await setLocalCssMappings(enabled);
+      if (!response.success) {
+        toast("Failed to update CSS mapping source", String(response.result));
+      } else if (!response.result.success) {
+        toast("Local CSS mappings unavailable", response.result.message);
+      }
+      await fetchLocalMappingsState();
+    } finally {
+      localMappingsPendingRef.current = false;
+      setLocalMappingsPending(false);
     }
-    await fetchLocalMappingsState();
   }
 
   return (
@@ -111,7 +121,7 @@ export function PluginSettings() {
         <ToggleField
           checked={localMappingsOn}
           label="Use Local CSS Mappings"
-          description="Use the existing local mapping file and skip remote mapping downloads."
+          description={localMappingsPending ? "Applying mapping source…" : "Use the existing local mapping file and skip remote mapping downloads."}
           onChange={setLocalMappings}
         />
       </Focusable>

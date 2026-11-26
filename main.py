@@ -6,7 +6,7 @@ from watchdog.observers import Observer
 sys.path.append(os.path.dirname(__file__))
 
 from css_utils import Log, create_steam_symlink, Result, get_theme_path, store_read as util_store_read, store_write as util_store_write, store_or_file_config, is_steam_beta_active
-from css_inject import ALL_INJECTS, initialize_class_mappings
+from css_inject import ALL_INJECTS, initialize_class_mappings, parse_class_mappings, replace_class_mappings
 from css_theme import CSS_LOADER_VER
 from css_remoteinstall import install
 
@@ -28,13 +28,14 @@ Initialized = False
 SUCCESSFUL_FETCH_THIS_RUN = False
 CLASS_MAPPINGS_LOCK = asyncio.Lock()
 LOCAL_MAPPINGS_LOGGED_THIS_RUN = False
+MAPPING_REQUEST_GENERATION = 0
 
 
 def use_local_css_mappings() -> bool:
     return util_store_read("use_local_css_mappings").lower() in {"1", "true"}
 
 async def fetch_class_mappings(css_translations_path : str, loader : Loader):
-    global SUCCESSFUL_FETCH_THIS_RUN, LOCAL_MAPPINGS_LOGGED_THIS_RUN
+    global SUCCESSFUL_FETCH_THIS_RUN, LOCAL_MAPPINGS_LOGGED_THIS_RUN, MAPPING_REQUEST_GENERATION
 
     if use_local_css_mappings():
         if not LOCAL_MAPPINGS_LOGGED_THIS_RUN:
@@ -44,6 +45,9 @@ async def fetch_class_mappings(css_translations_path : str, loader : Loader):
 
     if SUCCESSFUL_FETCH_THIS_RUN:
         return
+
+    MAPPING_REQUEST_GENERATION += 1
+    request_generation = MAPPING_REQUEST_GENERATION
 
     try:
         socket.setdefaulttimeout(3)
@@ -59,6 +63,14 @@ async def fetch_class_mappings(css_translations_path : str, loader : Loader):
     else:
         css_translations_url = "https://api.deckthemes.com/stable.json"
 
+    def request_is_current() -> bool:
+        current_setting = util_store_read("beta_translations")
+        if ((len(current_setting.strip()) <= 0 or current_setting == "-1" or current_setting == "auto") and is_steam_beta_active()) or (current_setting == "1" or current_setting == "true"):
+            current_url = "https://api.deckthemes.com/beta.json"
+        else:
+            current_url = "https://api.deckthemes.com/stable.json"
+        return request_generation == MAPPING_REQUEST_GENERATION and current_url == css_translations_url and not use_local_css_mappings()
+
     Log(f"Fetching CSS mappings from {css_translations_url}")
 
     try:
@@ -70,24 +82,24 @@ async def fetch_class_mappings(css_translations_path : str, loader : Loader):
                     if len(text.strip()) <= 0:
                         raise Exception("Empty response")
 
-                    async with CLASS_MAPPINGS_LOCK:
-                        # Local mode may have been enabled while the request was in flight.
-                        if use_local_css_mappings():
-                            Log("Discarding remote css translations because local mappings were enabled")
-                            return
+                    remote_data = json.loads(text)
+                    remote_mappings = parse_class_mappings(remote_data)
+                    if remote_mappings is None:
+                        raise Exception("Response contains no valid class translations")
 
-                        if SUCCESSFUL_FETCH_THIS_RUN:
+                    async with CLASS_MAPPINGS_LOCK:
+                        # Only the latest request for the currently selected feed may commit.
+                        if not request_is_current():
+                            Log("Discarding stale css translations response")
                             return
 
                         with open(css_translations_path, "w", encoding="utf-8") as fp:
-                            fp.write(text)
+                            json.dump(remote_data, fp)
 
+                        replace_class_mappings(remote_mappings)
                         SUCCESSFUL_FETCH_THIS_RUN = True
-                        Log(f"Fetched css mappings from server")
-                        if initialize_class_mappings():
-                            asyncio.get_running_loop().create_task(loader.reset(silent=True))
-                        else:
-                            Log("Fetched css mappings could not be loaded")
+                        Log("Fetched css mappings from server")
+                        asyncio.get_running_loop().create_task(loader.reset(silent=True))
 
     except Exception as ex:
         Log(f"Failed to fetch css translations from server [{type(ex).__name__}]: {str(ex)}")
@@ -225,15 +237,20 @@ class Plugin:
         return Result(True).to_dict()
 
     async def set_local_css_mappings(self, enabled : bool) -> dict:
-        global SUCCESSFUL_FETCH_THIS_RUN, LOCAL_MAPPINGS_LOGGED_THIS_RUN
+        global SUCCESSFUL_FETCH_THIS_RUN, LOCAL_MAPPINGS_LOGGED_THIS_RUN, MAPPING_REQUEST_GENERATION
 
         css_translations_path = os.path.join(get_theme_path(), "css_translations.json")
+        MAPPING_REQUEST_GENERATION += 1
+        operation_generation = MAPPING_REQUEST_GENERATION
 
         if enabled:
             # Set this before waiting for the lock so an in-flight remote request
             # discards its response instead of replacing the local mapping file.
             util_store_write("use_local_css_mappings", "1")
             async with CLASS_MAPPINGS_LOCK:
+                if operation_generation != MAPPING_REQUEST_GENERATION or not use_local_css_mappings():
+                    return Result(True).to_dict()
+
                 if not initialize_class_mappings():
                     util_store_write("use_local_css_mappings", "0")
                     SUCCESSFUL_FETCH_THIS_RUN = False
@@ -252,13 +269,16 @@ class Plugin:
         util_store_write("use_local_css_mappings", "0")
         LOCAL_MAPPINGS_LOGGED_THIS_RUN = False
         SUCCESSFUL_FETCH_THIS_RUN = False
+        if operation_generation != MAPPING_REQUEST_GENERATION or use_local_css_mappings():
+            return Result(True).to_dict()
         await fetch_class_mappings(css_translations_path, self.loader)
         return Result(True).to_dict()
 
     async def _fetch_class_mappings(self, run_in_bg : bool = False):
-        global SUCCESSFUL_FETCH_THIS_RUN
+        global SUCCESSFUL_FETCH_THIS_RUN, MAPPING_REQUEST_GENERATION
 
         SUCCESSFUL_FETCH_THIS_RUN = False
+        MAPPING_REQUEST_GENERATION += 1
         css_translations_path = os.path.join(get_theme_path(), "css_translations.json")
         if run_in_bg:
             asyncio.get_event_loop().create_task(every(60, fetch_class_mappings, css_translations_path, self.loader))

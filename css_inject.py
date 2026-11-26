@@ -9,6 +9,27 @@ from css_browserhook import BrowserTabHook as CssTab, inject, remove
 
 CLASS_MAPPINGS = {}
 
+def parse_class_mappings(data: dict) -> dict | None:
+    if not isinstance(data, dict) or not data:
+        return None
+
+    mappings = {}
+
+    # Data is in the format of { "uid": ["ver1", "ver2", "ver3"]}
+    for uid, versions in data.items():
+        if not isinstance(uid, str) or not uid or not isinstance(versions, list) or not versions or not all(isinstance(value, str) and value for value in versions):
+            return None
+
+        latest_value = versions[-1]
+        for previous_value in versions[:-1]:
+            mappings[previous_value] = latest_value
+
+    return mappings or None
+
+def replace_class_mappings(mappings: dict) -> None:
+    CLASS_MAPPINGS.clear()
+    CLASS_MAPPINGS.update(mappings)
+
 def initialize_class_mappings() -> bool:
     css_translations_path = os.path.join(get_theme_path(), "css_translations.json")
 
@@ -23,28 +44,12 @@ def initialize_class_mappings() -> bool:
         Log(f"Failed to load css translations from local file: {str(e)}")
         return False
 
-    if not isinstance(data, dict) or not data:
-        Log("Failed to load css translations: expected a non-empty JSON object")
-        return False
-
-    mappings = {}
-
-    # Data is in the format of { "uid": ["ver1", "ver2", "ver3"]}
-    for uid, versions in data.items():
-        if not isinstance(versions, list) or not versions or not all(isinstance(value, str) and value for value in versions):
-            Log(f"Failed to load css translations: invalid mapping entry {uid}")
-            return False
-
-        latest_value = versions[-1]
-        for previous_value in versions[:-1]:
-            mappings[previous_value] = latest_value
-
-    if not mappings:
+    mappings = parse_class_mappings(data)
+    if mappings is None:
         Log("Failed to load css translations: the file contains no class translations")
         return False
 
-    CLASS_MAPPINGS.clear()
-    CLASS_MAPPINGS.update(mappings)
+    replace_class_mappings(mappings)
 
     Log(f"Loaded {len(CLASS_MAPPINGS)} css translations from local file")
     return True
