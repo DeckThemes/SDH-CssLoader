@@ -33,6 +33,15 @@ MAPPING_REQUEST_GENERATION = 0
 
 def write_class_mappings_atomically(path: str, data: dict) -> None:
     directory = os.path.dirname(path) or "."
+    if os.path.islink(path):
+        raise OSError("Refusing to replace a symbolic link for css translations")
+
+    destination_mode = 0o644
+    try:
+        destination_mode = os.stat(path).st_mode & 0o777
+    except FileNotFoundError:
+        pass
+
     file_descriptor, temporary_path = tempfile.mkstemp(
         prefix=f".{os.path.basename(path)}.", suffix=".tmp", dir=directory
     )
@@ -43,11 +52,10 @@ def write_class_mappings_atomically(path: str, data: dict) -> None:
             fp.flush()
             os.fsync(fp.fileno())
 
-        try:
-            existing_mode = os.stat(path).st_mode & 0o777
-            os.chmod(temporary_path, existing_mode)
-        except FileNotFoundError:
-            pass
+        os.chmod(temporary_path, destination_mode)
+
+        if os.path.islink(path):
+            raise OSError("Refusing to replace a symbolic link for css translations")
 
         os.replace(temporary_path, path)
         temporary_path = None
